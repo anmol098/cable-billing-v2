@@ -62,6 +62,11 @@ IDs referenced throughout: `B-xxx` and `RULE-xx` (BRD), `FR-xxx`, `BR-xx` and `J
 | D-18 | **Mid-month new connection or reactivation: each operator chooses** between "charge full month (as adjustment)" and "start from next month". | Operator setting `mid_month_start_policy`. §8.3 |
 | D-19 | **Distribution: Google Play** (closed-testing track for the pilot, then production). | Needs a Play developer account, privacy policy, data-safety form and an in-app minimum-version gate. |
 | D-20 | **Subscription: 30-day trial, 15-day grace.** | §13 |
+| D-21 | **Product name: "Cable Billing".** The domain is not decided yet. | Until the domain is chosen, the Android `applicationId` is `com.cablebilling.lineman` and email uses a placeholder sender. Both must be final before the first Play production release (H-02). |
+| D-22 | **Subscription price: ₹400/month + GST** (18% → ₹472 charged). | Razorpay plan amount includes GST. Tax invoices for our fee need the business GSTIN (H-10). |
+| D-23 | **The product owner reviews all Hindi copy.** | Task H-03. |
+| D-24 | **Device testing:** the product owner will plan a broad phone/printer test matrix later. | Task H-05. Engineering keeps minSdk 26 and the raster-print approach. |
+| D-25 | **Missed bill runs (after read-only) are never generated automatically.** The Owner previews and runs them manually. | §13, closes Q-03. |
 
 ### 1.2 Engineering defaults (proposed — say if you disagree)
 
@@ -729,7 +734,7 @@ Tenants list (status, trial/subscription, customer count, last activity), tenant
 
 ## 13. SaaS subscription (Razorpay)
 
-Flat monthly fee with unlimited customers (B-018, FR-025). D-12 and D-20 apply.
+Flat monthly fee of **₹400 + GST** with unlimited customers (B-018, FR-025, D-22). D-12, D-20 and D-25 apply.
 
 | State | Entered when | Access |
 |---|---|---|
@@ -741,8 +746,8 @@ Flat monthly fee with unlimited customers (B-018, FR-025). D-12 and D-20 apply.
 
 - Owner → Settings → Subscription → "Pay ₹X / month" → Razorpay Checkout with a **Subscription** (UPI Autopay / card mandate). Webhooks (`subscription.activated`, `.charged`, `.pending`, `.halted`, `.cancelled`, `payment.failed`) are verified with HMAC signature, stored idempotently in `subscription_events` and drive the state machine. A daily cron reconciles state with the Razorpay API in case a webhook was missed.
 - The admin can record an offline payment or extend manually (audited). Useful for migrated operators.
-- **Price, GST on our own SaaS fee, and invoices to operators** are open questions (Q-01, Q-02).
-- After reactivation from `read_only`, any skipped billing months show as "Missed bill runs" on Bills, so the Owner can preview and run them. They're never auto-generated retroactively (Q-03 confirms).
+- Price: ₹400 + 18% GST = ₹472/month as a single Razorpay plan (D-22). The amounts live in config, not code. Tax invoices for our fee carry our GSTIN (Q-02, H-10).
+- After reactivation from `read_only`, any skipped billing months show as "Missed bill runs" on Bills, so the Owner can preview and run them. They are **never** generated automatically (D-25).
 
 ---
 
@@ -841,6 +846,8 @@ Known validation items carried forward: the invoice per-operator sum is off by o
 
 ## 18. Delivery phases
 
+> The phases below are broken into claimable tasks on the **task board** in [`tasks/`](../tasks/README.md). Agents work on tasks in parallel, each in its own git worktree, and merge into the integration branch.
+
 Each phase ends with a demo and an exit gate. Phases 3 and 5 can overlap with 2 and 4 once the API contract is frozen.
 
 ### Phase 0 — Repo foundation
@@ -916,15 +923,15 @@ These don't block Phase 0–1. Each has a default we'll use unless told otherwis
 
 | ID | Question | Default until answered | Needed by |
 |---|---|---|---|
-| Q-01 | Subscription price per month, and any different plans? | Single plan, price set in admin config | Phase 4 |
-| Q-02 | Do we charge GST on our SaaS fee and issue tax invoices to operators? (This is about *our* fee, not cable receipts.) | Razorpay invoice + manual GST handling | Phase 4 |
-| Q-03 | After an operator returns from read-only, should missed months be billed? | Owner-triggered "Missed bill runs", never automatic | Phase 4 |
-| Q-04 | Product name, domain and brand accent colour? | Working name "Cable Billing", accent = black | Phase 0 (domain needed for email + Play) |
-| Q-05 | Who reviews the Hindi copy (native speaker, ideally an operator)? | We draft; you review | Phase 3 |
+| ~~Q-01~~ | ~~Subscription price~~ | **Closed: ₹400/month + GST (D-22)** | — |
+| Q-02 | GST is charged (D-22). What is the business GSTIN and legal name for the tax invoices we issue to operators, and should operators be able to enter their own GSTIN? | Razorpay invoice with our GSTIN; operator GSTIN optional field | Phase 4 (H-10) |
+| ~~Q-03~~ | ~~Missed months after read-only~~ | **Closed: never automatic (D-25)** | — |
+| Q-04 | Name is decided: "Cable Billing" (D-21). What are the domain and brand accent colour? | Accent = black; placeholder domain in env config | Before Play production + email go-live (H-02) |
+| ~~Q-05~~ | ~~Hindi reviewer~~ | **Closed: the product owner reviews (D-23)** | — |
 | Q-06 | Data retention period for customers, receipts and audit logs? | Keep everything while the tenant exists; legal review before launch | Phase 5 |
 | Q-07 | How long to keep the legacy DB read-only after cutover? | 12 months | Phase 6 |
 | Q-08 | Migration rounding tolerance (₹ per customer / per operator)? | ±₹1 per customer, explained list | Phase 5 |
 | Q-09 | Digits on Android: Latin (0–9) or Devanagari (०–९) in Hindi mode? | Latin | Phase 3 usability |
 | Q-10 | If linemen struggle with passwords in usability round 1, may we add a PIN unlock after the first login? | Keep username + password | Phase 3 |
 | Q-11 | Support SLA and who gets billing-failure alerts (besides the platform admin)? | Platform admin + tenant owner by email | Phase 5 |
-| Q-12 | Specific phone models to include in the test lab? | 3 popular budget models (Android 8, 11, 14) | Phase 3 |
+| Q-12 | Phone/printer test matrix | The product owner will plan it (D-24, H-05) | Phase 3 |
