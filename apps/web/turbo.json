@@ -36,6 +36,9 @@
         "VERCEL_BRANCH_URL",
         "VERCEL_URL"
       ]
+    },
+    "test": {
+      "env": ["DATABASE_URL", "CB_SKIP_DB_TESTS", "CB_TEST_DATABASE_ALLOW_REMOTE"]
     }
   }
 }
