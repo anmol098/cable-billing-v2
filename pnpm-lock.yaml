@@ -223,6 +223,12 @@ importers:
 
   apps/web:
     dependencies:
+      '@cb/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      '@cb/db':
+        specifier: workspace:*
+        version: link:../../packages/db
       '@cb/i18n':
         specifier: workspace:*
         version: link:../../packages/i18n

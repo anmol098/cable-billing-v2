@@ -130,6 +130,32 @@
       "show_success": "Show done"
     }
   },
+  "job_alerts": {
+    "admin": {
+      "attempts": "Tries: {attempts} of {maxAttempts}",
+      "error": "Last error: {error}",
+      "intro": "A background job failed and will not run again by itself.",
+      "job_id": "Job id: {jobId}",
+      "job_type": "Job: {jobType}",
+      "next_step": "Check the job monitor and the logs, fix the cause, then add the job to the queue again.",
+      "operator": "Operator id: {operatorId}",
+      "platform": "Operator: none (platform job)",
+      "reason": "Why: {reason}",
+      "subject": "Job failed: {jobType}",
+      "time": "Failed at: {failedAt} IST"
+    },
+    "owner": {
+      "intro": "An automatic task for your business did not finish ({failedAt} IST).",
+      "next_step": "Our team has been told and is fixing it. You don't need to do anything now.",
+      "ref": "Reference: {jobId}",
+      "subject": "An automatic task did not finish"
+    },
+    "reason": {
+      "lease_expired": "it ran out of time on its last try",
+      "max_attempts": "it failed every time it was tried",
+      "permanent": "trying again cannot fix it"
+    }
+  },
   "mobile_designsystem": {
     "catalogue_sample_area": "Ward 5",
     "catalogue_sample_customer_name": "Ramesh Kumar",

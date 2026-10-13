@@ -1,0 +1,46 @@
+{
+  "_review": [
+    "admin.subject",
+    "admin.intro",
+    "admin.job_type",
+    "admin.job_id",
+    "admin.operator",
+    "admin.platform",
+    "admin.attempts",
+    "admin.reason",
+    "admin.error",
+    "admin.time",
+    "admin.next_step",
+    "owner.subject",
+    "owner.intro",
+    "owner.next_step",
+    "owner.ref",
+    "reason.max_attempts",
+    "reason.permanent",
+    "reason.lease_expired"
+  ],
+  "admin": {
+    "subject": "जॉब फ़ेल हुआ: {jobType}",
+    "intro": "एक बैकग्राउंड जॉब फ़ेल हो गया है और अपने आप दोबारा नहीं चलेगा।",
+    "job_type": "जॉब: {jobType}",
+    "job_id": "जॉब आईडी: {jobId}",
+    "operator": "ऑपरेटर आईडी: {operatorId}",
+    "platform": "ऑपरेटर: कोई नहीं (प्लेटफ़ॉर्म जॉब)",
+    "attempts": "कोशिशें: {maxAttempts} में से {attempts}",
+    "reason": "वजह: {reason}",
+    "error": "आख़िरी गड़बड़ी: {error}",
+    "time": "फ़ेल होने का समय: {failedAt} IST",
+    "next_step": "जॉब मॉनिटर और लॉग देखें, वजह ठीक करें, फिर जॉब को दोबारा कतार में डालें।"
+  },
+  "owner": {
+    "subject": "अपने आप चलने वाला एक काम पूरा नहीं हुआ",
+    "intro": "आपके बिज़नेस का अपने आप चलने वाला एक काम पूरा नहीं हुआ ({failedAt} IST)।",
+    "next_step": "हमारी टीम को बता दिया गया है और वह इसे ठीक कर रही है। अभी आपको कुछ नहीं करना है।",
+    "ref": "रेफ़रेंस: {jobId}"
+  },
+  "reason": {
+    "max_attempts": "हर कोशिश में फ़ेल हुआ",
+    "permanent": "दोबारा चलाने से ठीक नहीं होगा",
+    "lease_expired": "आख़िरी कोशिश में समय ख़त्म हो गया"
+  }
+}

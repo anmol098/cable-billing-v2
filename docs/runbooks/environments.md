@@ -430,12 +430,15 @@ job must be idempotent and catch up on the next run.
 | `/api/cron/invariants` | `0 21 * * *` | 02:30 daily | T-052 |
 | `/api/cron/receipt-links-cleanup` | `0 22 * * 0` | Mon 03:30 weekly | receipts (T-050) |
 
-Paths that do not exist yet just return 404 until their task lands; Vercel still calls them.
+All six routes exist (T-043). Until its owner task lands, a scheduler route is a stub that checks the
+secret, logs `cron.not_implemented` and answers **501**. `job-worker` runs every `defineJob(...)` exported
+by `@cb/core`; failed jobs email the active platform admins and the tenant's owners (Resend; without
+`RESEND_API_KEY`/`EMAIL_FROM` the email is only logged as `email.not_sent_no_provider`).
 
 **Auth:** when `CRON_SECRET` is set in the project, Vercel sends `Authorization: Bearer <CRON_SECRET>` with
 every cron call. Each cron route must compare it (constant-time) with `CRON_SECRET` and return 401 when
 it is missing or wrong, and must also refuse to run when `CRON_SECRET` itself is unset
-(`requireServerEnv("CRON_SECRET")`). Long jobs set `export const maxDuration = 300` in the route file
+(503 `CRON_NOT_CONFIGURED`). `cronRoute(...)` in `apps/web/src/app/api/cron/_lib/cron.ts` does all of this. Long jobs set `export const maxDuration = 300` in the route file
 (the job-worker budget is about 240 s). Adding a cron: append one line to `crons` in `vercel.json` (shared
 file, see `tasks/README.md` §6) and a row here.
 
