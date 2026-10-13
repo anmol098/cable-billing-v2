@@ -1,0 +1,23 @@
+{
+  "hint_digits": "Type code, phone or VC number",
+  "hint_letters": "Type the customer's name",
+  "numbers_key": "123",
+  "numbers_key_description": "Number pad",
+  "no_results": "No customer found",
+  "more_results": "Showing the first {count}. Type more.",
+  "updated_now": "Updated just now",
+  "updated_minutes": "{count, plural, one {Updated # min ago} other {Updated # min ago}}",
+  "updated_hours": "{count, plural, one {Updated # hour ago} other {Updated # hours ago}}",
+  "updated_days": "{count, plural, one {Updated # day ago} other {Updated # days ago}}",
+  "no_internet_updated": "No internet · {updated}",
+  "not_updated": "Could not update · {updated}",
+  "first_download": "Getting the customer list…",
+  "never_downloaded": "Customer list is not on this phone yet. Turn on internet.",
+  "payments_on_phone": "{count, plural, one {# payment on phone} other {# payments on phone}}",
+  "customer_connections": "{count, plural, one {# connection} other {# connections}}",
+  "customer_call": "Call",
+  "customer_includes_phone_payments": "Including payments saved on phone",
+  "customer_nothing_due": "Nothing due",
+  "customer_not_found": "This customer is not on the list",
+  "customer_no_internet": "No internet. Showing what is saved on the phone."
+}
