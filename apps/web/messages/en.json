@@ -243,6 +243,239 @@
       "permanent": "trying again cannot fix it"
     }
   },
+  "marketing": {
+    "contact": {
+      "call": "Call {phone}",
+      "description": "Questions about Cable Billing? Write or call us.",
+      "email": "Email",
+      "lead": "Questions about Cable Billing? Write or call us.",
+      "not_set": "Contact details will be added here soon.",
+      "phone": "Phone",
+      "title": "Contact us",
+      "users": {
+        "linemen": "Linemen: ask your office for a new password.",
+        "reset": "Forgot your password?",
+        "reset_link": "Get a new one",
+        "title": "Already using the app?"
+      },
+      "whatsapp": "Chat on WhatsApp",
+      "whatsapp_label": "WhatsApp"
+    },
+    "home": {
+      "already": "Already using Cable Billing?",
+      "cta": {
+        "title": "Try it free for {days} days"
+      },
+      "description": "Bills, money collection and receipts for local cable operators. In Hindi and English.",
+      "features": {
+        "bills": {
+          "text": "On the 1st of every month, bills are made for all your customers. You can check them before that.",
+          "title": "Bills every month"
+        },
+        "cash": {
+          "text": "See how much cash and UPI each lineman took, and check the cash they hand over to the office.",
+          "title": "Cash check"
+        },
+        "customers": {
+          "text": "Every customer, VC number and plan in one place. Add them one by one or from an Excel file.",
+          "title": "Customers and connections"
+        },
+        "dues": {
+          "text": "See who still has to pay and how much, with reports for every day and month.",
+          "title": "Who has to pay"
+        },
+        "language": {
+          "text": "Every screen in Hindi and English. Change it with one tap.",
+          "title": "Hindi and English"
+        },
+        "lineman_app": {
+          "text": "Linemen take cash and UPI on an Android phone. Without internet, payments are saved on the phone and reach the office later.",
+          "title": "App for linemen"
+        },
+        "receipts": {
+          "text": "Print a receipt on a small Bluetooth printer, or share a receipt link on WhatsApp.",
+          "title": "Receipts"
+        },
+        "title": "What it does"
+      },
+      "languages": "In Hindi and English.",
+      "lead": "Bills, money collection and receipts for your cable business.",
+      "no_card": "No card needed to start.",
+      "steps": {
+        "add": "Add your plans and customers.",
+        "linemen": "Add linemen and put the app on their phones.",
+        "sign_up": "Sign up and check your email.",
+        "title": "How to start"
+      },
+      "trial_line": "{days} days free. Then {price} a month + GST."
+    },
+    "legal": {
+      "contact_link": "Contact us",
+      "draft_body": "This page is a draft. A lawyer has not checked it yet, and it is not final.",
+      "draft_date": "Draft of {date}",
+      "draft_title": "Draft: for legal review"
+    },
+    "nav": {
+      "contact": "Contact us",
+      "footer": "More pages",
+      "main": "Main menu",
+      "open_app": "Open app",
+      "pricing": "Price",
+      "privacy": "Privacy policy",
+      "sign_in": "Sign in",
+      "skip": "Skip to content",
+      "start_trial": "Start free trial",
+      "terms": "Terms of use"
+    },
+    "pricing": {
+      "apps": "Web app for the office, Android app for linemen",
+      "description": "{price} a month + GST. Unlimited customers. {days} days free.",
+      "faq": {
+        "after_trial": {
+          "a": "To keep using the app, the owner pays {total} a month online (UPI Autopay or card). If the payment does not come, the app keeps working for {grace} more days.",
+          "q": "What happens after {days} days?"
+        },
+        "customer_money": {
+          "a": "No. Your customers pay you in cash or UPI, as they do today. The app records the payment and gives a receipt.",
+          "q": "Does the app take money from my customers online?"
+        },
+        "customers": {
+          "a": "No. The price is the same for any number of customers.",
+          "q": "Is there a limit on customers?"
+        },
+        "data": {
+          "a": "No. Your data is not deleted when you stop paying or cancel.",
+          "q": "Is my data deleted if I stop?"
+        },
+        "gst": {
+          "a": "The price is {price} a month. GST at {gst}% is {gst_amount}, so you pay {total}.",
+          "q": "Why {total}?"
+        },
+        "not_paid": {
+          "a": "After those {grace} days the app becomes view only. You can see all your data and linemen can still collect money, but new bills are not made until you pay.",
+          "q": "What if I don't pay?"
+        },
+        "title": "Questions"
+      },
+      "included": "What you get",
+      "languages": "Hindi and English",
+      "lead": "One plan for every cable operator.",
+      "no_card": "No card needed to start.",
+      "per_month": "a month + GST",
+      "title": "Price",
+      "total": "{total} a month with {gst}% GST",
+      "trial": "First {days} days free",
+      "unlimited_customers": "Unlimited customers"
+    },
+    "privacy": {
+      "changes": {
+        "text": "When this page changes, the date at the top changes too.",
+        "title": "Changes to this page"
+      },
+      "collect": {
+        "activity": "When someone signs in or changes something: the time, the internet (IP) address and the browser, so that we know who changed what.",
+        "customers": "About the operator's customers, as the operator enters them: name, customer code, phone, address, area, connections (VC numbers), plans, bills and payments.",
+        "fee": "For our monthly fee: the payment is handled by our payment partner, Razorpay. We do not see or keep card numbers.",
+        "owner": "About the owner and the business: business name, owner's name, mobile number, email and password. Passwords are stored only in a scrambled form that cannot be read back.",
+        "phone_app": "From the linemen's app: the phone model, Android version and app version, to keep sign-in safe.",
+        "team": "About staff and linemen: name, user name, and phone number if the owner adds it.",
+        "title": "What we keep"
+      },
+      "cookies": {
+        "text": "We use cookies to keep you signed in and to remember your language. The bot check on the sign-up page may use them too. We do not use cookies for advertising.",
+        "title": "Cookies"
+      },
+      "description": "What information Cable Billing keeps, why, and who can see it. Draft for legal review.",
+      "intro": "This page says what information Cable Billing keeps, why we keep it, and who can see it.",
+      "keep": {
+        "text": "We keep the data while the operator's account exists. It is not deleted when the subscription ends. The period after an account is closed is not decided yet.",
+        "title": "How long we keep it"
+      },
+      "operator_data": {
+        "text": "The operator decides which customer details to enter. We keep them for that operator's business. One operator cannot see another operator's data.",
+        "title": "Customer data is the operator's"
+      },
+      "others": {
+        "location": "Our database is in Singapore.",
+        "text": "Hosting: Vercel. Database: Neon. Email: Resend. Our monthly fee: Razorpay. Bot check on sign-up: Cloudflare Turnstile. Error reports: Sentry. Sign-in limits: Upstash.",
+        "title": "Other companies that help run the app"
+      },
+      "receipts": {
+        "text": "A receipt link shows only the customer's first name and part of the phone number. It stops working after {days} days, and the operator can stop it earlier.",
+        "title": "Receipt links"
+      },
+      "requests": {
+        "text": "To ask about your data, to correct it, or to complain, contact us.",
+        "title": "Questions and requests"
+      },
+      "safety": {
+        "text": "Connections to the app are encrypted (HTTPS). Passwords are stored scrambled. Each operator's data is kept separate, and changes to money records are recorded.",
+        "title": "How we keep it safe"
+      },
+      "title": "Privacy policy",
+      "use": {
+        "email": "To send emails about the account: email check, password reset and payment reminders.",
+        "fee": "To charge our monthly fee.",
+        "fix": "To find and fix problems in the app.",
+        "run": "To run the app: bills, receipts, reports and sign-in.",
+        "safety": "To keep accounts safe and stop misuse.",
+        "title": "Why we use it"
+      },
+      "who": {
+        "text": "Cable Billing is an app for local cable operators to keep customers, make bills, collect money and give receipts. The operator (the owner of the cable business) signs up and uses it for their business.",
+        "title": "Who we are"
+      }
+    },
+    "terms": {
+      "account": {
+        "text": "The owner signs up with their own details and checks their email. The owner adds staff and linemen and gives them their sign-in details. Keep passwords secret.",
+        "title": "Your account"
+      },
+      "cancel": {
+        "text": "The owner can stop the subscription. The app then becomes view only. Your data is not deleted.",
+        "title": "Stopping"
+      },
+      "changes": {
+        "text": "These terms may change. When they do, the date at the top changes too.",
+        "title": "Changes to these terms"
+      },
+      "data": {
+        "text": "The customers, bills and payments you enter are your business data. You can see them in the app at any time, also in view only mode.",
+        "title": "Your data"
+      },
+      "description": "How Cable Billing works: trial, price, view-only mode and your data. Draft for legal review.",
+      "intro": "These terms explain how Cable Billing works and what to expect when you use it.",
+      "messages": {
+        "text": "The app opens WhatsApp or SMS on your phone with the receipt link. We do not send these messages ourselves, so we cannot know if they reached the customer.",
+        "title": "WhatsApp and SMS"
+      },
+      "money": {
+        "text": "Your customers pay you in cash or UPI. The app only records these payments; it does not move money.",
+        "title": "Money from your customers"
+      },
+      "not_paid": {
+        "text": "The app keeps working for {grace} more days. After that it becomes view only: you can see your data and linemen can still collect money, but new bills are not made. When you pay, everything works again. Bills for the months in between are not made by themselves; the owner can make them from Bills.",
+        "title": "If the fee is not paid"
+      },
+      "price": {
+        "text": "The first {days} days are free. After that the price is {price} a month + GST ({total} a month), for any number of customers. The owner pays online in Settings, App subscription.",
+        "title": "Free trial and price"
+      },
+      "receipts": {
+        "text": "Receipts from the app are simple payment receipts. They are not GST tax invoices.",
+        "title": "Receipts and tax"
+      },
+      "records": {
+        "text": "A saved payment or bill is never deleted. A mistake is fixed with Undo payment or a Bill change, and both stay on record.",
+        "title": "Payments and bills stay on record"
+      },
+      "service": {
+        "text": "Cable Billing is an app for local cable operators: customers and connections, monthly bills, money collection by linemen, receipts and reports. The office uses it on the web; linemen use the Android app.",
+        "title": "The service"
+      },
+      "title": "Terms of use"
+    }
+  },
   "mobile_collect": {
     "amount": {
       "chip_due": "Full due {amount}",

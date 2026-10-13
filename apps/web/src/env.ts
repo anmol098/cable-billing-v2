@@ -28,8 +28,9 @@ import { z } from "zod";
 const isServer = typeof window === "undefined";
 
 // Zod's JIT probes `new Function()`, which a CSP without 'unsafe-eval' rejects (and reports).
-// The browser doesn't need the speed-up, so turn it off there before the first parse. This module
-// is the first app code the browser runs (via instrumentation-client.ts).
+// The browser doesn't need the speed-up, so turn it off there before the first parse, in case a
+// browser module imports this one (instrumentation-client.ts no longer does, to keep Zod out of
+// every page's JavaScript; it reads its two NEXT_PUBLIC_ variables literally).
 if (!isServer) z.config({ jitless: true });
 
 /** Treat `FOO=` (empty string, common in Vercel and `.env` files) the same as unset. */
@@ -63,6 +64,14 @@ const emailFrom = z
     /^(?:[^<>@\r\n]+\s<[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+>|[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+)$/,
     'must be "name@domain" or "Name <name@domain>"',
   );
+
+/** A plain email address, e.g. `help@example.com` (no display name). */
+const email = z.email({ error: "must be an email address like help@example.com" });
+
+/** An Indian mobile number in international form: `+91` and 10 digits, no spaces. */
+const indianMobile = z
+  .string()
+  .regex(/^\+91[6-9]\d{9}$/, "must be +91 followed by a 10-digit mobile number, no spaces");
 
 /** A bare host name as Vercel provides it (`my-app-git-x.vercel.app`, no protocol). */
 const host = z.string().regex(/^[a-z0-9.-]+(?::\d+)?$/i, "must be a host name without protocol");
@@ -112,6 +121,12 @@ const serverShape = {
    * Refused on any Vercel deployment (`deploymentEnvProblems`).
    */
   EMAIL_OUTBOX_DIR: optional(z.string().min(1)),
+
+  // --- Public contact details (T-087: /contact page, legal pages) ---
+  /** Support email shown on the public pages. Production needs it (Razorpay, Play Store, legal). */
+  SUPPORT_EMAIL: optional(email),
+  /** Optional support phone (`+91…`): a call link and a WhatsApp chat link on /contact. */
+  SUPPORT_PHONE: optional(indianMobile),
 
   // --- Bot protection on sign-up (Cloudflare Turnstile); site key is NEXT_PUBLIC_ ---
   TURNSTILE_SECRET_KEY: optional(z.string().min(1)),
@@ -211,6 +226,7 @@ export const REQUIRED_IN_PRODUCTION = [
   "CRON_SECRET",
   "RESEND_API_KEY",
   "EMAIL_FROM",
+  "SUPPORT_EMAIL",
   "TURNSTILE_SECRET_KEY",
   "NEXT_PUBLIC_TURNSTILE_SITE_KEY",
   "UPSTASH_REDIS_REST_URL",

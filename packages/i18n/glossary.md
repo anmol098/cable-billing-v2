@@ -177,6 +177,22 @@ the office has the payment.
 | Try now | अभी भेजें | Waiting screen: send what is on the phone to the office now | arrow-right | Sync, Retry upload |
 | Other lineman | दूसरा लाइनमैन | A payment another lineman saved on this phone; held, not sent with your sign-in | alert-triangle, `semantic.danger` | Foreign queue, Held items |
 
+## Public pages (web, T-087)
+
+| English | हिंदी | Means | Icon / colour | Not this |
+|---|---|---|---|---|
+| Price | कीमत | Our monthly fee, on the public pages | — | Pricing, Plan (that word is the customer's rental), दाम |
+| Free trial | फ़्री ट्रायल | The first 30 days after sign-up, no payment | — | Demo, निःशुल्क परीक्षण |
+| Start free trial | फ़्री ट्रायल शुरू करें | Go to sign-up | arrow-right | Get started, Register |
+| Sign up | साइन अप | Create the business's account | — | Register, पंजीकरण |
+| Open app | ऐप खोलें | Header link when already signed in (goes through sign-in) | — | Dashboard, Go to console |
+| View only | सिर्फ़ देख सकते हैं | Read-only mode after an unpaid fee (collections still work) | — | Read-only, Suspended |
+| Unlimited customers | ग्राहक जितने चाहें | No limit on how many customers | — | असीमित ग्राहक |
+| Privacy policy | प्राइवेसी पॉलिसी | What data we keep and why | — | Data policy, गोपनीयता नीति |
+| Terms of use | इस्तेमाल की शर्तें | How the service works and what to expect | — | T&C, नियम और शर्तें |
+| Contact us | हमसे बात करें | Support email / phone page | email, phone | Support, संपर्क करें |
+| Draft | ड्राफ़्ट | Text not yet checked by a lawyer | clock, `semantic.pending` (amber) | Beta, प्रारूप |
+
 ## Words we never show users
 
 Invoice, Ledger, Allocation, Adjustment, Reversal, Tenant, Sync / Synced / Pending sync,

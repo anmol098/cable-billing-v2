@@ -1,0 +1,372 @@
+{
+  "_review": [
+    "nav.skip",
+    "nav.main",
+    "nav.footer",
+    "nav.pricing",
+    "nav.sign_in",
+    "nav.open_app",
+    "nav.start_trial",
+    "nav.privacy",
+    "nav.terms",
+    "nav.contact",
+    "home.description",
+    "home.lead",
+    "home.languages",
+    "home.trial_line",
+    "home.no_card",
+    "home.already",
+    "home.features.title",
+    "home.features.customers.title",
+    "home.features.customers.text",
+    "home.features.bills.title",
+    "home.features.bills.text",
+    "home.features.lineman_app.title",
+    "home.features.lineman_app.text",
+    "home.features.receipts.title",
+    "home.features.receipts.text",
+    "home.features.cash.title",
+    "home.features.cash.text",
+    "home.features.dues.title",
+    "home.features.dues.text",
+    "home.features.language.title",
+    "home.features.language.text",
+    "home.steps.title",
+    "home.steps.sign_up",
+    "home.steps.add",
+    "home.steps.linemen",
+    "home.cta.title",
+    "pricing.title",
+    "pricing.description",
+    "pricing.lead",
+    "pricing.per_month",
+    "pricing.total",
+    "pricing.included",
+    "pricing.unlimited_customers",
+    "pricing.apps",
+    "pricing.languages",
+    "pricing.trial",
+    "pricing.no_card",
+    "pricing.faq.title",
+    "pricing.faq.after_trial.q",
+    "pricing.faq.after_trial.a",
+    "pricing.faq.not_paid.q",
+    "pricing.faq.not_paid.a",
+    "pricing.faq.data.q",
+    "pricing.faq.data.a",
+    "pricing.faq.customers.q",
+    "pricing.faq.customers.a",
+    "pricing.faq.gst.q",
+    "pricing.faq.gst.a",
+    "pricing.faq.customer_money.q",
+    "pricing.faq.customer_money.a",
+    "legal.draft_title",
+    "legal.draft_body",
+    "legal.draft_date",
+    "legal.contact_link",
+    "privacy.title",
+    "privacy.description",
+    "privacy.intro",
+    "privacy.who.title",
+    "privacy.who.text",
+    "privacy.collect.title",
+    "privacy.collect.owner",
+    "privacy.collect.customers",
+    "privacy.collect.team",
+    "privacy.collect.phone_app",
+    "privacy.collect.activity",
+    "privacy.collect.fee",
+    "privacy.use.title",
+    "privacy.use.run",
+    "privacy.use.safety",
+    "privacy.use.email",
+    "privacy.use.fee",
+    "privacy.use.fix",
+    "privacy.operator_data.title",
+    "privacy.operator_data.text",
+    "privacy.receipts.title",
+    "privacy.receipts.text",
+    "privacy.others.title",
+    "privacy.others.text",
+    "privacy.others.location",
+    "privacy.cookies.title",
+    "privacy.cookies.text",
+    "privacy.keep.title",
+    "privacy.keep.text",
+    "privacy.safety.title",
+    "privacy.safety.text",
+    "privacy.requests.title",
+    "privacy.requests.text",
+    "privacy.changes.title",
+    "privacy.changes.text",
+    "terms.title",
+    "terms.description",
+    "terms.intro",
+    "terms.service.title",
+    "terms.service.text",
+    "terms.account.title",
+    "terms.account.text",
+    "terms.price.title",
+    "terms.price.text",
+    "terms.not_paid.title",
+    "terms.not_paid.text",
+    "terms.cancel.title",
+    "terms.cancel.text",
+    "terms.data.title",
+    "terms.data.text",
+    "terms.receipts.title",
+    "terms.receipts.text",
+    "terms.messages.title",
+    "terms.messages.text",
+    "terms.money.title",
+    "terms.money.text",
+    "terms.records.title",
+    "terms.records.text",
+    "terms.changes.title",
+    "terms.changes.text",
+    "contact.title",
+    "contact.description",
+    "contact.lead",
+    "contact.email",
+    "contact.phone",
+    "contact.call",
+    "contact.whatsapp_label",
+    "contact.whatsapp",
+    "contact.not_set",
+    "contact.users.title",
+    "contact.users.reset",
+    "contact.users.reset_link",
+    "contact.users.linemen"
+  ],
+  "nav": {
+    "skip": "सीधे पेज पर जाएँ",
+    "main": "मेन्यू",
+    "footer": "और पेज",
+    "pricing": "कीमत",
+    "sign_in": "लॉग इन करें",
+    "open_app": "ऐप खोलें",
+    "start_trial": "फ़्री ट्रायल शुरू करें",
+    "privacy": "प्राइवेसी पॉलिसी",
+    "terms": "इस्तेमाल की शर्तें",
+    "contact": "हमसे बात करें"
+  },
+  "home": {
+    "description": "लोकल केबल ऑपरेटर के लिए बिल, पैसे लेना और रसीद। हिंदी और English में।",
+    "lead": "आपके केबल बिज़नेस के लिए बिल, पैसे लेना और रसीद।",
+    "languages": "हिंदी और English में।",
+    "trial_line": "{days} दिन फ़्री। उसके बाद {price} महीना + GST।",
+    "no_card": "शुरू करने के लिए कार्ड नहीं चाहिए।",
+    "already": "पहले से केबल बिलिंग इस्तेमाल करते हैं?",
+    "features": {
+      "title": "इससे क्या होता है",
+      "customers": {
+        "title": "ग्राहक और कनेक्शन",
+        "text": "हर ग्राहक, VC नंबर और प्लान एक जगह। एक-एक करके जोड़ें या Excel फ़ाइल से।"
+      },
+      "bills": {
+        "title": "हर महीने बिल",
+        "text": "हर महीने की 1 तारीख को सभी ग्राहकों के बिल बन जाते हैं। आप पहले से उन्हें देख सकते हैं।"
+      },
+      "lineman_app": {
+        "title": "लाइनमैन के लिए ऐप",
+        "text": "लाइनमैन Android फ़ोन पर नकद और UPI लेते हैं। इंटरनेट न हो तो पेमेंट फ़ोन में सेव रहते हैं और बाद में ऑफिस पहुँच जाते हैं।"
+      },
+      "receipts": {
+        "title": "रसीद",
+        "text": "छोटे ब्लूटूथ प्रिंटर पर रसीद प्रिंट करें, या WhatsApp पर रसीद का लिंक शेयर करें।"
+      },
+      "cash": {
+        "title": "कैश की जाँच",
+        "text": "देखें कि हर लाइनमैन ने कितना नकद और UPI लिया, और ऑफिस को दिया गया कैश जाँचें।"
+      },
+      "dues": {
+        "title": "किसका बाकी है",
+        "text": "देखें कि किसका कितना बाकी है। हर दिन और महीने की रिपोर्ट भी।"
+      },
+      "language": {
+        "title": "हिंदी और English",
+        "text": "हर स्क्रीन हिंदी और English में। एक टैप से भाषा बदलें।"
+      }
+    },
+    "steps": {
+      "title": "कैसे शुरू करें",
+      "sign_up": "साइन अप करें और अपना ईमेल चेक करें।",
+      "add": "अपने प्लान और ग्राहक जोड़ें।",
+      "linemen": "लाइनमैन जोड़ें और उनके फ़ोन में ऐप डालें।"
+    },
+    "cta": {
+      "title": "{days} दिन फ़्री में चलाकर देखें"
+    }
+  },
+  "pricing": {
+    "title": "कीमत",
+    "description": "{price} महीना + GST। ग्राहक जितने चाहें। {days} दिन फ़्री।",
+    "lead": "हर केबल ऑपरेटर के लिए एक ही प्लान।",
+    "per_month": "महीना + GST",
+    "total": "{gst}% GST के साथ {total} महीना",
+    "included": "आपको क्या मिलता है",
+    "unlimited_customers": "ग्राहक जितने चाहें",
+    "apps": "ऑफिस के लिए वेब ऐप, लाइनमैन के लिए Android ऐप",
+    "languages": "हिंदी और English",
+    "trial": "पहले {days} दिन फ़्री",
+    "no_card": "शुरू करने के लिए कार्ड नहीं चाहिए।",
+    "faq": {
+      "title": "सवाल",
+      "after_trial": {
+        "q": "{days} दिन के बाद क्या होगा?",
+        "a": "ऐप चालू रखने के लिए मालिक हर महीने {total} ऑनलाइन देते हैं (UPI ऑटोपे या कार्ड)। पेमेंट न आए तो ऐप {grace} दिन और चलता है।"
+      },
+      "not_paid": {
+        "q": "पेमेंट न करूँ तो क्या होगा?",
+        "a": "उन {grace} दिनों के बाद ऐप में आप सिर्फ़ देख सकते हैं। आपका सारा डेटा दिखता है और लाइनमैन पैसे ले सकते हैं, पर पेमेंट होने तक नए बिल नहीं बनते।"
+      },
+      "data": {
+        "q": "बंद करने पर क्या मेरा डेटा मिट जाएगा?",
+        "a": "नहीं। पेमेंट बंद करने या सब्सक्रिप्शन रोकने पर आपका डेटा नहीं मिटता।"
+      },
+      "customers": {
+        "q": "क्या ग्राहकों की कोई लिमिट है?",
+        "a": "नहीं। ग्राहक कितने भी हों, कीमत वही है।"
+      },
+      "gst": {
+        "q": "{total} क्यों?",
+        "a": "कीमत {price} महीना है। {gst}% GST {gst_amount} है, इसलिए आप {total} देते हैं।"
+      },
+      "customer_money": {
+        "q": "क्या ऐप मेरे ग्राहकों से ऑनलाइन पैसे लेता है?",
+        "a": "नहीं। आपके ग्राहक आज की तरह नकद या UPI से आपको पैसे देते हैं। ऐप पेमेंट लिखता है और रसीद देता है।"
+      }
+    }
+  },
+  "legal": {
+    "draft_title": "ड्राफ़्ट: कानूनी जाँच के लिए",
+    "draft_body": "यह पेज ड्राफ़्ट है। अभी किसी वकील ने इसे नहीं जाँचा है, और यह फ़ाइनल नहीं है।",
+    "draft_date": "{date} का ड्राफ़्ट",
+    "contact_link": "हमसे बात करें"
+  },
+  "privacy": {
+    "title": "प्राइवेसी पॉलिसी",
+    "description": "केबल बिलिंग कौन-सी जानकारी रखता है, क्यों, और उसे कौन देख सकता है। कानूनी जाँच के लिए ड्राफ़्ट।",
+    "intro": "इस पेज पर लिखा है कि केबल बिलिंग कौन-सी जानकारी रखता है, क्यों रखता है, और उसे कौन देख सकता है।",
+    "who": {
+      "title": "हम कौन हैं",
+      "text": "केबल बिलिंग लोकल केबल ऑपरेटर के लिए ऐप है: ग्राहक रखना, बिल बनाना, पैसे लेना और रसीद देना। ऑपरेटर (केबल बिज़नेस का मालिक) साइन अप करके इसे अपने बिज़नेस के लिए इस्तेमाल करता है।"
+    },
+    "collect": {
+      "title": "हम क्या रखते हैं",
+      "owner": "मालिक और बिज़नेस के बारे में: बिज़नेस का नाम, मालिक का नाम, मोबाइल नंबर, ईमेल और पासवर्ड। पासवर्ड ऐसे बदले हुए रूप में रखा जाता है जिसे वापस पढ़ा नहीं जा सकता।",
+      "customers": "ऑपरेटर के ग्राहकों के बारे में, जैसा ऑपरेटर लिखता है: नाम, ग्राहक कोड, फ़ोन, पता, एरिया, कनेक्शन (VC नंबर), प्लान, बिल और पेमेंट।",
+      "team": "स्टाफ़ और लाइनमैन के बारे में: नाम, यूज़र नेम, और फ़ोन नंबर अगर मालिक लिखे।",
+      "phone_app": "लाइनमैन के ऐप से: फ़ोन का मॉडल, Android वर्शन और ऐप वर्शन, ताकि लॉग इन सुरक्षित रहे।",
+      "activity": "जब कोई लॉग इन करता है या कुछ बदलता है: समय, इंटरनेट (IP) एड्रेस और ब्राउज़र, ताकि पता रहे कि किसने क्या बदला।",
+      "fee": "हमारी महीने की फ़ीस के लिए: पेमेंट हमारा पेमेंट पार्टनर Razorpay संभालता है। हम कार्ड नंबर न देखते हैं, न रखते हैं।"
+    },
+    "use": {
+      "title": "हम इसे क्यों इस्तेमाल करते हैं",
+      "run": "ऐप चलाने के लिए: बिल, रसीद, रिपोर्ट और लॉग इन।",
+      "safety": "अकाउंट सुरक्षित रखने और गलत इस्तेमाल रोकने के लिए।",
+      "email": "अकाउंट के बारे में ईमेल भेजने के लिए: ईमेल की जाँच, पासवर्ड बदलना और पेमेंट की याद।",
+      "fee": "हमारी महीने की फ़ीस लेने के लिए।",
+      "fix": "ऐप की दिक्कतें ढूँढने और ठीक करने के लिए।"
+    },
+    "operator_data": {
+      "title": "ग्राहकों का डेटा ऑपरेटर का है",
+      "text": "ग्राहक की कौन-सी जानकारी लिखनी है, यह ऑपरेटर तय करता है। हम उसे उसी ऑपरेटर के बिज़नेस के लिए रखते हैं। एक ऑपरेटर दूसरे ऑपरेटर का डेटा नहीं देख सकता।"
+    },
+    "receipts": {
+      "title": "रसीद के लिंक",
+      "text": "रसीद के लिंक में ग्राहक का सिर्फ़ पहला नाम और फ़ोन नंबर का कुछ हिस्सा दिखता है। लिंक {days} दिन बाद काम करना बंद कर देता है, और ऑपरेटर उसे पहले भी बंद कर सकता है।"
+    },
+    "others": {
+      "title": "ऐप चलाने में मदद करने वाली दूसरी कंपनियाँ",
+      "text": "होस्टिंग: Vercel। डेटाबेस: Neon। ईमेल: Resend। हमारी महीने की फ़ीस: Razorpay। साइन अप पर बॉट की जाँच: Cloudflare Turnstile। ऐप की दिक्कतों की रिपोर्ट: Sentry। लॉग इन की लिमिट: Upstash।",
+      "location": "हमारा डेटाबेस सिंगापुर में है।"
+    },
+    "cookies": {
+      "title": "कुकीज़",
+      "text": "हम कुकीज़ से आपको लॉग इन रखते हैं और आपकी भाषा याद रखते हैं। साइन अप पेज पर बॉट की जाँच भी इन्हें इस्तेमाल कर सकती है। हम विज्ञापन के लिए कुकीज़ इस्तेमाल नहीं करते।"
+    },
+    "keep": {
+      "title": "हम कब तक रखते हैं",
+      "text": "जब तक ऑपरेटर का अकाउंट है, हम डेटा रखते हैं। सब्सक्रिप्शन खत्म होने पर डेटा नहीं मिटता। अकाउंट बंद होने के बाद कितने समय तक रखेंगे, यह अभी तय नहीं है।"
+    },
+    "safety": {
+      "title": "हम इसे सुरक्षित कैसे रखते हैं",
+      "text": "ऐप से कनेक्शन एन्क्रिप्टेड (HTTPS) है। पासवर्ड बदले हुए रूप में रखे जाते हैं। हर ऑपरेटर का डेटा अलग रखा जाता है, और पैसों के रिकॉर्ड में हर बदलाव लिखा जाता है।"
+    },
+    "requests": {
+      "title": "सवाल और अनुरोध",
+      "text": "अपने डेटा के बारे में पूछने, उसे ठीक करवाने या शिकायत करने के लिए हमसे बात करें।"
+    },
+    "changes": {
+      "title": "इस पेज में बदलाव",
+      "text": "जब यह पेज बदलेगा, ऊपर लिखी तारीख भी बदलेगी।"
+    }
+  },
+  "terms": {
+    "title": "इस्तेमाल की शर्तें",
+    "description": "केबल बिलिंग कैसे काम करता है: फ़्री ट्रायल, कीमत, सिर्फ़ देखने वाला मोड और आपका डेटा। कानूनी जाँच के लिए ड्राफ़्ट।",
+    "intro": "ये शर्तें बताती हैं कि केबल बिलिंग कैसे काम करता है और इस्तेमाल करते समय आप क्या उम्मीद करें।",
+    "service": {
+      "title": "सर्विस",
+      "text": "केबल बिलिंग लोकल केबल ऑपरेटर के लिए ऐप है: ग्राहक और कनेक्शन, हर महीने बिल, लाइनमैन से पैसे लेना, रसीद और रिपोर्ट। ऑफिस इसे वेब पर इस्तेमाल करता है; लाइनमैन Android ऐप इस्तेमाल करते हैं।"
+    },
+    "account": {
+      "title": "आपका अकाउंट",
+      "text": "मालिक अपनी सही जानकारी से साइन अप करता है और अपना ईमेल चेक करता है। मालिक स्टाफ़ और लाइनमैन को जोड़ता है और उन्हें लॉग इन की जानकारी देता है। पासवर्ड किसी को न बताएँ।"
+    },
+    "price": {
+      "title": "फ़्री ट्रायल और कीमत",
+      "text": "पहले {days} दिन फ़्री हैं। उसके बाद कीमत {price} महीना + GST ({total} महीना) है, ग्राहक कितने भी हों। मालिक सेटिंग में, ऐप सब्सक्रिप्शन से ऑनलाइन पेमेंट करता है।"
+    },
+    "not_paid": {
+      "title": "अगर फ़ीस न दी जाए",
+      "text": "ऐप {grace} दिन और चलता है। उसके बाद आप सिर्फ़ देख सकते हैं: आपका डेटा दिखता है और लाइनमैन पैसे ले सकते हैं, पर नए बिल नहीं बनते। पेमेंट करने पर सब फिर से चालू हो जाता है। बीच के महीनों के बिल अपने-आप नहीं बनते; मालिक उन्हें बिल पेज से बना सकता है।"
+    },
+    "cancel": {
+      "title": "बंद करना",
+      "text": "मालिक सब्सक्रिप्शन बंद कर सकता है। तब ऐप में आप सिर्फ़ देख सकते हैं। आपका डेटा नहीं मिटता।"
+    },
+    "data": {
+      "title": "आपका डेटा",
+      "text": "आप जो ग्राहक, बिल और पेमेंट लिखते हैं, वह आपके बिज़नेस का डेटा है। आप उसे ऐप में कभी भी देख सकते हैं, सिर्फ़ देखने वाले मोड में भी।"
+    },
+    "receipts": {
+      "title": "रसीद और टैक्स",
+      "text": "ऐप की रसीदें पेमेंट की सादी रसीदें हैं। ये GST टैक्स इनवॉइस नहीं हैं।"
+    },
+    "messages": {
+      "title": "WhatsApp और SMS",
+      "text": "ऐप आपके फ़ोन में रसीद के लिंक के साथ WhatsApp या SMS खोलता है। ये मैसेज हम खुद नहीं भेजते, इसलिए हमें पता नहीं चलता कि ग्राहक तक पहुँचे या नहीं।"
+    },
+    "money": {
+      "title": "आपके ग्राहकों के पैसे",
+      "text": "आपके ग्राहक आपको नकद या UPI से पैसे देते हैं। ऐप सिर्फ़ ये पेमेंट लिखता है; पैसे नहीं भेजता।"
+    },
+    "records": {
+      "title": "पेमेंट और बिल रिकॉर्ड में रहते हैं",
+      "text": "सेव किया गया पेमेंट या बिल कभी मिटाया नहीं जाता। गलती पेमेंट रद्द करके या बिल में बदलाव करके ठीक होती है, और दोनों रिकॉर्ड में रहते हैं।"
+    },
+    "changes": {
+      "title": "इन शर्तों में बदलाव",
+      "text": "ये शर्तें बदल सकती हैं। जब बदलेंगी, ऊपर लिखी तारीख भी बदलेगी।"
+    }
+  },
+  "contact": {
+    "title": "हमसे बात करें",
+    "description": "केबल बिलिंग के बारे में सवाल है? हमें लिखें या फ़ोन करें।",
+    "lead": "केबल बिलिंग के बारे में सवाल है? हमें लिखें या फ़ोन करें।",
+    "email": "ईमेल",
+    "phone": "फ़ोन",
+    "call": "{phone} पर फ़ोन करें",
+    "whatsapp_label": "WhatsApp",
+    "whatsapp": "WhatsApp पर बात करें",
+    "not_set": "संपर्क की जानकारी जल्द ही यहाँ लिखी जाएगी।",
+    "users": {
+      "title": "पहले से ऐप इस्तेमाल करते हैं?",
+      "reset": "पासवर्ड भूल गए?",
+      "reset_link": "नया पासवर्ड बनाएँ",
+      "linemen": "लाइनमैन: नए पासवर्ड के लिए अपने ऑफिस से बात करें।"
+    }
+  }
+}

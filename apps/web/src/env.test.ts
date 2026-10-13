@@ -55,6 +55,7 @@ const production: Record<string, string> = {
   CRON_SECRET: "c".repeat(64),
   RESEND_API_KEY: "re_fake",
   EMAIL_FROM: "Cable Billing <noreply@example.test>",
+  SUPPORT_EMAIL: "help@example.test",
   TURNSTILE_SECRET_KEY: "0x4AAAAAAAfakefakefakefakefakefake",
   NEXT_PUBLIC_TURNSTILE_SITE_KEY: "0x4AAAAAAAfakefake",
   UPSTASH_REDIS_REST_URL: "https://fake.upstash.io",
@@ -146,6 +147,25 @@ describe("env schema", () => {
     expect(() => parseEnv(serverSchema, { RAZORPAY_KEY_SECRET: "s" }, "server")).toThrow(
       /RAZORPAY_KEY_ID: must be set together with RAZORPAY_KEY_SECRET/,
     );
+  });
+
+  it("checks the public contact details (T-087)", () => {
+    const ok = parseEnv(
+      serverSchema,
+      { SUPPORT_EMAIL: "help@example.test", SUPPORT_PHONE: "+919876543210" },
+      "server",
+    );
+    expect(ok.SUPPORT_EMAIL).toBe("help@example.test");
+    expect(ok.SUPPORT_PHONE).toBe("+919876543210");
+    for (const bad of [
+      { SUPPORT_EMAIL: "Help <help@example.test>" },
+      { SUPPORT_EMAIL: "help" },
+      { SUPPORT_PHONE: "98765 43210" },
+      { SUPPORT_PHONE: "9876543210" },
+      { SUPPORT_PHONE: "+911234567890" },
+    ]) {
+      expect(() => parseEnv(serverSchema, bad, "server")).toThrow(/SUPPORT_/);
+    }
   });
 
   it("validates client variables separately", () => {
