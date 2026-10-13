@@ -6,6 +6,27 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
+    <!-- Bluetooth receipt printer (T-068, PLAN §11.8). API 31+: "Nearby devices" (connect to a
+         paired printer; scan without location). API 26-30: install-time Bluetooth permissions, and
+         location only to find new printers. -->
+    <uses-feature
+        android:name="android.hardware.bluetooth"
+        android:required="false" />
+    <uses-permission
+        android:name="android.permission.BLUETOOTH"
+        android:maxSdkVersion="30" />
+    <uses-permission
+        android:name="android.permission.BLUETOOTH_ADMIN"
+        android:maxSdkVersion="30" />
+    <uses-permission
+        android:name="android.permission.ACCESS_FINE_LOCATION"
+        android:maxSdkVersion="30" />
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+    <uses-permission
+        android:name="android.permission.BLUETOOTH_SCAN"
+        android:usesPermissionFlags="neverForLocation"
+        tools:targetApi="s" />
+
     <!-- Voice read-out (T-067): since API 30 an app only sees TTS engines (and their voice
          download screen) it declares here. -->
     <queries>
