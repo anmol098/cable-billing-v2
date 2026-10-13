@@ -3,10 +3,10 @@ id: T-032
 title: Team management (staff and linemen)
 phase: 1
 area: web
-status: todo
-owner:
-claimed_at:
-branch:
+status: claimed
+owner: agent-t032
+claimed_at: 2026-10-13T19:33:02.627Z
+branch: task/T-032-team-management-staff-and-linemen
 depends_on: [T-029, T-028]
 review: self
 claimable_by: agent
@@ -51,3 +51,7 @@ D-07, D-16, PLAN §11.6 — see `docs/IMPLEMENTATION_PLAN.md`, `docs/PRD.md`, `d
 ## Completion notes
 
 _The agent fills this in before opening the PR: what was built, decisions taken, deviations, follow-up tasks created, and how it was verified._
+
+## Board log
+
+- 2026-10-13T19:33:02.627Z claimed by agent-t032
