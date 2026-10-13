@@ -3,10 +3,10 @@ id: T-034
 title: Connections (VC) lifecycle
 phase: 1
 area: web
-status: todo
-owner:
-claimed_at:
-branch:
+status: claimed
+owner: agent-t034
+claimed_at: 2026-10-13T19:47:14.429Z
+branch: task/T-034-connections-vc-lifecycle
 depends_on: [T-033]
 review: self
 claimable_by: agent
@@ -54,3 +54,7 @@ FR-005, FR-006, BR-03, BR-04, RULE-06, RULE-07, J-02, J-06, PLAN §8.1 — see `
 ## Completion notes
 
 _The agent fills this in before opening the PR: what was built, decisions taken, deviations, follow-up tasks created, and how it was verified._
+
+## Board log
+
+- 2026-10-13T19:47:14.430Z claimed by agent-t034
