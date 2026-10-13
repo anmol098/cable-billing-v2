@@ -3,10 +3,10 @@ id: T-030
 title: Settings: business profile and areas
 phase: 1
 area: web
-status: todo
-owner:
-claimed_at:
-branch:
+status: claimed
+owner: agent-t030
+claimed_at: 2026-10-13T16:18:54.669Z
+branch: task/T-030-settings-business-profile-and-areas
 depends_on: [T-029, T-025]
 review: self
 claimable_by: agent
@@ -53,3 +53,7 @@ PLAN §12.1, D-18 — see `docs/IMPLEMENTATION_PLAN.md`, `docs/PRD.md`, `docs/BR
 ## Completion notes
 
 _The agent fills this in before opening the PR: what was built, decisions taken, deviations, follow-up tasks created, and how it was verified._
+
+## Board log
+
+- 2026-10-13T16:18:54.669Z claimed by agent-t030
