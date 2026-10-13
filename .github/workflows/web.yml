@@ -2,8 +2,8 @@
 #
 # Jobs (check names for branch protection: "Web" and "Web e2e"):
 #   web  task board check, Biome, then turbo lint / typecheck / test / build. On pull requests turbo
-#        runs only the packages affected by the PR (`--affected` against the PR's base commit); on
-#        pushes it runs everything. A Postgres 17 service is up with DATABASE_URL set for DB
+#        runs only the packages affected by the PR (`--affected` against the PR's base commit;
+#        everything if the PR changes this file); on pushes it runs everything. A Postgres 17 service is up with DATABASE_URL set for DB
 #        integration tests (T-020+). turbo runs in strict env mode, so a task that needs
 #        DATABASE_URL must list it in its package turbo.json (`env` / `passThroughEnv`).
 #   e2e  production build of apps/web + Playwright smoke tests against `next start` (T-005; T-088
@@ -93,7 +93,11 @@ jobs:
           EVENT_NAME: ${{ github.event_name }}
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: |
-          if [ "$EVENT_NAME" = "pull_request" ]; then
+          if [ "$EVENT_NAME" = "pull_request" ] && ! git diff --quiet "$BASE_SHA" HEAD -- .github/workflows/web.yml; then
+            # A PR that changes this workflow proves it on the whole workspace.
+            echo "args=" >> "$GITHUB_OUTPUT"
+            echo "turbo scope: all packages (this workflow changed)"
+          elif [ "$EVENT_NAME" = "pull_request" ]; then
             # Only packages changed between the PR's base commit and the merge commit (plus their
             # dependents). Root changes (lockfile, turbo.json, root package.json) select everything.
             echo "TURBO_SCM_BASE=$BASE_SHA" >> "$GITHUB_ENV"
