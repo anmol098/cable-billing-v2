@@ -99,19 +99,16 @@ for (const locale of ["en", "hi"] as const) {
 }
 
 test.describe("public page links", () => {
-  test("Start free trial goes to /signup and Sign in opens the sign-in page", async ({
-    page,
-    request,
-  }) => {
+  test("Start free trial goes to /signup and Sign in opens the sign-in page", async ({ page }) => {
     await page.goto("/");
     const trial = page.getByRole("link", { name: "Start free trial" }).first();
     await expect(trial).toHaveAttribute("href", "/signup");
+    await trial.click();
+    // T-027's sign-up page.
+    await expect(page).toHaveURL(/\/signup$/);
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Create your account");
 
-    // /signup is T-027's page. Until it is merged the route does not exist; once it is, it must load.
-    const signup = await request.get("/signup");
-    test.info().annotations.push({ type: "signup status", description: String(signup.status()) });
-    if (signup.status() !== 404) expect(signup.status()).toBe(200);
-
+    await page.goto("/pricing");
     await page.getByRole("banner").getByRole("link", { name: "Sign in" }).click();
     await expect(page).toHaveURL(/\/login$/);
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Sign in");

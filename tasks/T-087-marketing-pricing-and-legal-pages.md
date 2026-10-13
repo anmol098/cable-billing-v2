@@ -131,12 +131,11 @@ numbers and options.
 - Wording claims to confirm: "No card needed to start" (T-027's form asks for none), "UPI Autopay
   or card" for our fee (PLAN §13, T-085 not built yet), and "Bills are made on the 1st; you can check
   them before that".
-- The `/signup` link is live but T-027 isn't merged yet. The e2e test checks the link and starts
-  requiring `/signup` to answer 200 as soon as the route exists.
+- `/login` (T-026) still has no "New here? Create account" link to `/signup` (T-027's note); the public pages link to both. A small follow-up on T-026's page can add it.
 
-**Verification** (Node v24.21.0, pnpm 12.11.2, local PostgreSQL 17)
+**Verification** (Node v24.21.0, pnpm 12.11.2, local PostgreSQL 17; rebased on `feature/mvp` c28fa0c)
 
-- `pnpm --filter web test`: 16 files / 169 tests. New `(marketing)/_components/marketing.test.tsx`
+- `pnpm --filter web test` (after the rebase): 189 tests pass. New `(marketing)/_components/marketing.test.tsx`
   (23) covers:
   - the facts (₹400 + 18% = ₹472; GST throws instead of rounding; 30/15/90 days);
   - the frame (Sign in vs Open app → `/login`; footer links; skip link; switch state in en/hi);
@@ -152,12 +151,12 @@ numbers and options.
 
   `env.test.ts` adds a test for the `SUPPORT_*` formats.
 - `pnpm --filter web test:e2e` (scratch DB `cb_e2e_t087` migrated, `E2E_PORT=3287`, pre-installed
-  Chromium): **47 passed**, 18 of them new in `e2e/marketing.spec.ts`:
+  Chromium; with T-027 merged): **49 passed**, 18 of them new in `e2e/marketing.spec.ts`:
   - all 5 pages × en/hi return 200 with the right `lang`, title and h1, the header sign-in link, and
     no console errors, failed requests or CSP reports (the only exception is the browser's own
     `/favicon.ico` 404 until H-02);
   - no horizontal scroll at 360px on any page in either language;
-  - Start free trial → `/signup` and the header Sign in opens the sign-in page;
+  - Start free trial → T-027's `/signup` page ("Create your account") and the header Sign in opens the sign-in page;
   - the footer reaches every page;
   - a session cookie shows "Open app" and `/` still renders;
   - the language switch works on `/pricing`;
