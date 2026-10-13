@@ -75,6 +75,8 @@ value per environment, never shared between production and anything else.
 | `RESEND_API_KEY` | optional | optional (non-prod key) | non-prod key | **required** (prod key) | Resend → API Keys |
 | `EMAIL_FROM` | sandbox sender | sandbox or test domain | verified domain | **required**, verified domain | Resend → Domains |
 | `EMAIL_OUTBOX_DIR` | e2e tests only (a temp folder) | **never** (refused) | **never** (refused) | **never** (refused) | Playwright config sets it for `next start` (T-027) |
+| `SUPPORT_EMAIL` | unset | optional | support address | **required**, support address | a mailbox you read (after H-02's domain) |
+| `SUPPORT_PHONE` | unset | optional | optional | optional, `+91…` | the support mobile (also gets WhatsApp) |
 | `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | test key | test key | staging widget | **required**, prod widget | Cloudflare → Turnstile |
 | `TURNSTILE_SECRET_KEY` | test key | test key | staging widget | **required**, prod widget | Cloudflare → Turnstile |
 | `UPSTASH_REDIS_REST_URL` | unset (in-memory) | non-prod DB | non-prod DB | **required**, prod DB | Upstash → database → REST |
@@ -187,6 +189,9 @@ account. Use a shared company email (not a personal one) as the owner where you 
    → Production `RESEND_API_KEY`; one `cable-billing-nonprod` → Preview/staging.
 5. `EMAIL_FROM`: `Cable Billing <noreply@<your-verified-domain>>` in production. Production refuses the
    `resend.dev` sandbox sender.
+6. `SUPPORT_EMAIL` (production, required): a mailbox someone reads, e.g. `help@<domain>`. It is shown on
+   `/contact` and linked from the privacy policy and terms (Razorpay and the Play Store listing ask for a
+   public contact). Optional `SUPPORT_PHONE` (`+91` and 10 digits) adds Call and WhatsApp links there.
 
 ### 4.5 Upstash Redis (rate limits, E-07)
 

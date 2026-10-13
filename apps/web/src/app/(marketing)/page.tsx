@@ -1,16 +1,14 @@
-import { useLocale, useTranslations } from "next-intl";
-import { LocaleSwitch } from "@/components/locale-switch";
-import { setLocale } from "@/i18n/actions";
+import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
+import { HomeContent } from "./_components/home-content";
 
-/** Placeholder home page. T-087 (marketing) replaces it with the real landing page. */
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("marketing.home");
+  // The title stays the product name (the root layout's default).
+  return { description: t("description") };
+}
+
+/** `/`: the landing page (T-087). */
 export default function HomePage() {
-  const t = useTranslations();
-  const locale = useLocale();
-  return (
-    <main className="flex flex-col gap-6 p-6">
-      <h1 className="font-strong text-2xl">{t("common.app_name")}</h1>
-      <p className="text-text-muted">{t("scaffold.home.placeholder")}</p>
-      <LocaleSwitch current={locale} action={setLocale} />
-    </main>
-  );
+  return <HomeContent />;
 }

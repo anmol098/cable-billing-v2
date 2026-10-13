@@ -283,6 +283,11 @@ export const ICON_NODES = {
     ["path", { d: "M9 14 4 9l5-5" }],
     ["path", { d: "M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11" }],
   ],
+  // Lucide "mail"
+  "email": [
+    ["path", { d: "m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7" }],
+    ["rect", { x: "2", y: "4", width: "20", height: "16", rx: "2" }],
+  ],
 } as const;
 
 /** A semantic icon name from icons.json. */
