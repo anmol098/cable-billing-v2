@@ -162,6 +162,15 @@ and paste the SQL from `appendOnlyTriggerSql({ table: "payments", allowedColumns
   `app.current_operator()`; `app.forbid_update_delete()`.
 - Migrations run from a trusted workflow, never from the Vercel build (PLAN §17).
 
+## Seed data (T-036)
+
+`pnpm db:seed [--scale small|legacy|10x] [--seed N] [--as-of YYYY-MM-DD] [--migrate]` fills an
+**empty**, migrated database (`DATABASE_URL_UNPOOLED`, else `DATABASE_URL`) with deterministic fake
+tenants, customers, connections and months of bills and payments made with the `@cb/domain` rules.
+Local hosts only unless `--allow-remote`; never production. `pnpm db:seed --help` for every option;
+code and rules in `src/seed/` (`@cb/db/seed`); staging/preview use: `docs/runbooks/environments.md`
+§4.13.
+
 ## Testing
 
 DB integration tests run against a real Postgres 17 (CI: the `postgres:17` service; locally: the

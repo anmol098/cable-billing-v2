@@ -15,6 +15,7 @@
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
     "generate": "turbo run generate",
+    "db:seed": "pnpm --filter @cb/db db:seed",
     "i18n:build": "pnpm --filter @cb/i18n i18n:build",
     "i18n:check": "pnpm --filter @cb/i18n i18n:check",
     "tokens:build": "pnpm --filter @cb/design-tokens tokens:build",

@@ -7,7 +7,8 @@
   "sideEffects": false,
   "exports": {
     ".": "./src/index.ts",
-    "./testing": "./src/testing/index.ts"
+    "./testing": "./src/testing/index.ts",
+    "./seed": "./src/seed/index.ts"
   },
   "scripts": {
     "build": "tsc --noEmit",
@@ -16,6 +17,7 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:check": "drizzle-kit check",
+    "db:seed": "tsx src/seed/cli.ts",
     "db:test:clean": "tsx src/testing/clean.ts"
   },
   "dependencies": {
