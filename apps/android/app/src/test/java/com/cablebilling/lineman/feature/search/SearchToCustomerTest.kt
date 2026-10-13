@@ -17,6 +17,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.cablebilling.designsystem.component.NumberPadTags
@@ -88,7 +89,6 @@ class SearchToCustomerTest {
     private lateinit var network: TestNetwork
     private lateinit var roster: RosterRepository
     private lateinit var searchViewModel: SearchViewModel
-    private val customerViewModels = mutableMapOf<String, CustomerViewModel>()
     private val status = MutableStateFlow(RosterSyncStatus(0, 5, false, null, 0))
     private var refreshRequests = 0
     private val ramesh = RosterFixtures.ramesh
@@ -133,11 +133,12 @@ class SearchToCustomerTest {
                             SearchScreen(onOpenCustomer, onOpenWaiting, viewModel = searchViewModel)
                         },
                         customerScreen = { customerId, onCollect, onBack ->
-                            val viewModel =
-                                customerViewModels.getOrPut(customerId) {
+                            val customerViewModel =
+                                // Scoped to the screen's back-stack entry, like hiltViewModel in the app.
+                                viewModel(key = customerId) {
                                     CustomerViewModel(customerId, RosterCustomerData(roster), voiceLines)
                                 }
-                            CustomerScreen(customerId, onCollect, onBack, viewModel = viewModel)
+                            CustomerScreen(customerId, onCollect, onBack, viewModel = customerViewModel)
                         },
                     )
                 }
