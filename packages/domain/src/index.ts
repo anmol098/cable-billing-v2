@@ -3,6 +3,7 @@ export const packageName = "@cb/domain";
 
 export * from "./adjustments";
 export * from "./allocation";
+export * from "./billing";
 export * from "./money";
 export * from "./result";
 export * from "./time";
