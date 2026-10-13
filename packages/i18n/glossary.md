@@ -106,6 +106,17 @@ the office has the payment.
 | Temporary no. | अस्थायी नं. | A `P-…` receipt number before the office gives the final `R-…` one | clock, `semantic.pending` (amber) | Provisional, Draft |
 | The printer got it | प्रिंटर को मिल गया | Every byte reached the printer; we cannot see the paper | check-circle, `semantic.success` | Printed successfully, Done |
 
+## Settings words (lineman app)
+
+| English | हिंदी | Means | Icon / colour | Not this |
+|---|---|---|---|---|
+| Settings | सेटिंग | The low-traffic options screen (gear on the search home) | settings | Preferences, Options, सेटिंग्स |
+| Language | भाषा | हिंदी or English for the whole app | languages | Locale |
+| Voice | आवाज़ | The read-out (on / off) | volume-2 / volume-x | TTS, Speech |
+| App version | ऐप वर्ज़न | `0.1.0 (1)` | — | Build |
+| App report | ऐप रिपोर्ट | Diagnostic log the lineman shares for support (no customer data) | share-2 | Diagnostics, Logs, Crash report |
+| Share app report | ऐप रिपोर्ट शेयर करें | Opens the share sheet; we never know if it went anywhere | share-2 | Send diagnostics, Upload |
+
 ## Sign-in words (lineman app)
 
 | English | हिंदी | Means | Icon / colour | Not this |

@@ -1,0 +1,34 @@
+{
+  "open": "Settings",
+  "title": "Settings",
+  "language": "Language",
+  "voice": "Voice",
+  "printer": {
+    "title": "Printer",
+    "none": "No printer yet",
+    "set_up": "Set up printer"
+  },
+  "account": {
+    "signed_in": "Signed in: {name}"
+  },
+  "sign_out": {
+    "button": "Sign out",
+    "confirm_title": "Sign out of this phone?",
+    "confirm_body": "To sign in again you need your user name and password.",
+    "confirm_yes": "Yes, sign out",
+    "blocked_title": "You cannot sign out yet",
+    "blocked_count": "{count, plural, one {# payment is still on this phone. It must reach the office first.} other {# payments are still on this phone. They must reach the office first.}}",
+    "blocked_safe": "The payments are safe. Signing out never deletes them.",
+    "try_now": "Try now",
+    "open_waiting": "Open Waiting",
+    "now_possible": "All your payments reached the office. You can sign out now."
+  },
+  "version": "App version {version}",
+  "diagnostics": {
+    "title": "For support",
+    "explain": "A short app report for the office or support. It has no customer names, phone numbers or amounts.",
+    "share": "Share app report",
+    "chooser": "Share app report",
+    "subject": "Cable Billing app report"
+  }
+}

@@ -176,7 +176,11 @@ account. Use a shared company email (not a personal one) as the owner where you 
 4. Settings → **Auth Tokens** → create an **organisation token** → `SENTRY_AUTH_TOKEN`. Also set
    `SENTRY_ORG` (org slug) and `SENTRY_PROJECT=cable-billing-web`. Source maps upload only when the token
    is set.
-5. Android DSN goes to the Android release secrets (T-071/T-073), not to Vercel.
+5. Android DSN goes to the Android release secrets (T-071/T-073), not to Vercel: `cable-billing-android` →
+   Client Keys → copy the DSN into the CI secrets `SENTRY_DSN_PROD` and `SENTRY_DSN_STAGING` (the same DSN is
+   fine; events carry the flavour as their environment). The release build reads them as
+   `-Pcb.sentryDsn.<flavour>` or `SENTRY_DSN_<FLAVOUR>`; the `dev` flavour never gets one (see
+   `apps/android/README.md`).
 
 ### 4.4 Resend (email, E-07)
 

@@ -38,6 +38,8 @@ import com.cablebilling.lineman.feature.customer.navigateToCustomer
 import com.cablebilling.lineman.feature.printer.PrinterSetup
 import com.cablebilling.lineman.feature.printer.PrinterSetupRoute
 import com.cablebilling.lineman.feature.search.SearchScreen
+import com.cablebilling.lineman.feature.settings.Settings
+import com.cablebilling.lineman.feature.settings.SettingsRoute
 import com.cablebilling.lineman.feature.today.TodayScreen
 import com.cablebilling.lineman.feature.waiting.WaitingScreen
 import com.cablebilling.lineman.ui.navigation.CollectRoute
@@ -65,6 +67,10 @@ typealias CollectDoneSlot =
 /** The Waiting tab (T-066). */
 typealias WaitingSlot = @Composable () -> Unit
 
+/** Settings (T-071): printer setup, the Waiting tab (sign-out blocked by payments on the phone), back. */
+typealias SettingsSlot =
+    @Composable (onPrinterSetup: () -> Unit, onOpenWaiting: () -> Unit, onBack: () -> Unit) -> Unit
+
 /**
  * App shell: the three top-level screens behind a bottom bar (PLAN §11.2). Login (T-063) goes in front.
  * Search → Customer → Collect → Done sit above the search home on the Search tab's stack. The slots
@@ -73,13 +79,23 @@ typealias WaitingSlot = @Composable () -> Unit
 @Composable
 fun CableApp(
     navController: NavHostController = rememberNavController(),
-    searchHome: SearchHomeSlot = { onOpenCustomer, onOpenWaiting -> SearchScreen(onOpenCustomer, onOpenWaiting) },
+    searchHome: SearchHomeSlot = { onOpenCustomer, onOpenWaiting ->
+        // T-071: the search home's small gear opens settings.
+        SearchScreen(
+            onOpenCustomer,
+            onOpenWaiting,
+            onOpenSettings = dropUnlessResumed { navController.navigate(SettingsRoute) },
+        )
+    },
     customerScreen: CustomerSlot = { customerId, onCollect, onBack -> CustomerScreen(customerId, onCollect, onBack) },
     collectScreen: CollectSlot = { customerId, onSaved, onBack -> CollectScreen(customerId, onSaved, onBack) },
     collectDone: CollectDoneSlot = { paymentId, onPrinterSetup, onFinish ->
         CollectDoneScreen(paymentId, onPrinterSetup, onFinish)
     },
     waitingScreen: WaitingSlot = { WaitingScreen() },
+    settingsScreen: SettingsSlot = { onPrinterSetup, onOpenWaiting, onBack ->
+        Settings(onBack = onBack, onPrinterSetup = onPrinterSetup, onOpenWaiting = onOpenWaiting)
+    },
 ) {
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = backStackEntry?.destination
@@ -131,6 +147,14 @@ fun CableApp(
             composable<WaitingRoute> { waitingScreen() }
             // Printer setup (T-068): opened from settings (T-071) and the receipt screen (T-069).
             composable<PrinterSetupRoute> { PrinterSetup(onBack = { navController.popBackStack() }) }
+            // Settings (T-071), above the search home on the Search tab.
+            composable<SettingsRoute> {
+                settingsScreen(
+                    dropUnlessResumed { navController.navigate(PrinterSetupRoute) },
+                    dropUnlessResumed { navController.navigateToTopLevel(TopLevelDestination.Waiting) },
+                    dropUnlessResumed { navController.popBackStack() },
+                )
+            }
         }
     }
 }
@@ -173,8 +197,13 @@ private fun NavDestination?.isOn(destination: TopLevelDestination): Boolean =
 private val TopLevelDestination.subScreens: List<KClass<*>>
     get() =
         when (this) {
-            TopLevelDestination.Search -> listOf(CustomerRoute::class, CollectRoute::class, CollectDoneRoute::class)
-            TopLevelDestination.Today, TopLevelDestination.Waiting -> emptyList()
+            TopLevelDestination.Search -> {
+                listOf(CustomerRoute::class, CollectRoute::class, CollectDoneRoute::class, SettingsRoute::class)
+            }
+
+            TopLevelDestination.Today, TopLevelDestination.Waiting -> {
+                emptyList()
+            }
         }
 
 /** Bottom-bar navigation: one copy of each tab, state kept when switching back. */

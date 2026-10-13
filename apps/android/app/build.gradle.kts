@@ -15,12 +15,19 @@ fun apiBaseUrl(
     default: String,
 ): String = providers.gradleProperty("cb.apiBaseUrl.$flavor").getOrElse(default)
 
-/** Sentry DSN from `-Pcb.sentryDsn=…` or the SENTRY_DSN environment variable. Empty = Sentry stays off. */
-val sentryDsn: String =
-    providers
-        .gradleProperty("cb.sentryDsn")
-        .orElse(providers.environmentVariable("SENTRY_DSN"))
-        .getOrElse("")
+/**
+ * Sentry DSN of a flavour (T-071): `-Pcb.sentryDsn.<flavour>=…` or `SENTRY_DSN_<FLAVOUR>`; staging and
+ * prod fall back to `-Pcb.sentryDsn` / `SENTRY_DSN`. dev never falls back, so local builds and the unit
+ * tests (devDebug) have no DSN. Empty = Sentry stays off.
+ */
+fun sentryDsn(flavor: String): String {
+    val own =
+        providers
+            .gradleProperty("cb.sentryDsn.$flavor")
+            .orElse(providers.environmentVariable("SENTRY_DSN_${flavor.uppercase()}"))
+    val shared = providers.gradleProperty("cb.sentryDsn").orElse(providers.environmentVariable("SENTRY_DSN"))
+    return (if (flavor == "dev") own else own.orElse(shared)).getOrElse("")
+}
 
 android {
     namespace = "com.cablebilling.lineman"
@@ -36,13 +43,13 @@ android {
         versionName = "0.1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        buildConfigField("String", "SENTRY_DSN", "\"$sentryDsn\"")
     }
 
     flavorDimensions += "env"
     productFlavors {
         create("dev") {
             dimension = "env"
+            buildConfigField("String", "SENTRY_DSN", "\"${sentryDsn("dev")}\"")
             applicationIdSuffix = ".dev"
             versionNameSuffix = "-dev"
             // Local Next.js dev server as seen from the Android emulator (PLAN §17 "Local").
@@ -54,6 +61,7 @@ android {
         }
         create("staging") {
             dimension = "env"
+            buildConfigField("String", "SENTRY_DSN", "\"${sentryDsn("staging")}\"")
             applicationIdSuffix = ".staging"
             versionNameSuffix = "-staging"
             // TODO(H-02): real staging domain.
@@ -65,6 +73,7 @@ android {
         }
         create("prod") {
             dimension = "env"
+            buildConfigField("String", "SENTRY_DSN", "\"${sentryDsn("prod")}\"")
             // TODO(H-02): real production domain.
             buildConfigField(
                 "String",

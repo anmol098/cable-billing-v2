@@ -288,6 +288,14 @@ export const ICON_NODES = {
     ["path", { d: "m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7" }],
     ["rect", { x: "2", y: "4", width: "20", height: "16", rx: "2" }],
   ],
+  // Lucide "share-2"
+  "share": [
+    ["circle", { cx: "18", cy: "5", r: "3" }],
+    ["circle", { cx: "6", cy: "12", r: "3" }],
+    ["circle", { cx: "18", cy: "19", r: "3" }],
+    ["line", { x1: "8.59", x2: "15.42", y1: "13.51", y2: "17.49" }],
+    ["line", { x1: "15.41", x2: "8.59", y1: "6.51", y2: "10.49" }],
+  ],
 } as const;
 
 /** A semantic icon name from icons.json. */

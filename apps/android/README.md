@@ -37,7 +37,9 @@ The full local check (same as tasks/README.md §3.5):
 | `prod` | `com.cablebilling.lineman` | `https://app.cablebilling.example/api/mobile/v1/` (placeholder until H-02) |
 
 Override a URL with `-Pcb.apiBaseUrl.<flavour>=…` (e.g. a phone on the same Wi-Fi as your laptop).
-Sentry is off unless a DSN is given with `-Pcb.sentryDsn=…` or `SENTRY_DSN`.
+Sentry is off unless the flavour has a DSN: `-Pcb.sentryDsn.<flavour>=…` or `SENTRY_DSN_<FLAVOUR>`
+(staging and prod also take the shared `-Pcb.sentryDsn` / `SENTRY_DSN`; dev never does, so local builds and
+unit tests send nothing). It lands in `BuildConfig.SENTRY_DSN`.
 
 ## Layout
 
@@ -52,7 +54,7 @@ app/                      the app: feature packages under com.cablebilling.linem
   ui/                     app shell (CableApp: bottom bar + NavHost), navigation
   di/                     Hilt modules (network, storage)
   locale/                 AppLanguage (Hindi default, per-app language)
-  diagnostics/            CrashReporting (Sentry)
+  diagnostics/            diagnostic log (no personal data), app report, CrashReporting (Sentry) + scrubbing
   schemas/                Room exported schemas (committed; one JSON per database version)
 core/designsystem/        GENERATED Tokens.kt + ic_cb_* icons, CableTheme, fonts, components
                           (component/), Rupees formatting (money/), Speaker (voice/)
@@ -135,6 +137,28 @@ Generated, never edited by hand: `core/designsystem/.../generated/Tokens.kt` (`p
   anything asks for a roster pull (`RosterSyncScheduler.requestNow()`).
 - `feature/waiting`: the Waiting tab: problems first (Call office), payments on the phone, another
   lineman's held payments (flagged, Call office), last push status in honest words, "Try now".
+
+## Settings, diagnostics and crash reporting (T-071)
+
+- `feature/settings`: `SettingsRoute` opened by the small gear (`SettingsButton`) at the end of the search
+  home's query row; it sits on the Search tab's stack. Language हिंदी / English (`AppLanguage.set`, kept by
+  the per-app language API), voice on/off (`VoiceToggle` on the shared `Speaker`), printer name +
+  "Set up printer" (`PrinterSetupRoute`), sign out, app version, "Share app report".
+- **Sign-out** is refused while the signed-in lineman has payments on the phone
+  (`PaymentDao.oldestSavedOnPhoneFor(userId, 1)`; another lineman's held payments and refused ones do not
+  block it). The screen says how many, that they are safe, and offers "Try now" and "Open Waiting"; the
+  check runs again at "Yes, sign out". Sign-out never deletes a payment (`SignOutKeepsPaymentsTest`).
+- `diagnostics/DiagnosticLog`: a ring buffer on disk (`noBackupFilesDir/diagnostics`, 64 KiB cap, two
+  files) of `snake_case` events with codes and counts. Every line goes through `PiiScrubber`; exceptions
+  are logged as types and stack frames only (never messages). `DiagnosticsRecorder` writes app start,
+  session changes, payment-push results and crashes. Write your own events with
+  `log.info("event_name", "key=value …")`, never names, phone numbers, amounts or tokens.
+- "Share app report" opens the share sheet with `DiagnosticReport` (app, phone model, queue counts, the
+  log) as plain text. The app only knows the sheet was opened, never that anything was sent.
+- `CrashReporting` + `SentryPrivacy`: Sentry with `sendDefaultPii = false`, no screenshots or view
+  hierarchy, no tracing; `beforeSend` / `beforeBreadcrumb` scrub messages, exception values, breadcrumbs,
+  extras and tags and drop the request, server name, device name and all user fields but Sentry's random
+  install id. Never started under Robolectric.
 
 ## Design-system components
 

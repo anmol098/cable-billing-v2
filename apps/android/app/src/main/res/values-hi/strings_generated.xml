@@ -244,6 +244,36 @@
         <item quantity="other">%1$d मिनट पहले अपडेट हुआ</item>
     </plurals>
     <string name="mobile_search_updated_now">अभी अपडेट हुआ</string>
+    <!-- %1$s = name -->
+    <string name="mobile_settings_account_signed_in">लॉग इन: %1$s</string>
+    <string name="mobile_settings_diagnostics_chooser">ऐप रिपोर्ट शेयर करें</string>
+    <string name="mobile_settings_diagnostics_explain">ऑफिस या सपोर्ट के लिए ऐप की छोटी रिपोर्ट। इसमें ग्राहक के नाम, फ़ोन नंबर या रकम नहीं हैं।</string>
+    <string name="mobile_settings_diagnostics_share">ऐप रिपोर्ट शेयर करें</string>
+    <string name="mobile_settings_diagnostics_subject">केबल बिलिंग ऐप रिपोर्ट</string>
+    <string name="mobile_settings_diagnostics_title">मदद के लिए</string>
+    <string name="mobile_settings_language">भाषा</string>
+    <string name="mobile_settings_open">सेटिंग</string>
+    <string name="mobile_settings_printer_none">अभी कोई प्रिंटर नहीं</string>
+    <string name="mobile_settings_printer_set_up">प्रिंटर लगाएँ</string>
+    <string name="mobile_settings_printer_title">प्रिंटर</string>
+    <!-- %1$d = count -->
+    <plurals name="mobile_settings_sign_out_blocked_count">
+        <item quantity="one">%1$d पेमेंट अभी फ़ोन में है। पहले इसे ऑफिस पहुँचना है।</item>
+        <item quantity="other">%1$d पेमेंट अभी फ़ोन में हैं। पहले इन्हें ऑफिस पहुँचना है।</item>
+    </plurals>
+    <string name="mobile_settings_sign_out_blocked_safe">पेमेंट सुरक्षित हैं। लॉग आउट से ये कभी नहीं मिटते।</string>
+    <string name="mobile_settings_sign_out_blocked_title">अभी लॉग आउट नहीं हो सकता</string>
+    <string name="mobile_settings_sign_out_button">लॉग आउट करें</string>
+    <string name="mobile_settings_sign_out_confirm_body">फिर से लॉग इन करने के लिए यूज़र नेम और पासवर्ड चाहिए।</string>
+    <string name="mobile_settings_sign_out_confirm_title">इस फ़ोन से लॉग आउट करें?</string>
+    <string name="mobile_settings_sign_out_confirm_yes">हाँ, लॉग आउट करें</string>
+    <string name="mobile_settings_sign_out_now_possible">आपके सब पेमेंट ऑफिस पहुँच गए। अब लॉग आउट कर सकते हैं।</string>
+    <string name="mobile_settings_sign_out_open_waiting">इंतज़ार में देखें</string>
+    <string name="mobile_settings_sign_out_try_now">अभी भेजें</string>
+    <string name="mobile_settings_title">सेटिंग</string>
+    <!-- %1$s = version -->
+    <string name="mobile_settings_version">ऐप वर्ज़न %1$s</string>
+    <string name="mobile_settings_voice">आवाज़</string>
     <string name="mobile_shell_nav_search">खोजें</string>
     <string name="mobile_shell_nav_today">आज</string>
     <string name="mobile_shell_nav_waiting">इंतज़ार में</string>

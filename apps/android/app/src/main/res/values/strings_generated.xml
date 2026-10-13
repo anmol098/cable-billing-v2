@@ -244,6 +244,36 @@
         <item quantity="other">Updated %1$d min ago</item>
     </plurals>
     <string name="mobile_search_updated_now">Updated just now</string>
+    <!-- %1$s = name -->
+    <string name="mobile_settings_account_signed_in">Signed in: %1$s</string>
+    <string name="mobile_settings_diagnostics_chooser">Share app report</string>
+    <string name="mobile_settings_diagnostics_explain">A short app report for the office or support. It has no customer names, phone numbers or amounts.</string>
+    <string name="mobile_settings_diagnostics_share">Share app report</string>
+    <string name="mobile_settings_diagnostics_subject">Cable Billing app report</string>
+    <string name="mobile_settings_diagnostics_title">For support</string>
+    <string name="mobile_settings_language">Language</string>
+    <string name="mobile_settings_open">Settings</string>
+    <string name="mobile_settings_printer_none">No printer yet</string>
+    <string name="mobile_settings_printer_set_up">Set up printer</string>
+    <string name="mobile_settings_printer_title">Printer</string>
+    <!-- %1$d = count -->
+    <plurals name="mobile_settings_sign_out_blocked_count">
+        <item quantity="one">%1$d payment is still on this phone. It must reach the office first.</item>
+        <item quantity="other">%1$d payments are still on this phone. They must reach the office first.</item>
+    </plurals>
+    <string name="mobile_settings_sign_out_blocked_safe">The payments are safe. Signing out never deletes them.</string>
+    <string name="mobile_settings_sign_out_blocked_title">You cannot sign out yet</string>
+    <string name="mobile_settings_sign_out_button">Sign out</string>
+    <string name="mobile_settings_sign_out_confirm_body">To sign in again you need your user name and password.</string>
+    <string name="mobile_settings_sign_out_confirm_title">Sign out of this phone?</string>
+    <string name="mobile_settings_sign_out_confirm_yes">Yes, sign out</string>
+    <string name="mobile_settings_sign_out_now_possible">All your payments reached the office. You can sign out now.</string>
+    <string name="mobile_settings_sign_out_open_waiting">Open Waiting</string>
+    <string name="mobile_settings_sign_out_try_now">Try now</string>
+    <string name="mobile_settings_title">Settings</string>
+    <!-- %1$s = version -->
+    <string name="mobile_settings_version">App version %1$s</string>
+    <string name="mobile_settings_voice">Voice</string>
     <string name="mobile_shell_nav_search">Search</string>
     <string name="mobile_shell_nav_today">Today</string>
     <string name="mobile_shell_nav_waiting">Waiting</string>
