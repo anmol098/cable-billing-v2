@@ -9,7 +9,10 @@
       "inputs": [
         "$TURBO_DEFAULT$",
         "$TURBO_ROOT$/packages/ui/src/theme.css",
-        "$TURBO_ROOT$/apps/android/core/designsystem/src/main/java/com/cablebilling/designsystem/generated/**"
+        "$TURBO_ROOT$/apps/android/core/designsystem/src/main/java/com/cablebilling/designsystem/generated/**",
+        "$TURBO_ROOT$/packages/ui/src/icons/icons.generated.ts",
+        "$TURBO_ROOT$/packages/ui/src/icons/LICENSE-lucide.txt",
+        "$TURBO_ROOT$/apps/android/core/designsystem/src/main/res/drawable/ic_cb_*.xml"
       ]
     }
   }
