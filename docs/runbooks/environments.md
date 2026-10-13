@@ -74,6 +74,7 @@ value per environment, never shared between production and anything else.
 | `RECEIPT_BASE_URL` | unset | unset | optional | optional (defaults to `APP_BASE_URL`) | a short domain later, if any |
 | `RESEND_API_KEY` | optional | optional (non-prod key) | non-prod key | **required** (prod key) | Resend → API Keys |
 | `EMAIL_FROM` | sandbox sender | sandbox or test domain | verified domain | **required**, verified domain | Resend → Domains |
+| `EMAIL_OUTBOX_DIR` | e2e tests only (a temp folder) | **never** (refused) | **never** (refused) | **never** (refused) | Playwright config sets it for `next start` (T-027) |
 | `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | test key | test key | staging widget | **required**, prod widget | Cloudflare → Turnstile |
 | `TURNSTILE_SECRET_KEY` | test key | test key | staging widget | **required**, prod widget | Cloudflare → Turnstile |
 | `UPSTASH_REDIS_REST_URL` | unset (in-memory) | non-prod DB | non-prod DB | **required**, prod DB | Upstash → database → REST |

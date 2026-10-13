@@ -39,12 +39,21 @@ export function sentryDsnParts(dsn: string | undefined): SentryDsnParts | undefi
   };
 }
 
+/** Cloudflare Turnstile (sign-up bot check, T-027): its script and its challenge iframe. */
+export const TURNSTILE_ORIGIN = "https://challenges.cloudflare.com";
+
 export function contentSecurityPolicy({ isDev, sentryDsn }: SecurityHeaderOptions): string {
   const sentry = sentryDsnParts(sentryDsn);
   const directives: Record<string, string[]> = {
     "default-src": ["'self'"],
     // Next.js inlines bootstrap scripts; nonces can replace 'unsafe-inline' once pages need it.
-    "script-src": ["'self'", "'unsafe-inline'", ...(isDev ? ["'unsafe-eval'"] : [])],
+    "script-src": [
+      "'self'",
+      "'unsafe-inline'",
+      ...(isDev ? ["'unsafe-eval'"] : []),
+      TURNSTILE_ORIGIN,
+    ],
+    "frame-src": [TURNSTILE_ORIGIN],
     "style-src": ["'self'", "'unsafe-inline'"],
     "img-src": ["'self'", "data:", "blob:"],
     "font-src": ["'self'"],

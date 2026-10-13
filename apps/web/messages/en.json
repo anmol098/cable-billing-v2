@@ -518,6 +518,71 @@
     "section_pages": "Pages in {section}",
     "skip_to_content": "Skip to main content"
   },
+  "signup": {
+    "email": {
+      "existing_ignore": "Was it not you? Ignore this email. Nothing changed.",
+      "existing_intro": "Someone tried to create a Cable Billing account with this email, but it already has one.",
+      "existing_reset": "Forgot your password? Get a new one here:",
+      "existing_sign_in": "Sign in here:",
+      "existing_subject": "You already have a Cable Billing account",
+      "verify_action": "Open this link to start your 30 free days. It works for {hours, plural, one {# hour} other {# hours}}:",
+      "verify_ignore": "Did you not create it? Ignore this email. Nothing will happen.",
+      "verify_intro": "Hello! An account for Cable Billing was created with this email.",
+      "verify_subject": "Confirm your email for Cable Billing"
+    },
+    "error": {
+      "email_failed": "We could not send the email. Try again in a minute.",
+      "email_invalid": "Check the email. It looks like name@example.com.",
+      "fix_fields": "Fix the boxes marked in red.",
+      "mobile_invalid": "Type a 10-digit mobile number.",
+      "password_too_long": "Use at most 128 letters, numbers or signs.",
+      "password_too_short": "Use at least 8 letters, numbers or signs.",
+      "person_check_failed": "We could not check that you are a person. Try again.",
+      "rate_limited": "Too many tries. Try again in {minutes, plural, one {# minute} other {# minutes}}.",
+      "required": "Fill this in.",
+      "too_long": "This is too long. Make it shorter.",
+      "unexpected": "Something went wrong. Try again."
+    },
+    "form": {
+      "business_name_hint": "Your cable business, for example Anmol Cable Network.",
+      "business_name_label": "Business name",
+      "description": "30 days free. No card needed.",
+      "email_hint": "We send a link here to check that it is yours.",
+      "email_label": "Email",
+      "have_account": "Already have an account?",
+      "mobile_hint": "You can sign in with this number too.",
+      "mobile_label": "Mobile no.",
+      "owner_name_label": "Your name",
+      "password_hint": "At least 8 letters, numbers or signs.",
+      "password_label": "Password",
+      "person_check_label": "Check that you are a person",
+      "sign_in": "Sign in",
+      "submit": "Start 30 days free",
+      "submitting": "Please wait…",
+      "title": "Create your account"
+    },
+    "sent": {
+      "body": "We sent a link to {email}. Open it to start. The link works for 24 hours.",
+      "different_email": "Use a different email",
+      "not_there": "Not there? Look in the Spam folder, or create the account again.",
+      "title": "Check your email"
+    },
+    "verify": {
+      "account_exists": "This email already has an account. Sign in.",
+      "business_label": "Business",
+      "create_again": "Create account again",
+      "description": "Your email is confirmed. Type your password to start your 30 free days.",
+      "email_label": "Email",
+      "invalid_body": "It is old or was already used. If you already started, sign in. If not, create the account again.",
+      "invalid_title": "This link does not work",
+      "password_label": "Password (the one you chose)",
+      "sign_in": "Sign in",
+      "submit": "Start",
+      "submitting": "Starting…",
+      "title": "Start Cable Billing",
+      "wrong_password": "Wrong password. Type the password you chose when you created the account."
+    }
+  },
   "ui": {
     "help_about": "Help: {topic}",
     "language": "Language",

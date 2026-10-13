@@ -1,3 +1,5 @@
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { defineConfig, devices } from "@playwright/test";
 
 /**
@@ -11,6 +13,14 @@ import { defineConfig, devices } from "@playwright/test";
 const PORT = Number(process.env.E2E_PORT ?? 3100);
 const externalBaseUrl = process.env.E2E_BASE_URL;
 const executablePath = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH || undefined;
+
+/**
+ * Where the local server writes the emails it would send (`EMAIL_OUTBOX_DIR`, local only), so the
+ * sign-up test can read its link (T-027). Set here so the server and the tests agree on it.
+ */
+if (!externalBaseUrl) {
+  process.env.EMAIL_OUTBOX_DIR ??= join(tmpdir(), `cb-e2e-outbox-${PORT}`);
+}
 
 export default defineConfig({
   testDir: "./e2e",
@@ -32,6 +42,7 @@ export default defineConfig({
     ? undefined
     : {
         command: `pnpm exec next start --port ${PORT}`,
+        env: { ...(process.env as Record<string, string>) },
         url: `http://localhost:${PORT}/api/health`,
         reuseExistingServer: !process.env.CI,
         timeout: 60_000,

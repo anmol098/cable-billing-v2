@@ -1,0 +1,65 @@
+{
+  "form": {
+    "title": "Create your account",
+    "description": "30 days free. No card needed.",
+    "business_name_label": "Business name",
+    "business_name_hint": "Your cable business, for example Anmol Cable Network.",
+    "owner_name_label": "Your name",
+    "mobile_label": "Mobile no.",
+    "mobile_hint": "You can sign in with this number too.",
+    "email_label": "Email",
+    "email_hint": "We send a link here to check that it is yours.",
+    "password_label": "Password",
+    "password_hint": "At least 8 letters, numbers or signs.",
+    "person_check_label": "Check that you are a person",
+    "submit": "Start 30 days free",
+    "submitting": "Please wait…",
+    "have_account": "Already have an account?",
+    "sign_in": "Sign in"
+  },
+  "error": {
+    "fix_fields": "Fix the boxes marked in red.",
+    "required": "Fill this in.",
+    "too_long": "This is too long. Make it shorter.",
+    "mobile_invalid": "Type a 10-digit mobile number.",
+    "email_invalid": "Check the email. It looks like name@example.com.",
+    "password_too_short": "Use at least 8 letters, numbers or signs.",
+    "password_too_long": "Use at most 128 letters, numbers or signs.",
+    "rate_limited": "Too many tries. Try again in {minutes, plural, one {# minute} other {# minutes}}.",
+    "person_check_failed": "We could not check that you are a person. Try again.",
+    "email_failed": "We could not send the email. Try again in a minute.",
+    "unexpected": "Something went wrong. Try again."
+  },
+  "sent": {
+    "title": "Check your email",
+    "body": "We sent a link to {email}. Open it to start. The link works for 24 hours.",
+    "not_there": "Not there? Look in the Spam folder, or create the account again.",
+    "different_email": "Use a different email"
+  },
+  "verify": {
+    "title": "Start Cable Billing",
+    "description": "Your email is confirmed. Type your password to start your 30 free days.",
+    "business_label": "Business",
+    "email_label": "Email",
+    "password_label": "Password (the one you chose)",
+    "submit": "Start",
+    "submitting": "Starting…",
+    "wrong_password": "Wrong password. Type the password you chose when you created the account.",
+    "account_exists": "This email already has an account. Sign in.",
+    "invalid_title": "This link does not work",
+    "invalid_body": "It is old or was already used. If you already started, sign in. If not, create the account again.",
+    "sign_in": "Sign in",
+    "create_again": "Create account again"
+  },
+  "email": {
+    "verify_subject": "Confirm your email for Cable Billing",
+    "verify_intro": "Hello! An account for Cable Billing was created with this email.",
+    "verify_action": "Open this link to start your 30 free days. It works for {hours, plural, one {# hour} other {# hours}}:",
+    "verify_ignore": "Did you not create it? Ignore this email. Nothing will happen.",
+    "existing_subject": "You already have a Cable Billing account",
+    "existing_intro": "Someone tried to create a Cable Billing account with this email, but it already has one.",
+    "existing_sign_in": "Sign in here:",
+    "existing_reset": "Forgot your password? Get a new one here:",
+    "existing_ignore": "Was it not you? Ignore this email. Nothing changed."
+  }
+}
