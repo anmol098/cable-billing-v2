@@ -1,0 +1,43 @@
+{
+  "name": "@cb/web",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Next.js web app: operator dashboard, sign-up, admin, mobile API, cron and webhooks.",
+  "type": "module",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "next typegen && tsc --noEmit",
+    "test": "vitest run",
+    "test:e2e": "playwright test"
+  },
+  "dependencies": {
+    "@cb/i18n": "workspace:*",
+    "@cb/ui": "workspace:*",
+    "@fontsource-variable/inter": "^5.3.0",
+    "@fontsource-variable/noto-sans-devanagari": "^5.3.0",
+    "@sentry/nextjs": "^11.6.0",
+    "next": "^16.4.0",
+    "next-intl": "^4.14.9",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@cb/config": "workspace:*",
+    "@playwright/test": "^1.64.0",
+    "@tailwindcss/postcss": "catalog:",
+    "@testing-library/dom": "^10.4.2",
+    "@testing-library/jest-dom": "^7.0.1",
+    "@testing-library/react": "^16.3.3",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "@vitejs/plugin-react": "^6.1.2",
+    "jsdom": "^30.1.2",
+    "tailwindcss": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

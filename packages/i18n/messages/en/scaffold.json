@@ -1,0 +1,12 @@
+{
+  "home": {
+    "placeholder": "This page is being built.",
+    "language": "Language"
+  },
+  "type_sample": {
+    "title": "Font and number check",
+    "hindi": "Hindi",
+    "english": "English",
+    "amounts": "Amounts"
+  }
+}

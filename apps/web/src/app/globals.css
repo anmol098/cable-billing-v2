@@ -1,0 +1,9 @@
+/*
+ * The only stylesheet entry. Design tokens (colours, type, radius, borders, spacing, sizes) come
+ * from the generated `@cb/ui/theme.css`, which also imports Tailwind. Do not add colours, font
+ * stacks or sizes here: change packages/design-tokens/tokens.json instead.
+ */
+@import "@cb/ui/theme.css";
+
+/* Tailwind scans apps/web automatically; shared components live in packages/ui. */
+@source "../../../../packages/ui/src";

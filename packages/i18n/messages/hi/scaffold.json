@@ -1,0 +1,20 @@
+{
+  "_review": [
+    "home.placeholder",
+    "home.language",
+    "type_sample.title",
+    "type_sample.hindi",
+    "type_sample.english",
+    "type_sample.amounts"
+  ],
+  "home": {
+    "placeholder": "यह पेज अभी बन रहा है।",
+    "language": "भाषा"
+  },
+  "type_sample": {
+    "title": "अक्षर और नंबर की जाँच",
+    "hindi": "हिंदी",
+    "english": "अंग्रेज़ी",
+    "amounts": "रकम"
+  }
+}
