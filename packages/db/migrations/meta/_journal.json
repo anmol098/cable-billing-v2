@@ -22,6 +22,27 @@
       "when": 1791893631945,
       "tag": "0002_tenancy_identity_functions",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1791894657088,
+      "tag": "0003_customers_connections_extensions",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1791894658076,
+      "tag": "0004_customers_plans_connections",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1791894658946,
+      "tag": "0005_customers_plans_connections_constraints",
+      "breakpoints": true
     }
   ]
 }

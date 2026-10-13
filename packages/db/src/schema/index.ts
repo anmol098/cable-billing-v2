@@ -5,6 +5,9 @@
  */
 export * from "./audit";
 export * from "./auth";
+export * from "./connections";
 export * from "./counters";
+export * from "./customers";
+export * from "./plans";
 export * from "./subscriptions";
 export * from "./tenancy";
