@@ -193,6 +193,22 @@ the office has the payment.
 | Contact us | हमसे बात करें | Support email / phone page | email, phone | Support, संपर्क करें |
 | Draft | ड्राफ़्ट | Text not yet checked by a lawyer | clock, `semantic.pending` (amber) | Beta, प्रारूप |
 
+## Cash handover words (web Linemen page)
+
+| English | हिंदी | Means | Icon / colour | Not this |
+|---|---|---|---|---|
+| Cash expected | कितना कैश होना चाहिए | Cash payments the office has for the lineman's day (UPI and cancelled payments not counted) | banknote, `semantic.cash` | Expected collection, System total |
+| Cash handed over | कितना कैश दिया | The cash the lineman gave the office | handshake | Deposit, Settlement |
+| ₹50 short / ₹50 extra | ₹50 कम / ₹50 ज़्यादा | Handed over minus expected | `semantic.danger` (red) | Discrepancy, Variance |
+| Cash matches | कैश पूरा है | Handed over = expected | `semantic.success` (green) | Reconciled, Balanced |
+| Not handed over | कैश नहीं दिया | No handover for the day yet | clock, `semantic.pending` | Open, Pending |
+| Waiting for check | जाँच बाकी | Handed over; the office has not decided | handshake, `semantic.pending` | Submitted, Pending review |
+| Accept / Accepted | मंज़ूर करें / मंज़ूर | The office takes the cash; the day is closed | circle-check, `semantic.success` | Approve, Reconcile |
+| Send back / Sent back | वापस भेजें / वापस भेजा | The office returns the handover with a note; the lineman hands over again | undo, `semantic.danger` | Reject, Return |
+| Phone last online | फ़ोन आख़िरी बार ऑनलाइन | When the lineman's phone last reached the office | phone | Last sync, Last seen |
+| Cancelled (a payment) | रद्द | A payment the owner undid; not in the totals | `semantic.danger` | Reversed, Void |
+| Switched off (a lineman) | बंद | A deactivated lineman's account | — | Disabled, Inactive |
+
 ## Words we never show users
 
 Invoice, Ledger, Allocation, Adjustment, Reversal, Tenant, Sync / Synced / Pending sync,

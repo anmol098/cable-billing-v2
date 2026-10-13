@@ -243,6 +243,115 @@
       "permanent": "दोबारा चलाने से ठीक नहीं होगा"
     }
   },
+  "linemen": {
+    "add_linemen": "लाइनमैन जोड़ें",
+    "card": {
+      "list_label": "लाइनमैन",
+      "switched_off": "बंद"
+    },
+    "changed": "कैश देने के बाद कुल बदल गया: तब ₹{before}, अब ₹{now}।",
+    "date_time": "{date}, {time}",
+    "day": {
+      "label": "दिन",
+      "next": "अगला दिन",
+      "previous": "पिछला दिन",
+      "show": "दिखाएँ",
+      "today": "आज",
+      "today_date": "आज, {date}"
+    },
+    "day_title": "{name}: {date}",
+    "difference": {
+      "extra": "₹{amount} ज़्यादा",
+      "match": "कैश पूरा है",
+      "short": "₹{amount} कम"
+    },
+    "empty": "अभी कोई लाइनमैन नहीं है। सेटिंग में लाइनमैन जोड़ें।",
+    "page_description": "हर लाइनमैन ने कितना नकद और UPI लिया, और ऑफिस को कितना कैश दिया।",
+    "phone": {
+      "last_online": "फ़ोन आख़िरी बार ऑनलाइन {when}",
+      "none": "किसी फ़ोन में लॉग इन नहीं",
+      "not_seen": "{when} के बाद फ़ोन ऑनलाइन नहीं आया। उसके बाद के पेमेंट अभी फ़ोन में हो सकते हैं।",
+      "unsynced": "{count, plural, one {कैश देते समय # पेमेंट (₹{amount} नकद) फ़ोन में बाकी था।} other {कैश देते समय # पेमेंट (₹{amount} नकद) फ़ोन में बाकी थे।}}"
+    },
+    "reason": {
+      "extra": "कैश ज़्यादा है",
+      "label": "लाइनमैन की वजह",
+      "other": "दूसरी वजह",
+      "pending_sync": "पेमेंट फ़ोन में बाकी",
+      "short": "कैश कम है"
+    },
+    "review": {
+      "accept": "मंज़ूर करें",
+      "accept_summary": "{name} ने {handed} दिए। होने चाहिए थे {expected}। {difference}। मंज़ूर करने के बाद यह दिन बंद हो जाएगा।",
+      "accept_title": "यह कैश मंज़ूर करें?",
+      "accepted_toast": "कैश मंज़ूर हो गया",
+      "accepting": "मंज़ूर हो रहा है…",
+      "back": "सभी लाइनमैन",
+      "cancelled": "रद्द",
+      "column": {
+        "amount": "रकम",
+        "customer": "ग्राहक",
+        "method": "नकद / UPI",
+        "receipt": "रसीद नं.",
+        "time": "समय"
+      },
+      "difference": "फ़र्क",
+      "error": {
+        "already_accepted": "यह कैश पहले ही मंज़ूर हो चुका है।",
+        "already_returned": "यह कैश पहले ही वापस भेजा जा चुका है।",
+        "generic": "कुछ गड़बड़ हो गई। फिर से करें।",
+        "not_submitted": "लाइनमैन ने अभी कैश नहीं दिया।",
+        "read_only": "सिर्फ़ देख सकते हैं: कैश मंज़ूर करने या वापस भेजने के लिए ऐप का पैसा भरें।",
+        "resubmitted": "लाइनमैन ने फिर से कैश दिया है। नए नंबर देखें।"
+      },
+      "expected": "कितना कैश होना चाहिए",
+      "expected_note": "ऑफिस के पास पहुँचे नकद पेमेंट। UPI और रद्द पेमेंट नहीं गिने जाते।",
+      "expected_then": "कैश देते समय कितना होना चाहिए था",
+      "handed_over": "कितना कैश दिया",
+      "handed_over_at": "{when} को कैश दिया",
+      "handover_title": "ऑफिस को कैश",
+      "history": {
+        "accepted": "{name} ने मंज़ूर किया",
+        "returned": "{name} ने वापस भेजा",
+        "submitted": "{name} ने {handed} दिए (होने चाहिए थे {expected})"
+      },
+      "history_title": "क्या हुआ",
+      "lineman_note": "लाइनमैन का नोट",
+      "no_payments": "इस दिन कोई पेमेंट नहीं।",
+      "not_handed_over": "अभी कैश नहीं दिया।",
+      "office_note": "ऑफिस का नोट: {note}",
+      "payments": "पेमेंट",
+      "payments_caption": "दिन के पेमेंट",
+      "payments_title": "दिन के पेमेंट",
+      "returned_toast": "लाइनमैन को वापस भेजा",
+      "reviewed_accepted": "{name} ने {when} को मंज़ूर किया",
+      "reviewed_returned": "{name} ने {when} को वापस भेजा",
+      "send_back": "वापस भेजें",
+      "send_back_note_label": "लाइनमैन क्या ठीक करे?",
+      "send_back_note_required": "लिखें कि लाइनमैन क्या ठीक करे।",
+      "send_back_summary": "{name} को फ़ोन पर आपका नोट दिखेगा और वह फिर से कैश दे सकता है।",
+      "send_back_title": "यह कैश वापस भेजें?",
+      "sending_back": "वापस भेज रहे हैं…",
+      "to_check": "जाँचना है",
+      "upi": "UPI लिया"
+    },
+    "status": {
+      "accepted": "मंज़ूर",
+      "open": "कैश नहीं दिया",
+      "returned": "वापस भेजा",
+      "submitted": "जाँच बाकी"
+    },
+    "time_am": "{time} AM",
+    "time_pm": "{time} PM",
+    "totals": {
+      "cash": "नकद",
+      "label": "दिन का कुल",
+      "none_waiting": "कुछ जाँचना बाकी नहीं",
+      "upi": "UPI",
+      "upi_note": "UPI ऑफिस को नहीं दिया जाता: वह पहले से आपके खाते में है।",
+      "waiting": "{count, plural, one {# कैश जाँचना बाकी} other {# कैश जाँचने बाकी}}"
+    }
+  },
   "marketing": {
     "contact": {
       "call": "{phone} पर फ़ोन करें",

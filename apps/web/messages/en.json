@@ -243,6 +243,115 @@
       "permanent": "trying again cannot fix it"
     }
   },
+  "linemen": {
+    "add_linemen": "Add linemen",
+    "card": {
+      "list_label": "Linemen",
+      "switched_off": "Switched off"
+    },
+    "changed": "The cash total changed after the handover: ₹{before} then, ₹{now} now.",
+    "date_time": "{date}, {time}",
+    "day": {
+      "label": "Day",
+      "next": "Next day",
+      "previous": "Previous day",
+      "show": "Show",
+      "today": "Today",
+      "today_date": "Today, {date}"
+    },
+    "day_title": "{name}: {date}",
+    "difference": {
+      "extra": "₹{amount} extra",
+      "match": "Cash matches",
+      "short": "₹{amount} short"
+    },
+    "empty": "No linemen yet. Add linemen in Settings.",
+    "page_description": "Cash and UPI each lineman collected, and the cash they handed over.",
+    "phone": {
+      "last_online": "Phone last online {when}",
+      "none": "No phone signed in",
+      "not_seen": "Phone not online since {when}. Payments after that may still be on the phone.",
+      "unsynced": "{count, plural, one {When handing over, # payment (₹{amount} cash) was still on the phone.} other {When handing over, # payments (₹{amount} cash) were still on the phone.}}"
+    },
+    "reason": {
+      "extra": "More cash",
+      "label": "Lineman's reason",
+      "other": "Other",
+      "pending_sync": "Payments still on phone",
+      "short": "Less cash"
+    },
+    "review": {
+      "accept": "Accept",
+      "accept_summary": "{name} gave {handed}. Expected {expected}. {difference}. After you accept, this day is closed.",
+      "accept_title": "Accept this cash?",
+      "accepted_toast": "Cash accepted",
+      "accepting": "Accepting…",
+      "back": "All linemen",
+      "cancelled": "Cancelled",
+      "column": {
+        "amount": "Amount",
+        "customer": "Customer",
+        "method": "Cash / UPI",
+        "receipt": "Receipt no.",
+        "time": "Time"
+      },
+      "difference": "Difference",
+      "error": {
+        "already_accepted": "This handover was already accepted.",
+        "already_returned": "This handover was already sent back.",
+        "generic": "Something went wrong. Try again.",
+        "not_submitted": "The lineman has not handed over cash yet.",
+        "read_only": "View only: pay for the app to accept or send back handovers.",
+        "resubmitted": "The lineman handed over again. Check the new numbers."
+      },
+      "expected": "Cash expected",
+      "expected_note": "Cash payments the office has. UPI and cancelled payments are not counted.",
+      "expected_then": "Cash expected at handover",
+      "handed_over": "Cash handed over",
+      "handed_over_at": "Handed over at {when}",
+      "handover_title": "Cash handover",
+      "history": {
+        "accepted": "{name} accepted",
+        "returned": "{name} sent it back",
+        "submitted": "{name} handed over {handed} (expected {expected})"
+      },
+      "history_title": "What happened",
+      "lineman_note": "Lineman's note",
+      "no_payments": "No payments for this day.",
+      "not_handed_over": "Not handed over yet.",
+      "office_note": "Office note: {note}",
+      "payments": "Payments",
+      "payments_caption": "Payments of the day",
+      "payments_title": "Payments of the day",
+      "returned_toast": "Sent back to the lineman",
+      "reviewed_accepted": "Accepted by {name} at {when}",
+      "reviewed_returned": "Sent back by {name} at {when}",
+      "send_back": "Send back",
+      "send_back_note_label": "What should the lineman fix?",
+      "send_back_note_required": "Write what the lineman should fix.",
+      "send_back_summary": "{name} will see your note on the phone and can hand over again.",
+      "send_back_title": "Send this handover back?",
+      "sending_back": "Sending back…",
+      "to_check": "To check",
+      "upi": "UPI collected"
+    },
+    "status": {
+      "accepted": "Accepted",
+      "open": "Not handed over",
+      "returned": "Sent back",
+      "submitted": "Waiting for check"
+    },
+    "time_am": "{time} AM",
+    "time_pm": "{time} PM",
+    "totals": {
+      "cash": "Cash",
+      "label": "Totals for the day",
+      "none_waiting": "No handover to check",
+      "upi": "UPI",
+      "upi_note": "UPI is not handed over: it is already in your account.",
+      "waiting": "{count, plural, one {# handover to check} other {# handovers to check}}"
+    }
+  },
   "marketing": {
     "contact": {
       "call": "Call {phone}",

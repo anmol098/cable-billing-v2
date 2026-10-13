@@ -71,6 +71,20 @@
       "when": 1791903068672,
       "tag": "0009_invariant_checks_append_only",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1791907040652,
+      "tag": "0010_handover_events",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1791907048181,
+      "tag": "0011_handover_events_append_only",
+      "breakpoints": true
     }
   ]
 }
