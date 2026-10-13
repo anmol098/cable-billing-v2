@@ -35,10 +35,13 @@ jobs:
       android: ${{ steps.filter.outputs.android }}
     steps:
       # Pull requests use the API; pushes diff against the commit before the push, which needs git.
+      # Full history: without stored credentials paths-filter cannot fetch the "before" commit of a
+      # private repo itself ("could not read Username"), so it must already be in the checkout.
       - name: Check out
         if: github.event_name != 'pull_request'
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          fetch-depth: 0
           persist-credentials: false
 
       - name: Detect Android-relevant changes
