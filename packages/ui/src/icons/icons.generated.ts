@@ -253,6 +253,36 @@ export const ICON_NODES = {
   "bluetooth": [
     ["path", { d: "m7 7 10 10-5 5V2l5 5L7 17" }],
   ],
+  // Lucide "ellipsis"
+  "more": [
+    ["circle", { cx: "12", cy: "12", r: "1" }],
+    ["circle", { cx: "19", cy: "12", r: "1" }],
+    ["circle", { cx: "5", cy: "12", r: "1" }],
+  ],
+  // Lucide "store"
+  "business": [
+    ["path", { d: "M15 21v-5a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v5" }],
+    ["path", { d: "M17.774 10.31a1.12 1.12 0 0 0-1.549 0 2.5 2.5 0 0 1-3.451 0 1.12 1.12 0 0 0-1.548 0 2.5 2.5 0 0 1-3.452 0 1.12 1.12 0 0 0-1.549 0 2.5 2.5 0 0 1-3.77-3.248l2.889-4.184A2 2 0 0 1 7 2h10a2 2 0 0 1 1.653.873l2.895 4.192a2.5 2.5 0 0 1-3.774 3.244" }],
+    ["path", { d: "M4 10.95V19a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8.05" }],
+  ],
+  // Lucide "users"
+  "team": [
+    ["path", { d: "M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" }],
+    ["path", { d: "M16 3.128a4 4 0 0 1 0 7.744" }],
+    ["path", { d: "M22 21v-2a4 4 0 0 0-3-3.87" }],
+    ["circle", { cx: "9", cy: "7", r: "4" }],
+  ],
+  // Lucide "credit-card"
+  "subscription": [
+    ["rect", { width: "20", height: "14", x: "2", y: "5", rx: "2" }],
+    ["line", { x1: "2", x2: "22", y1: "10", y2: "10" }],
+    ["path", { d: "M6 14h2" }],
+  ],
+  // Lucide "undo-2"
+  "undo": [
+    ["path", { d: "M9 14 4 9l5-5" }],
+    ["path", { d: "M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11" }],
+  ],
 } as const;
 
 /** A semantic icon name from icons.json. */

@@ -37,5 +37,10 @@
   "password": "lock",
   "show": "eye",
   "hide": "eye-off",
-  "bluetooth": "bluetooth"
+  "bluetooth": "bluetooth",
+  "more": "ellipsis",
+  "business": "store",
+  "team": "users",
+  "subscription": "credit-card",
+  "undo": "undo-2"
 }
