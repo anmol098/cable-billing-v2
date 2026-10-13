@@ -28,14 +28,18 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.cablebilling.designsystem.generated.Tokens
 import com.cablebilling.lineman.R
+import com.cablebilling.lineman.feature.collect.CollectDoneRoute
+import com.cablebilling.lineman.feature.collect.CollectDoneScreen
+import com.cablebilling.lineman.feature.collect.CollectScreen
+import com.cablebilling.lineman.feature.collect.navigateToCollectDone
 import com.cablebilling.lineman.feature.customer.CustomerRoute
 import com.cablebilling.lineman.feature.customer.CustomerScreen
 import com.cablebilling.lineman.feature.customer.navigateToCustomer
 import com.cablebilling.lineman.feature.printer.PrinterSetup
 import com.cablebilling.lineman.feature.printer.PrinterSetupRoute
-import com.cablebilling.lineman.feature.queue.WaitingScreen
 import com.cablebilling.lineman.feature.search.SearchScreen
 import com.cablebilling.lineman.feature.today.TodayScreen
+import com.cablebilling.lineman.feature.waiting.WaitingScreen
 import com.cablebilling.lineman.ui.navigation.CollectRoute
 import com.cablebilling.lineman.ui.navigation.SearchRoute
 import com.cablebilling.lineman.ui.navigation.TodayRoute
@@ -50,16 +54,32 @@ typealias SearchHomeSlot = @Composable (onOpenCustomer: (customerId: String) -> 
 typealias CustomerSlot =
     @Composable (customerId: String, onCollect: (customerId: String) -> Unit, onBack: () -> Unit) -> Unit
 
+/** The collect flow (T-066): Amount → Method → Confirm; `onSaved` once the payment is committed on the phone. */
+typealias CollectSlot =
+    @Composable (customerId: String, onSaved: (paymentId: String) -> Unit, onBack: () -> Unit) -> Unit
+
+/** The Done screen of a saved payment (T-066): printer setup, and Done back to the search home. */
+typealias CollectDoneSlot =
+    @Composable (paymentId: String, onPrinterSetup: () -> Unit, onFinish: () -> Unit) -> Unit
+
+/** The Waiting tab (T-066). */
+typealias WaitingSlot = @Composable () -> Unit
+
 /**
  * App shell: the three top-level screens behind a bottom bar (PLAN §11.2). Login (T-063) goes in front.
- * Search → Customer → Collect sit above the search home on the Search tab's stack. [searchHome] and
- * [customerScreen] use Hilt ViewModels; tests that run the shell without Hilt pass their own.
+ * Search → Customer → Collect → Done sit above the search home on the Search tab's stack. The slots
+ * default to the Hilt screens; tests that run the shell without Hilt pass their own.
  */
 @Composable
 fun CableApp(
     navController: NavHostController = rememberNavController(),
     searchHome: SearchHomeSlot = { onOpenCustomer, onOpenWaiting -> SearchScreen(onOpenCustomer, onOpenWaiting) },
     customerScreen: CustomerSlot = { customerId, onCollect, onBack -> CustomerScreen(customerId, onCollect, onBack) },
+    collectScreen: CollectSlot = { customerId, onSaved, onBack -> CollectScreen(customerId, onSaved, onBack) },
+    collectDone: CollectDoneSlot = { paymentId, onPrinterSetup, onFinish ->
+        CollectDoneScreen(paymentId, onPrinterSetup, onFinish)
+    },
+    waitingScreen: WaitingSlot = { WaitingScreen() },
 ) {
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = backStackEntry?.destination
@@ -91,12 +111,24 @@ fun CableApp(
                     dropUnlessResumed { navController.popBackStack() },
                 )
             }
-            // Placeholder until T-066 builds Amount → Method → Confirm → Done from here.
-            composable<CollectRoute> {
-                PlaceholderScreen(title = stringResource(R.string.common_collect), testTag = "screen_collect")
+            // T-066: Amount → Method → (UPI ref) → Confirm in one destination; Save replaces it with Done.
+            composable<CollectRoute> { entry ->
+                collectScreen(
+                    entry.toRoute<CollectRoute>().customerId,
+                    { paymentId -> navController.navigateToCollectDone(paymentId) },
+                    dropUnlessResumed { navController.popBackStack() },
+                )
+            }
+            composable<CollectDoneRoute> { entry ->
+                collectDone(
+                    entry.toRoute<CollectDoneRoute>().paymentId,
+                    dropUnlessResumed { navController.navigate(PrinterSetupRoute) },
+                    // Done: next customer, from the search home.
+                    dropUnlessResumed { navController.popBackStack(SearchRoute, inclusive = false) },
+                )
             }
             composable<TodayRoute> { TodayScreen() }
-            composable<WaitingRoute> { WaitingScreen() }
+            composable<WaitingRoute> { waitingScreen() }
             // Printer setup (T-068): opened from settings (T-071) and the receipt screen (T-069).
             composable<PrinterSetupRoute> { PrinterSetup(onBack = { navController.popBackStack() }) }
         }
@@ -141,7 +173,7 @@ private fun NavDestination?.isOn(destination: TopLevelDestination): Boolean =
 private val TopLevelDestination.subScreens: List<KClass<*>>
     get() =
         when (this) {
-            TopLevelDestination.Search -> listOf(CustomerRoute::class, CollectRoute::class)
+            TopLevelDestination.Search -> listOf(CustomerRoute::class, CollectRoute::class, CollectDoneRoute::class)
             TopLevelDestination.Today, TopLevelDestination.Waiting -> emptyList()
         }
 

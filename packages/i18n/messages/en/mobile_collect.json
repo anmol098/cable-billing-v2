@@ -1,0 +1,46 @@
+{
+  "amount": {
+    "title": "How much money?",
+    "hint": "Type the amount",
+    "due_now": "Due now: {amount}",
+    "chip_due": "Full due {amount}"
+  },
+  "method": {
+    "title": "How did they pay?"
+  },
+  "upi": {
+    "title": "UPI ref no.",
+    "hint": "Not needed. Type it, or tap Skip.",
+    "skip": "Skip"
+  },
+  "confirm": {
+    "title": "Check and save",
+    "upi_ref": "UPI ref: {reference}",
+    "saving": "Saving…",
+    "not_saved": "Not saved. Try again.",
+    "signed_out": "Not saved. Sign in again, then collect again."
+  },
+  "done": {
+    "title": "Money saved",
+    "receipt_no": "Receipt no.",
+    "temporary_no": "Temporary no.",
+    "goes_when_online": "It goes to the office by itself when there is internet.",
+    "office_will_check": "The money is safe. The office will check this payment.",
+    "problem": "The office did not take this payment. Call the office.",
+    "whatsapp": "WhatsApp",
+    "sms": "SMS",
+    "printer_setup": "Set up printer"
+  },
+  "waiting": {
+    "title": "Waiting",
+    "count": "{count, plural, one {# payment is not at the office yet} other {# payments are not at the office yet}}",
+    "nothing": "Nothing waiting",
+    "try_now": "Try now",
+    "sending": "Sending to the office…",
+    "no_internet": "No internet. It goes by itself when internet is on.",
+    "failed": "Could not send now. It tries again by itself.",
+    "all_sent": "Sent to office",
+    "held_explain": "{count, plural, one {# payment of another lineman is on this phone. It is not sent with your sign-in. Call the office.} other {# payments of another lineman are on this phone. They are not sent with your sign-in. Call the office.}}",
+    "held_chip": "Other lineman"
+  }
+}

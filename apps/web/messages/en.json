@@ -243,6 +243,52 @@
       "permanent": "trying again cannot fix it"
     }
   },
+  "mobile_collect": {
+    "amount": {
+      "chip_due": "Full due {amount}",
+      "due_now": "Due now: {amount}",
+      "hint": "Type the amount",
+      "title": "How much money?"
+    },
+    "confirm": {
+      "not_saved": "Not saved. Try again.",
+      "saving": "Saving…",
+      "signed_out": "Not saved. Sign in again, then collect again.",
+      "title": "Check and save",
+      "upi_ref": "UPI ref: {reference}"
+    },
+    "done": {
+      "goes_when_online": "It goes to the office by itself when there is internet.",
+      "office_will_check": "The money is safe. The office will check this payment.",
+      "printer_setup": "Set up printer",
+      "problem": "The office did not take this payment. Call the office.",
+      "receipt_no": "Receipt no.",
+      "sms": "SMS",
+      "temporary_no": "Temporary no.",
+      "title": "Money saved",
+      "whatsapp": "WhatsApp"
+    },
+    "method": {
+      "title": "How did they pay?"
+    },
+    "upi": {
+      "hint": "Not needed. Type it, or tap Skip.",
+      "skip": "Skip",
+      "title": "UPI ref no."
+    },
+    "waiting": {
+      "all_sent": "Sent to office",
+      "count": "{count, plural, one {# payment is not at the office yet} other {# payments are not at the office yet}}",
+      "failed": "Could not send now. It tries again by itself.",
+      "held_chip": "Other lineman",
+      "held_explain": "{count, plural, one {# payment of another lineman is on this phone. It is not sent with your sign-in. Call the office.} other {# payments of another lineman are on this phone. They are not sent with your sign-in. Call the office.}}",
+      "no_internet": "No internet. It goes by itself when internet is on.",
+      "nothing": "Nothing waiting",
+      "sending": "Sending to the office…",
+      "title": "Waiting",
+      "try_now": "Try now"
+    }
+  },
   "mobile_designsystem": {
     "catalogue_sample_area": "Ward 5",
     "catalogue_sample_customer_name": "Ramesh Kumar",

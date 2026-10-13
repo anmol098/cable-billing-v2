@@ -163,6 +163,20 @@ the office has the payment.
 | App subscription | ऐप सब्सक्रिप्शन | Our monthly fee for Cable Billing | credit-card | Plan (that word is the customer's rental), Billing |
 | Coming soon | जल्द आ रहा है | A page that is not built yet | — | Under construction, WIP |
 
+## Collect words (lineman app)
+
+| English | हिंदी | Means | Icon / colour | Not this |
+|---|---|---|---|---|
+| How much money? | कितने पैसे? | The Amount screen's question | — | Enter amount, राशि दर्ज करें |
+| Full due | पूरा बाकी | Quick amount: everything the customer owes now | — | Outstanding, Total dues |
+| How did they pay? | पैसे कैसे दिए? | The Method screen's question (Cash / UPI) | banknote / qr-code | Payment mode |
+| UPI ref no. | UPI रेफ़. नं. | The number the customer's UPI app shows; optional, not proof | — | UTR, Transaction ID |
+| Skip | छोड़ें | Go on without typing the optional UPI ref | arrow-right | Not applicable, N/A |
+| Check and save | देखें और सेव करें | The Confirm screen before money is saved | check | Review, Submit |
+| Money saved | पैसे सेव हो गए | Done screen title: saved on the phone (never "paid" or "sent") | check-circle | Payment successful |
+| Try now | अभी भेजें | Waiting screen: send what is on the phone to the office now | arrow-right | Sync, Retry upload |
+| Other lineman | दूसरा लाइनमैन | A payment another lineman saved on this phone; held, not sent with your sign-in | alert-triangle, `semantic.danger` | Foreign queue, Held items |
+
 ## Words we never show users
 
 Invoice, Ledger, Allocation, Adjustment, Reversal, Tenant, Sync / Synced / Pending sync,

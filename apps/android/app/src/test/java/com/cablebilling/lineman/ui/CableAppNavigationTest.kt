@@ -24,13 +24,14 @@ class CableAppNavigationTest {
 
     @Test
     fun `bottom bar shows the three Hindi tabs and switches screens`() {
-        // The search home and customer screen use Hilt ViewModels: stand-ins here
-        // (SearchToCustomerTest runs the real ones).
+        // The search home, customer and Waiting screens use Hilt ViewModels: stand-ins here
+        // (SearchToCustomerTest, CollectFlowTest and WaitingScreenTest run the real ones).
         composeRule.setContent {
             CableTheme {
                 CableApp(
                     searchHome = { _, _ -> PlaceholderScreen(title = "search", testTag = "screen_search") },
                     customerScreen = { _, _, _ -> PlaceholderScreen(title = "customer", testTag = "screen_customer") },
+                    waitingScreen = { PlaceholderScreen(title = "waiting", testTag = "screen_waiting") },
                 )
             }
         }

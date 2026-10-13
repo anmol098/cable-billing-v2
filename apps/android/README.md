@@ -43,11 +43,12 @@ Sentry is off unless a DSN is given with `-Pcb.sentryDsn=…` or `SENTRY_DSN`.
 
 ```text
 app/                      the app: feature packages under com.cablebilling.lineman
-  feature/{login,update,search,today,queue,…}   one package per feature (PLAN §11.1)
+  feature/{login,update,search,customer,collect,waiting,today,…}   one package per feature (PLAN §11.1)
   data/network            Retrofit services, interceptors, generated DTOs (data/network/generated)
   data/auth               session store (Tink-sealed), install id, sign in / out
   data/db                 Room database (roster cache, payment queue, outboxes, sync_meta), repositories
-  data/sync               roster sync (RosterSync*: engine, worker, scheduler); payment push (T-066)
+  data/payments           payment queue: save (UUIDv7 + P-ref, commit before "Saved"), receipts (T-066)
+  data/sync               roster sync (RosterSync*) and payment push (PaymentSync*): engine, worker, scheduler
   ui/                     app shell (CableApp: bottom bar + NavHost), navigation
   di/                     Hilt modules (network, storage)
   locale/                 AppLanguage (Hindi default, per-app language)
@@ -106,8 +107,34 @@ Generated, never edited by hand: `core/designsystem/.../generated/Tokens.kt` (`p
   `customerId`): cached copy at once, `refreshCustomer` on open, due huge, credit apart, tap-to-call
   (`ACTION_DIAL`), connections, read-out "name, ₹X due" (`SpeakOnShow`), giant Collect button.
 - Navigation (`ui/CableApp`): `SearchRoute` → `CustomerRoute(customerId)` → `CollectRoute(customerId)`
-  (placeholder until T-066), all on the Search tab (it stays highlighted; tapping it returns home).
-  `CableApp(searchHome = …, customerScreen = …)` lets tests run the shell without Hilt.
+  → `CollectDoneRoute(paymentId)`, all on the Search tab (it stays highlighted; tapping it returns home).
+  `CableApp(searchHome = …, customerScreen = …, collectScreen = …, collectDone = …, waitingScreen = …)`
+  lets tests run the shell without Hilt.
+
+## Collect flow, payment queue and push (T-066)
+
+- `feature/collect`: `CollectScreen` (one destination, steps Amount → Method → UPI ref → Confirm in
+  `CollectViewModel`, all in `SavedStateHandle`), then `CollectDoneScreen` (`CollectDoneRoute`, which
+  replaces the flow on the back stack: Back from Done never reaches Save again). Amount is pre-filled
+  with the due (rounded up to whole rupees), quick chips full due / ₹100 / ₹200 / ₹500, number pad
+  (the first key after a pre-fill or chip types a new amount, max ₹99,99,999). Confirm reads "name से
+  ₹X नकद" aloud; Save is enabled once and the screen moves to Done only after Room committed.
+- `data/payments/PaymentRepository.save(draft)`: the draft carries a UUIDv7 made when Confirm opened
+  (kept across process death, so a second Save is the same payment); the provisional reference
+  `P-{device_code}-{seq}` is taken inside the insert's transaction; the push is requested after the
+  commit. Rows are never deleted (`PaymentDao` has no delete/replace).
+- `data/sync/PaymentSync` pushes `POST /payments:batch`: only the signed-in lineman's own payments
+  (another lineman's stay held, PLAN §9.2), oldest first, 50 per batch. Outcomes: posted / duplicate
+  / posted_needs_review → `SENT_TO_OFFICE` + permanent receipt number (+ review reason);
+  rejected → `NEEDS_OFFICE_HELP`; retry_later, missing result, offline, 429/5xx, unreadable answer →
+  stays `SAVED_ON_PHONE` (retry with backoff, no limit); APP_TOO_OLD / signed out / other refusals →
+  stays, the next trigger tries again. A retry after a lost answer resends the same ids → duplicates.
+- `PaymentSyncWorker` + `PaymentSyncScheduler`: unique work `payment-sync` (APPEND_OR_REPLACE, at most
+  one waiting run), `NetworkType.CONNECTED`, exponential backoff from 30 s; triggered after every save,
+  on sign-in, on app open (`start()` in `CableApplication`) and by "Try now". A push that posted
+  anything asks for a roster pull (`RosterSyncScheduler.requestNow()`).
+- `feature/waiting`: the Waiting tab: problems first (Call office), payments on the phone, another
+  lineman's held payments (flagged, Call office), last push status in honest words, "Try now".
 
 ## Design-system components
 
