@@ -3,10 +3,10 @@ id: T-008
 title: Android project scaffold
 phase: 0
 area: android
-status: todo
-owner:
-claimed_at:
-branch:
+status: claimed
+owner: agent-t008
+claimed_at: 2026-10-13T05:36:18.925Z
+branch: task/T-008-android-project-scaffold
 depends_on: [T-002, T-004]
 review: self
 claimable_by: agent
@@ -59,3 +59,4 @@ _The agent fills this in before opening the PR: what was built, decisions taken,
 
 - 2026-10-13T04:21:04.114Z blocked by coordinator: Android SDK download blocked: network policy denies dl.google.com in this cloud environment. Unblock after the host is allowed.
 - 2026-10-13T05:34:04.510Z unblocked by coordinator
+- 2026-10-13T05:36:18.925Z claimed by agent-t008
