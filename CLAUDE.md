@@ -29,6 +29,8 @@ pnpm tokens:build [--check]              # tokens.json → theme.css + Tokens.kt
 pnpm icons:build [--check]               # icons.json → @cb/ui <Icon> data + Android ic_cb_*.xml drawables
 pnpm --filter @cb/domain test            # one package (any script, any @cb/* package)
 pnpm --filter @cb/domain exec vitest     # watch mode for one package
+pnpm --filter web dev                    # Next.js dev server for apps/web (http://localhost:3000)
+pnpm --filter web build && pnpm --filter web test:e2e   # Playwright smoke tests against `next start`
 cd apps/android && ./gradlew ktlintCheck detekt testDevDebugUnitTest assembleDevDebug
 ```
 

@@ -42,5 +42,17 @@
     "vc_number": "VC नंबर",
     "whatsapp_opened": "WhatsApp खुल गया",
     "yes": "हाँ"
+  },
+  "scaffold": {
+    "home": {
+      "language": "भाषा",
+      "placeholder": "यह पेज अभी बन रहा है।"
+    },
+    "type_sample": {
+      "amounts": "रकम",
+      "english": "अंग्रेज़ी",
+      "hindi": "हिंदी",
+      "title": "अक्षर और नंबर की जाँच"
+    }
   }
 }

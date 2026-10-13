@@ -1,0 +1,8 @@
+# Written by `next build` / `next typegen`; regenerated on every run.
+next-env.d.ts
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/

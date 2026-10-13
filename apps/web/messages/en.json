@@ -42,5 +42,17 @@
     "vc_number": "VC number",
     "whatsapp_opened": "WhatsApp opened",
     "yes": "Yes"
+  },
+  "scaffold": {
+    "home": {
+      "language": "Language",
+      "placeholder": "This page is being built."
+    },
+    "type_sample": {
+      "amounts": "Amounts",
+      "english": "English",
+      "hindi": "Hindi",
+      "title": "Font and number check"
+    }
   }
 }

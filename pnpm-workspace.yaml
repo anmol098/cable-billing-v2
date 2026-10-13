@@ -8,6 +8,7 @@ packages:
 # instead of repeating a version range.
 catalog:
   "@tailwindcss/node": ^4.3.3
+  "@tailwindcss/postcss": ^4.3.3
   "@types/node": ^24.19.2
   "@types/react": ^19.3.0
   "@types/react-dom": ^19.3.0
@@ -27,3 +28,7 @@ engineStrict: true
 # postinstall check is not needed.
 allowBuilds:
   esbuild: false
+  # Pulled in by next-intl (message extraction tooling). Both ship prebuilt binaries in optional
+  # platform packages; their install scripts only build from source / verify, so they stay off.
+  "@parcel/watcher": false
+  "@swc/core": false
