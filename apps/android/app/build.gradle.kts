@@ -156,6 +156,7 @@ dependencies {
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.androidx.datastore.preferences)
+    implementation(libs.androidx.lifecycle.process)
 
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kotlinx.serialization.json)
@@ -174,6 +175,8 @@ dependencies {
     testImplementation(platform(libs.androidx.compose.bom))
     testImplementation(libs.androidx.compose.ui.test.junit4)
     testImplementation(libs.okhttp.mockwebserver3)
+    testImplementation(libs.androidx.room.testing)
+    testImplementation(libs.androidx.work.testing)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 }
 
@@ -194,4 +197,13 @@ tasks.withType<Test>().configureEach {
         .withPropertyName("apiFixtures")
         .withPathSensitivity(PathSensitivity.RELATIVE)
     if (writeApiModels != null) systemProperty("cb.writeApiModels", writeApiModels)
+}
+
+// T-064: MigrationTestHelper reads the exported Room schemas from the app's assets. The Room plugin adds
+// them to androidTest only, and Robolectric unit tests see the tested variant's assets (unit-test assets
+// are not merged), so debug builds carry them (a few KB of JSON; release builds never do).
+androidComponents {
+    onVariants(selector().withBuildType("debug")) { variant ->
+        variant.sources.assets?.addStaticSourceDirectory(file("schemas").path)
+    }
 }
