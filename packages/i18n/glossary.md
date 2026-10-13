@@ -163,6 +163,21 @@ the office has the payment.
 | App subscription | ऐप सब्सक्रिप्शन | Our monthly fee for Cable Billing | credit-card | Plan (that word is the customer's rental), Billing |
 | Coming soon | जल्द आ रहा है | A page that is not built yet | — | Under construction, WIP |
 
+## Settings words (web)
+
+| English | हिंदी | Means | Icon / colour | Not this |
+|---|---|---|---|---|
+| Business details | बिज़नेस की जानकारी | Settings page: name, office phone, address, receipt words | store | Business profile, Company settings |
+| Office phone | ऑफिस का फ़ोन | Number on receipts and on the linemen's "Call office" button | phone | Helpline, Contact no. |
+| Receipt message | रसीद पर संदेश | Words printed at the bottom of every receipt | — | Footer, Receipt footer |
+| Bill number start | बिल नंबर की शुरुआत | The letters before every new bill number (`CB-2610-00001`) | — | Invoice prefix, Series |
+| Receipt language | रसीद की भाषा | Language of the receipt link customers open | languages | Default locale |
+| Charge the full month | पूरे महीने का पैसा लें | Mid-month start: this month's full rent goes on the next bill (D-18) | receipt | Prorate, Adjustment |
+| Start from next month | अगले महीने से शुरू करें | Mid-month start: no rent for this month (D-18) | arrow-right | Defer billing |
+| Hide (an area) | छिपाएँ | Take an area out of the pickers; its customers keep it | eye-off | Archive, Delete, Deactivate |
+| Show again | फिर से दिखाएँ | Put a hidden area back in the pickers | eye | Restore, Unarchive |
+| Hidden | छिपा हुआ | An area that is not offered for new customers | eye-off | Archived, Inactive |
+
 ## Collect words (lineman app)
 
 | English | हिंदी | Means | Icon / colour | Not this |
