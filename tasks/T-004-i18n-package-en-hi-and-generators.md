@@ -3,10 +3,10 @@ id: T-004
 title: i18n package (en + hi) and generators
 phase: 0
 area: i18n
-status: todo
-owner:
-claimed_at:
-branch:
+status: claimed
+owner: agent-t004
+claimed_at: 2026-10-13T04:31:35.597Z
+branch: task/T-004-i18n-package-en-hi-and-generators
 depends_on: [T-001]
 review: self
 claimable_by: agent
@@ -59,3 +59,7 @@ D-06, PLAN §2.2 rule 5, PLAN §11.4 — see `docs/IMPLEMENTATION_PLAN.md`, `doc
 ## Completion notes
 
 _The agent fills this in before opening the PR: what was built, decisions taken, deviations, follow-up tasks created, and how it was verified._
+
+## Board log
+
+- 2026-10-13T04:31:35.597Z claimed by agent-t004
