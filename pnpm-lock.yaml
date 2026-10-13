@@ -344,10 +344,26 @@ importers:
         version: 6.0.2(zod@4.6.6)
 
   packages/core:
+    dependencies:
+      '@cb/db':
+        specifier: workspace:*
+        version: link:../db
+      '@cb/domain':
+        specifier: workspace:*
+        version: link:../domain
+      drizzle-orm:
+        specifier: 0.45.4
+        version: 0.45.4(@neondatabase/serverless@1.2.0)(@opentelemetry/api@1.9.1)(@types/pg@8.23.1)(kysely@0.29.6)(pg@8.23.1)
+      zod:
+        specifier: 'catalog:'
+        version: 4.6.6
     devDependencies:
       '@cb/config':
         specifier: workspace:*
         version: link:../config
+      '@cb/contracts':
+        specifier: workspace:*
+        version: link:../contracts
       '@types/node':
         specifier: 'catalog:'
         version: 24.19.2

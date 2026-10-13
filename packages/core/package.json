@@ -6,15 +6,23 @@
   "type": "module",
   "sideEffects": false,
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./testing": "./src/testing/index.ts"
   },
   "scripts": {
     "build": "tsc --noEmit",
     "typecheck": "tsc --noEmit",
     "test": "vitest run"
   },
+  "dependencies": {
+    "@cb/db": "workspace:*",
+    "@cb/domain": "workspace:*",
+    "drizzle-orm": "0.45.4",
+    "zod": "catalog:"
+  },
   "devDependencies": {
     "@cb/config": "workspace:*",
+    "@cb/contracts": "workspace:*",
     "@types/node": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
