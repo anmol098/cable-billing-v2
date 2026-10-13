@@ -71,6 +71,8 @@ object Tokens {
     object Size {
         val TouchMin = 56.dp
         val PrimaryButton = 64.dp
+        val Icon = 24.dp
+        val IconLarge = 40.dp
     }
 
     object Elevation {

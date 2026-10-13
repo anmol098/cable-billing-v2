@@ -64,6 +64,8 @@
   /* size: h-touch-min, min-h-primary-button, … */
   --spacing-touch-min: 2.75rem;
   --spacing-primary-button: 3rem;
+  --spacing-icon: 1.25rem;
+  --spacing-icon-large: 2rem;
 
   /* elevation: none on the web; shadows are cleared above (hyper-minimal). */
 }

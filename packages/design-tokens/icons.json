@@ -32,5 +32,6 @@
   "logout": "log-out",
   "language": "languages",
   "close": "x",
-  "next": "arrow-right"
+  "next": "arrow-right",
+  "backspace": "delete"
 }

@@ -1,0 +1,15 @@
+{
+  "numpad_delete": "Delete",
+  "numpad_letters": "ABC",
+  "speak": "Listen",
+  "voice_on": "Voice on",
+  "voice_off": "Voice off",
+  "catalogue_title": "Components (test)",
+  "catalogue_sample_customer_name": "Ramesh Kumar",
+  "catalogue_sample_area": "Ward 5",
+  "catalogue_sample_updated": "Updated 5 min ago",
+  "catalogue_sample_on_phone": "{count, plural, one {# payment on phone} other {# payments on phone}}",
+  "catalogue_sample_speech": "Ramesh Kumar, 450 rupees due",
+  "catalogue_sample_whatsapp": "WhatsApp",
+  "catalogue_sample_sms": "SMS"
+}
