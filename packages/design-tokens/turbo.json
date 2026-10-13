@@ -4,6 +4,13 @@
   "tasks": {
     "build": {
       "outputs": []
+    },
+    "test": {
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/packages/ui/src/theme.css",
+        "$TURBO_ROOT$/apps/android/core/designsystem/src/main/java/com/cablebilling/designsystem/generated/**"
+      ]
     }
   }
 }

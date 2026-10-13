@@ -11,12 +11,18 @@
   "scripts": {
     "build": "tsc --noEmit",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "generate": "tsx scripts/build.ts",
+    "tokens:build": "tsx scripts/build.ts"
   },
   "devDependencies": {
     "@cb/config": "workspace:*",
+    "@tailwindcss/node": "catalog:",
     "@types/node": "catalog:",
+    "tailwindcss": "catalog:",
+    "tsx": "catalog:",
     "typescript": "catalog:",
-    "vitest": "catalog:"
+    "vitest": "catalog:",
+    "zod": "catalog:"
   }
 }
