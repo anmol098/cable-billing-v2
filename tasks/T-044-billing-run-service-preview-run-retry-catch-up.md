@@ -3,10 +3,10 @@ id: T-044
 title: Billing run service (preview, run, retry, catch-up)
 phase: 2
 area: core
-status: todo
-owner:
-claimed_at:
-branch:
+status: claimed
+owner: agent-t044
+claimed_at: 2026-10-13T13:37:57.794Z
+branch: task/T-044-billing-run-service-preview-run-retry-ca
 depends_on: [T-040, T-041, T-043, T-023]
 review: required
 claimable_by: agent
@@ -52,3 +52,7 @@ PLAN §8.2, PLAN §14, FR-009, FR-011, FR-012, J-03, B-006, D-13, D-25 — see `
 ## Completion notes
 
 _The agent fills this in before opening the PR: what was built, decisions taken, deviations, follow-up tasks created, and how it was verified._
+
+## Board log
+
+- 2026-10-13T13:37:57.794Z claimed by agent-t044
