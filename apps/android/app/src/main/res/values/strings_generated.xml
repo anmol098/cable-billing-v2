@@ -71,4 +71,14 @@
     <string name="mobile_shell_nav_search">Search</string>
     <string name="mobile_shell_nav_today">Today</string>
     <string name="mobile_shell_nav_waiting">Waiting</string>
+    <!-- %1$s = amount, %2$s = name -->
+    <string name="mobile_voice_cash_from">%1$s cash from %2$s</string>
+    <!-- %1$s = name, %2$s = amount -->
+    <string name="mobile_voice_customer_due">%1$s, %2$s due</string>
+    <string name="mobile_voice_hindi_voice_download">Download</string>
+    <string name="mobile_voice_hindi_voice_later">Later</string>
+    <string name="mobile_voice_hindi_voice_missing">Hindi voice is not on this phone</string>
+    <string name="mobile_voice_money_saved">Money saved on phone</string>
+    <!-- %1$s = amount, %2$s = name -->
+    <string name="mobile_voice_upi_from">%1$s UPI from %2$s</string>
 </resources>

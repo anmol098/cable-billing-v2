@@ -10,13 +10,14 @@ import com.cablebilling.designsystem.voice.LocalSpeaker
 import com.cablebilling.designsystem.voice.Speaker
 import com.cablebilling.lineman.locale.AppLanguage
 import com.cablebilling.lineman.ui.CableApp
+import com.cablebilling.lineman.voice.VoiceHost
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
 /** The only activity. AppCompat (not ComponentActivity) so the per-app language works on API < 33. */
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
-    /** Voice read-out for every screen, as `LocalSpeaker` (T-009; real TTS from T-067). */
+    /** Voice read-out for every screen, as `LocalSpeaker` (T-009; TextToSpeech from T-067). */
     @Inject
     lateinit var speaker: Speaker
 
@@ -28,6 +29,8 @@ class MainActivity : AppCompatActivity() {
             CompositionLocalProvider(LocalSpeaker provides speaker) {
                 CableTheme {
                     CableApp()
+                    // TTS lifecycle + the one-time Hindi voice prompt (T-067).
+                    VoiceHost(speaker)
                 }
             }
         }
