@@ -3,10 +3,10 @@ id: T-026
 title: Web authentication core (Better Auth)
 phase: 1
 area: core
-status: todo
-owner:
-claimed_at:
-branch:
+status: claimed
+owner: agent-t026
+claimed_at: 2026-10-13T12:52:58.900Z
+branch: task/T-026-web-authentication-core-better-auth
 depends_on: [T-005, T-021, T-025]
 review: required
 claimable_by: agent
@@ -63,3 +63,7 @@ PLAN §9.2, FR-028, E-04, E-07 — see `docs/IMPLEMENTATION_PLAN.md`, `docs/PRD.
 ## Completion notes
 
 _The agent fills this in before opening the PR: what was built, decisions taken, deviations, follow-up tasks created, and how it was verified._
+
+## Board log
+
+- 2026-10-13T12:52:58.900Z claimed by agent-t026
