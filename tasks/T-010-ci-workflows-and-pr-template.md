@@ -3,10 +3,10 @@ id: T-010
 title: CI workflows and PR template
 phase: 0
 area: infra
-status: todo
-owner:
-claimed_at:
-branch:
+status: claimed
+owner: agent-t010
+claimed_at: 2026-10-13T06:28:01.903Z
+branch: task/T-010-ci-workflows-and-pr-template
 depends_on: [T-005, T-008]
 review: self
 claimable_by: agent
@@ -55,3 +55,7 @@ PLAN §17 — see `docs/IMPLEMENTATION_PLAN.md`, `docs/PRD.md`, `docs/BRD.md`.
 ## Completion notes
 
 _The agent fills this in before opening the PR: what was built, decisions taken, deviations, follow-up tasks created, and how it was verified._
+
+## Board log
+
+- 2026-10-13T06:28:01.903Z claimed by agent-t010
