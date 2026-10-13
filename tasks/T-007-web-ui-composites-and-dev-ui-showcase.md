@@ -3,10 +3,10 @@ id: T-007
 title: Web UI composites and /dev/ui showcase
 phase: 0
 area: web-ui
-status: todo
-owner:
-claimed_at:
-branch:
+status: claimed
+owner: agent-t007
+claimed_at: 2026-10-13T06:25:06.259Z
+branch: task/T-007-web-ui-composites-and-dev-ui-showcase
 depends_on: [T-006, T-003]
 review: self
 claimable_by: agent
@@ -50,3 +50,7 @@ PLAN §6.4, PLAN §12.2 — see `docs/IMPLEMENTATION_PLAN.md`, `docs/PRD.md`, `d
 ## Completion notes
 
 _The agent fills this in before opening the PR: what was built, decisions taken, deviations, follow-up tasks created, and how it was verified._
+
+## Board log
+
+- 2026-10-13T06:25:06.259Z claimed by agent-t007
