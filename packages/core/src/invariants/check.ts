@@ -61,7 +61,11 @@ export async function checkTenantInvariants(
   if (!Number.isInteger(timeoutMs) || timeoutMs <= 0) {
     throw new TypeError("checkTenantInvariants: statementTimeoutMs must be a positive integer");
   }
-  await tx.execute(sql`SELECT set_config('statement_timeout', ${String(timeoutMs)}, true)`);
+  // Transaction-local settings. JIT off: the plan is cheap to run (~0.1 s for a tenant of 1,000
+  // customers and 40k ledger rows) but big enough to trigger JIT compilation, which took ~2 s.
+  await tx.execute(
+    sql`SELECT set_config('statement_timeout', ${String(timeoutMs)}, true), set_config('jit', 'off', true)`,
+  );
   const op = sql`${operatorId}::uuid`;
   const result = await tx.execute<ViolationRow>(sql`
     WITH
