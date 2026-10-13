@@ -3,10 +3,10 @@ id: T-046
 title: Payment posting and reversal service
 phase: 2
 area: core
-status: todo
-owner:
-claimed_at:
-branch:
+status: claimed
+owner: agent-t046
+claimed_at: 2026-10-13T13:12:10.124Z
+branch: task/T-046-payment-posting-and-reversal-service
 depends_on: [T-041, T-023, T-025]
 review: required
 claimable_by: agent
@@ -51,3 +51,7 @@ PLAN §8.4, PLAN §8.6, PLAN §10.4, FR-013, FR-014, FR-016, FR-017, RULE-16, RU
 ## Completion notes
 
 _The agent fills this in before opening the PR: what was built, decisions taken, deviations, follow-up tasks created, and how it was verified._
+
+## Board log
+
+- 2026-10-13T13:12:10.125Z claimed by agent-t046
