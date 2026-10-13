@@ -3,10 +3,10 @@ id: T-006
 title: Web UI primitives
 phase: 0
 area: web-ui
-status: todo
-owner:
-claimed_at:
-branch:
+status: claimed
+owner: agent-t006
+claimed_at: 2026-10-13T06:06:09.169Z
+branch: task/T-006-web-ui-primitives
 depends_on: [T-005]
 review: self
 claimable_by: agent
@@ -55,3 +55,7 @@ PLAN §6.3, PLAN §6.4, PLAN §2.2, E-09 — see `docs/IMPLEMENTATION_PLAN.md`, 
 ## Completion notes
 
 _The agent fills this in before opening the PR: what was built, decisions taken, deviations, follow-up tasks created, and how it was verified._
+
+## Board log
+
+- 2026-10-13T06:06:09.170Z claimed by agent-t006
