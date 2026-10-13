@@ -3,10 +3,10 @@ id: T-022
 title: Schema: customers, plans, VC assets and assignments
 phase: 1
 area: db
-status: todo
-owner:
-claimed_at:
-branch:
+status: claimed
+owner: agent-t022
+claimed_at: 2026-10-13T12:25:00.767Z
+branch: task/T-022-schema-customers-plans-vc-assets-and-ass
 depends_on: [T-021]
 review: required
 claimable_by: agent
@@ -56,3 +56,7 @@ PLAN §7.2, FR-003, FR-004, FR-005, FR-006, FR-007, RULE-02, RULE-06, BR-03 — 
 ## Completion notes
 
 _The agent fills this in before opening the PR: what was built, decisions taken, deviations, follow-up tasks created, and how it was verified._
+
+## Board log
+
+- 2026-10-13T12:25:00.767Z claimed by agent-t022
