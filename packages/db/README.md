@@ -67,6 +67,8 @@ Platform policies that exist (T-021, each one reviewed):
 | `subscriptions` | SELECT, UPDATE | state cron, webhooks, admin "extend" |
 | `subscription_events` | SELECT, INSERT, UPDATE | Razorpay webhooks (append-only except processing columns) |
 | `audit_events` | SELECT, INSERT where `operator_id IS NULL` | platform-level events only, never a tenant's |
+| `jobs` (T-023) | SELECT, INSERT, UPDATE (no DELETE) | the job worker enqueues and claims every tenant's jobs (`FOR UPDATE SKIP LOCKED`), then works in `withTenant` |
+| `receipt_links` (T-023) | SELECT | the public receipt page finds a link by token hash before the tenant is known; counting and revoking happen in `withTenant` |
 
 ## API
 
