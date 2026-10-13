@@ -1,0 +1,39 @@
+# Local staging MariaDB for the legacy dump (T-090, PLAN §15 step 1). See docs/migration/README.md.
+#
+#   docker compose -f tools/migration/docker-compose.yml up -d --wait
+#   tools/migration/restore.sh /secure/path/legacy-dump.sql.gz
+#
+# - Bound to 127.0.0.1 only: the database holds real customer data.
+# - The root password is a local-only default (override with LEGACY_DB_PASSWORD); it is not a secret
+#   because the port is never exposed beyond this machine.
+# - Data lives in the named volume `cb-legacy-mariadb`. Remove it when you are done with the dump:
+#     docker compose -f tools/migration/docker-compose.yml down --volumes
+# - sql_mode is relaxed so zero dates (0000-00-00) in the legacy data restore as they are.
+name: cb-legacy
+
+services:
+  mariadb:
+    # 10.11 LTS. The legacy server's exact version is unknown; any 10.x restores a mysqldump.
+    image: mariadb:10.11
+    restart: "no"
+    ports:
+      - "127.0.0.1:${LEGACY_DB_PORT:-3307}:3306"
+    environment:
+      MARIADB_ROOT_PASSWORD: ${LEGACY_DB_PASSWORD:-legacy-local-only}
+      MARIADB_DATABASE: ${LEGACY_DB_NAME:-legacy}
+    command:
+      - --sql-mode=NO_ENGINE_SUBSTITUTION
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --max-allowed-packet=1G
+      - --innodb-buffer-pool-size=512M
+    volumes:
+      - cb-legacy-mariadb:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+volumes:
+  cb-legacy-mariadb:
