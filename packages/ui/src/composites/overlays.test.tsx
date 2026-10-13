@@ -299,9 +299,11 @@ describe("Combobox", () => {
       return search(query);
     });
     render(
-      <Combobox {...COMBO_LABELS} loadOptions={loadOptions} onSelect={() => {}} debounceMs={50} />,
+      <Combobox {...COMBO_LABELS} loadOptions={loadOptions} onSelect={() => {}} debounceMs={300} />,
     );
-    const user = userEvent.setup();
+    // delay: null types every letter in the same tick, so a slow or busy machine cannot stretch
+    // the gap between keystrokes past the debounce (it did with 50 ms and per-key delays).
+    const user = userEvent.setup({ delay: null });
     await user.type(screen.getByRole("combobox"), "sit");
     await screen.findByRole("option", { name: /Sita Devi/ });
     // Typed quickly: one search for the whole word, not one per letter.
