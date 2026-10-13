@@ -3,10 +3,10 @@ id: T-009
 title: Android design-system components
 phase: 0
 area: android
-status: todo
-owner:
-claimed_at:
-branch:
+status: claimed
+owner: agent-t009
+claimed_at: 2026-10-13T06:28:05.828Z
+branch: task/T-009-android-design-system-components
 depends_on: [T-008, T-003]
 review: self
 claimable_by: agent
@@ -50,3 +50,7 @@ PLAN §6.4, PLAN §2.2, PLAN §11.3, D-10 — see `docs/IMPLEMENTATION_PLAN.md`,
 ## Completion notes
 
 _The agent fills this in before opening the PR: what was built, decisions taken, deviations, follow-up tasks created, and how it was verified._
+
+## Board log
+
+- 2026-10-13T06:28:05.828Z claimed by agent-t009
