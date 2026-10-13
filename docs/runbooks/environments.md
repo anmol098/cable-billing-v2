@@ -160,8 +160,8 @@ account. Use a shared company email (not a personal one) as the owner where you 
    `DATABASE_URL` for the non-owner role `cb_app` and removes `DATABASE_URL_UNPOOLED` from Vercel.
 8. Migrations are **not** run by the Vercel build (PLAN §17). Production and staging migrations run from
    a gated GitHub Actions workflow (later task); add `DATABASE_URL_UNPOOLED` to the GitHub environments
-   `staging` and `production` (§4.10). Applying migrations and seed data to preview branches is wired up by
-   the DB/CI tasks (T-020, T-036, T-010).
+   `staging` and `production` (§4.10). Seed data reaches preview branches by inheritance from `staging`
+   (§4.13); applying migrations to preview branches is wired up by the DB/CI tasks (T-020, T-010).
 
 ### 4.3 Sentry (errors, E-08)
 
@@ -381,6 +381,45 @@ sessions straight away (`SELECT pg_terminate_backend(pid) FROM pg_stat_activity 
 '<old>';`, or restart the compute in Neon), accepting a minute of errors on instances that haven't
 picked up the new deployment.
 
+### 4.13 Seed data on staging and preview branches (T-036)
+
+Non-production databases hold **fake data only**, made by the seed generator
+(`packages/db/src/seed`). It is deterministic (same `--seed` and `--as-of` → same rows), uses made-up
+Hindi and English names and phone numbers in the fictional `555xxxxxxx` range, and builds 12–23 months of
+bills, payments, adjustments and reversals through the real billing rules (every account passes
+`checkLedger`).
+
+| Scale | Operators / customers / months | Rough size | Time (local Postgres 17) |
+|---|---|---|---|
+| `small` (default) | 3 / 150 / 12 | 1.5k bills, 1.1k payments | ~1 s |
+| `legacy` | 8 / 7,616 / 23 | 148k bills, 108k payments | 30–40 s (busy 4-CPU machine) |
+| `10x` | 80 / 76,160 / 23 | ~1.5M bills | not measured; expect ~10× `legacy` |
+
+**Neon previews get `small` automatically, by inheritance.** The Neon ↔ Vercel integration creates every
+preview branch as a copy of `staging` (§4.2), so seeding `staging` once gives every later preview the same
+`small` data with no per-preview step. After `staging` is migrated (and again whenever it is re-created):
+
+```bash
+# DATABASE_URL_UNPOOLED = the staging branch's direct (owner) URL, from Neon → Connect
+DATABASE_URL_UNPOOLED='postgres://…' pnpm db:seed --scale small --allow-remote --if-empty
+```
+
+- `--allow-remote` is required for any non-local host. `--if-empty` exits 0 without writing when the
+  database already has operators, so the same command is safe in an automated step (for example a CI job
+  that runs it against a fresh preview branch after its migrations, if a preview branch is ever created
+  from an empty parent). Without `--if-empty` a non-empty database is refused (exit 2).
+- **Never production:** the seed refuses when `VERCEL_ENV=production` or `CB_SEED_FORBIDDEN=1` (set the
+  latter in any production shell or GitHub environment), and it refuses any database that already holds
+  operators, so a production URL is refused even with `--allow-remote`. Nothing runs it automatically on
+  production builds.
+- It writes only through `withTenant` (RLS on), so it also works with the `cb_app` role, but staging and
+  previews normally use the owner URL. It never updates or deletes rows (append-only triggers untouched).
+- To start over on `staging`, drop and re-create its database (it holds no real data), migrate, seed.
+- Sign-in on seeded environments (web: T-026; Android: T-028): `seed-op01-owner`, `seed-op01-staff1`,
+  `seed-op01-lineman01` … (`opNN` = operator number), password `seed-dev-password`. Operators 1 and 2 are
+  both called "Shiv Cable Network" on purpose (names are not unique, FR-002). `--no-password` creates the
+  users without passwords; `CB_SEED_PASSWORD_HASH` sets another (argon2id) hash.
+
 ---
 
 ## 5. Local setup
@@ -405,7 +444,11 @@ pnpm --filter web dev        # http://localhost:3000, /api/health
 - Next.js reads `apps/web/.env.local` itself (Next's own `.env*` loading; `.env.example` is never loaded).
 - Stop / start the database: `docker stop cb-postgres` / `docker start cb-postgres`. Reset it:
   `docker rm -f cb-postgres && docker volume rm cb-postgres-data`, then step 1 again.
-- Migrations and seed data: see `packages/db/README.md` (T-020) and the seed task (T-036) once they land.
+- Migrations and seed data: `DATABASE_URL=postgres://postgres:postgres@localhost:5432/cable_billing pnpm
+  db:seed --migrate` applies the migrations to that empty database and fills it with the `small` dataset
+  (§4.13; the variable must be set in the shell, `.env.local` is not read). `pnpm db:seed --help` lists
+  the options.
+  Schema details: `packages/db/README.md`.
 - Instead of Docker you can use a personal Neon branch: Neon → `cable-billing-nonprod` → **Branches → New
   branch** from `staging`, and put its URLs in `.env.local`. Never point a local machine at production.
 - `vercel env pull apps/web/.env.local` (Vercel CLI) copies the **Development** variables; check they do
