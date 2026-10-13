@@ -6,7 +6,7 @@
  * password, the WhatsApp share link). The server checks every field again.
  */
 import { Button, Dialog, Icon, RadioCards, useToast } from "@cb/ui";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { type FormEvent, useId, useState, useTransition } from "react";
 import type {
   AddedView,
@@ -308,6 +308,7 @@ export function AddStaffDialog({
 }) {
   const t = useTranslations("team.form");
   const common = useTranslations("common");
+  const locale = useLocale();
   const id = useId();
   const setupLabel = useId();
   const [name, setName] = useState("");
@@ -337,7 +338,8 @@ export function AddStaffDialog({
         login,
         setup,
         password: setup === "password" ? password : "",
-        language: "en",
+        // Their emails (the invitation) are in the language the Owner is using now.
+        language: locale,
       });
       if (result.ok) {
         setAdded(result.added);
