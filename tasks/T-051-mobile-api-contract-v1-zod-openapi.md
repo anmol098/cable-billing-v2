@@ -3,10 +3,10 @@ id: T-051
 title: Mobile API contract v1 (Zod → OpenAPI)
 phase: 2
 area: api
-status: todo
-owner:
-claimed_at:
-branch:
+status: claimed
+owner: agent-t051
+claimed_at: 2026-10-13T10:41:16.125Z
+branch: task/T-051-mobile-api-contract-v1-zod-openapi
 depends_on: [T-024]
 review: required
 claimable_by: agent
@@ -53,3 +53,7 @@ PLAN §10.2, PLAN §10.3, PLAN §10.4, E-05 — see `docs/IMPLEMENTATION_PLAN.md
 ## Completion notes
 
 _The agent fills this in before opening the PR: what was built, decisions taken, deviations, follow-up tasks created, and how it was verified._
+
+## Board log
+
+- 2026-10-13T10:41:16.126Z claimed by agent-t051
