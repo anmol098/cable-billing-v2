@@ -3,10 +3,10 @@ id: T-090
 title: Migration: staging and profiling tooling
 phase: 5
 area: migration
-status: todo
-owner:
-claimed_at:
-branch:
+status: claimed
+owner: agent-t090
+claimed_at: 2026-10-13T15:29:09.812Z
+branch: task/T-090-migration-staging-and-profiling-tooling
 depends_on: [T-001]
 review: self
 claimable_by: agent
@@ -51,3 +51,7 @@ PLAN §15 steps 1, FR-026, BRD §13, D-09 — see `docs/IMPLEMENTATION_PLAN.md`,
 ## Completion notes
 
 _The agent fills this in before opening the PR: what was built, decisions taken, deviations, follow-up tasks created, and how it was verified._
+
+## Board log
+
+- 2026-10-13T15:29:09.813Z claimed by agent-t090
