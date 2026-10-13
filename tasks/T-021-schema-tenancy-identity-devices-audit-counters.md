@@ -3,10 +3,10 @@ id: T-021
 title: Schema: tenancy, identity, devices, audit, counters
 phase: 1
 area: db
-status: todo
-owner:
-claimed_at:
-branch:
+status: claimed
+owner: agent-t021
+claimed_at: 2026-10-13T11:55:23.489Z
+branch: task/T-021-schema-tenancy-identity-devices-audit-co
 depends_on: [T-020]
 review: required
 claimable_by: agent
@@ -58,3 +58,7 @@ PLAN §7.2 (operators, users, devices, areas, counters, audit_events, subscripti
 ## Completion notes
 
 _The agent fills this in before opening the PR: what was built, decisions taken, deviations, follow-up tasks created, and how it was verified._
+
+## Board log
+
+- 2026-10-13T11:55:23.489Z claimed by agent-t021
