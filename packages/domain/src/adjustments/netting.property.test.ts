@@ -314,7 +314,7 @@ describe("plan-change netting (property)", () => {
     for (const [path, count] of Object.entries(coverage)) {
       expect(count, `coverage: ${path}`).toBeGreaterThan(100);
     }
-  });
+  }, 60_000); // About 3 s locally; the budget leaves room for slow or busy CI runners.
 
   it("the result does not depend on the order of the records", () => {
     const record = (id: string, direction: AdjustmentDirection, a: number): RentalChargeRecord => ({
@@ -355,5 +355,5 @@ describe("plan-change netting (property)", () => {
       ),
       { numRuns: 2_000 },
     );
-  });
+  }, 60_000);
 });
