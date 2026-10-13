@@ -125,6 +125,18 @@ the office has the payment.
 | 2-step sign-in | 2-स्टेप लॉग इन | Password + code (platform admins) | — | 2FA, MFA |
 | Sign out on all devices | सभी डिवाइस से लॉग आउट करें | End every session of this user | log-out | Revoke sessions |
 
+## Sign-up words (web)
+
+| English | हिंदी | Means | Icon / colour | Not this |
+|---|---|---|---|---|
+| Create account | अकाउंट बनाएँ | An owner signs up for Cable Billing | — | Register, Sign up, रजिस्टर करें |
+| 30 days free | 30 दिन मुफ़्त | The free trial (D-20) | — | Trial, ट्रायल, Free tier |
+| Business name | बिज़नेस का नाम | The operator's name, as customers know it | — | Company, Tenant, फ़र्म |
+| Mobile no. | मोबाइल नंबर | The owner's 10-digit mobile number | phone | Phone number, Contact |
+| Confirm (an email) | पक्का करें | Open the link we emailed, to show the email is yours | — | Verify, Validate, सत्यापित करें |
+| Check that you are a person | जाँच कि आप इंसान हैं | The anti-robot box on the form | — | CAPTCHA, Bot check |
+| Start | शुरू करें | Begin using the app after confirming the email | arrow-right | Activate, Provision |
+
 ## Search and customer words (lineman app)
 
 | English | हिंदी | Means | Icon / colour | Not this |

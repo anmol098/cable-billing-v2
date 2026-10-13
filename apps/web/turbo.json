@@ -23,6 +23,7 @@
         "CRON_SECRET",
         "DATABASE_URL",
         "DATABASE_URL_UNPOOLED",
+        "EMAIL_OUTBOX_DIR",
         "RAZORPAY_KEY_SECRET",
         "RAZORPAY_WEBHOOK_SECRET",
         "RESEND_API_KEY",

@@ -108,3 +108,4 @@ export { findPii, isPiiKey, type PiiFinding, piiKindOfValue, scrubText } from ".
 export * from "./mobile-auth";
 export * from "./payments";
 export * from "./receipts/links";
+export * from "./tenants";

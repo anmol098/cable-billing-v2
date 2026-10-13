@@ -1,29 +1,39 @@
 /**
  * The app's server singletons for auth (T-026): the service runtime (database client, logger,
- * clock; T-025) and the auth service (@cb/core `createAuthService`). Server-only.
+ * clock; T-025), the auth service (@cb/core `createAuthService`) and the self sign-up service
+ * (@cb/core `createSignupService`, T-027; same rate limiter and email transport). Server-only.
  *
  * Built lazily on first use, so `next build` and routes that don't need them work without any
  * environment (T-011). What each environment gets:
  *
- * | | Rate limits | Reset emails |
- * |---|---|---|
- * | production | Upstash (required by the env module) | Resend (required) |
- * | preview / staging | Upstash when set, else in memory (logged) | Resend when set, else not sent (logged) |
- * | local, CI, e2e | in memory | Resend when set, else captured (`next dev` prints them) |
+ * | | Rate limits | Emails (reset, sign-up) | Sign-up bot check |
+ * |---|---|---|---|
+ * | production | Upstash (required by the env module) | Resend (required) | Turnstile (required) |
+ * | preview / staging | Upstash when set, else in memory (logged) | Resend when set, else not sent (logged) | Turnstile when set, else off (logged) |
+ * | local, CI, e2e | in memory | Resend when set, else captured (`next dev` prints them; `EMAIL_OUTBOX_DIR` writes files for e2e) | Turnstile when set, else off |
  */
+import { randomUUID } from "node:crypto";
+import { mkdirSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
 import {
+  type AuthEmailMessage,
   type AuthEmailTransport,
   type AuthService,
+  type BotCheck,
   createAuthService,
   createCaptureTransport,
   createLogger,
   createMemoryRateLimiter,
   createResendTransport,
   createServiceRuntime,
+  createSignupService,
+  createTurnstileVerifier,
   createUpstashRateLimiter,
+  disabledBotCheck,
   type Logger,
   type RateLimiter,
   type ServiceRuntime,
+  type SignupService,
   startRuntimeRoleCheck,
 } from "@cb/core";
 import { createDb } from "@cb/db";
@@ -32,8 +42,14 @@ import { nextCookies } from "better-auth/next-js";
 import { after } from "next/server";
 import { baseUrls, deploymentTarget, requireServerEnv, serverEnv } from "@/env";
 import { renderResetEmail } from "./reset-email";
+import { renderSignupEmail } from "./signup-email";
 
-type Singletons = { runtime: ServiceRuntime; auth: AuthService; rateLimiter: RateLimiter };
+type Singletons = {
+  runtime: ServiceRuntime;
+  auth: AuthService;
+  rateLimiter: RateLimiter;
+  signup: SignupService;
+};
 
 // Kept on globalThis so `next dev` hot reloads don't open a new pool each time.
 const KEY = Symbol.for("@cb/web/auth-singletons");
@@ -55,15 +71,36 @@ function emailTransportFor(logger: Logger): AuthEmailTransport {
   if (apiKey && from) return createResendTransport({ apiKey, from });
   const local = deploymentTarget(serverEnv) === "local";
   if (!local) logger.warn("auth.email_not_configured", { reason: "resend_not_configured" });
+  // Local and CI end-to-end tests only (the env module refuses it on Vercel).
+  const outbox = local ? serverEnv.EMAIL_OUTBOX_DIR : undefined;
   return createCaptureTransport({
-    // Local development only: show the reset email in the terminal (never on Vercel, never in
-    // a production build, which is what e2e runs).
+    // Local development only: show the email in the terminal (never on Vercel, never in a
+    // production build, which is what e2e runs).
     onSend: (message) => {
       if (local && serverEnv.NODE_ENV === "development") {
         console.warn(`[dev email] ${message.subject}\n${message.text}`);
       }
+      if (outbox) writeToOutbox(outbox, message);
     },
   });
+}
+
+/** One JSON file per email, for the e2e tests (`EMAIL_OUTBOX_DIR`). */
+function writeToOutbox(dir: string, message: AuthEmailMessage): void {
+  mkdirSync(dir, { recursive: true });
+  writeFileSync(
+    join(dir, `${Date.now()}-${randomUUID()}.json`),
+    JSON.stringify({ to: message.to, subject: message.subject, text: message.text }),
+  );
+}
+
+function botCheckFor(logger: Logger): BotCheck {
+  const secret = serverEnv.TURNSTILE_SECRET_KEY;
+  if (secret) return createTurnstileVerifier({ secret });
+  if (deploymentTarget(serverEnv) !== "local") {
+    logger.warn("signup.bot_check_off", { reason: "turnstile_not_configured" });
+  }
+  return disabledBotCheck();
 }
 
 /** Runs `task` after the response is sent (Next's `after`), or just lets it finish. */
@@ -105,7 +142,14 @@ function create(): Singletons {
     // Copies Better Auth's Set-Cookie headers into Next's cookie store; must be the last plugin.
     plugins: [nextCookies()],
   });
-  return { runtime, auth, rateLimiter };
+  const signup = createSignupService({
+    runtime,
+    baseURL: baseUrls().app,
+    rateLimiter,
+    botCheck: botCheckFor(logger),
+    sendEmail: (email) => transport.send(renderSignupEmail(email)),
+  });
+  return { runtime, auth, rateLimiter, signup };
 }
 
 function singletons(): Singletons {
@@ -133,4 +177,9 @@ export function getAuthService(): AuthService {
  */
 export function getRateLimiter(): RateLimiter {
   return singletons().rateLimiter;
+}
+
+/** Self sign-up (`/signup`, `/verify/<token>`, T-027). */
+export function getSignupService(): SignupService {
+  return singletons().signup;
 }

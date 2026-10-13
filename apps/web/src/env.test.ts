@@ -234,6 +234,22 @@ describe("deployment presence rules", () => {
     expect(deploymentEnvProblems(appEnv({ VERCEL_ENV: "development" }))).toEqual([]);
   });
 
+  it("EMAIL_OUTBOX_DIR (e2e email files) is local only, refused on every Vercel deployment", () => {
+    expect(deploymentEnvProblems(appEnv({ EMAIL_OUTBOX_DIR: "/tmp/outbox" }))).toEqual([]);
+    expect(
+      deploymentEnvProblems(appEnv({ ...production, EMAIL_OUTBOX_DIR: "/tmp/outbox" })),
+    ).toEqual(["EMAIL_OUTBOX_DIR: only for local tests; never set it in production"]);
+    const preview = appEnv({
+      VERCEL_ENV: "preview",
+      DATABASE_URL: production.DATABASE_URL,
+      BETTER_AUTH_SECRET: production.BETTER_AUTH_SECRET,
+      EMAIL_OUTBOX_DIR: "/tmp/outbox",
+    });
+    expect(deploymentEnvProblems(preview)).toEqual([
+      "EMAIL_OUTBOX_DIR: only for local tests; never set it in preview",
+    ]);
+  });
+
   it("never allows live Razorpay keys outside production", () => {
     const env = appEnv({
       VERCEL_ENV: "preview",

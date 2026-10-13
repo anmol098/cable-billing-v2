@@ -106,6 +106,12 @@ const serverShape = {
   RESEND_API_KEY: optional(z.string().startsWith("re_", 'must start with "re_"')),
   /** Sender, e.g. `Cable Billing <noreply@your-domain>`; the domain must be verified in Resend. */
   EMAIL_FROM: optional(emailFrom),
+  /**
+   * Local and CI end-to-end tests only: with no Resend key, every outgoing email is also written
+   * as a JSON file into this folder, where the Playwright tests read sign-up links (T-027).
+   * Refused on any Vercel deployment (`deploymentEnvProblems`).
+   */
+  EMAIL_OUTBOX_DIR: optional(z.string().min(1)),
 
   // --- Bot protection on sign-up (Cloudflare Turnstile); site key is NEXT_PUBLIC_ ---
   TURNSTILE_SECRET_KEY: optional(z.string().min(1)),
@@ -241,6 +247,9 @@ export function deploymentEnvProblems(env: AppEnv): string[] {
   const problems = required
     .filter((key) => env[key] === undefined)
     .map((key) => `${key}: required in ${target}`);
+  if (env.EMAIL_OUTBOX_DIR !== undefined) {
+    problems.push(`EMAIL_OUTBOX_DIR: only for local tests; never set it in ${target}`);
+  }
 
   const liveRazorpay = env.RAZORPAY_KEY_ID?.startsWith("rzp_live_");
   if (target === "production") {
