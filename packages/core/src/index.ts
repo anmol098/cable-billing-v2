@@ -43,6 +43,7 @@ export {
   tenantModeOf,
 } from "./authz/writable";
 export * from "./billing";
+export * from "./collections";
 export {
   createServiceRuntime,
   isRequestId,

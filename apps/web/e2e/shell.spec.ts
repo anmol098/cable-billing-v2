@@ -134,6 +134,9 @@ test.describe("operator shell", () => {
     // Every page, including the sub-pages and the detail pages (placeholders until built).
     for (const route of allRoutes()) {
       const response = await page.goto(urlOf(route.path));
+      // A built detail page doesn't know the made-up id: 404 like any unknown or other tenant's
+      // id (T-062 `/linemen/[id]` is the first). Placeholders still answer 200 with their title.
+      if (isDynamicPath(route.path) && response?.status() === 404) continue;
       expect(response?.status(), route.path).toBe(200);
       await expect(heading(page), route.path).toHaveText(en.shell.routes[route.id]);
     }

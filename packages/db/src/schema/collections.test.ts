@@ -212,7 +212,9 @@ describeDb("collection_sessions", () => {
     await expect(update(a, row.id, { collectorId: a.ownerId })).rejects.toSatisfy(
       isImmutableRowError,
     );
-    await expect(t.current.admin.query("TRUNCATE collection_sessions")).rejects.toSatisfy(
+    // CASCADE: handover_events (T-062) references the sessions, so a plain TRUNCATE would stop at
+    // the foreign key before reaching the trigger this test is about.
+    await expect(t.current.admin.query("TRUNCATE collection_sessions CASCADE")).rejects.toSatisfy(
       isImmutableRowError,
     );
   });

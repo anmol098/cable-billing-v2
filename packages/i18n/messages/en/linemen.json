@@ -1,0 +1,109 @@
+{
+  "day_title": "{name}: {date}",
+  "page_description": "Cash and UPI each lineman collected, and the cash they handed over.",
+  "day": {
+    "label": "Day",
+    "show": "Show",
+    "previous": "Previous day",
+    "next": "Next day",
+    "today": "Today",
+    "today_date": "Today, {date}"
+  },
+  "totals": {
+    "label": "Totals for the day",
+    "cash": "Cash",
+    "upi": "UPI",
+    "upi_note": "UPI is not handed over: it is already in your account.",
+    "waiting": "{count, plural, one {# handover to check} other {# handovers to check}}",
+    "none_waiting": "No handover to check"
+  },
+  "card": {
+    "list_label": "Linemen",
+    "switched_off": "Switched off"
+  },
+  "status": {
+    "open": "Not handed over",
+    "submitted": "Waiting for check",
+    "accepted": "Accepted",
+    "returned": "Sent back"
+  },
+  "difference": {
+    "match": "Cash matches",
+    "short": "₹{amount} short",
+    "extra": "₹{amount} extra"
+  },
+  "reason": {
+    "label": "Lineman's reason",
+    "short": "Less cash",
+    "extra": "More cash",
+    "pending_sync": "Payments still on phone",
+    "other": "Other"
+  },
+  "phone": {
+    "none": "No phone signed in",
+    "last_online": "Phone last online {when}",
+    "not_seen": "Phone not online since {when}. Payments after that may still be on the phone.",
+    "unsynced": "{count, plural, one {When handing over, # payment (₹{amount} cash) was still on the phone.} other {When handing over, # payments (₹{amount} cash) were still on the phone.}}"
+  },
+  "changed": "The cash total changed after the handover: ₹{before} then, ₹{now} now.",
+  "time_am": "{time} AM",
+  "time_pm": "{time} PM",
+  "date_time": "{date}, {time}",
+  "empty": "No linemen yet. Add linemen in Settings.",
+  "add_linemen": "Add linemen",
+  "review": {
+    "back": "All linemen",
+    "expected": "Cash expected",
+    "expected_note": "Cash payments the office has. UPI and cancelled payments are not counted.",
+    "upi": "UPI collected",
+    "payments": "Payments",
+    "handover_title": "Cash handover",
+    "not_handed_over": "Not handed over yet.",
+    "handed_over": "Cash handed over",
+    "expected_then": "Cash expected at handover",
+    "difference": "Difference",
+    "lineman_note": "Lineman's note",
+    "handed_over_at": "Handed over at {when}",
+    "office_note": "Office note: {note}",
+    "reviewed_accepted": "Accepted by {name} at {when}",
+    "reviewed_returned": "Sent back by {name} at {when}",
+    "accept": "Accept",
+    "accepting": "Accepting…",
+    "accept_title": "Accept this cash?",
+    "accept_summary": "{name} gave {handed}. Expected {expected}. {difference}. After you accept, this day is closed.",
+    "send_back": "Send back",
+    "sending_back": "Sending back…",
+    "send_back_title": "Send this handover back?",
+    "send_back_summary": "{name} will see your note on the phone and can hand over again.",
+    "send_back_note_label": "What should the lineman fix?",
+    "send_back_note_required": "Write what the lineman should fix.",
+    "accepted_toast": "Cash accepted",
+    "returned_toast": "Sent back to the lineman",
+    "error": {
+      "already_accepted": "This handover was already accepted.",
+      "already_returned": "This handover was already sent back.",
+      "not_submitted": "The lineman has not handed over cash yet.",
+      "resubmitted": "The lineman handed over again. Check the new numbers.",
+      "read_only": "View only: pay for the app to accept or send back handovers.",
+      "generic": "Something went wrong. Try again."
+    },
+    "payments_title": "Payments of the day",
+    "payments_caption": "Payments of the day",
+    "no_payments": "No payments for this day.",
+    "column": {
+      "time": "Time",
+      "customer": "Customer",
+      "method": "Cash / UPI",
+      "amount": "Amount",
+      "receipt": "Receipt no."
+    },
+    "cancelled": "Cancelled",
+    "to_check": "To check",
+    "history_title": "What happened",
+    "history": {
+      "submitted": "{name} handed over {handed} (expected {expected})",
+      "accepted": "{name} accepted",
+      "returned": "{name} sent it back"
+    }
+  }
+}
