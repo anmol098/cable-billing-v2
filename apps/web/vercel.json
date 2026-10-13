@@ -1,0 +1,13 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "nextjs",
+  "regions": ["sin1"],
+  "crons": [
+    { "path": "/api/cron/billing-scheduler", "schedule": "45 18 * * *" },
+    { "path": "/api/cron/job-worker", "schedule": "*/2 * * * *" },
+    { "path": "/api/cron/subscription-states", "schedule": "30 0 * * *" },
+    { "path": "/api/cron/session-close", "schedule": "0 19 * * *" },
+    { "path": "/api/cron/invariants", "schedule": "0 21 * * *" },
+    { "path": "/api/cron/receipt-links-cleanup", "schedule": "0 22 * * 0" }
+  ]
+}
