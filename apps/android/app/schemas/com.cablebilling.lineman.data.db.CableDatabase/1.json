@@ -1,0 +1,653 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 1,
+    "identityHash": "bd437c6be2e0148a6e7a767a234e0198",
+    "entities": [
+      {
+        "tableName": "customers",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `code` TEXT NOT NULL, `name` TEXT NOT NULL, `phone` TEXT, `alt_phone` TEXT, `address` TEXT, `area_id` TEXT, `area_name` TEXT, `balance_paise` INTEGER NOT NULL, `credit_paise` INTEGER NOT NULL, `open_bill_count` INTEGER NOT NULL, `open_bills_outstanding_paise` INTEGER NOT NULL, `oldest_open_period` TEXT, `updated_at` INTEGER NOT NULL, `cached_at` INTEGER NOT NULL, `search_digits` TEXT NOT NULL, `search_name` TEXT NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "code",
+            "columnName": "code",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "phone",
+            "columnName": "phone",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "altPhone",
+            "columnName": "alt_phone",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "address",
+            "columnName": "address",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "areaId",
+            "columnName": "area_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "areaName",
+            "columnName": "area_name",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "balancePaise",
+            "columnName": "balance_paise",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "creditPaise",
+            "columnName": "credit_paise",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "openBillCount",
+            "columnName": "open_bill_count",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "openBillsOutstandingPaise",
+            "columnName": "open_bills_outstanding_paise",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "oldestOpenPeriod",
+            "columnName": "oldest_open_period",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "updatedAt",
+            "columnName": "updated_at",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cachedAt",
+            "columnName": "cached_at",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "searchDigits",
+            "columnName": "search_digits",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "searchName",
+            "columnName": "search_name",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_customers_code",
+            "unique": false,
+            "columnNames": [
+              "code"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_customers_code` ON `${TABLE_NAME}` (`code`)"
+          },
+          {
+            "name": "index_customers_name",
+            "unique": false,
+            "columnNames": [
+              "name"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_customers_name` ON `${TABLE_NAME}` (`name`)"
+          },
+          {
+            "name": "index_customers_phone",
+            "unique": false,
+            "columnNames": [
+              "phone"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_customers_phone` ON `${TABLE_NAME}` (`phone`)"
+          }
+        ]
+      },
+      {
+        "tableName": "customer_vcs",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`customer_id` TEXT NOT NULL, `position` INTEGER NOT NULL, `vc_number` TEXT NOT NULL, `status` TEXT NOT NULL, PRIMARY KEY(`customer_id`, `position`))",
+        "fields": [
+          {
+            "fieldPath": "customerId",
+            "columnName": "customer_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "position",
+            "columnName": "position",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "vcNumber",
+            "columnName": "vc_number",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "status",
+            "columnName": "status",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "customer_id",
+            "position"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_customer_vcs_vc_number",
+            "unique": false,
+            "columnNames": [
+              "vc_number"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_customer_vcs_vc_number` ON `${TABLE_NAME}` (`vc_number`)"
+          }
+        ]
+      },
+      {
+        "tableName": "open_bills",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`invoice_id` TEXT NOT NULL, `customer_id` TEXT NOT NULL, `invoice_number` TEXT NOT NULL, `kind` TEXT NOT NULL, `period` TEXT NOT NULL, `charges_paise` INTEGER NOT NULL, `outstanding_paise` INTEGER NOT NULL, `cached_at` INTEGER NOT NULL, PRIMARY KEY(`invoice_id`))",
+        "fields": [
+          {
+            "fieldPath": "invoiceId",
+            "columnName": "invoice_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "customerId",
+            "columnName": "customer_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "invoiceNumber",
+            "columnName": "invoice_number",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "kind",
+            "columnName": "kind",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "period",
+            "columnName": "period",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "chargesPaise",
+            "columnName": "charges_paise",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "outstandingPaise",
+            "columnName": "outstanding_paise",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cachedAt",
+            "columnName": "cached_at",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "invoice_id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_open_bills_customer_id",
+            "unique": false,
+            "columnNames": [
+              "customer_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_open_bills_customer_id` ON `${TABLE_NAME}` (`customer_id`)"
+          }
+        ]
+      },
+      {
+        "tableName": "payments",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `customer_id` TEXT NOT NULL, `customer_code` TEXT NOT NULL, `customer_name` TEXT NOT NULL, `amount_paise` INTEGER NOT NULL, `method` TEXT NOT NULL, `upi_reference` TEXT, `notes` TEXT, `recorded_at` INTEGER NOT NULL, `business_date` TEXT NOT NULL, `provisional_ref` TEXT NOT NULL, `collector_id` TEXT NOT NULL, `device_id` TEXT NOT NULL, `state` TEXT NOT NULL, `attempt_count` INTEGER NOT NULL, `last_attempt_at` INTEGER, `last_error_code` TEXT, `review_reason` TEXT, `receipt_number` TEXT, `posted_at` INTEGER, `posted_business_date` TEXT, `balance_after_paise` INTEGER, `credit_after_paise` INTEGER, `allocations_json` TEXT, `synced_at` INTEGER, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "customerId",
+            "columnName": "customer_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "customerCode",
+            "columnName": "customer_code",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "customerName",
+            "columnName": "customer_name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "amountPaise",
+            "columnName": "amount_paise",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "method",
+            "columnName": "method",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "upiReference",
+            "columnName": "upi_reference",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "notes",
+            "columnName": "notes",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "recordedAt",
+            "columnName": "recorded_at",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "businessDate",
+            "columnName": "business_date",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "provisionalRef",
+            "columnName": "provisional_ref",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "collectorId",
+            "columnName": "collector_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "deviceId",
+            "columnName": "device_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "state",
+            "columnName": "state",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "attemptCount",
+            "columnName": "attempt_count",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastAttemptAt",
+            "columnName": "last_attempt_at",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "lastErrorCode",
+            "columnName": "last_error_code",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "reviewReason",
+            "columnName": "review_reason",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "receiptNumber",
+            "columnName": "receipt_number",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "postedAt",
+            "columnName": "posted_at",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "postedBusinessDate",
+            "columnName": "posted_business_date",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "balanceAfterPaise",
+            "columnName": "balance_after_paise",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "creditAfterPaise",
+            "columnName": "credit_after_paise",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "allocationsJson",
+            "columnName": "allocations_json",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "syncedAt",
+            "columnName": "synced_at",
+            "affinity": "INTEGER"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_payments_customer_id_state",
+            "unique": false,
+            "columnNames": [
+              "customer_id",
+              "state"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_payments_customer_id_state` ON `${TABLE_NAME}` (`customer_id`, `state`)"
+          },
+          {
+            "name": "index_payments_state_recorded_at",
+            "unique": false,
+            "columnNames": [
+              "state",
+              "recorded_at"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_payments_state_recorded_at` ON `${TABLE_NAME}` (`state`, `recorded_at`)"
+          },
+          {
+            "name": "index_payments_collector_id_business_date",
+            "unique": false,
+            "columnNames": [
+              "collector_id",
+              "business_date"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_payments_collector_id_business_date` ON `${TABLE_NAME}` (`collector_id`, `business_date`)"
+          },
+          {
+            "name": "index_payments_provisional_ref",
+            "unique": true,
+            "columnNames": [
+              "provisional_ref"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_payments_provisional_ref` ON `${TABLE_NAME}` (`provisional_ref`)"
+          }
+        ]
+      },
+      {
+        "tableName": "receipt_actions_outbox",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `payment_id` TEXT NOT NULL, `action` TEXT NOT NULL, `at` INTEGER NOT NULL, `state` TEXT NOT NULL, `attempt_count` INTEGER NOT NULL, `last_error_code` TEXT, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "paymentId",
+            "columnName": "payment_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "action",
+            "columnName": "action",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "at",
+            "columnName": "at",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "state",
+            "columnName": "state",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "attemptCount",
+            "columnName": "attempt_count",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastErrorCode",
+            "columnName": "last_error_code",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_receipt_actions_outbox_payment_id",
+            "unique": false,
+            "columnNames": [
+              "payment_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_receipt_actions_outbox_payment_id` ON `${TABLE_NAME}` (`payment_id`)"
+          },
+          {
+            "name": "index_receipt_actions_outbox_state_at",
+            "unique": false,
+            "columnNames": [
+              "state",
+              "at"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_receipt_actions_outbox_state_at` ON `${TABLE_NAME}` (`state`, `at`)"
+          }
+        ]
+      },
+      {
+        "tableName": "collection_day",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`collector_id` TEXT NOT NULL, `business_date` TEXT NOT NULL, `cash_total_paise` INTEGER NOT NULL, `upi_total_paise` INTEGER NOT NULL, `payment_count` INTEGER NOT NULL, `status` TEXT NOT NULL, `handover_json` TEXT, `server_time` INTEGER NOT NULL, `cached_at` INTEGER NOT NULL, `queued_handover_json` TEXT, PRIMARY KEY(`collector_id`, `business_date`))",
+        "fields": [
+          {
+            "fieldPath": "collectorId",
+            "columnName": "collector_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "businessDate",
+            "columnName": "business_date",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cashTotalPaise",
+            "columnName": "cash_total_paise",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "upiTotalPaise",
+            "columnName": "upi_total_paise",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "paymentCount",
+            "columnName": "payment_count",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "status",
+            "columnName": "status",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "handoverJson",
+            "columnName": "handover_json",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "serverTime",
+            "columnName": "server_time",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cachedAt",
+            "columnName": "cached_at",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "queuedHandoverJson",
+            "columnName": "queued_handover_json",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "collector_id",
+            "business_date"
+          ]
+        }
+      },
+      {
+        "tableName": "sync_meta",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`stream` TEXT NOT NULL, `scope` TEXT, `cursor` TEXT, `last_success_at` INTEGER, `last_server_time` INTEGER, `last_attempt_at` INTEGER, `last_failure` TEXT, PRIMARY KEY(`stream`))",
+        "fields": [
+          {
+            "fieldPath": "stream",
+            "columnName": "stream",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "scope",
+            "columnName": "scope",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "cursor",
+            "columnName": "cursor",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "lastSuccessAt",
+            "columnName": "last_success_at",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "lastServerTime",
+            "columnName": "last_server_time",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "lastAttemptAt",
+            "columnName": "last_attempt_at",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "lastFailure",
+            "columnName": "last_failure",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "stream"
+          ]
+        }
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'bd437c6be2e0148a6e7a767a234e0198')"
+    ]
+  }
+}

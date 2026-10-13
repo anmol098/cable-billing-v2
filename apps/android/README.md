@@ -46,11 +46,13 @@ app/                      the app: feature packages under com.cablebilling.linem
   feature/{login,update,search,today,queue,…}   one package per feature (PLAN §11.1)
   data/network            Retrofit services, interceptors, generated DTOs (data/network/generated)
   data/auth               session store (Tink-sealed), install id, sign in / out
+  data/db                 Room database (roster cache, payment queue, outboxes, sync_meta), repositories
+  data/sync               roster sync (RosterSync*: engine, worker, scheduler); payment push (T-066)
   ui/                     app shell (CableApp: bottom bar + NavHost), navigation
   di/                     Hilt modules (network, storage)
   locale/                 AppLanguage (Hindi default, per-app language)
   diagnostics/            CrashReporting (Sentry)
-  schemas/                Room exported schemas (committed; created by the first @Database)
+  schemas/                Room exported schemas (committed; one JSON per database version)
 core/designsystem/        GENERATED Tokens.kt + ic_cb_* icons, CableTheme, fonts, components
                           (component/), Rupees formatting (money/), Speaker (voice/)
 app/src/debug/            debug-only component catalogue (second launcher icon "Components (test)")
@@ -77,6 +79,21 @@ Generated, never edited by hand: `core/designsystem/.../generated/Tokens.kt` (`p
   is sealed with the Keystore-backed Tink key in the `session` DataStore.
 - The network tests run against MockWebServer with the contract fixtures in
   `packages/contracts/fixtures` (no server needed); those files are inputs of the test task.
+
+## Offline roster and the Room database (T-064)
+
+- `data/db/CableDatabase` (Room, file `cable.db`): `customers`, `customer_vcs`, `open_bills` (roster
+  cache), `payments` (local queue, never deleted), `receipt_actions_outbox`, `collection_day`,
+  `sync_meta`. Money is `Long` paise; instants are epoch-ms `Long` (`*_at`), dates `YYYY-MM-DD` text.
+- `RosterRepository`: `search(query)` and `customer(id)` Flows (offline, projected balance = server
+  balance minus the phone's unsynced payments), `refreshCustomer(id)` (online detail), and
+  `syncStatus()` for "Updated X min ago".
+- `RosterSync` pulls `GET /sync/customers` (full, then deltas by cursor; CURSOR_INVALID → full);
+  `RosterSyncScheduler` runs it every 30 min, on sign-in, on app open and on `requestNow()`.
+- **Changing the schema:** bump `CableDatabase.VERSION`, add a `Migration` to `CableMigrations.ALL`,
+  build (Room writes `schemas/…/<version>.json`; commit it), add the new identity hash to
+  `CableDatabaseMigrationTest`. Never use a destructive fallback: payments may exist only on the phone.
+  Debug builds carry the schema JSONs as assets so `MigrationTestHelper` runs under Robolectric.
 
 ## Design-system components
 
