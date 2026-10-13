@@ -3,10 +3,10 @@ id: T-065
 title: Android: number-pad search home and customer screen
 phase: 3
 area: android
-status: todo
-owner:
-claimed_at:
-branch:
+status: claimed
+owner: agent-t065
+claimed_at: 2026-10-13T13:38:58.502Z
+branch: task/T-065-android-number-pad-search-home-and-custo
 depends_on: [T-064, T-009]
 review: self
 claimable_by: agent
@@ -51,3 +51,7 @@ PLAN §11.2, PLAN §11.3 (Search, Customer), D-10, D-11 — see `docs/IMPLEMENTA
 ## Completion notes
 
 _The agent fills this in before opening the PR: what was built, decisions taken, deviations, follow-up tasks created, and how it was verified._
+
+## Board log
+
+- 2026-10-13T13:38:58.503Z claimed by agent-t065
