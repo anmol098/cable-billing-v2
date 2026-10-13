@@ -28,6 +28,14 @@ export {
   tenantKey,
   tenantPolicies,
 } from "./rls";
+export {
+  checkRuntimeRole,
+  MAX_LISTED_OBJECTS,
+  type OwnedObject,
+  type RuntimeRoleIssue,
+  type RuntimeRoleIssueCode,
+  type RuntimeRoleReport,
+} from "./runtime-role";
 export * from "./schema";
 export { type Schema, TransactionFinishedError, type Tx, type TxOptions } from "./tenant";
 export {

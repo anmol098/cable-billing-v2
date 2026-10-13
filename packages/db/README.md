@@ -30,13 +30,22 @@ from migrations and data fixes run as the owner.
   `app_rw` and `app_platform` (migration 0000 grants that). Isolation holds for everything that goes
   through `createDb`, which is the only query path @cb/db offers. A raw `pg` connection with this URL
   would bypass RLS, so app code must never open one.
-- **Shape B (recommended for production, follow-up for H-01).** Runtime `DATABASE_URL` uses a
-  separate LOGIN role that is only a member of `app_rw` and `app_platform`, no BYPASSRLS, owns
-  nothing; the owner URL is used only as `DATABASE_URL_UNPOOLED` for migrations. Then even a raw
-  connection that never set the tenant sees zero rows. Tested in `tenant.test.ts`. Setup:
+- **Shape B (staging and production, T-020a).** Runtime `DATABASE_URL` uses a separate LOGIN role
+  `cb_app` that is only a member of `app_rw` and `app_platform`, no BYPASSRLS, owns nothing; the
+  owner URL is used only for migrations. Then even a raw connection that never set the tenant can't
+  read tenant rows. Created with **NOINHERIT**, so a raw query has no table rights at all
+  (`permission denied`); with INHERIT it would see zero tenant rows but every row of tables with an
+  `app_platform` policy. Setup, verification and rotation: `docs/runbooks/environments.md` §4.12.
   ```sql
-  CREATE ROLE cb_app LOGIN PASSWORD '<generated>' INHERIT IN ROLE app_rw, app_platform;
+  CREATE ROLE cb_app LOGIN NOINHERIT NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS
+    IN ROLE app_rw, app_platform;   -- then \password cb_app
   ```
+  **Boot check:** `checkRuntimeRole(db)` → `{ ok, sessionUser, database, issues }` reports a
+  superuser, BYPASSRLS/CREATEROLE/CREATEDB/REPLICATION, owned objects (directly or via membership of
+  the owner role), CREATE rights, a missing app-role membership (`cannot_assume_role`) and, as a
+  warning, INHERIT. It never throws for a finding (only if the database can't be reached). Call it
+  where shape B is expected (staging, production) and log/alert; previews (shape A) would fail it.
+  Tested in `runtime-role.test.ts`.
 
 ### What `withPlatform` may do
 

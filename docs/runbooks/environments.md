@@ -67,8 +67,8 @@ value per environment, never shared between production and anything else.
 
 | Variable | Local | Preview | Staging | Production | Where it comes from |
 |---|---|---|---|---|---|
-| `DATABASE_URL` | Docker URL | integration | non-prod `staging` branch, pooled | prod project `main`, pooled | Neon → Connect (pooled) |
-| `DATABASE_URL_UNPOOLED` | Docker URL | integration | non-prod `staging`, direct | prod `main`, direct | Neon → Connect (pooling off) |
+| `DATABASE_URL` | Docker URL | integration (owner role) | non-prod `staging` branch, pooled, **role `cb_app`** (§4.12) | prod project `main`, pooled, **role `cb_app`** (§4.12) | Neon → Connect (pooled), user and password swapped for `cb_app` |
+| `DATABASE_URL_UNPOOLED` | Docker URL | integration (owner role) | **not in Vercel** after §4.12 (owner URL only in the GitHub environment, §4.10) | **not in Vercel** after §4.12 (same) | Neon → Connect (pooling off) |
 | `BETTER_AUTH_SECRET` | optional | **required** | **required** | **required** | `openssl rand -base64 32` |
 | `APP_BASE_URL` | `http://localhost:3000` | leave unset (branch URL is used) | staging URL | **required**, https | your domain / Vercel URL |
 | `RECEIPT_BASE_URL` | unset | unset | optional | optional (defaults to `APP_BASE_URL`) | a short domain later, if any |
@@ -156,6 +156,8 @@ account. Use a shared company email (not a personal one) as the owner where you 
    re-syncs its variables then.
 7. Staging: set `DATABASE_URL` / `DATABASE_URL_UNPOOLED` on the `staging` environment to the non-prod
    `staging` branch.
+   The owner URLs on staging and production are temporary: after the first migration, §4.12 swaps
+   `DATABASE_URL` for the non-owner role `cb_app` and removes `DATABASE_URL_UNPOOLED` from Vercel.
 8. Migrations are **not** run by the Vercel build (PLAN §17). Production and staging migrations run from
    a gated GitHub Actions workflow (later task); add `DATABASE_URL_UNPOOLED` to the GitHub environments
    `staging` and `production` (§4.10). Applying migrations and seed data to preview branches is wired up by
@@ -251,8 +253,8 @@ reviewer = the product owner). Secrets:
 
 | Environment | Secret | Used by |
 |---|---|---|
-| `staging` | `DATABASE_URL_UNPOOLED` (non-prod `staging` branch) | migrations workflow |
-| `production` | `DATABASE_URL_UNPOOLED` (prod `main`) | migrations workflow, backups (T-096) |
+| `staging` | `DATABASE_URL_UNPOOLED` (non-prod `staging` branch, owner role, direct) | migrations workflow |
+| `production` | `DATABASE_URL_UNPOOLED` (prod `main`, owner role, direct) | migrations workflow, backups (T-096) |
 | repository | `VERCEL_AUTOMATION_BYPASS_SECRET` | Playwright against previews (T-010/T-088) |
 | `production` | backup bucket keys, Play service account, keystore | T-096, T-073 (names set there) |
 
@@ -269,6 +271,115 @@ the Postgres service container (T-010).
    which variable is missing.
 5. Production (later, when `main` first deploys): the build log fails with
    `Environment is not ready for production` and a list if anything is missing; fix and redeploy.
+
+### 4.12 Runtime database role `cb_app` (staging and production, after the first migration)
+
+**Why.** Every URL Neon gives you logs in as the database **owner** (`neondb_owner`), which owns every
+table. Row-level security (RLS) does not bind a table's owner, so with an owner URL, tenant isolation
+rests on the app always going through `withTenant` / `withPlatform` (`@cb/db` "shape A"). On staging
+and production the app instead logs in as **`cb_app`**: a role that owns nothing, is not a superuser,
+has no BYPASSRLS / CREATEROLE / CREATEDB, and can only switch into the two app roles `app_rw` and
+`app_platform` ("shape B", `packages/db/README.md` → "Who connects as whom"). Then even a query that
+skipped `withTenant` can't read tenant data: it gets `permission denied`. Migrations keep running as
+the owner.
+
+| Where | Runtime `DATABASE_URL` (Vercel) | Migrations (`DATABASE_URL_UNPOOLED`) |
+|---|---|---|
+| Local, CI | owner (Docker / service container) | owner |
+| Previews | owner, written by the Neon integration (**shape A**: leave it, nothing to do) | owner (integration) |
+| Staging | **`cb_app`**, pooled, non-prod `staging` branch | owner, direct, only in the GitHub environment `staging` |
+| Production | **`cb_app`**, pooled, prod `main` branch | owner, direct, only in the GitHub environment `production` |
+
+Do this once per branch: on the prod project's `main`, and on the non-prod project's `staging`.
+Roles live inside a Neon branch, so preview branches created from `staging` later contain a copy of
+`cb_app` too. Previews still use the owner URL, which is fine (seed data only).
+
+**Before you start:** the first migration (`0000_foundation`) must have run on that branch (it creates
+`app_rw` and `app_platform`). Have the owner's **direct** URL ready (Neon → Connect, pooling off, role
+`neondb_owner`): the same one the migrations workflow uses.
+
+1. **Generate the password** on your machine and save it straight into the password-manager entry
+   "Neon `<project>/<branch>` cb_app":
+   ```bash
+   openssl rand -hex 32     # 64 hex characters = 256 bits; nothing to URL-encode
+   ```
+2. **Create the role** with `psql` from your machine. Not in the Neon SQL Editor (it keeps query
+   history), and not in Neon Console → Roles (roles made there get extra rights, e.g. membership of
+   `neon_superuser`, CREATEDB and CREATEROLE).
+   ```bash
+   read -rs OWNER_URL && export OWNER_URL     # paste the owner's direct URL (not echoed, not in history)
+   HISTFILE=/dev/null psql "$OWNER_URL"
+   ```
+   ```sql
+   CREATE ROLE cb_app LOGIN NOINHERIT NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS
+     IN ROLE app_rw, app_platform;
+   \password cb_app
+   -- paste the password twice; psql sends only a SCRAM hash, so it never reaches server logs
+   ```
+   - `IN ROLE app_rw, app_platform` makes `cb_app` a member, so `withTenant` / `withPlatform` can
+     switch to those roles inside each transaction (`SET LOCAL ROLE`).
+   - **NOINHERIT on purpose** (stricter than the `INHERIT` sketch in T-020): `cb_app` has no table
+     rights of its own, only after switching. With INHERIT, a raw query would still see zero tenant
+     rows, but **every** row of the tables that have an `app_platform` policy (`operators`, `users`,
+     `sessions`, `accounts`, …). Both behaviours are tested in `packages/db/src/runtime-role.test.ts`.
+   - Grant it nothing else, ever: no table grants, no ownership, no `CREATE`. Tables that later
+     migrations create are covered by migration 0000's default privileges (tested), as long as every
+     migration runs as the same owner role.
+   - If Neon refuses `\password` (it checks password strength on plain text), run
+     `ALTER ROLE cb_app PASSWORD '<password>';` in the same session instead (`HISTFILE=/dev/null`
+     keeps it out of psql's history file).
+   - `ERROR: permission denied to grant role "app_rw"`: you are not connected as the owner role that
+     ran migration 0000.
+3. **Build the runtime URL**: take the owner's **pooled** URL from Neon → Connect (host contains
+   `-pooler`), replace user and password, keep every query parameter:
+   ```text
+   postgresql://cb_app:<password>@ep-…-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require
+   ```
+4. **Verify before switching**, from a checkout of this repo (`pnpm install` done). It prints the
+   report and exits non-zero unless the role is safe:
+   ```bash
+   read -rs DATABASE_URL && export DATABASE_URL    # paste the cb_app URL from step 3
+   pnpm --silent --filter @cb/db exec tsx -e 'import { checkRuntimeRole, createDb } from "@cb/db"; const db = createDb({ connectionString: process.env.DATABASE_URL }); checkRuntimeRole(db).then((r) => { console.log(JSON.stringify(r, null, 2)); process.exitCode = r.ok ? 0 : 1; }, (e) => { console.error(e); process.exitCode = 1; }).finally(() => db.end());'
+   unset DATABASE_URL OWNER_URL
+   ```
+   Expect `"ok": true`, `"sessionUser": "cb_app"`, `"issues": []`. Each `error` issue says what is
+   wrong (the owner URL, for comparison, reports `owns_objects`, `createrole`, …). Optional extra
+   check: `psql "<cb_app URL>" -c 'SELECT count(*) FROM operators'` must fail with
+   `permission denied for table operators`.
+5. **Switch Vercel** (Settings → Environment Variables), for that environment only (Production for
+   prod `main`; `staging` for the non-prod `staging` branch):
+   - `DATABASE_URL` = the `cb_app` URL from step 3 (Sensitive).
+   - **Delete** `DATABASE_URL_UNPOOLED` there. The app doesn't read it at runtime; migrations run from
+     GitHub Actions with the owner URL kept only in the GitHub environment (§4.10). If a runtime
+     feature ever needs a direct connection, give it `cb_app`'s direct URL, never the owner's.
+   - Leave Preview and Development alone (owner URLs from the integration, shape A).
+   - Redeploy. Re-check both variables after any "Save changes" in the Neon integration settings,
+     which can re-sync them.
+6. **Confirm** after the deploy: `/api/health` returns `ok`; once apps/web runs `checkRuntimeRole` at
+   boot (T-025 / apps/web), the runtime log shows no unsafe-role error; and as the owner,
+   `SELECT usename, count(*) FROM pg_stat_activity GROUP BY 1` shows the app's connections as
+   `cb_app`.
+
+**Rotating the `cb_app` password (no downtime).** Changing a role's password breaks every running
+instance that still uses the old one, so rotate by moving to a second role:
+
+1. Steps 1–4 with a new role name, `cb_app_v2` (next time `cb_app_v3`, …), same
+   `CREATE ROLE … NOINHERIT … IN ROLE app_rw, app_platform`.
+2. Step 5 with the new URL, then redeploy. Old and new instances work side by side meanwhile.
+3. When the old role has no connections left (wait at least an hour; as the owner:
+   `SELECT count(*) FROM pg_stat_activity WHERE usename = 'cb_app'`), disable it:
+   `ALTER ROLE cb_app NOLOGIN;` (reversible: `ALTER ROLE cb_app LOGIN;`).
+4. A day later: `DROP ROLE cb_app;`. It owns nothing and holds no grants, so this just works; if it
+   reports dependent objects, stop and find out who granted it something.
+5. Vercel deployments keep the variables they were built with: once the old role is disabled, an
+   **Instant Rollback** to a deployment from before the switch can't connect. Redeploy that commit
+   instead (it picks up the current variables).
+6. Record the rotation in the password-manager entry (§7).
+
+If the password may have leaked: do steps 1–2 at once, then `ALTER ROLE <old> NOLOGIN;` and end its
+sessions straight away (`SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE usename =
+'<old>';`, or restart the compute in Neon), accepting a minute of errors on instances that haven't
+picked up the new deployment.
 
 ---
 
@@ -346,7 +457,8 @@ General rules:
 |---|---|---|
 | `BETTER_AUTH_SECRET` | New value in Vercel → redeploy | All web users must sign in again. Check the effect on Android tokens with the T-026/T-028 notes before rotating in production. |
 | `CRON_SECRET` | New value → redeploy | Vercel sends the new value from the next run; nothing else to change. |
-| `DATABASE_URL*` (DB password) | Neon → Roles → reset password. The integration re-syncs preview/integration variables; update production (and staging, GitHub `DATABASE_URL_UNPOOLED`) by hand → redeploy | Old connections fail at once: do it in a quiet hour; expect a minute of errors. |
+| `DATABASE_URL` on staging/production (role `cb_app`) | Switch to a new role (`cb_app_v2`), then disable and drop the old one: §4.12 "Rotating" | No downtime. |
+| Owner password (GitHub `DATABASE_URL_UNPOOLED`, preview URLs) | Neon → Roles → reset password. The integration re-syncs the preview variables; update the GitHub environments' `DATABASE_URL_UNPOOLED` by hand | Migrations and open preview connections fail until updated. The staging/production app (`cb_app`) is not affected. |
 | `RESEND_API_KEY` | Create a new key → update Vercel → redeploy → delete the old key | No downtime. |
 | `UPSTASH_REDIS_REST_TOKEN` | Upstash → database → reset credentials → update Vercel → redeploy | The old token stops at once; rate limiting fails until the redeploy finishes. |
 | `TURNSTILE_SECRET_KEY` | Cloudflare → Turnstile → widget → Rotate secret key (keep the overlap period if offered) → update Vercel → redeploy | Sign-ups may fail briefly without an overlap. The site key does not change. |
