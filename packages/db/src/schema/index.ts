@@ -5,9 +5,15 @@
  */
 export * from "./audit";
 export * from "./auth";
+export * from "./billing";
+export * from "./collections";
 export * from "./connections";
 export * from "./counters";
 export * from "./customers";
+export * from "./jobs";
+export * from "./ledger";
+export * from "./payments";
 export * from "./plans";
+export * from "./receipts";
 export * from "./subscriptions";
 export * from "./tenancy";
