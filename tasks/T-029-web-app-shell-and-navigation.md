@@ -3,10 +3,10 @@ id: T-029
 title: Web app shell and navigation
 phase: 1
 area: web
-status: todo
-owner:
-claimed_at:
-branch:
+status: claimed
+owner: agent-t029
+claimed_at: 2026-10-13T13:58:03.467Z
+branch: task/T-029-web-app-shell-and-navigation
 depends_on: [T-007, T-026]
 review: self
 claimable_by: agent
@@ -55,3 +55,7 @@ PLAN §12.1, PLAN §12.2, D-16 — see `docs/IMPLEMENTATION_PLAN.md`, `docs/PRD.
 ## Completion notes
 
 _The agent fills this in before opening the PR: what was built, decisions taken, deviations, follow-up tasks created, and how it was verified._
+
+## Board log
+
+- 2026-10-13T13:58:03.468Z claimed by agent-t029
