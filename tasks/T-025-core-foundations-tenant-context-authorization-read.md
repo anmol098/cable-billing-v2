@@ -3,10 +3,10 @@ id: T-025
 title: Core foundations: tenant context, authorization, read-only guard, audit, logging
 phase: 1
 area: core
-status: todo
-owner:
-claimed_at:
-branch:
+status: claimed
+owner: agent-t025
+claimed_at: 2026-10-13T12:24:56.652Z
+branch: task/T-025-core-foundations-tenant-context-authoriz
 depends_on: [T-021, T-024]
 review: required
 claimable_by: agent
@@ -60,3 +60,7 @@ PLAN §9.1, PLAN §9.3, PLAN §9.4, FR-001, FR-024, D-13, D-16 — see `docs/IMP
 ## Completion notes
 
 _The agent fills this in before opening the PR: what was built, decisions taken, deviations, follow-up tasks created, and how it was verified._
+
+## Board log
+
+- 2026-10-13T12:24:56.653Z claimed by agent-t025
