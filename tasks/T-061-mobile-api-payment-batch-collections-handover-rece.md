@@ -3,7 +3,7 @@ id: T-061
 title: Mobile API: payment batch, collections, handover, receipts
 phase: 3
 area: api
-status: claimed
+status: done
 owner: agent-t061
 claimed_at: 2026-10-13T19:32:56.618Z
 branch: task/T-061-mobile-api-payment-batch-collections-han
@@ -111,8 +111,25 @@ What this needs from others (not done here): the **phone does not send another l
 
 **Verification**
 
-VERIFICATION_PLACEHOLDER
+Node v24.21.0, pnpm 12.11.2, local PostgreSQL 17; rebased on `feature/mvp` ba8c57c (after T-033). DB suites really ran, nothing of this task skipped.
+
+- **Web route handlers** (real DB, real T-028 sign-in and tokens, injected clock; every body parsed with the contract): `payments/_lib/batch.test.ts` (13), `collections/_lib/collections.test.ts` (8), `receipts/_lib/receipts.test.ts` (8).
+  - **Same batch 10× concurrently** (dedicated 16-connection pool; an admin connection holds the customer's balance row lock until all 10 requests are blocked on it, then releases them together): per item exactly 1 `posted` + 9 `duplicate`, the identical `payment` in all 10 answers, receipts R-2610-00001…00005 gap-free, receipt counter +5, 5 payments / 5 receipts / 7 ledger rows / 1 session, strictly sequential balance snapshots; then 10 sequential replays → all `duplicate`, byte-identical results, row counts unchanged.
+  - Posted payment shape (oldest-bill allocations with `outstanding_after_paise`, credit, balance/credit after, echoed id and provisional ref, `posted_needs_review` `customer_inactive`), session totals, the contract fixture batch (same keys as the fixture response).
+  - A malformed item never sinks the batch: fractional paise, UPI ref on cash, missing id (nil UUID), unknown and other-tenant customers (CUSTOMER_NOT_FOUND, no leak), reused id (message names `amount_paise`), offset timestamp → `rejected` with `payments.<i>.<field>` paths, the rest posted / duplicate; only valid items written. Whole-request 400s (empty, 51 items, wrong shape, not JSON); exactly 50 is fine.
+  - **Timeout then retry**: the first answer "lost", the identical batch 2 min later → `duplicate` with the same payments; after a later bill the replay still returns the posting-time snapshots; nothing doubled.
+  - **Transient failures**: a 40001 and a thrown error on items 2/3 → `retry_later` (CONFLICT / INTERNAL), items 1/4 posted; the retry posts 2/3 once (4 payments). Time budget with a clock that advances on every read → a posted prefix then `retry_later` RATE_LIMITED; the next send posts the rest.
+  - **Read-only** (`read_only` and `cancelled`): payments, day, handover, receipt links and actions all work (D-13).
+  - Auth: no token, missing header (400), old app (426 + `min_app_version_code`), forged and expired tokens (401), "Sign out this phone" (401 DEVICE_REVOKED) → nothing written.
+  - **Deactivated lineman**: disabled with a still-valid token → 403 ACCOUNT_DISABLED (also after `revokeMobileRefreshTokens`), nothing written; another lineman sends the queue → `posted_needs_review` `collector_inactive`, stored with the sender; after re-activation the original phone's resend → `duplicate`, identical payments. Another active lineman's held payment → `collector_mismatch`.
+  - Isolation: the same payment id in two tenants is two payments; another tenant's customer → CUSTOMER_NOT_FOUND, its rows unchanged; another tenant's or lineman's day is empty and contains none of the other ids; another tenant's handover leaves the session untouched; another tenant's payment → PAYMENT_NOT_FOUND for links and `retry_later` for actions, no link/action written anywhere.
+  - Collections: newest-first payments, empty / bad / future dates (incl. the IST day boundary), handover discrepancy and required reason, idempotent `submission_id` (no new event row), ID_REUSED (names only), returned → resubmitted → accepted → HANDOVER_ALREADY_ACCEPTED, fixture request. Receipts: 90-day https link with only the token hash stored (token not in logs), a new link per call, 20-link cap → 429 + `Retry-After`, http origin → 500 with no link made, honest actions vs `sent`/`delivered`, replays.
+- **Core** `receipts/actions/actions.test.ts` (7): stored with actor/device and both clocks, duplicate / ID_REUSED (names), NOT_FOUND for unknown or other-tenant payments, per-tenant ids, **6 identical concurrent inserts racing at once** (table-lock barrier) → 1 recorded + 5 duplicate, 1 row; every role, read-only, append-only (UPDATE/DELETE refused), validation. Isolation suite: new `receipts.record_action` case passes; coverage test passes.
+- **Mutation checks** (reverted): CONFLICT → `rejected` and NOT_FOUND → `retry_later` in the batch mapping make 2 tests fail; dropping `ON CONFLICT DO NOTHING` in `recordReceiptAction` fails the race test.
+- **Playwright** (`next start`, migrated scratch DB `cb_e2e_t061`, `E2E_PORT` 3261–3263, pre-installed Chromium; DB dropped afterwards): full suite **58 passed**, incl. new `mobile-collect.spec.ts` (sign-in → literal `/payments:batch` → 5 parallel replays → day → handover → link → literal `/receipts/actions:batch` → 401 without token), run with both an http origin (link 500) and `RECEIPT_BASE_URL=https://…` (link 200).
+- Root: `pnpm install --frozen-lockfile`, `pnpm lint`, `pnpm typecheck` (10/10), `pnpm test` (10/10: core 645 + 1 skipped T-033 benchmark, web 239, db 254, contracts 175), `pnpm build` (lists the five new routes), `pnpm generate` (no diff), tokens / icons / i18n / openapi `--check`, `node scripts/tasks.mjs check --local`: all pass.
 
 ## Board log
 
 - 2026-10-13T19:32:56.618Z claimed by agent-t061
+- 2026-10-13T20:03:06.635Z completed on task/T-061-mobile-api-payment-batch-collections-han
