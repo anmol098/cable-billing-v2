@@ -3,10 +3,10 @@ id: T-042
 title: Domain: plan-change netting and mid-month start policy
 phase: 2
 area: domain
-status: todo
-owner:
-claimed_at:
-branch:
+status: claimed
+owner: agent-t042
+claimed_at: 2026-10-13T11:55:19.689Z
+branch: task/T-042-domain-plan-change-netting-and-mid-month
 depends_on: [T-024]
 review: required
 claimable_by: agent
@@ -49,3 +49,7 @@ PLAN §8.3, D-14, D-18, FR-008, BR-07, RULE-10 — see `docs/IMPLEMENTATION_PLAN
 ## Completion notes
 
 _The agent fills this in before opening the PR: what was built, decisions taken, deviations, follow-up tasks created, and how it was verified._
+
+## Board log
+
+- 2026-10-13T11:55:19.690Z claimed by agent-t042
