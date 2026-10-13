@@ -243,9 +243,7 @@ test.describe("connections", () => {
     await expect(card(page, VC).locator("[data-event]")).toHaveCount(4);
   });
 
-  test("phone (360px): the tab fits; another business's customer answers 404", async ({
-    page,
-  }) => {
+  test("phone (360px): the tab fits; another business's customer answers 404", async ({ page }) => {
     test.setTimeout(90_000);
     await page.setViewportSize(PHONE);
     await signIn(page, "owner");
