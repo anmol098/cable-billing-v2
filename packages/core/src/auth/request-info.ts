@@ -7,8 +7,9 @@
  * client-controlled: they only feed per-IP limits and audit metadata, never a decision about who
  * the user is (per-account limits don't depend on them).
  */
-import { type ClientInfo, sanitizeClientInfo } from "../context/tenant-context";
+
 import { requestIdFrom } from "../context/runtime";
+import { type ClientInfo, sanitizeClientInfo } from "../context/tenant-context";
 
 /** The headers Better Auth reads the session IP from (same order as {@link clientIp}). */
 export const CLIENT_IP_HEADERS = ["x-real-ip", "x-forwarded-for"] as const;

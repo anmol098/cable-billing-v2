@@ -7,8 +7,9 @@
 #        integration tests (T-020+). turbo runs in strict env mode, so a task that needs
 #        DATABASE_URL must list it in its package turbo.json (`env` / `passThroughEnv`).
 #   e2e  production build of apps/web + Playwright smoke tests against `next start` (T-005; T-088
-#        grows the suite). No DATABASE_URL here: the smoke test expects the DB check to be
-#        "not_configured".
+#        grows the suite). A Postgres 17 service, migrated before the build, backs the sign-in
+#        tests (T-026); BETTER_AUTH_SECRET is a CI-only throwaway value. (/api/health still
+#        reports the DB check as "not_configured" until its real ping lands.)
 #
 # Toolchain: Node from .nvmrc, pnpm from package.json "packageManager" (pnpm/action-setup; corepack's
 # shim can't run pnpm 12). Third-party actions are pinned to full commit SHAs; Dependabot bumps them.
@@ -127,6 +128,25 @@ jobs:
     name: Web e2e
     runs-on: ubuntu-24.04
     timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: cable_billing
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d cable_billing"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      # CI-only throwaway credentials (same shape as apps/web/.env.example).
+      DATABASE_URL: postgres://postgres:postgres@localhost:5432/cable_billing
+      DATABASE_URL_UNPOOLED: postgres://postgres:postgres@localhost:5432/cable_billing
+      BETTER_AUTH_SECRET: ci-e2e-only-secret-not-used-anywhere-else-0123456789
     steps:
       - name: Check out
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -149,6 +169,9 @@ jobs:
       - name: Install Playwright Chromium (+ OS dependencies)
         # Uses the Playwright version pinned in apps/web, so the browser always matches it.
         run: pnpm --filter web exec playwright install --with-deps chromium
+
+      - name: Migrate the e2e database
+        run: pnpm --filter @cb/db db:migrate
 
       - name: Build apps/web
         run: pnpm exec turbo run build --filter=@cb/web

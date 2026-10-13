@@ -636,7 +636,9 @@ export function createAuthService(options: CreateAuthServiceOptions) {
     },
 
     /** Ends every session of the signed-in user (all browsers), then this one's cookie. */
-    async signOutEverywhere(input: { headers: Headers }): Promise<AuthResult<{ sessions: number }>> {
+    async signOutEverywhere(input: {
+      headers: Headers;
+    }): Promise<AuthResult<{ sessions: number }>> {
       const session = await getSession(input.headers);
       if (!session) {
         await withHeaders(input.headers, () => auth.api.signOut({ headers: input.headers }));

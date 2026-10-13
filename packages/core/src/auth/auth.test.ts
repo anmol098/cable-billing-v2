@@ -91,9 +91,7 @@ function totp(base32Secret: string, at = Date.now()): string {
   for (const char of base32Secret.replace(/=+$/, "").toUpperCase()) {
     bits += alphabet.indexOf(char).toString(2).padStart(5, "0");
   }
-  const key = Buffer.from(
-    (bits.match(/.{8}/g) ?? []).map((byte) => Number.parseInt(byte, 2)),
-  );
+  const key = Buffer.from((bits.match(/.{8}/g) ?? []).map((byte) => Number.parseInt(byte, 2)));
   const counter = Buffer.alloc(8);
   counter.writeBigUInt64BE(BigInt(Math.floor(at / 1000 / 30)));
   const mac = createHmac("sha1", key).update(counter).digest();
@@ -132,8 +130,11 @@ describeDb("web authentication (Better Auth)", () => {
     );
   };
   const loginOf = async (userId: string) =>
-    (await t.current.admin.query<{ login: string }>("SELECT login FROM users WHERE id = $1", [userId]))
-      .rows[0]?.login ?? "";
+    (
+      await t.current.admin.query<{ login: string }>("SELECT login FROM users WHERE id = $1", [
+        userId,
+      ])
+    ).rows[0]?.login ?? "";
   const sessionRows = async (userId: string) =>
     (
       await t.current.admin.query<{ id: string; expires_at: Date; created_at: Date }>(
@@ -290,7 +291,11 @@ describeDb("web authentication (Better Auth)", () => {
     it("never lets a lineman sign in to the web, even with the right password", async () => {
       const browser = newBrowser();
       const login = await loginOf(tenant.users.lineman);
-      const wrong = await service.signIn({ login, password: "nope nope", headers: browser.headers() });
+      const wrong = await service.signIn({
+        login,
+        password: "nope nope",
+        headers: browser.headers(),
+      });
       expect(wrong).toEqual({ ok: false, error: { code: "INVALID_CREDENTIALS" } });
 
       const right = await service.signIn({ login, password: PASSWORD, headers: browser.headers() });
@@ -307,14 +312,21 @@ describeDb("web authentication (Better Auth)", () => {
     });
 
     it("refuses disabled users and users of a suspended operator", async () => {
-      const disabled = await createUser(t.current, { operatorId: tenant.operatorId, role: "staff" });
+      const disabled = await createUser(t.current, {
+        operatorId: tenant.operatorId,
+        role: "staff",
+      });
       await setPassword(disabled.userId);
       await t.current.admin.query("UPDATE users SET status = 'disabled' WHERE id = $1", [
         disabled.userId,
       ]);
       const browser = newBrowser();
       expect(
-        await service.signIn({ login: disabled.login, password: PASSWORD, headers: browser.headers() }),
+        await service.signIn({
+          login: disabled.login,
+          password: PASSWORD,
+          headers: browser.headers(),
+        }),
       ).toEqual({ ok: false, error: { code: "ACCOUNT_DISABLED" } });
       expect(
         await service.signIn({
@@ -424,7 +436,9 @@ describeDb("web authentication (Better Auth)", () => {
       const row = (await sessionRows(tenant.users.staff)).find((s) => s.id === sessionId);
       const before = row?.expires_at.getTime() ?? 0;
       // Pretend the last refresh was 2 days ago.
-      const aged = new Date(Date.now() + (SESSION_POLICY.tenantExpiresInSeconds - 2 * 86_400) * 1000);
+      const aged = new Date(
+        Date.now() + (SESSION_POLICY.tenantExpiresInSeconds - 2 * 86_400) * 1000,
+      );
       await t.current.admin.query("UPDATE sessions SET expires_at = $1 WHERE id = $2", [
         aged,
         sessionId,
@@ -441,7 +455,9 @@ describeDb("web authentication (Better Auth)", () => {
       const browser = newBrowser();
       await service.signIn({ login: user.login, password: PASSWORD, headers: browser.headers() });
       expect(await service.getSession(browser.headers())).not.toBeNull();
-      await t.current.admin.query("UPDATE users SET status = 'disabled' WHERE id = $1", [user.userId]);
+      await t.current.admin.query("UPDATE users SET status = 'disabled' WHERE id = $1", [
+        user.userId,
+      ]);
       expect(await service.getSession(browser.headers())).toBeNull();
       expect(await sessionRows(user.userId)).toEqual([]);
 
@@ -449,7 +465,9 @@ describeDb("web authentication (Better Auth)", () => {
       await setPassword(other.userId);
       const second = newBrowser();
       await service.signIn({ login: other.login, password: PASSWORD, headers: second.headers() });
-      await t.current.admin.query("UPDATE users SET role = 'lineman' WHERE id = $1", [other.userId]);
+      await t.current.admin.query("UPDATE users SET role = 'lineman' WHERE id = $1", [
+        other.userId,
+      ]);
       expect(await service.getSession(second.headers())).toBeNull();
       const ctx = await service.tenantContext({ db: t.current.db }, second.headers());
       expect(ctx).toMatchObject({ ok: false, error: { code: "UNAUTHENTICATED" } });
@@ -460,12 +478,19 @@ describeDb("web authentication (Better Auth)", () => {
       await setPassword(user.userId);
       const [laptop, phone, office] = [newBrowser(), newBrowser(), newBrowser()];
       for (const b of [laptop, phone, office]) {
-        const r = await service.signIn({ login: user.login, password: PASSWORD, headers: b.headers() });
+        const r = await service.signIn({
+          login: user.login,
+          password: PASSWORD,
+          headers: b.headers(),
+        });
         expect(r.ok).toBe(true);
       }
       expect(await sessionRows(user.userId)).toHaveLength(3);
 
-      expect(await service.signOut({ headers: laptop.headers() })).toEqual({ ok: true, value: undefined });
+      expect(await service.signOut({ headers: laptop.headers() })).toEqual({
+        ok: true,
+        value: undefined,
+      });
       expect(laptop.cookies.has(SESSION_COOKIE)).toBe(false);
       expect(await service.getSession(laptop.headers())).toBeNull();
       expect(await sessionRows(user.userId)).toHaveLength(2);
@@ -512,14 +537,22 @@ describeDb("web authentication (Better Auth)", () => {
       });
       const cap = SESSION_POLICY.platformAdminMaxAgeSeconds * 1000;
       const [row] = await sessionRows(admin.userId);
-      expect((row?.expires_at.getTime() ?? 0) - (row?.created_at.getTime() ?? 0)).toBeLessThanOrEqual(cap);
+      expect(
+        (row?.expires_at.getTime() ?? 0) - (row?.created_at.getTime() ?? 0),
+      ).toBeLessThanOrEqual(cap);
       // Not a tenant user.
       const ctx = await service.tenantContext({ db: t.current.db }, browser.headers());
-      expect(ctx).toMatchObject({ ok: false, error: { code: "FORBIDDEN", details: { reason: "not_a_tenant_user" } } });
+      expect(ctx).toMatchObject({
+        ok: false,
+        error: { code: "FORBIDDEN", details: { reason: "not_a_tenant_user" } },
+      });
 
       // Enrol: password again, then a first code.
       expect(
-        await service.startTwoFactorEnrolment({ password: "wrong password!", headers: browser.headers() }),
+        await service.startTwoFactorEnrolment({
+          password: "wrong password!",
+          headers: browser.headers(),
+        }),
       ).toMatchObject({ ok: false, error: { code: "INVALID_CREDENTIALS" } });
       const enrolment = await service.startTwoFactorEnrolment({
         password: PASSWORD,
@@ -537,7 +570,10 @@ describeDb("web authentication (Better Auth)", () => {
         code: totp(enrolment.value.secret),
         headers: browser.headers(),
       });
-      expect(confirmed).toEqual({ ok: true, value: { userId: admin.userId, role: "platform_admin" } });
+      expect(confirmed).toEqual({
+        ok: true,
+        value: { userId: admin.userId, role: "platform_admin" },
+      });
       expect(await service.getSession(browser.headers())).toMatchObject({
         twoFactorEnabled: true,
         twoFactorEnrolmentRequired: false,
@@ -579,7 +615,8 @@ describeDb("web authentication (Better Auth)", () => {
       });
       const adminSession = await service.getSession(again.headers());
       expect(adminSession?.role).toBe("platform_admin");
-      const lifetime = (adminSession?.expiresAt.getTime() ?? 0) - (adminSession?.createdAt.getTime() ?? 0);
+      const lifetime =
+        (adminSession?.expiresAt.getTime() ?? 0) - (adminSession?.createdAt.getTime() ?? 0);
       expect(lifetime).toBeLessThanOrEqual(cap);
       expect(lifetime).toBeGreaterThan(cap - 60_000);
 
@@ -626,12 +663,17 @@ describeDb("web authentication (Better Auth)", () => {
       expect(await service.getSession(other.headers())).not.toBeNull();
 
       expect(
-        await service.requestPasswordReset({ email: ` ${ownerEmail.toUpperCase()} `, headers: browser.headers() }),
+        await service.requestPasswordReset({
+          email: ` ${ownerEmail.toUpperCase()} `,
+          headers: browser.headers(),
+        }),
       ).toEqual({ ok: true, value: undefined });
       expect(emails).toHaveLength(1);
       const email = emails[0];
       expect(email).toMatchObject({ to: ownerEmail, language: "en", expiresInMinutes: 60 });
-      const match = /^http:\/\/localhost:3000\/reset\/([A-Za-z0-9_-]+)$/.exec(email?.resetUrl ?? "");
+      const match = /^http:\/\/localhost:3000\/reset\/([A-Za-z0-9_-]+)$/.exec(
+        email?.resetUrl ?? "",
+      );
       expect(match).not.toBeNull();
       const token = match?.[1] ?? "";
 
@@ -650,15 +692,29 @@ describeDb("web authentication (Better Auth)", () => {
       ).toEqual({ ok: true, value: undefined });
       // Single use.
       expect(
-        await service.resetPassword({ token, newPassword: "another new password", headers: browser.headers() }),
+        await service.resetPassword({
+          token,
+          newPassword: "another new password",
+          headers: browser.headers(),
+        }),
       ).toEqual({ ok: false, error: { code: "INVALID_TOKEN" } });
       // Every session ended; old password no longer works, the new one does.
       expect(await service.getSession(other.headers())).toBeNull();
       expect(
-        await service.signIn({ login: ownerEmail, password: PASSWORD, headers: newBrowser().headers() }),
+        await service.signIn({
+          login: ownerEmail,
+          password: PASSWORD,
+          headers: newBrowser().headers(),
+        }),
       ).toEqual({ ok: false, error: { code: "INVALID_CREDENTIALS" } });
       expect(
-        (await service.signIn({ login: ownerEmail, password: newPassword, headers: newBrowser().headers() })).ok,
+        (
+          await service.signIn({
+            login: ownerEmail,
+            password: newPassword,
+            headers: newBrowser().headers(),
+          })
+        ).ok,
       ).toBe(true);
 
       const actions = (await auditRows(tenant.users.owner)).map((r) => r.action);
@@ -683,7 +739,11 @@ describeDb("web authentication (Better Auth)", () => {
         "UPDATE verifications SET expires_at = now() - interval '1 minute'",
       );
       expect(
-        await service.resetPassword({ token, newPassword: "another password", headers: browser.headers() }),
+        await service.resetPassword({
+          token,
+          newPassword: "another password",
+          headers: browser.headers(),
+        }),
       ).toEqual({ ok: false, error: { code: "INVALID_TOKEN" } });
       expect(
         await service.resetPassword({
@@ -693,7 +753,11 @@ describeDb("web authentication (Better Auth)", () => {
         }),
       ).toEqual({ ok: false, error: { code: "INVALID_TOKEN" } });
       expect(
-        await service.resetPassword({ token: "../../etc", newPassword: "another password", headers: browser.headers() }),
+        await service.resetPassword({
+          token: "../../etc",
+          newPassword: "another password",
+          headers: browser.headers(),
+        }),
       ).toEqual({ ok: false, error: { code: "INVALID_TOKEN" } });
     });
 
@@ -702,7 +766,9 @@ describeDb("web authentication (Better Auth)", () => {
       const email = "someone-else@nowhere.test";
       const { limit } = AUTH_RATE_LIMITS.resetRequestPerEmail;
       for (let i = 0; i < limit; i += 1) {
-        expect((await service.requestPasswordReset({ email, headers: newBrowser().headers() })).ok).toBe(true);
+        expect(
+          (await service.requestPasswordReset({ email, headers: newBrowser().headers() })).ok,
+        ).toBe(true);
       }
       const blocked = await service.requestPasswordReset({ email, headers: browser.headers() });
       expect(!blocked.ok && blocked.error.code).toBe("RATE_LIMITED");

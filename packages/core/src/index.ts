@@ -17,6 +17,7 @@ export {
   writeAuditEvent,
 } from "./audit/audit";
 export { isSensitiveAuditKey, REDACTED, redactForAudit } from "./audit/redact";
+export * from "./auth";
 export { assertRole } from "./authz/assert-role";
 export {
   CAPABILITIES,
@@ -103,4 +104,3 @@ export {
 } from "./logging/logger";
 export { findPii, isPiiKey, type PiiFinding, piiKindOfValue, scrubText } from "./logging/pii";
 export * from "./payments";
-export * from "./auth";

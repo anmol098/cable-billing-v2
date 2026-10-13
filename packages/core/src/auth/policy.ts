@@ -13,7 +13,11 @@
 import type { UserRole } from "@cb/db";
 
 /** Roles that may hold a web session. */
-export const WEB_SIGN_IN_ROLES = ["owner", "staff", "platform_admin"] as const satisfies readonly UserRole[];
+export const WEB_SIGN_IN_ROLES = [
+  "owner",
+  "staff",
+  "platform_admin",
+] as const satisfies readonly UserRole[];
 export type WebRole = (typeof WEB_SIGN_IN_ROLES)[number];
 
 export function isWebRole(role: unknown): role is WebRole {
@@ -67,7 +71,8 @@ export interface SignInSubject {
 export function webSignInBlock(subject: SignInSubject): SignInBlockReason | null {
   if (subject.status !== "active") return "user_disabled";
   if (!isWebRole(subject.role)) return "role_not_allowed";
-  if (subject.role === "platform_admin") return subject.operatorId === null ? null : "role_not_allowed";
+  if (subject.role === "platform_admin")
+    return subject.operatorId === null ? null : "role_not_allowed";
   if (subject.operatorId === null) return "role_not_allowed";
   if (subject.operatorStatus !== "active") return "operator_suspended";
   return null;
