@@ -22,6 +22,7 @@
       "!**/*.generated.*",
       "!packages/ui/src/theme.css",
       "!packages/contracts/openapi.json",
+      "!packages/db/migrations/meta",
       "!apps/web/messages",
       "!pnpm-lock.yaml"
     ]
