@@ -155,7 +155,6 @@
       "address": "Address (optional)",
       "alt_phone": "Other mobile no. (optional)",
       "area": "Area",
-      "area_choose": "Choose area",
       "area_none": "No area",
       "code": "Customer code",
       "code_hint": "Leave it empty to use the next number ({next}).",
@@ -176,7 +175,6 @@
       "col_name": "Name",
       "col_status": "Status",
       "empty": "No customers yet. Add your first customer.",
-      "filters": "Filters",
       "matched_vc": "VC {vc}",
       "next": "Next",
       "no_area": "No area",
@@ -203,8 +201,6 @@
       "step_customer": "Customer"
     },
     "profile": {
-      "add_another": "Add another customer",
-      "add_connection": "Add connection",
       "address": "Address",
       "alt_phone": "Other mobile no.",
       "back": "All customers",
