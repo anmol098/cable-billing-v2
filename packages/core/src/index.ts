@@ -9,6 +9,7 @@
  */
 export const packageName = "@cb/core";
 
+export * from "./areas";
 export {
   type AuditEventInput,
   type AuditRecorder,
@@ -108,6 +109,7 @@ export {
 } from "./logging/logger";
 export { findPii, isPiiKey, type PiiFinding, piiKindOfValue, scrubText } from "./logging/pii";
 export * from "./mobile-auth";
+export * from "./operators";
 export * from "./payments";
 export * from "./receipts/links";
 export * from "./tenants";
