@@ -3,10 +3,10 @@ id: T-040
 title: Domain: billing eligibility and invoice calculation
 phase: 2
 area: domain
-status: todo
-owner:
-claimed_at:
-branch:
+status: claimed
+owner: agent-t040
+claimed_at: 2026-10-13T11:55:32.848Z
+branch: task/T-040-domain-billing-eligibility-and-invoice-c
 depends_on: [T-024]
 review: required
 claimable_by: agent
@@ -50,3 +50,7 @@ PLAN §8.1, PLAN §8.2, FR-009, FR-010, RULE-04, RULE-05, RULE-08, RULE-09, B-00
 ## Completion notes
 
 _The agent fills this in before opening the PR: what was built, decisions taken, deviations, follow-up tasks created, and how it was verified._
+
+## Board log
+
+- 2026-10-13T11:55:32.848Z claimed by agent-t040
