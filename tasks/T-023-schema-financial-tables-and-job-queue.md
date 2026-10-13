@@ -3,10 +3,10 @@ id: T-023
 title: Schema: financial tables and job queue
 phase: 1
 area: db
-status: todo
-owner:
-claimed_at:
-branch:
+status: claimed
+owner: agent-t023
+claimed_at: 2026-10-13T12:41:22.397Z
+branch: task/T-023-schema-financial-tables-and-job-queue
 depends_on: [T-022]
 review: required
 claimable_by: agent
@@ -58,3 +58,7 @@ PLAN §7.2, PLAN §8, FR-009–FR-017, FR-022, RULE-05, RULE-20, BR-13 — see `
 ## Completion notes
 
 _The agent fills this in before opening the PR: what was built, decisions taken, deviations, follow-up tasks created, and how it was verified._
+
+## Board log
+
+- 2026-10-13T12:41:22.397Z claimed by agent-t023
