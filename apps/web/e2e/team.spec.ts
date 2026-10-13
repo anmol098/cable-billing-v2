@@ -173,6 +173,14 @@ test.describe("team: staff and linemen", () => {
     await expect(card.getByText(`Xiaomi Redmi 9A (${firstBody.device.device_code})`)).toBeVisible();
     await expect(card.getByText("Signed in")).toBeVisible();
 
+    // The rest happens on a 360px phone: nothing scrolls sideways.
+    await page.setViewportSize({ width: 360, height: 740 });
+    await page.screenshot({ path: test.info().outputPath("team-360.png"), fullPage: true });
+    const overflow = await page.evaluate(
+      () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+    );
+    expect(overflow).toBeLessThanOrEqual(0);
+
     // New password: the phone's refresh fails; the old password is dead, the new one works.
     await card.getByRole("button", { name: "New password for Ravi Kumar" }).click();
     const reset = page.getByRole("dialog");
