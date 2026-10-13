@@ -1,0 +1,168 @@
+# Web / TypeScript checks for every PR into the integration branch (and main), plus pushes to them.
+#
+# Jobs (check names for branch protection: "Web" and "Web e2e"):
+#   web  task board check, Biome, then turbo lint / typecheck / test / build. On pull requests turbo
+#        runs only the packages affected by the PR (`--affected` against the PR's base commit;
+#        everything if the PR changes this file); on pushes it runs everything. A Postgres 17 service is up with DATABASE_URL set for DB
+#        integration tests (T-020+). turbo runs in strict env mode, so a task that needs
+#        DATABASE_URL must list it in its package turbo.json (`env` / `passThroughEnv`).
+#   e2e  production build of apps/web + Playwright smoke tests against `next start` (T-005; T-088
+#        grows the suite). No DATABASE_URL here: the smoke test expects the DB check to be
+#        "not_configured".
+#
+# Toolchain: Node from .nvmrc, pnpm from package.json "packageManager" (pnpm/action-setup; corepack's
+# shim can't run pnpm 12). Third-party actions are pinned to full commit SHAs; Dependabot bumps them.
+name: Web
+
+on:
+  pull_request:
+    branches: [main, "feature/**"]
+  push:
+    branches: [main, "feature/**"]
+    # Board commits from scripts/tasks.mjs (claim/block/release) touch only tasks/**; don't spend
+    # runner minutes on them. Pull requests are never path-filtered, so required checks always report.
+    paths-ignore: ["tasks/**", "docs/**"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  # One run per PR (or per pushed branch); a newer push cancels the superseded run. Runs on main are
+  # never cancelled so every release commit keeps a result.
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+env:
+  # Turbo: no telemetry, plain logs; Next.js: no telemetry.
+  TURBO_TELEMETRY_DISABLED: "1"
+  TURBO_UI: "false"
+  NEXT_TELEMETRY_DISABLED: "1"
+
+jobs:
+  web:
+    name: Web
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: cable_billing
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d cable_billing"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      # Same shape as apps/web/.env.example (local Docker Postgres). CI-only throwaway credentials.
+      DATABASE_URL: postgres://postgres:postgres@localhost:5432/cable_billing
+      DATABASE_URL_UNPOOLED: postgres://postgres:postgres@localhost:5432/cable_billing
+    steps:
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # turbo --affected needs the history between the PR base and head.
+          fetch-depth: 0
+          filter: blob:none
+          persist-credentials: false
+
+      - name: Set up pnpm (version from package.json packageManager)
+        uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+        with:
+          cache: true
+
+      - name: Set up Node (version from .nvmrc)
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Task board check
+        run: node scripts/tasks.mjs check --local
+
+      - name: Choose turbo scope
+        id: scope
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          if [ "$EVENT_NAME" = "pull_request" ] && ! git diff --quiet "$BASE_SHA" HEAD -- .github/workflows/web.yml; then
+            # A PR that changes this workflow proves it on the whole workspace.
+            echo "args=" >> "$GITHUB_OUTPUT"
+            echo "turbo scope: all packages (this workflow changed)"
+          elif [ "$EVENT_NAME" = "pull_request" ]; then
+            # Only packages changed between the PR's base commit and the merge commit (plus their
+            # dependents). Root changes (lockfile, turbo.json, root package.json) select everything.
+            echo "TURBO_SCM_BASE=$BASE_SHA" >> "$GITHUB_ENV"
+            echo "args=--affected" >> "$GITHUB_OUTPUT"
+            echo "turbo scope: packages affected since $BASE_SHA"
+          else
+            echo "args=" >> "$GITHUB_OUTPUT"
+            echo "turbo scope: all packages"
+          fi
+
+      - name: Lint (Biome, whole repo)
+        run: pnpm exec biome ci .
+
+      - name: Lint (turbo)
+        run: pnpm exec turbo run lint ${{ steps.scope.outputs.args }}
+
+      - name: Typecheck
+        run: pnpm exec turbo run typecheck ${{ steps.scope.outputs.args }}
+
+      - name: Test
+        run: pnpm exec turbo run test ${{ steps.scope.outputs.args }}
+
+      - name: Build
+        run: pnpm exec turbo run build ${{ steps.scope.outputs.args }}
+
+  e2e:
+    name: Web e2e
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up pnpm (version from package.json packageManager)
+        uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+        with:
+          cache: true
+
+      - name: Set up Node (version from .nvmrc)
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright Chromium (+ OS dependencies)
+        # Uses the Playwright version pinned in apps/web, so the browser always matches it.
+        run: pnpm --filter web exec playwright install --with-deps chromium
+
+      - name: Build apps/web
+        run: pnpm exec turbo run build --filter=@cb/web
+
+      - name: Playwright smoke tests
+        run: pnpm --filter web test:e2e
+
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: playwright-report
+          path: |
+            apps/web/playwright-report/
+            apps/web/test-results/
+          retention-days: 7
+          if-no-files-found: ignore
