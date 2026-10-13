@@ -477,6 +477,9 @@ All six routes exist (T-043). Until its owner task lands, a scheduler route is a
 secret, logs `cron.not_implemented` and answers **501**. `job-worker` runs every `defineJob(...)` exported
 by `@cb/core`; failed jobs email the active platform admins and the tenant's owners (Resend; without
 `RESEND_API_KEY`/`EMAIL_FROM` the email is only logged as `email.not_sent_no_provider`).
+`invariants` queues the `invariants.check` job (T-052): a breach in any tenant's books fails that job
+with `last_error = permanent: invariant_breach` (so the admins get the job-failure email); the tenants and
+rows are in the `invariant_checks` table and the `invariants.breach` log lines (ids and counts only).
 
 **Auth:** when `CRON_SECRET` is set in the project, Vercel sends `Authorization: Bearer <CRON_SECRET>` with
 every cron call. Each cron route must compare it (constant-time) with `CRON_SECRET` and return 401 when

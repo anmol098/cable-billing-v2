@@ -57,6 +57,20 @@
       "when": 1791895924365,
       "tag": "0007_financial_tables_job_queue_constraints",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1791903067532,
+      "tag": "0008_invariant_checks",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1791903068672,
+      "tag": "0009_invariant_checks_append_only",
+      "breakpoints": true
     }
   ]
 }
