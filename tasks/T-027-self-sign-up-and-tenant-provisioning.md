@@ -3,10 +3,10 @@ id: T-027
 title: Self sign-up and tenant provisioning
 phase: 1
 area: web
-status: todo
-owner:
-claimed_at:
-branch:
+status: claimed
+owner: agent-t027
+claimed_at: 2026-10-13T14:30:29.073Z
+branch: task/T-027-self-sign-up-and-tenant-provisioning
 depends_on: [T-026, T-007]
 review: self
 claimable_by: agent
@@ -53,3 +53,7 @@ D-15, D-20, PLAN §12.3 — see `docs/IMPLEMENTATION_PLAN.md`, `docs/PRD.md`, `d
 ## Completion notes
 
 _The agent fills this in before opening the PR: what was built, decisions taken, deviations, follow-up tasks created, and how it was verified._
+
+## Board log
+
+- 2026-10-13T14:30:29.075Z claimed by agent-t027
