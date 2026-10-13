@@ -6,8 +6,9 @@ import com.cablebilling.lineman.printing.escpos.PrinterProfile
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.job
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
@@ -33,7 +34,9 @@ class PrinterSettingsTest {
         return try {
             runBlocking { block(DataStorePrinterSettings(store), store) }
         } finally {
-            scope.cancel()
+            // Wait until the scope has finished: DataStore releases the file only on completion,
+            // and a second DataStore on the same file (the "restart") is refused until then.
+            runBlocking { scope.coroutineContext.job.cancelAndJoin() }
         }
     }
 
