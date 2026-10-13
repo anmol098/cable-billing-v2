@@ -1,0 +1,32 @@
+{
+  "name": "@cb/migration",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Legacy MariaDB migration tooling: staging (restore, copy into a Postgres legacy schema) and counts-only profiling (T-090).",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "tsc --noEmit",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "legacy:fixture": "tsx src/cli/fixture.ts",
+    "legacy:copy": "tsx src/cli/copy.ts",
+    "legacy:profile": "tsx src/cli/profile.ts",
+    "legacy:check": "tsx src/cli/check-profile.ts"
+  },
+  "dependencies": {
+    "mysql2": "3.24.5",
+    "pg": "8.23.1"
+  },
+  "devDependencies": {
+    "@cb/config": "workspace:*",
+    "@types/node": "catalog:",
+    "@types/pg": "8.23.1",
+    "tsx": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}
