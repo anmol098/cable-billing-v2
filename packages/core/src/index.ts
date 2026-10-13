@@ -104,5 +104,6 @@ export {
   strictLoggingByDefault,
 } from "./logging/logger";
 export { findPii, isPiiKey, type PiiFinding, piiKindOfValue, scrubText } from "./logging/pii";
+export * from "./mobile-auth";
 export * from "./payments";
 export * from "./receipts/links";

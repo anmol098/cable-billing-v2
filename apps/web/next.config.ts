@@ -20,7 +20,7 @@ const nextConfig: NextConfig = {
   // Version-accurate Next.js docs live in apps/web/node_modules/next/dist/docs/.
   agentRules: false,
   // Workspace libraries are TypeScript source (no dist); Next.js compiles them. Add new @cb/* deps here.
-  transpilePackages: ["@cb/core", "@cb/db", "@cb/domain", "@cb/i18n", "@cb/ui"],
+  transpilePackages: ["@cb/contracts", "@cb/core", "@cb/db", "@cb/domain", "@cb/i18n", "@cb/ui"],
   turbopack: { root: workspaceRoot },
   outputFileTracingRoot: workspaceRoot,
   async headers() {

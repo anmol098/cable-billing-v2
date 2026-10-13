@@ -33,7 +33,7 @@ import { after } from "next/server";
 import { baseUrls, deploymentTarget, requireServerEnv, serverEnv } from "@/env";
 import { renderResetEmail } from "./reset-email";
 
-type Singletons = { runtime: ServiceRuntime; auth: AuthService };
+type Singletons = { runtime: ServiceRuntime; auth: AuthService; rateLimiter: RateLimiter };
 
 // Kept on globalThis so `next dev` hot reloads don't open a new pool each time.
 const KEY = Symbol.for("@cb/web/auth-singletons");
@@ -93,18 +93,19 @@ function create(): Singletons {
       }),
   });
   const transport = emailTransportFor(logger);
+  const rateLimiter = rateLimiterFor(logger);
   const auth = createAuthService({
     db: runtime.db,
     secret: BETTER_AUTH_SECRET,
     baseURL: baseUrls().app,
-    rateLimiter: rateLimiterFor(logger),
+    rateLimiter,
     sendPasswordResetEmail: (email) => transport.send(renderResetEmail(email)),
     logger,
     runInBackground,
     // Copies Better Auth's Set-Cookie headers into Next's cookie store; must be the last plugin.
     plugins: [nextCookies()],
   });
-  return { runtime, auth };
+  return { runtime, auth, rateLimiter };
 }
 
 function singletons(): Singletons {
@@ -124,4 +125,12 @@ export function getServerRuntime(): ServiceRuntime {
 /** The auth service. Use the helpers in `@/lib/auth/session` in pages and actions. */
 export function getAuthService(): AuthService {
   return singletons().auth;
+}
+
+/**
+ * The rate limiter the auth service uses. The mobile sign-in (T-028) shares it, so web and phone
+ * sign-in attempts count against the same per-account limit (in memory too, not only on Upstash).
+ */
+export function getRateLimiter(): RateLimiter {
+  return singletons().rateLimiter;
 }

@@ -223,6 +223,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@cb/contracts':
+        specifier: workspace:*
+        version: link:../../packages/contracts
       '@cb/core':
         specifier: workspace:*
         version: link:../../packages/core

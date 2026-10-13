@@ -13,6 +13,7 @@
     "test:e2e": "playwright test"
   },
   "dependencies": {
+    "@cb/contracts": "workspace:*",
     "@cb/core": "workspace:*",
     "@cb/db": "workspace:*",
     "@cb/design-tokens": "workspace:*",
