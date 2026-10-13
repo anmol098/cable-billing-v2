@@ -3,4 +3,8 @@
  * Shared file (tasks/README.md §6): append your module's `export * from "./<module>";` line only.
  * drizzle.config.ts reads this file to generate migrations; `createDb` passes it to Drizzle.
  */
-export {};
+export * from "./audit";
+export * from "./auth";
+export * from "./counters";
+export * from "./subscriptions";
+export * from "./tenancy";
