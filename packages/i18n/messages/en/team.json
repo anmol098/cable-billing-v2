@@ -89,7 +89,7 @@
   },
   "switch_off": {
     "title": "Switch off {name}?",
-    "summary_lineman": "{name} can't sign in any more, and the phone is signed out now. Payments and history stay. Payments still saved on the phone are not lost: they reach the office and are marked for checking.",
+    "summary_lineman": "{name} can't sign in any more, and the phone is signed out now. Old payments and history stay. Payments still saved on the phone stay there and are not lost. Best: switch off after {name} has handed over the day's money.",
     "summary_staff": "{name} can't sign in any more and is signed out now. Their work stays.",
     "confirm": "Switch off",
     "done": "{name} is switched off."

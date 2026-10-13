@@ -346,7 +346,9 @@ describe("row actions", () => {
     fireEvent.click(screen.getByRole("button", { name: "Switch off Ravi Kumar" }));
     const sheet = within(await screen.findByRole("alertdialog"));
     expect(sheet.getByText("Switch off Ravi Kumar?")).toBeInTheDocument();
-    expect(sheet.getByText(/Payments still saved on the phone are not lost/)).toBeInTheDocument();
+    expect(
+      sheet.getByText(/Payments still saved on the phone stay there and are not lost/),
+    ).toBeInTheDocument();
     expect(switchOff).not.toHaveBeenCalled();
     await act(async () => {
       fireEvent.click(sheet.getByRole("button", { name: "Switch off" }));

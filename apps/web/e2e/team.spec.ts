@@ -213,7 +213,9 @@ test.describe("team: staff and linemen", () => {
     await card.getByRole("button", { name: "Switch off Ravi Kumar" }).click();
     const confirm = page.getByRole("alertdialog");
     await expect(
-      confirm.getByText("Payments still saved on the phone are not lost", { exact: false }),
+      confirm.getByText("Payments still saved on the phone stay there and are not lost", {
+        exact: false,
+      }),
     ).toBeVisible();
     await confirm.getByRole("button", { name: "Switch off" }).click();
     await expect(page.getByText("Ravi Kumar is switched off.", { exact: true })).toBeVisible();
