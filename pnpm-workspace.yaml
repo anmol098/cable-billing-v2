@@ -13,3 +13,9 @@ catalog:
 
 # Refuse to install under an older Node than package.json "engines" allows.
 engineStrict: true
+
+# Install scripts each dependency may run (true) or not (false); pnpm fails on undecided ones.
+# esbuild (pulled in by tsx) gets its binary from an optional platform package, so its
+# postinstall check is not needed.
+allowBuilds:
+  esbuild: false

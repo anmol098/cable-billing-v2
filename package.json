@@ -15,6 +15,8 @@
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
     "generate": "turbo run generate",
+    "i18n:build": "pnpm --filter @cb/i18n i18n:build",
+    "i18n:check": "pnpm --filter @cb/i18n i18n:check",
     "tasks": "node scripts/tasks.mjs"
   },
   "devDependencies": {
