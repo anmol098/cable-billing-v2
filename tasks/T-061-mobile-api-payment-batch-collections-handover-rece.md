@@ -3,10 +3,10 @@ id: T-061
 title: Mobile API: payment batch, collections, handover, receipts
 phase: 3
 area: api
-status: todo
-owner:
-claimed_at:
-branch:
+status: claimed
+owner: agent-t061
+claimed_at: 2026-10-13T19:32:56.618Z
+branch: task/T-061-mobile-api-payment-batch-collections-han
 depends_on: [T-028, T-046, T-050, T-062]
 review: required
 claimable_by: agent
@@ -52,3 +52,7 @@ PLAN §10.2, PLAN §10.4, FR-015, FR-016, FR-019, FR-020, FR-022 — see `docs/I
 ## Completion notes
 
 _The agent fills this in before opening the PR: what was built, decisions taken, deviations, follow-up tasks created, and how it was verified._
+
+## Board log
+
+- 2026-10-13T19:32:56.618Z claimed by agent-t061
