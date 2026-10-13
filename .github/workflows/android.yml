@@ -55,7 +55,9 @@ jobs:
               - 'packages/design-tokens/**'
               - 'packages/i18n/**'
               - 'packages/contracts/**'
-              - '.github/workflows/android.yml'
+              # THROWAWAY (T-010 failcheck branch only): the self-pattern is dropped here so this PR,
+              # whose diff against feature/mvp necessarily contains android.yml, looks like a
+              # web-only change to the filter.
 
   android:
     name: Android

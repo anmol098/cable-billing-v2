@@ -37,3 +37,6 @@ export async function getHealth({
     checks: { db: { status: db } },
   };
 }
+
+// THROWAWAY (T-010 CI fail-path check, never merged): `any` breaks Biome noExplicitAny.
+export const ciFailcheckProbe = (value: any) => value;
