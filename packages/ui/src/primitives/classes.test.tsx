@@ -274,6 +274,9 @@ function CompositeGallery() {
   );
 }
 
+/** The gallery opens overlays and types into the combobox: slower than one render on a busy CI box. */
+const GALLERY_TIMEOUT = 30_000;
+
 function collectClasses(into: Set<string>): void {
   for (const element of document.querySelectorAll("[class]")) {
     for (const name of element.classList) into.add(name);
@@ -321,15 +324,19 @@ async function renderedClasses(): Promise<string[]> {
 }
 
 describe("primitive and composite classes exist in the token theme", () => {
-  it("every rendered class compiles to CSS", async () => {
-    const classes = await renderedClasses();
-    expect(classes.length).toBeGreaterThan(80);
-    const css = theme.candidatesToCss(classes);
-    // `group` is a marker for `group-*` variants and has no CSS of its own.
-    const markers = new Set(["group"]);
-    const missing = classes.filter((name, index) => css[index] === null && !markers.has(name));
-    expect(missing).toEqual([]);
-  });
+  it(
+    "every rendered class compiles to CSS",
+    async () => {
+      const classes = await renderedClasses();
+      expect(classes.length).toBeGreaterThan(80);
+      const css = theme.candidatesToCss(classes);
+      // `group` is a marker for `group-*` variants and has no CSS of its own.
+      const markers = new Set(["group"]);
+      const missing = classes.filter((name, index) => css[index] === null && !markers.has(name));
+      expect(missing).toEqual([]);
+    },
+    GALLERY_TIMEOUT,
+  );
 
   it("is not vacuous: stock names the theme removed produce nothing", () => {
     const removed = ["bg-white", "text-xs", "shadow-md", "bg-red-500", "font-bold", "rounded-3xl"];
@@ -342,10 +349,14 @@ describe("primitive and composite classes exist in the token theme", () => {
     expect(css).toContain("var(--color-focus)");
   });
 
-  it("no rendered class is a shadow or gradient", async () => {
-    const classes = await renderedClasses();
-    const css = theme.candidatesToCss(classes).join("\n");
-    expect(css).not.toMatch(/box-shadow:\s*(?!var\(--tw-ring-offset-shadow\)|0 0 #0000)/);
-    expect(css).not.toMatch(/gradient\(/);
-  });
+  it(
+    "no rendered class is a shadow or gradient",
+    async () => {
+      const classes = await renderedClasses();
+      const css = theme.candidatesToCss(classes).join("\n");
+      expect(css).not.toMatch(/box-shadow:\s*(?!var\(--tw-ring-offset-shadow\)|0 0 #0000)/);
+      expect(css).not.toMatch(/gradient\(/);
+    },
+    GALLERY_TIMEOUT,
+  );
 });
