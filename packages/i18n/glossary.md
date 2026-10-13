@@ -114,6 +114,17 @@ the office has the payment.
 | Password | पासवर्ड | The secret the owner gave the lineman | lock | PIN, Passcode, कूटशब्द |
 | Account | अकाउंट | The lineman's sign-in, which the owner can switch off | — | Profile, User |
 
+## Sign-in words (web)
+
+| English | हिंदी | Means | Icon / colour | Not this |
+|---|---|---|---|---|
+| Email | ईमेल | Address the reset link is sent to (owners, staff) | — | E-mail ID, ई-मेल पता |
+| Link | लिंक | The one-time address in the reset email | — | URL, Token |
+| Forgot password? | पासवर्ड भूल गए? | Ask for a reset link | — | Recover account |
+| Code | कोड | The 6-digit number from the authenticator app (admins) | — | OTP, TOTP, Token |
+| 2-step sign-in | 2-स्टेप लॉग इन | Password + code (platform admins) | — | 2FA, MFA |
+| Sign out on all devices | सभी डिवाइस से लॉग आउट करें | End every session of this user | log-out | Revoke sessions |
+
 ## Words we never show users
 
 Invoice, Ledger, Allocation, Adjustment, Reversal, Tenant, Sync / Synced / Pending sync,

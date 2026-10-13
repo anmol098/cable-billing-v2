@@ -1,4 +1,91 @@
 {
+  "auth": {
+    "email": {
+      "reset_action": "Open this link to set it. It works once, for {minutes} minutes:",
+      "reset_ignore": "If it was not you, ignore this email. Your password stays the same.",
+      "reset_intro": "Someone asked to set a new password for your Cable Billing account.",
+      "reset_subject": "Set a new password for Cable Billing"
+    },
+    "error": {
+      "account_disabled": "Your account is switched off. Call your owner or office.",
+      "invalid_code": "Wrong code. Look at the app and type the new code.",
+      "invalid_credentials": "Wrong user name or password.",
+      "invalid_password": "Use 8 to 128 letters, numbers or signs.",
+      "invalid_token": "This link does not work any more. Ask for a new link.",
+      "passwords_differ": "The two passwords are not the same.",
+      "rate_limited": "Too many tries. Try again in {minutes, plural, one {# minute} other {# minutes}}.",
+      "required": "Fill this in.",
+      "role_not_allowed": "This login is for the phone app. Linemen sign in on the phone, not here.",
+      "title": "Could not sign in",
+      "two_factor_expired": "This took too long. Sign in again.",
+      "unexpected": "Something went wrong. Try again."
+    },
+    "login": {
+      "description": "For owners and office staff.",
+      "forgot_password": "Forgot password?",
+      "lineman_hint": "Linemen sign in on the phone app.",
+      "login_label": "Mobile no., user name or email",
+      "password_label": "Password",
+      "submit": "Sign in",
+      "submitting": "Signing in…",
+      "title": "Sign in"
+    },
+    "notice": {
+      "password_changed": "Password changed. Sign in with your new password.",
+      "session_ended": "Please sign in again.",
+      "signed_out": "You are signed out."
+    },
+    "password": {
+      "hide": "Hide",
+      "hide_label": "Hide password",
+      "show": "Show",
+      "show_label": "Show password"
+    },
+    "reset": {
+      "back": "Back to sign in",
+      "description": "Type your email. We will send you a link to set a new password.",
+      "email_label": "Email",
+      "lineman_hint": "Linemen: ask your owner to change your password.",
+      "sent": "If this email has an account, we sent a link to it. The link works once, for 1 hour.",
+      "sent_title": "Check your email",
+      "submit": "Send link",
+      "submitting": "Sending…",
+      "title": "Forgot password"
+    },
+    "reset_new": {
+      "confirm_label": "New password again",
+      "description": "Type your new password two times.",
+      "password_label": "New password",
+      "submit": "Save password",
+      "submitting": "Saving…",
+      "title": "New password"
+    },
+    "sign_out": "Sign out",
+    "sign_out_everywhere": "Sign out on all devices",
+    "two_factor": {
+      "back": "Back to sign in",
+      "code_label": "6-digit code",
+      "description": "Open your authenticator app. Type the 6-digit code for Cable Billing.",
+      "submit": "Check code",
+      "submitting": "Checking…",
+      "title": "Enter code"
+    },
+    "two_factor_setup": {
+      "add_key": "Add this key to your authenticator app (Google Authenticator, Authy, …):",
+      "backup_description": "If you lose your phone, each code works once. Save them somewhere safe now. They are shown only once.",
+      "backup_title": "Backup codes",
+      "code_label": "6-digit code from the app",
+      "confirm": "Turn on",
+      "confirming": "Checking…",
+      "description": "Admins need a code from an authenticator app every time they sign in.",
+      "key_label": "Key",
+      "open_in_app": "Open in authenticator app",
+      "password_label": "Your password",
+      "start": "Next",
+      "starting": "Please wait…",
+      "title": "Turn on 2-step sign-in"
+    }
+  },
   "common": {
     "amount": "₹{amount}",
     "amount_credit": "₹{amount} credit",

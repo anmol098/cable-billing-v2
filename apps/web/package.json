@@ -15,11 +15,13 @@
   "dependencies": {
     "@cb/core": "workspace:*",
     "@cb/db": "workspace:*",
+    "@cb/domain": "workspace:*",
     "@cb/i18n": "workspace:*",
     "@cb/ui": "workspace:*",
     "@fontsource-variable/inter": "^5.3.0",
     "@fontsource-variable/noto-sans-devanagari": "^5.3.0",
     "@sentry/nextjs": "^11.6.0",
+    "better-auth": "1.7.7",
     "next": "^16.4.0",
     "next-intl": "^4.14.9",
     "react": "catalog:",
