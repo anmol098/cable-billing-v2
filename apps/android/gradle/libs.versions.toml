@@ -77,6 +77,7 @@ sentry-android-core = { module = "io.sentry:sentry-android-core", version.ref = 
 junit = { module = "junit:junit", version.ref = "junit" }
 androidx-test-ext-junit = { module = "androidx.test.ext:junit", version.ref = "androidx-test-ext-junit" }
 robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
+okhttp-mockwebserver3 = { module = "com.squareup.okhttp3:mockwebserver3", version.ref = "okhttp" }
 
 # Lint tooling (used by the root build and detekt-rules, not shipped).
 detekt-api = { module = "io.gitlab.arturbosch.detekt:detekt-api", version.ref = "detekt" }

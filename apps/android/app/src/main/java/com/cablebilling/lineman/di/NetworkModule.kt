@@ -1,6 +1,7 @@
 package com.cablebilling.lineman.di
 
 import com.cablebilling.lineman.BuildConfig
+import com.cablebilling.lineman.data.network.AppVersionInterceptor
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -16,7 +17,8 @@ import javax.inject.Singleton
 
 /**
  * Retrofit + OkHttp + kotlinx.serialization for `/api/mobile/v1` (PLAN §10.2). The base URL comes
- * from the build flavour (BuildConfig.API_BASE_URL). T-063 adds the auth interceptor and services.
+ * from the build flavour (BuildConfig.API_BASE_URL). This plain client sends the version header on
+ * every request; T-063's `data/network/ApiModule` builds the authenticated client and the services.
  */
 @Module
 @InstallIn(SingletonComponent::class)
@@ -34,11 +36,12 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideOkHttpClient(): OkHttpClient =
+    fun provideOkHttpClient(appVersion: AppVersionInterceptor): OkHttpClient =
         OkHttpClient
             .Builder()
             .connectTimeout(CONNECT_TIMEOUT)
             .readTimeout(READ_TIMEOUT)
+            .addInterceptor(appVersion)
             .apply {
                 if (BuildConfig.DEBUG) {
                     // BASIC: method, URL, status and size only; never headers or bodies (tokens, PII).

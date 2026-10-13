@@ -1,0 +1,56 @@
+{
+  "_review": [
+    "title",
+    "login_label",
+    "password_label",
+    "show_password",
+    "hide_password",
+    "keyboard_numbers_description",
+    "keyboard_letters_description",
+    "sign_in",
+    "signing_in",
+    "forgot_password",
+    "error.wrong_password",
+    "error.account_disabled",
+    "error.not_lineman",
+    "error.too_many_tries",
+    "error.no_internet",
+    "signed_out.session_expired",
+    "signed_out.phone_signed_out",
+    "signed_out.account_disabled",
+    "signed_out.storage_reset",
+    "update.title",
+    "update.body",
+    "update.button"
+  ],
+  "title": "लॉग इन",
+  "login_label": "मोबाइल नंबर या यूज़र नेम",
+  "password_label": "पासवर्ड",
+  "show_password": "दिखाएँ",
+  "hide_password": "छिपाएँ",
+  "keyboard_numbers": "123",
+  "keyboard_letters": "ABC",
+  "keyboard_numbers_description": "नंबर वाला कीबोर्ड",
+  "keyboard_letters_description": "अक्षर वाला कीबोर्ड",
+  "sign_in": "लॉग इन करें",
+  "signing_in": "लॉग इन हो रहा है…",
+  "forgot_password": "पासवर्ड भूल गए?",
+  "error": {
+    "wrong_password": "यूज़र नेम या पासवर्ड गलत है।",
+    "account_disabled": "आपका अकाउंट बंद है। ऑफिस को फ़ोन करें।",
+    "not_lineman": "यह ऐप लाइनमैन के लिए है। मालिक और स्टाफ़ वेबसाइट इस्तेमाल करें।",
+    "too_many_tries": "बहुत बार कोशिश हुई। थोड़ी देर रुककर फिर से करें।",
+    "no_internet": "इंटरनेट नहीं है। लॉग इन के लिए इंटरनेट चाहिए।"
+  },
+  "signed_out": {
+    "session_expired": "फिर से लॉग इन करें। फ़ोन में सेव पेमेंट सुरक्षित हैं।",
+    "phone_signed_out": "ऑफिस ने इस फ़ोन से लॉग आउट कर दिया है। फिर से लॉग इन करें। फ़ोन में सेव पेमेंट सुरक्षित हैं।",
+    "account_disabled": "आपका अकाउंट बंद है। ऑफिस को फ़ोन करें। फ़ोन में सेव पेमेंट सुरक्षित हैं।",
+    "storage_reset": "फिर से लॉग इन करें।"
+  },
+  "update": {
+    "title": "ऐप का नया वर्ज़न चाहिए",
+    "body": "काम जारी रखने के लिए ऐप अपडेट करें। फ़ोन में सेव पेमेंट सुरक्षित हैं। अपडेट के बाद वे ऑफिस पहुँच जाएँगे।",
+    "button": "ऐप अपडेट करें"
+  }
+}

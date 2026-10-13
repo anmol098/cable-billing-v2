@@ -145,6 +145,38 @@
     "voice_off": "Voice off",
     "voice_on": "Voice on"
   },
+  "mobile_login": {
+    "error": {
+      "account_disabled": "Your account is switched off. Call office.",
+      "no_internet": "No internet. Sign in needs internet.",
+      "not_lineman": "This app is for linemen. Owners and staff use the website.",
+      "too_many_tries": "Too many tries. Wait a little and try again.",
+      "wrong_password": "Wrong user name or password."
+    },
+    "forgot_password": "Forgot password?",
+    "hide_password": "Hide",
+    "keyboard_letters": "ABC",
+    "keyboard_letters_description": "Letter keyboard",
+    "keyboard_numbers": "123",
+    "keyboard_numbers_description": "Number keyboard",
+    "login_label": "Mobile no. or user name",
+    "password_label": "Password",
+    "show_password": "Show",
+    "sign_in": "Sign in",
+    "signed_out": {
+      "account_disabled": "Your account is switched off. Call office. Payments saved on this phone are safe.",
+      "phone_signed_out": "The office signed this phone out. Sign in again. Payments saved on this phone are safe.",
+      "session_expired": "Please sign in again. Payments saved on this phone are safe.",
+      "storage_reset": "Please sign in again."
+    },
+    "signing_in": "Signing in…",
+    "title": "Sign in",
+    "update": {
+      "body": "Update the app to keep working. Payments saved on this phone are safe. They go to the office after the update.",
+      "button": "Update app",
+      "title": "New app version needed"
+    }
+  },
   "mobile_shell": {
     "nav_search": "Search",
     "nav_today": "Today",

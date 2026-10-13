@@ -8,6 +8,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import com.cablebilling.designsystem.theme.CableTheme
 import com.cablebilling.designsystem.voice.LocalSpeaker
 import com.cablebilling.designsystem.voice.Speaker
+import com.cablebilling.lineman.feature.login.SessionGate
 import com.cablebilling.lineman.locale.AppLanguage
 import com.cablebilling.lineman.ui.CableApp
 import com.cablebilling.lineman.voice.VoiceHost
@@ -28,7 +29,8 @@ class MainActivity : AppCompatActivity() {
         setContent {
             CompositionLocalProvider(LocalSpeaker provides speaker) {
                 CableTheme {
-                    CableApp()
+                    // Force update, then login, in front of the app shell (T-063).
+                    SessionGate { CableApp() }
                     // TTS lifecycle + the one-time Hindi voice prompt (T-067).
                     VoiceHost(speaker)
                 }
