@@ -3,10 +3,10 @@ id: T-068
 title: Android: Bluetooth printer setup and ESC/POS raster printing
 phase: 3
 area: android
-status: todo
-owner:
-claimed_at:
-branch:
+status: claimed
+owner: agent-t068
+claimed_at: 2026-10-13T12:48:22.654Z
+branch: task/T-068-android-bluetooth-printer-setup-and-esc
 depends_on: [T-009]
 review: self
 claimable_by: agent
@@ -53,3 +53,7 @@ PLAN §11.8, FR-018, D-08, RULE-18 — see `docs/IMPLEMENTATION_PLAN.md`, `docs/
 ## Completion notes
 
 _The agent fills this in before opening the PR: what was built, decisions taken, deviations, follow-up tasks created, and how it was verified._
+
+## Board log
+
+- 2026-10-13T12:48:22.654Z claimed by agent-t068
