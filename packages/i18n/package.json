@@ -6,16 +6,24 @@
   "type": "module",
   "sideEffects": false,
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./load": "./src/load.ts"
   },
   "scripts": {
     "build": "tsc --noEmit",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "generate": "tsx scripts/i18n.ts build",
+    "i18n:build": "tsx scripts/i18n.ts build",
+    "i18n:check": "tsx scripts/i18n.ts check"
+  },
+  "dependencies": {
+    "@formatjs/icu-messageformat-parser": "^3.5.21"
   },
   "devDependencies": {
     "@cb/config": "workspace:*",
     "@types/node": "catalog:",
+    "tsx": "^4.23.15",
     "typescript": "catalog:",
     "vitest": "catalog:"
   }
