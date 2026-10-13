@@ -3,10 +3,10 @@ id: T-047
 title: Bills UI: runs, preview, register, detail, printable bill
 phase: 2
 area: web
-status: todo
-owner:
-claimed_at:
-branch:
+status: claimed
+owner: agent-t047
+claimed_at: 2026-10-13T19:32:52.461Z
+branch: task/T-047-bills-ui-runs-preview-register-detail-pr
 depends_on: [T-044, T-029]
 review: self
 claimable_by: agent
@@ -55,3 +55,7 @@ PLAN §12.1, J-03, FR-009, FR-011 — see `docs/IMPLEMENTATION_PLAN.md`, `docs/P
 ## Completion notes
 
 _The agent fills this in before opening the PR: what was built, decisions taken, deviations, follow-up tasks created, and how it was verified._
+
+## Board log
+
+- 2026-10-13T19:32:52.461Z claimed by agent-t047
