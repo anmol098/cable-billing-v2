@@ -3,10 +3,10 @@ id: T-064
 title: Android: Room database and roster sync
 phase: 3
 area: android
-status: todo
-owner:
-claimed_at:
-branch:
+status: claimed
+owner: agent-t064
+claimed_at: 2026-10-13T12:48:27.295Z
+branch: task/T-064-android-room-database-and-roster-sync
 depends_on: [T-063]
 review: self
 claimable_by: agent
@@ -51,3 +51,7 @@ PLAN §10.3, PLAN §11.5 — see `docs/IMPLEMENTATION_PLAN.md`, `docs/PRD.md`, `
 ## Completion notes
 
 _The agent fills this in before opening the PR: what was built, decisions taken, deviations, follow-up tasks created, and how it was verified._
+
+## Board log
+
+- 2026-10-13T12:48:27.295Z claimed by agent-t064
