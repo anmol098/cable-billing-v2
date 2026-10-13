@@ -1,0 +1,87 @@
+{
+  "title": "UI showcase",
+  "intro": "Every building block of the web app, in the language you choose.",
+  "add_customer": "Add customer",
+  "sections": {
+    "buttons": "Buttons",
+    "fields": "Fields",
+    "numbers": "Amounts and states",
+    "cards": "Card",
+    "empty": "Empty list",
+    "table": "Table",
+    "dialogs": "Dialog and confirm",
+    "toasts": "Messages",
+    "stepper": "Steps",
+    "search": "Search",
+    "help": "Help"
+  },
+  "buttons": {
+    "stop_connection": "Stop connection",
+    "disabled": "Not now"
+  },
+  "fields": {
+    "name": "Customer name",
+    "name_hint": "e.g. Ramesh Kumar",
+    "phone": "Mobile number",
+    "phone_problem": "Enter 10 digits.",
+    "plan": "Plan",
+    "plan_choose": "Choose a plan",
+    "plan_basic": "Basic",
+    "plan_sports": "Sports",
+    "note": "Note",
+    "whatsapp_bill": "Open WhatsApp with the bill",
+    "whatsapp_bill_hint": "You press Send in WhatsApp.",
+    "method": "How did they pay?",
+    "amount": "Amount",
+    "whole_rupees": "Whole rupees only."
+  },
+  "card": {
+    "title": "This month",
+    "text": "Collected so far"
+  },
+  "empty": {
+    "message": "No customers yet. Add your first customer."
+  },
+  "table": {
+    "caption": "Customers",
+    "area": "Area",
+    "status": "Status",
+    "active": "Active",
+    "stopped": "Stopped",
+    "opened": "Opened {name}"
+  },
+  "dialog": {
+    "open": "Change plan",
+    "title": "Change plan",
+    "description": "The new rent starts next month."
+  },
+  "confirm": {
+    "title": "Stop this connection?",
+    "summary": "{name}'s set-top box {vc} will stop. Rent stops from <b>{month}</b>. {amount} old due stays.",
+    "stopping": "Stopping…",
+    "stopped": "Connection stopped"
+  },
+  "toasts": {
+    "show_success": "Show done",
+    "show_pending": "Show waiting",
+    "show_problem": "Show problem",
+    "saved": "Saved",
+    "problem_detail": "Check the internet and try again."
+  },
+  "stepper": {
+    "customer": "Customer",
+    "connections": "Connections",
+    "check": "Check & save",
+    "check_text": "Check the details, then press Save.",
+    "saved": "Customer saved"
+  },
+  "search": {
+    "label": "Find customer",
+    "hint": "Name, phone or VC number",
+    "empty": "No customer found",
+    "chosen": "Chosen: {name}"
+  },
+  "help": {
+    "text": "Money the customer still has to pay."
+  }
+}

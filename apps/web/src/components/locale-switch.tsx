@@ -1,4 +1,5 @@
 import type { Locale } from "@cb/i18n";
+import { LanguageSwitch } from "@cb/ui";
 import { useTranslations } from "next-intl";
 
 type Props = {
@@ -8,40 +9,22 @@ type Props = {
   action: (formData: FormData) => void | Promise<void>;
 };
 
-const OPTIONS = [
-  { locale: "en", label: "language_english" },
-  { locale: "hi", label: "language_hindi" },
-] as const;
-
 /**
- * Scaffold language switch: one tap, each language named in its own script.
- * T-007's `LanguageSwitch` composite replaces the markup; keep `setLocale` as the action.
+ * The app's language switch: T-007's `LanguageSwitch` (EN | हिं, each language named in its own
+ * script) with the words from i18n. Pass `setLocale` as the action.
  */
 export function LocaleSwitch({ current, action }: Props) {
-  const t = useTranslations("common");
-  const tScaffold = useTranslations("scaffold.home");
+  const common = useTranslations("common");
+  const ui = useTranslations("ui");
   return (
-    <form action={action} className="flex gap-2" aria-label={tScaffold("language")}>
-      {OPTIONS.map(({ locale, label }) => {
-        const selected = locale === current;
-        return (
-          <button
-            key={locale}
-            type="submit"
-            name="locale"
-            value={locale}
-            lang={locale}
-            aria-pressed={selected}
-            className={
-              selected
-                ? "min-h-touch-min rounded-md border-hairline border-accent bg-accent px-4 text-on-accent"
-                : "min-h-touch-min rounded-md border-hairline border-border bg-bg px-4 text-text"
-            }
-          >
-            {t(label)}
-          </button>
-        );
-      })}
-    </form>
+    <LanguageSwitch
+      label={ui("language")}
+      value={current}
+      action={action}
+      options={[
+        { value: "en", short: ui("language_short_en"), name: common("language_english") },
+        { value: "hi", short: ui("language_short_hi"), name: common("language_hindi") },
+      ]}
+    />
   );
 }

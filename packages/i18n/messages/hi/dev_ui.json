@@ -1,0 +1,150 @@
+{
+  "_review": [
+    "title",
+    "intro",
+    "add_customer",
+    "sections.buttons",
+    "sections.fields",
+    "sections.numbers",
+    "sections.cards",
+    "sections.empty",
+    "sections.table",
+    "sections.dialogs",
+    "sections.toasts",
+    "sections.stepper",
+    "sections.search",
+    "sections.help",
+    "buttons.stop_connection",
+    "buttons.disabled",
+    "fields.name",
+    "fields.name_hint",
+    "fields.phone",
+    "fields.phone_problem",
+    "fields.plan",
+    "fields.plan_choose",
+    "fields.plan_basic",
+    "fields.plan_sports",
+    "fields.note",
+    "fields.whatsapp_bill",
+    "fields.whatsapp_bill_hint",
+    "fields.method",
+    "fields.amount",
+    "fields.whole_rupees",
+    "card.title",
+    "card.text",
+    "empty.message",
+    "table.caption",
+    "table.area",
+    "table.status",
+    "table.active",
+    "table.stopped",
+    "table.opened",
+    "dialog.open",
+    "dialog.title",
+    "dialog.description",
+    "confirm.title",
+    "confirm.summary",
+    "confirm.stopping",
+    "confirm.stopped",
+    "toasts.show_success",
+    "toasts.show_pending",
+    "toasts.show_problem",
+    "toasts.saved",
+    "toasts.problem_detail",
+    "stepper.customer",
+    "stepper.connections",
+    "stepper.check",
+    "stepper.check_text",
+    "stepper.saved",
+    "search.label",
+    "search.hint",
+    "search.empty",
+    "search.chosen",
+    "help.text"
+  ],
+  "title": "UI नमूने",
+  "intro": "वेब ऐप के सारे हिस्से, आपकी चुनी भाषा में।",
+  "add_customer": "ग्राहक जोड़ें",
+  "sections": {
+    "buttons": "बटन",
+    "fields": "भरने की जगह",
+    "numbers": "रकम और हालत",
+    "cards": "कार्ड",
+    "empty": "खाली लिस्ट",
+    "table": "टेबल",
+    "dialogs": "डायलॉग और पक्का करें",
+    "toasts": "संदेश",
+    "stepper": "चरण",
+    "search": "खोज",
+    "help": "मदद"
+  },
+  "buttons": {
+    "stop_connection": "कनेक्शन बंद करें",
+    "disabled": "अभी नहीं"
+  },
+  "fields": {
+    "name": "ग्राहक का नाम",
+    "name_hint": "जैसे रमेश कुमार",
+    "phone": "मोबाइल नंबर",
+    "phone_problem": "10 अंक लिखें।",
+    "plan": "प्लान",
+    "plan_choose": "प्लान चुनें",
+    "plan_basic": "बेसिक",
+    "plan_sports": "स्पोर्ट्स",
+    "note": "नोट",
+    "whatsapp_bill": "बिल के साथ WhatsApp खोलें",
+    "whatsapp_bill_hint": "भेजें आप WhatsApp में दबाएँगे।",
+    "method": "पैसे कैसे दिए?",
+    "amount": "रकम",
+    "whole_rupees": "सिर्फ़ पूरे रुपये।"
+  },
+  "card": {
+    "title": "इस महीने",
+    "text": "अब तक मिले"
+  },
+  "empty": {
+    "message": "अभी कोई ग्राहक नहीं है। पहला ग्राहक जोड़ें।"
+  },
+  "table": {
+    "caption": "ग्राहक",
+    "area": "एरिया",
+    "status": "हालत",
+    "active": "चालू",
+    "stopped": "बंद",
+    "opened": "{name} खोला"
+  },
+  "dialog": {
+    "open": "प्लान बदलें",
+    "title": "प्लान बदलें",
+    "description": "नया किराया अगले महीने से लगेगा।"
+  },
+  "confirm": {
+    "title": "यह कनेक्शन बंद करें?",
+    "summary": "{name} का सेट-टॉप बॉक्स {vc} बंद होगा। किराया <b>{month}</b> से रुकेगा। {amount} पुराना बाकी रहेगा।",
+    "stopping": "बंद हो रहा है…",
+    "stopped": "कनेक्शन बंद हुआ"
+  },
+  "toasts": {
+    "show_success": "हो गया दिखाएँ",
+    "show_pending": "इंतज़ार दिखाएँ",
+    "show_problem": "दिक्कत दिखाएँ",
+    "saved": "सेव हो गया",
+    "problem_detail": "इंटरनेट देखें और फिर से करें।"
+  },
+  "stepper": {
+    "customer": "ग्राहक",
+    "connections": "कनेक्शन",
+    "check": "जाँचें और सेव करें",
+    "check_text": "जानकारी जाँचें, फिर सेव करें दबाएँ।",
+    "saved": "ग्राहक सेव हो गया"
+  },
+  "search": {
+    "label": "ग्राहक खोजें",
+    "hint": "नाम, फ़ोन या VC नंबर",
+    "empty": "कोई ग्राहक नहीं मिला",
+    "chosen": "चुना: {name}"
+  },
+  "help": {
+    "text": "ग्राहक को अभी जितने पैसे देने हैं।"
+  }
+}

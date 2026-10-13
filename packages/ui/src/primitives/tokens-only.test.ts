@@ -3,13 +3,13 @@ import { join, relative } from "node:path";
 import { describe, expect, it } from "vitest";
 
 /*
- * Acceptance check for T-006: the primitives (and their shared class strings in lib/) use design
- * tokens only. Colours, sizes, radii, borders and type come from theme.css utilities; anything
+ * Acceptance check for T-006 and T-007: the primitives, the composites and their shared class
+ * strings in lib/ use design tokens only. Colours, sizes, radii, borders and type come from theme.css utilities; anything
  * hard-coded fails here with the file, line and rule.
  */
 
 const SRC = join(import.meta.dirname, "..");
-const SCANNED_DIRS = ["primitives", "lib"];
+const SCANNED_DIRS = ["primitives", "composites", "lib"];
 
 type Rule = { name: string; pattern: RegExp };
 
@@ -22,7 +22,8 @@ const HARD_CODED_RULES: Rule[] = [
   { name: "CSS length", pattern: /(?<![\w-])\d*\.?\d+(?:px|rem|em|vh|vw|vmin|vmax|pt|dp|sp)\b/ },
   { name: "Tailwind arbitrary value", pattern: /[\w)]-\[/ },
   { name: "Tailwind arbitrary property or variant", pattern: /(?:^|[\s"'`])\[(?:&|@|[a-z-]+:)/ },
-  { name: "Tailwind CSS-variable shorthand", pattern: /[\w)]-\(--/ },
+  // Radix's measured sizes (`w-(--radix-popover-trigger-width)`) are runtime values, not tokens.
+  { name: "Tailwind CSS-variable shorthand", pattern: /[\w)]-\(--(?!radix-)/ },
   { name: "inline style", pattern: /\bstyle\s*=\s*\{/ },
   {
     name: "shadow or gradient",
@@ -61,9 +62,16 @@ function sourceFiles(): string[] {
 }
 
 describe("tokens only (no hard-coded colours or sizes)", () => {
-  it("scans the primitives and lib sources", () => {
+  it("scans the primitives, composites and lib sources", () => {
     const files = sourceFiles().map((file) => relative(SRC, file));
-    expect(files).toEqual(expect.arrayContaining(["primitives/Button.tsx", "lib/styles.ts"]));
+    expect(files).toEqual(
+      expect.arrayContaining([
+        "primitives/Button.tsx",
+        "composites/DataTable.tsx",
+        "composites/Stepper.tsx",
+        "lib/styles.ts",
+      ]),
+    );
   });
 
   it.each(sourceFiles().map((file) => [relative(SRC, file), file]))("%s", (_name, file) => {
@@ -107,6 +115,7 @@ describe("tokens only (no hard-coded colours or sizes)", () => {
     "// No shadows: hairline borders instead.",
     'import { Slot } from "@radix-ui/react-slot";',
     'className="w-1/2 p-4"',
+    'className="w-(--radix-popover-trigger-width)"',
   ])("allows %s", (line) => {
     expect(findHardCoded(line)).toEqual([]);
   });

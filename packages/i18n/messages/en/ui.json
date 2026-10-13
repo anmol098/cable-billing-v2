@@ -1,0 +1,12 @@
+{
+  "language": "Language",
+  "language_short_en": "EN",
+  "language_short_hi": "हिं",
+  "step_progress": "Step {current} of {total}",
+  "searching": "Searching…",
+  "search_failed": "Could not search. Try again.",
+  "search_results": "{count, plural, one {# match} other {# matches}}",
+  "notifications": "Notifications",
+  "help_about": "Help: {topic}",
+  "saving": "Saving…"
+}
