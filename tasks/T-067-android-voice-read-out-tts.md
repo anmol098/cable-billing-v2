@@ -3,10 +3,10 @@ id: T-067
 title: Android: voice read-out (TTS)
 phase: 3
 area: android
-status: todo
-owner:
-claimed_at:
-branch:
+status: claimed
+owner: agent-t067
+claimed_at: 2026-10-13T10:25:40.431Z
+branch: task/T-067-android-voice-read-out-tts
 depends_on: [T-009]
 review: self
 claimable_by: agent
@@ -50,3 +50,7 @@ PLAN §11.3 (Voice column), D-10 — see `docs/IMPLEMENTATION_PLAN.md`, `docs/PR
 ## Completion notes
 
 _The agent fills this in before opening the PR: what was built, decisions taken, deviations, follow-up tasks created, and how it was verified._
+
+## Board log
+
+- 2026-10-13T10:25:40.431Z claimed by agent-t067
