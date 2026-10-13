@@ -1,0 +1,4 @@
+{
+  "extends": "@cb/config/tsconfig.lib.json",
+  "include": ["src", "vitest.config.ts"]
+}

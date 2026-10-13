@@ -1,0 +1,22 @@
+{
+  "name": "@cb/db",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Drizzle schema, migrations and RLS policies for Neon Postgres.",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "tsc --noEmit",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@cb/config": "workspace:*",
+    "@types/node": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}
