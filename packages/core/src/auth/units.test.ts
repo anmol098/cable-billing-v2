@@ -257,6 +257,10 @@ describe("request info", () => {
     const fresh = requestIdFromHeaders(new Headers({ "x-request-id": "client-chosen" }));
     expect(fresh).not.toBe("client-chosen");
     expect(fresh).toMatch(/^[0-9a-f-]{36}$/);
-    expect(requestIdFromHeaders(new Headers({ "x-vercel-id": "bad id\n" }))).not.toContain("bad");
+    // An invalid id is replaced by a fresh UUID. (Not `.not.toContain("bad")`: a random hex UUID
+    // contains "bad" about 1% of the time.)
+    const replaced = requestIdFromHeaders(new Headers({ "x-vercel-id": "bad id\n" }));
+    expect(replaced).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/);
+    expect(replaced).not.toBe("bad id\n");
   });
 });
