@@ -43,6 +43,11 @@
     "whatsapp_opened": "WhatsApp opened",
     "yes": "Yes"
   },
+  "mobile_shell": {
+    "nav_search": "Search",
+    "nav_today": "Today",
+    "nav_waiting": "Waiting"
+  },
   "scaffold": {
     "home": {
       "language": "Language",

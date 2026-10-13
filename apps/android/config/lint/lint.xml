@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Android lint settings shared by every module. Errors fail `./gradlew lint`. -->
+<lint>
+    <!-- Version-freshness checks depend on the day the build runs; versions are reviewed by hand. -->
+    <issue id="GradleDependency" severity="ignore" />
+    <issue id="NewerVersionAvailable" severity="ignore" />
+    <issue id="AndroidGradlePluginVersion" severity="ignore" />
+    <!-- targetSdk follows the Google Play requirement on purpose (see apps/android/README.md). -->
+    <issue id="OldTargetApi" severity="ignore" />
+    <!-- Generated catalogues (icons, strings) hold entries for screens not built yet; R8 resource
+         shrinking drops the unused ones from release builds. -->
+    <issue id="UnusedResources">
+        <ignore path="**/drawable/ic_cb_*.xml" />
+        <ignore path="**/strings_generated.xml" />
+    </issue>
+    <!-- Hand-written strings are not allowed (CLAUDE.md "i18n only"); everything is generated. -->
+    <issue id="HardcodedText" severity="error" />
+</lint>

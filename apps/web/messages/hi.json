@@ -43,6 +43,11 @@
     "whatsapp_opened": "WhatsApp खुल गया",
     "yes": "हाँ"
   },
+  "mobile_shell": {
+    "nav_search": "खोजें",
+    "nav_today": "आज",
+    "nav_waiting": "इंतज़ार में"
+  },
   "scaffold": {
     "home": {
       "language": "भाषा",
