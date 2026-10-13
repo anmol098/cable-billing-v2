@@ -21,9 +21,24 @@ import {
   type Translate,
 } from "./format";
 
-export function RunStatePill({ t, state }: { t: Translate; state: RunState }) {
+export function RunStatePill({
+  t,
+  state,
+  className,
+}: {
+  t: Translate;
+  state: RunState;
+  className?: string;
+}) {
   const style = RUN_STATE_PILL[state];
-  return <StatusPill variant={style.variant} icon={style.icon} label={t(`run_status.${state}`)} />;
+  return (
+    <StatusPill
+      variant={style.variant}
+      icon={style.icon}
+      label={t(`run_status.${state}`)}
+      className={className}
+    />
+  );
 }
 
 /** ← previous month · month · next month →, inside [first, current]. */
@@ -353,7 +368,7 @@ export function MonthCalendar({
               <span className="text-sm text-text-muted">{t("calendar.before_start")}</span>
             ) : (
               <>
-                <RunStatePill t={t} state={month.run?.status ?? "none"} />
+                <RunStatePill t={t} state={month.run?.status ?? "none"} className="self-start" />
                 <span className="text-sm text-text">
                   {t("calendar.bills", { count: month.billCount })}
                 </span>
