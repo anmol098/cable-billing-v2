@@ -3,10 +3,10 @@ id: T-043
 title: Job queue, cron endpoints and failure alerts
 phase: 2
 area: core
-status: todo
-owner:
-claimed_at:
-branch:
+status: claimed
+owner: agent-t043
+claimed_at: 2026-10-13T13:12:14.680Z
+branch: task/T-043-job-queue-cron-endpoints-and-failure-ale
 depends_on: [T-023, T-025]
 review: self
 claimable_by: agent
@@ -53,3 +53,7 @@ PLAN §14 — see `docs/IMPLEMENTATION_PLAN.md`, `docs/PRD.md`, `docs/BRD.md`.
 ## Completion notes
 
 _The agent fills this in before opening the PR: what was built, decisions taken, deviations, follow-up tasks created, and how it was verified._
+
+## Board log
+
+- 2026-10-13T13:12:14.680Z claimed by agent-t043
