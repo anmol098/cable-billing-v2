@@ -242,7 +242,10 @@ reactivate 3 Dec, disconnect 15 Jan. It reads the rows back, maps them as above 
 - **Mutation check** (reverted): with the EXCLUDE range changed to `'[)'`, 2 overlap tests fail
   (same-day reuse, and the range that ends on the open assignment's first day).
 - `db:generate` reports "No schema changes"; `db:check` OK.
-- Root results after the final rebase: see the PR.
+- Root, on top of the latest `feature/mvp` (c5338e6): `pnpm install --frozen-lockfile`,
+  `pnpm lint`, `pnpm typecheck` (9/9), `pnpm test` (9/9; @cb/db 15 files / 140 tests against local
+  PG 17), `pnpm build` (9/9), `pnpm generate` (no diff), `node scripts/tasks.mjs check --local`
+  (OK, 82 tasks).
 
 ## Board log
 
