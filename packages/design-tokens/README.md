@@ -75,3 +75,31 @@ is also a CSS variable (`var(--color-cash)`) because the theme is `@theme static
 - `src/css.ts`, `src/kotlin.ts`: the two renderers. `src/outputs.ts`: output paths.
 - `src/fs.ts`: reading `tokens.json`, writing and checking files (Node only).
 - `scripts/build.ts`: the CLI behind `tokens:build` and `generate`.
+
+## Icons
+
+`icons.json` maps a **semantic name** (what the icon means: `cash`, `pending`, `whatsapp`) to a
+[Lucide](https://lucide.dev) icon name. `pnpm icons:build` reads the glyphs from the installed
+`lucide-static` package (no network) and writes:
+
+| Generated file (committed, never edit by hand) | Used by |
+|---|---|
+| `packages/ui/src/icons/icons.generated.ts` (+ `LICENSE-lucide.txt`) | Web: `<Icon name="cash" />` from `@cb/ui` |
+| `apps/android/core/designsystem/src/main/res/drawable/ic_cb_<name>.xml` | Android: `R.drawable.ic_cb_cash` |
+
+Add an icon:
+
+1. Find the glyph on lucide.dev and add `"<meaning>": "<lucide-name>"` to `icons.json`. Names are
+   lowercase kebab-case (`log-out` becomes `ic_cb_log_out` on Android). Use Lucide's current
+   name; old aliases (`home`, `check-circle`, `alert-triangle`) are rejected.
+2. Run `pnpm icons:build` and commit `icons.json` with the generated files. Removing a name also
+   deletes its drawable.
+
+Rules: one meaning per name, the same glyph on web and Android (PLAN §2.2, E-09). No brand logos:
+`whatsapp` is a plain speech bubble. Icons are drawn in the current text colour, so colour them
+with token utilities (`text-cash`) on the web and token colours (`tint = Tokens.Color.Cash`) on
+Android. CI runs `pnpm icons:build --check`, which fails on a missing, stale or left-over file.
+
+Code: `src/icons/manifest.ts` (validation), `src/icons/svg.ts` (Lucide shapes → path data),
+`src/icons/android.ts` (VectorDrawable XML), `src/icons/react.ts` (React data module),
+`src/icons/outputs.ts`, `src/icons/fs.ts` (Node only), `scripts/icons.ts` (CLI).

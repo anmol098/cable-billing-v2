@@ -12,13 +12,15 @@
     "build": "tsc --noEmit",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "generate": "tsx scripts/build.ts",
-    "tokens:build": "tsx scripts/build.ts"
+    "generate": "tsx scripts/build.ts && tsx scripts/icons.ts",
+    "tokens:build": "tsx scripts/build.ts",
+    "icons:build": "tsx scripts/icons.ts"
   },
   "devDependencies": {
     "@cb/config": "workspace:*",
     "@tailwindcss/node": "catalog:",
     "@types/node": "catalog:",
+    "lucide-static": "1.55.0",
     "tailwindcss": "catalog:",
     "tsx": "catalog:",
     "typescript": "catalog:",

@@ -26,6 +26,7 @@ pnpm test                                # turbo: vitest run in every package
 pnpm build                               # turbo: build every package/app
 pnpm generate                            # turbo: tokens, icons, i18n, openapi generators
 pnpm tokens:build [--check]              # tokens.json → theme.css + Tokens.kt (--check: fail on drift)
+pnpm icons:build [--check]               # icons.json → @cb/ui <Icon> data + Android ic_cb_*.xml drawables
 pnpm --filter @cb/domain test            # one package (any script, any @cb/* package)
 pnpm --filter @cb/domain exec vitest     # watch mode for one package
 cd apps/android && ./gradlew ktlintCheck detekt testDevDebugUnitTest assembleDevDebug

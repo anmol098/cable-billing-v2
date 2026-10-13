@@ -18,6 +18,7 @@
     "i18n:build": "pnpm --filter @cb/i18n i18n:build",
     "i18n:check": "pnpm --filter @cb/i18n i18n:check",
     "tokens:build": "pnpm --filter @cb/design-tokens tokens:build",
+    "icons:build": "pnpm --filter @cb/design-tokens icons:build",
     "tasks": "node scripts/tasks.mjs"
   },
   "devDependencies": {
