@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+        Window theme only. All UI colours, type and shapes come from CableTheme (core/designsystem),
+        which maps the design tokens. AppCompat is the parent so the per-app language API works on
+        API < 33.
+    -->
+    <style name="Theme.Cable" parent="Theme.AppCompat.Light.NoActionBar" />
+</resources>

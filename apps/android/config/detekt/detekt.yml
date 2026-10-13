@@ -1,0 +1,41 @@
+# detekt config: only the differences from detekt's default config (buildUponDefaultConfig = true).
+# Run: ./gradlew detekt   (reports in build/reports/detekt/)
+
+# Project rules from :detekt-rules. Colours and sizes come from the generated design tokens
+# (packages/design-tokens/tokens.json → core/designsystem); only core/designsystem may turn
+# literals into Color / dp / sp.
+cable:
+  active: true
+  RawColorLiteral:
+    active: true
+    excludes: ['**/core/designsystem/**', '**/detekt-rules/**']
+  RawDimensionLiteral:
+    active: true
+    excludes: ['**/core/designsystem/**', '**/detekt-rules/**']
+
+naming:
+  FunctionNaming:
+    # Compose: @Composable functions are PascalCase.
+    ignoreAnnotated: ['Composable']
+  TopLevelPropertyNaming:
+    constantPattern: '[A-Z][_A-Za-z0-9]*'
+
+complexity:
+  LongParameterList:
+    # Composables take many optional parameters (modifier, colours, callbacks).
+    functionThreshold: 8
+    ignoreDefaultParameters: true
+    ignoreAnnotated: ['Composable']
+  LongMethod:
+    ignoreAnnotated: ['Composable']
+
+style:
+  MagicNumber:
+    excludes: ['**/test/**', '**/androidTest/**', '**/core/designsystem/**', '**/*.kts']
+    ignorePropertyDeclaration: true
+    ignoreCompanionObjectPropertyDeclaration: true
+  UnusedPrivateMember:
+    # @Preview functions are private and only used by the IDE.
+    ignoreAnnotated: ['Preview']
+  MaxLineLength:
+    maxLineLength: 120
