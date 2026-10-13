@@ -1,0 +1,32 @@
+{
+  "title": "Sign in",
+  "login_label": "Mobile no. or user name",
+  "password_label": "Password",
+  "show_password": "Show",
+  "hide_password": "Hide",
+  "keyboard_numbers": "123",
+  "keyboard_letters": "ABC",
+  "keyboard_numbers_description": "Number keyboard",
+  "keyboard_letters_description": "Letter keyboard",
+  "sign_in": "Sign in",
+  "signing_in": "Signing in…",
+  "forgot_password": "Forgot password?",
+  "error": {
+    "wrong_password": "Wrong user name or password.",
+    "account_disabled": "Your account is switched off. Call office.",
+    "not_lineman": "This app is for linemen. Owners and staff use the website.",
+    "too_many_tries": "Too many tries. Wait a little and try again.",
+    "no_internet": "No internet. Sign in needs internet."
+  },
+  "signed_out": {
+    "session_expired": "Please sign in again. Payments saved on this phone are safe.",
+    "phone_signed_out": "The office signed this phone out. Sign in again. Payments saved on this phone are safe.",
+    "account_disabled": "Your account is switched off. Call office. Payments saved on this phone are safe.",
+    "storage_reset": "Please sign in again."
+  },
+  "update": {
+    "title": "New app version needed",
+    "body": "Update the app to keep working. Payments saved on this phone are safe. They go to the office after the update.",
+    "button": "Update app"
+  }
+}

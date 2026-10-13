@@ -87,6 +87,18 @@ the office has the payment.
 | Call office | ऑफिस को फ़ोन करें | phone |
 | Yes / No | हाँ / नहीं | — |
 | OK | ठीक है | — |
+| Sign in | लॉग इन करें | arrow-right |
+| Sign out | लॉग आउट करें | log-out |
+| Show / Hide (password) | दिखाएँ / छिपाएँ | eye / eye-off |
+| Update app | ऐप अपडेट करें | download |
+
+## Sign-in words (lineman app)
+
+| English | हिंदी | Means | Icon / colour | Not this |
+|---|---|---|---|---|
+| User name | यूज़र नेम | What the lineman types to sign in (usually their mobile number) | user | Login ID, Username/ID |
+| Password | पासवर्ड | The secret the owner gave the lineman | lock | PIN, Passcode, कूटशब्द |
+| Account | अकाउंट | The lineman's sign-in, which the owner can switch off | — | Profile, User |
 
 ## Words we never show users
 

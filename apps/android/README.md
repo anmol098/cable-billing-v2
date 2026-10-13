@@ -43,7 +43,9 @@ Sentry is off unless a DSN is given with `-Pcb.sentryDsn=…` or `SENTRY_DSN`.
 
 ```text
 app/                      the app: feature packages under com.cablebilling.lineman
-  feature/{search,today,queue,…}   one package per feature (PLAN §11.1)
+  feature/{login,update,search,today,queue,…}   one package per feature (PLAN §11.1)
+  data/network            Retrofit services, interceptors, generated DTOs (data/network/generated)
+  data/auth               session store (Tink-sealed), install id, sign in / out
   ui/                     app shell (CableApp: bottom bar + NavHost), navigation
   di/                     Hilt modules (network, storage)
   locale/                 AppLanguage (Hindi default, per-app language)
@@ -60,6 +62,21 @@ gradle/libs.versions.toml version catalog (append-only shared file)
 Generated, never edited by hand: `core/designsystem/.../generated/Tokens.kt` (`pnpm tokens:build`),
 `core/designsystem/src/main/res/drawable/ic_cb_*.xml` (icons), and
 `app/src/main/res/values*/strings_generated.xml` (`pnpm i18n:build`).
+
+## API, sign-in and force update (T-063)
+
+- `app/.../data/network/generated/ApiModels.kt`: **generated** DTOs (kotlinx.serialization) from
+  `packages/contracts/openapi.json`. Never edit it. The generator is plain Kotlin in the unit-test
+  source set (`data/network/codegen/ApiModelGenerator.kt`); `ApiModelsUpToDateTest` fails when the
+  file is stale. After a contract change:
+  `./gradlew :app:testDevDebugUnitTest --tests '*ApiModelsUpToDateTest' -Pcb.writeApiModels=true`.
+- `MobileApi` (every bearer endpoint) and `AuthApi` (login, refresh, logout): Retrofit, written by
+  hand against the contract. Wrap calls in `apiCall(errors) { … }` to get an `ApiResult`.
+- Every request sends `x-app-version-code`; the authenticated client adds the bearer token and
+  refreshes it once on UNAUTHENTICATED (single flight). The session (tokens, user, operator, device)
+  is sealed with the Keystore-backed Tink key in the `session` DataStore.
+- The network tests run against MockWebServer with the contract fixtures in
+  `packages/contracts/fixtures` (no server needed); those files are inputs of the test task.
 
 ## Design-system components
 

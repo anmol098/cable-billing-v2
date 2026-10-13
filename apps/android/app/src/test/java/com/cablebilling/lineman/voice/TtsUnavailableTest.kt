@@ -7,6 +7,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
@@ -14,6 +16,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.printToString
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.cablebilling.designsystem.component.SpeakButton
@@ -23,6 +26,7 @@ import com.cablebilling.designsystem.voice.LocalSpeaker
 import com.cablebilling.designsystem.voice.NoOpSpeaker
 import com.cablebilling.designsystem.voice.Speaker
 import com.cablebilling.lineman.MainActivity
+import com.cablebilling.lineman.feature.login.LoginTags
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Rule
@@ -166,8 +170,12 @@ class AppWithoutTtsTest {
         composeRule.waitForIdle()
         val speaker = composeRule.activity.speaker as TtsSpeaker
         assertEquals(VoiceStatus.Unavailable, speaker.status.value)
-        composeRule.onNodeWithTag("nav_today").performClick()
-        composeRule.onNodeWithTag("screen_today").assertExists()
+        // Nobody is signed in, so the first screen is the login (T-063); it still takes input.
+        composeRule.waitUntil(timeoutMillis = 10_000L) {
+            composeRule.onAllNodesWithTag(LoginTags.SCREEN).fetchSemanticsNodes().isNotEmpty()
+        }
+        composeRule.onNodeWithTag(LoginTags.LOGIN).performTextInput("9876501234")
+        composeRule.onNodeWithTag(LoginTags.LOGIN).assert(hasText("9876501234"))
         speaker.say(VoiceLine("नमस्ते", "Hello"))
         assertNull(engine.lastSpoken)
         assertEquals(0, composeRule.onAllNodesWithTag(HindiVoicePromptTags.PROMPT).fetchSemanticsNodes().size)

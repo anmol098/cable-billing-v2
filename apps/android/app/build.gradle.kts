@@ -173,5 +173,25 @@ dependencies {
     testImplementation(libs.androidx.test.ext.junit)
     testImplementation(platform(libs.androidx.compose.bom))
     testImplementation(libs.androidx.compose.ui.test.junit4)
+    testImplementation(libs.okhttp.mockwebserver3)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
+}
+
+// T-063: the mobile API contract is an input of the unit tests. ApiModelsUpToDateTest regenerates the
+// DTOs (data/network/generated/ApiModels.kt) from packages/contracts/openapi.json and fails on drift;
+// the network tests decode packages/contracts/fixtures. Regenerate the DTOs with
+// ./gradlew :app:testDevDebugUnitTest --tests '*ApiModelsUpToDateTest' -Pcb.writeApiModels=true
+val apiContractDir: Directory = rootProject.layout.projectDirectory.dir("../../packages/contracts")
+val writeApiModels: String? = providers.gradleProperty("cb.writeApiModels").orNull
+
+tasks.withType<Test>().configureEach {
+    inputs
+        .file(apiContractDir.file("openapi.json"))
+        .withPropertyName("apiContract")
+        .withPathSensitivity(PathSensitivity.RELATIVE)
+    inputs
+        .dir(apiContractDir.dir("fixtures"))
+        .withPropertyName("apiFixtures")
+        .withPathSensitivity(PathSensitivity.RELATIVE)
+    if (writeApiModels != null) systemProperty("cb.writeApiModels", writeApiModels)
 }
