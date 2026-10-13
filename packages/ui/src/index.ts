@@ -2,3 +2,5 @@
 export const packageName = "@cb/ui";
 
 export { ICON_NAMES, Icon, type IconName, type IconProps, isIconName } from "./icons";
+export * from "./lib";
+export * from "./primitives";
