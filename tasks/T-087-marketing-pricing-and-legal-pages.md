@@ -3,10 +3,10 @@ id: T-087
 title: Marketing, pricing and legal pages
 phase: 4
 area: web
-status: todo
-owner:
-claimed_at:
-branch:
+status: claimed
+owner: agent-t087
+claimed_at: 2026-10-13T15:27:46.680Z
+branch: task/T-087-marketing-pricing-and-legal-pages
 depends_on: [T-007]
 review: self
 claimable_by: agent
@@ -49,3 +49,7 @@ D-15, D-19, D-21, D-22 — see `docs/IMPLEMENTATION_PLAN.md`, `docs/PRD.md`, `do
 ## Completion notes
 
 _The agent fills this in before opening the PR: what was built, decisions taken, deviations, follow-up tasks created, and how it was verified._
+
+## Board log
+
+- 2026-10-13T15:27:46.681Z claimed by agent-t087
