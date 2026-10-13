@@ -103,3 +103,4 @@ export {
 } from "./logging/logger";
 export { findPii, isPiiKey, type PiiFinding, piiKindOfValue, scrubText } from "./logging/pii";
 export * from "./payments";
+export * from "./auth";

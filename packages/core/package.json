@@ -17,6 +17,8 @@
   "dependencies": {
     "@cb/db": "workspace:*",
     "@cb/domain": "workspace:*",
+    "@node-rs/argon2": "2.2.2",
+    "better-auth": "1.7.7",
     "drizzle-orm": "0.45.4",
     "zod": "catalog:"
   },
