@@ -142,8 +142,6 @@ dependencies {
 
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.material3)
-    // TODO(T-009): placeholder bottom-bar icons; swap for the generated ic_cb_* drawables (T-003).
-    implementation(libs.androidx.compose.material.icons.core)
     implementation(libs.androidx.compose.ui.tooling.preview)
     debugImplementation(libs.androidx.compose.ui.tooling)
 

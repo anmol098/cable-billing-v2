@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hasRoute
@@ -67,7 +68,7 @@ private fun CableBottomBar(
             NavigationBarItem(
                 selected = selected,
                 onClick = { if (!selected) onSelect(destination) },
-                icon = { Icon(destination.icon, contentDescription = null) },
+                icon = { Icon(painterResource(destination.icon), contentDescription = null) },
                 label = { Text(stringResource(destination.label), style = MaterialTheme.typography.labelLarge) },
                 alwaysShowLabel = true,
                 modifier = Modifier.testTag(destination.testTag),
