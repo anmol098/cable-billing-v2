@@ -3,10 +3,10 @@ id: T-033
 title: Customers: services, list, search, add, profile summary
 phase: 1
 area: web
-status: todo
-owner:
-claimed_at:
-branch:
+status: claimed
+owner: agent-t033
+claimed_at: 2026-10-13T15:52:41.844Z
+branch: task/T-033-customers-services-list-search-add-profi
 depends_on: [T-029, T-022, T-025]
 review: self
 claimable_by: agent
@@ -57,3 +57,7 @@ FR-003, FR-004, RULE-02, PLAN §12.1, PLAN §12.2 — see `docs/IMPLEMENTATION_P
 ## Completion notes
 
 _The agent fills this in before opening the PR: what was built, decisions taken, deviations, follow-up tasks created, and how it was verified._
+
+## Board log
+
+- 2026-10-13T15:52:41.844Z claimed by agent-t033
