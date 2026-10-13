@@ -45,6 +45,7 @@ export {
 } from "./authz/writable";
 export * from "./billing";
 export * from "./collections";
+export * from "./connections";
 export {
   createServiceRuntime,
   isRequestId,

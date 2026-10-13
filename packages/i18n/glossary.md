@@ -285,6 +285,21 @@ the office has the payment.
 | Still due on this bill | इस बिल पर बाकी | This bill's charges not yet paid | `semantic.due` | Outstanding |
 | Print bill | बिल प्रिंट करें | The A5 paper bill, in the operator's language | printer | Export PDF, Invoice copy |
 
+## Connection words (web, T-034)
+
+| English | हिंदी | Means | Icon / colour | Not this |
+|---|---|---|---|---|
+| Rent (monthly) | किराया | What a connection costs each month (its plan or own amount) | — | Rental, Tariff, Subscription fee |
+| Stop (a connection) | बंद करें | Pause it; rent stops from the next month; it can be started again | circle-pause | Suspend, Deactivate |
+| Start again | फिर से चालू करें | Undo "Stop"; rent starts again from the next month | circle-play | Reactivate, Resume |
+| Remove (a connection) | हटाएँ | End it for good; the VC can go to another customer from the next day | unplug | Disconnect, Terminate, Delete |
+| Add connection | कनेक्शन जोड़ें | Put a set-top box (VC number) on a customer | plus | Assign VC, New subscription |
+| Start day | शुरू का दिन | The day the box was put in | calendar | Activation date, Start date |
+| From which day? | किस दिन से? | The day a stop / start / removal counts from | calendar | Effective date |
+| Old due stays | पुराना बाकी रहेगा | Money already owed is not changed by a stop or removal | `semantic.due` (red text) | Arrears remain |
+| Old connections | पुराने कनेक्शन | Removed connections, kept with their old bills and payments | — | History, Archived |
+| What happened | क्या हुआ | A connection's list of starts, stops, rent changes and removal | — | Timeline, Audit trail, Events |
+
 ## Words we never show users
 
 Invoice, Ledger, Allocation, Adjustment, Reversal, Tenant, Sync / Synced / Pending sync,
