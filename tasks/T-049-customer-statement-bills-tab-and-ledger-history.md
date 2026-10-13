@@ -3,10 +3,10 @@ id: T-049
 title: Customer statement, bills tab and ledger history
 phase: 2
 area: web
-status: todo
-owner:
-claimed_at:
-branch:
+status: claimed
+owner: agent-t049
+claimed_at: 2026-10-13T20:30:55.113Z
+branch: task/T-049-customer-statement-bills-tab-and-ledger
 depends_on: [T-044, T-046, T-033]
 review: self
 claimable_by: agent
@@ -51,3 +51,7 @@ B-009, FR-011, BRD §12 (Customer account statement) — see `docs/IMPLEMENTATIO
 ## Completion notes
 
 _The agent fills this in before opening the PR: what was built, decisions taken, deviations, follow-up tasks created, and how it was verified._
+
+## Board log
+
+- 2026-10-13T20:30:55.114Z claimed by agent-t049
