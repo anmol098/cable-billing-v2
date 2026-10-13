@@ -1,0 +1,24 @@
+{
+  "_review": [
+    "language",
+    "language_short_en",
+    "language_short_hi",
+    "step_progress",
+    "searching",
+    "search_failed",
+    "search_results",
+    "notifications",
+    "help_about",
+    "saving"
+  ],
+  "language": "भाषा",
+  "language_short_en": "EN",
+  "language_short_hi": "हिं",
+  "step_progress": "चरण {current} / {total}",
+  "searching": "खोज रहे हैं…",
+  "search_failed": "खोज नहीं हो पाई। फिर से करें।",
+  "search_results": "{count, plural, one {# मिला} other {# मिले}}",
+  "notifications": "सूचनाएँ",
+  "help_about": "मदद: {topic}",
+  "saving": "सेव हो रहा है…"
+}

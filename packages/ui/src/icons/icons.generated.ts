@@ -216,6 +216,16 @@ export const ICON_NODES = {
     ["path", { d: "m22 22-5-10-5 10" }],
     ["path", { d: "M14 18h6" }],
   ],
+  // Lucide "x"
+  "close": [
+    ["path", { d: "M18 6 6 18" }],
+    ["path", { d: "m6 6 12 12" }],
+  ],
+  // Lucide "arrow-right"
+  "next": [
+    ["path", { d: "M5 12h14" }],
+    ["path", { d: "m12 5 7 7-7 7" }],
+  ],
 } as const;
 
 /** A semantic icon name from icons.json. */

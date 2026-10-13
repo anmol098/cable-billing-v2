@@ -30,5 +30,7 @@
   "export": "download",
   "import": "upload",
   "logout": "log-out",
-  "language": "languages"
+  "language": "languages",
+  "close": "x",
+  "next": "arrow-right"
 }

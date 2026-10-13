@@ -43,6 +43,93 @@
     "whatsapp_opened": "WhatsApp खुल गया",
     "yes": "हाँ"
   },
+  "dev_ui": {
+    "add_customer": "ग्राहक जोड़ें",
+    "buttons": {
+      "disabled": "अभी नहीं",
+      "stop_connection": "कनेक्शन बंद करें"
+    },
+    "card": {
+      "text": "अब तक मिले",
+      "title": "इस महीने"
+    },
+    "confirm": {
+      "stopped": "कनेक्शन बंद हुआ",
+      "stopping": "बंद हो रहा है…",
+      "summary": "{name} का सेट-टॉप बॉक्स {vc} बंद होगा। किराया <b>{month}</b> से रुकेगा। {amount} पुराना बाकी रहेगा।",
+      "title": "यह कनेक्शन बंद करें?"
+    },
+    "dialog": {
+      "description": "नया किराया अगले महीने से लगेगा।",
+      "open": "प्लान बदलें",
+      "title": "प्लान बदलें"
+    },
+    "empty": {
+      "message": "अभी कोई ग्राहक नहीं है। पहला ग्राहक जोड़ें।"
+    },
+    "fields": {
+      "amount": "रकम",
+      "method": "पैसे कैसे दिए?",
+      "name": "ग्राहक का नाम",
+      "name_hint": "जैसे रमेश कुमार",
+      "note": "नोट",
+      "phone": "मोबाइल नंबर",
+      "phone_problem": "10 अंक लिखें।",
+      "plan": "प्लान",
+      "plan_basic": "बेसिक",
+      "plan_choose": "प्लान चुनें",
+      "plan_sports": "स्पोर्ट्स",
+      "whatsapp_bill": "बिल के साथ WhatsApp खोलें",
+      "whatsapp_bill_hint": "भेजें आप WhatsApp में दबाएँगे।",
+      "whole_rupees": "सिर्फ़ पूरे रुपये।"
+    },
+    "help": {
+      "text": "ग्राहक को अभी जितने पैसे देने हैं।"
+    },
+    "intro": "वेब ऐप के सारे हिस्से, आपकी चुनी भाषा में।",
+    "search": {
+      "chosen": "चुना: {name}",
+      "empty": "कोई ग्राहक नहीं मिला",
+      "hint": "नाम, फ़ोन या VC नंबर",
+      "label": "ग्राहक खोजें"
+    },
+    "sections": {
+      "buttons": "बटन",
+      "cards": "कार्ड",
+      "dialogs": "डायलॉग और पक्का करें",
+      "empty": "खाली लिस्ट",
+      "fields": "भरने की जगह",
+      "help": "मदद",
+      "numbers": "रकम और हालत",
+      "search": "खोज",
+      "stepper": "चरण",
+      "table": "टेबल",
+      "toasts": "संदेश"
+    },
+    "stepper": {
+      "check": "जाँचें और सेव करें",
+      "check_text": "जानकारी जाँचें, फिर सेव करें दबाएँ।",
+      "connections": "कनेक्शन",
+      "customer": "ग्राहक",
+      "saved": "ग्राहक सेव हो गया"
+    },
+    "table": {
+      "active": "चालू",
+      "area": "एरिया",
+      "caption": "ग्राहक",
+      "opened": "{name} खोला",
+      "status": "हालत",
+      "stopped": "बंद"
+    },
+    "title": "UI नमूने",
+    "toasts": {
+      "problem_detail": "इंटरनेट देखें और फिर से करें।",
+      "saved": "सेव हो गया",
+      "show_pending": "इंतज़ार दिखाएँ",
+      "show_problem": "दिक्कत दिखाएँ",
+      "show_success": "हो गया दिखाएँ"
+    }
+  },
   "mobile_shell": {
     "nav_search": "खोजें",
     "nav_today": "आज",
@@ -59,5 +146,17 @@
       "hindi": "हिंदी",
       "title": "अक्षर और नंबर की जाँच"
     }
+  },
+  "ui": {
+    "help_about": "मदद: {topic}",
+    "language": "भाषा",
+    "language_short_en": "EN",
+    "language_short_hi": "हिं",
+    "notifications": "सूचनाएँ",
+    "saving": "सेव हो रहा है…",
+    "search_failed": "खोज नहीं हो पाई। फिर से करें।",
+    "search_results": "{count, plural, one {# मिला} other {# मिले}}",
+    "searching": "खोज रहे हैं…",
+    "step_progress": "चरण {current} / {total}"
   }
 }

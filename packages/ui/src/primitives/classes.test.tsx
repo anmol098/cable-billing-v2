@@ -3,7 +3,24 @@ import { join } from "node:path";
 import { __unstable__loadDesignSystem } from "@tailwindcss/node";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { useState } from "react";
 import { beforeAll, describe, expect, it } from "vitest";
+import {
+  Combobox,
+  ConfirmSheet,
+  DataTable,
+  type DataTableColumn,
+  Dialog,
+  EmptyState,
+  HelpTip,
+  LanguageSwitch,
+  PAGE_ACTION_CLEARANCE,
+  PageHeader,
+  Stepper,
+  ToastProvider,
+  useToast,
+} from "../composites";
+import { dialogOverlayClasses, dialogPanelClasses } from "../composites/Dialog";
 import { fieldBase, focusRing, focusWithinRing } from "../lib/styles";
 import {
   Amount,
@@ -103,35 +120,223 @@ function Gallery() {
       <Divider />
       <Divider orientation="vertical" />
       <VisuallyHidden>v</VisuallyHidden>
+      <CompositeGallery />
     </div>
   );
 }
 
+type SampleRow = { id: string; name: string; due: number };
+const SAMPLE_ROWS: SampleRow[] = [
+  { id: "1", name: "Ramesh", due: 45000 },
+  { id: "2", name: "Sita", due: 0 },
+];
+const SAMPLE_COLUMNS: DataTableColumn<SampleRow>[] = [
+  { id: "name", header: "Name", cell: (row) => row.name },
+  {
+    id: "due",
+    header: "Due",
+    align: "end",
+    cell: (row) => <Amount paise={row.due} tone="balance" />,
+  },
+];
+const STEPS = ["a", "b", "c"].map((id) => ({
+  id,
+  title: id,
+  content: <Input aria-label={id} />,
+}));
+
+function ToastButtons() {
+  const { toast } = useToast();
+  return (
+    <Button
+      onClick={() => {
+        toast({ variant: "success", title: "Saved", description: "d" });
+        toast({ variant: "pending", title: "Saved on phone" });
+        toast({ variant: "danger", title: "Problem" });
+      }}
+    >
+      Show toasts
+    </Button>
+  );
+}
+
+/** T-007 composites, in every variant; the overlays open from buttons (see renderedClasses). */
+function CompositeGallery() {
+  const [overlays, setOverlays] = useState(false);
+  return (
+    <ToastProvider closeLabel="Close" label="Notifications">
+      <div className={PAGE_ACTION_CLEARANCE}>
+        <PageHeader
+          title="Customers"
+          description="d"
+          back={<span>b</span>}
+          action={<Button size="lg">Add</Button>}
+        />
+        <PageHeader
+          title="Inline"
+          headingLevel={2}
+          actionPlacement="inline"
+          action={<Button>Add</Button>}
+        />
+        <EmptyState icon="customer" message="No customers yet." action={<Button>Add</Button>} />
+        <DataTable
+          caption="Clickable"
+          columns={SAMPLE_COLUMNS}
+          rows={SAMPLE_ROWS}
+          rowKey={(row) => row.id}
+          onRowClick={() => {}}
+        />
+        <DataTable
+          caption="Links"
+          columns={SAMPLE_COLUMNS}
+          rows={SAMPLE_ROWS}
+          rowKey={(row) => row.id}
+          rowHref={(row) => `/c/${row.id}`}
+        />
+        <DataTable
+          caption="Plain"
+          columns={SAMPLE_COLUMNS}
+          rows={SAMPLE_ROWS}
+          rowKey={(row) => row.id}
+        />
+        <Stepper
+          steps={STEPS}
+          defaultStep={1}
+          backLabel="Back"
+          nextLabel="Next"
+          finishLabel="Save"
+          progressLabel={(current, total) => `${current}/${total}`}
+        />
+        <Stepper
+          steps={STEPS}
+          defaultStep={2}
+          backLabel="Back"
+          nextLabel="Next"
+          finishLabel="Save"
+          finishing
+          finishingLabel="Saving"
+          progressLabel={(current, total) => `${current}/${total}`}
+        />
+        <Combobox
+          label="Find customer"
+          loadOptions={async () => [
+            { value: "1", label: "Ramesh", description: "C-1" },
+            { value: "2", label: "Sita" },
+          ]}
+          onSelect={() => {}}
+          debounceMs={0}
+          loadingLabel="Searching"
+          emptyLabel="None"
+          errorLabel="Error"
+        />
+        <Combobox
+          label="Hidden label"
+          hideLabel
+          loadOptions={async () => []}
+          onSelect={() => {}}
+          loadingLabel="Searching"
+          emptyLabel="None"
+          errorLabel="Error"
+        />
+        <LanguageSwitch
+          label="Language"
+          value="en"
+          action={() => {}}
+          options={[
+            { value: "en", short: "EN", name: "English" },
+            { value: "hi", short: "हिं", name: "हिंदी" },
+          ]}
+        />
+        <HelpTip label="Help" text="t" translation={{ text: "h", lang: "hi" }} />
+        <ToastButtons />
+        <Button onClick={() => setOverlays(true)}>Open overlays</Button>
+        <Dialog
+          title="Dialog"
+          description="d"
+          closeLabel="Close dialog"
+          open={overlays}
+          footer={<Button>Save</Button>}
+        >
+          body
+        </Dialog>
+        <ConfirmSheet
+          title="Stop?"
+          summary="It stops."
+          confirmLabel="Stop"
+          cancelLabel="Cancel"
+          confirmIcon="danger"
+          tone="danger"
+          open={overlays}
+          onConfirm={() => {}}
+        />
+      </div>
+    </ToastProvider>
+  );
+}
+
+/** The gallery opens overlays and types into the combobox: slower than one render on a busy CI box. */
+const GALLERY_TIMEOUT = 30_000;
+
+function collectClasses(into: Set<string>): void {
+  for (const element of document.querySelectorAll("[class]")) {
+    for (const name of element.classList) into.add(name);
+  }
+}
+
 async function renderedClasses(): Promise<string[]> {
   render(<Gallery />);
-  // Open one tooltip so its (portalled) classes are collected too.
-  await userEvent.setup().hover(screen.getByRole("button", { name: "Print primary md" }));
-  await screen.findByRole("tooltip");
   const classes = new Set<string>();
-  for (const element of document.querySelectorAll("[class]")) {
-    for (const name of element.classList) classes.add(name);
-  }
-  for (const shared of [fieldBase, focusRing, focusWithinRing]) {
+  // Radix modals set `pointer-events: none` on the body; the gallery opens them last anyway.
+  const user = userEvent.setup({ pointerEventsCheck: 0 });
+  // Open one tooltip so its (portalled) classes are collected too.
+  await user.hover(screen.getByRole("button", { name: "Print primary md" }));
+  await screen.findByRole("tooltip");
+  collectClasses(classes);
+  // Combobox list with options (highlighted and not).
+  await user.type(screen.getByRole("combobox", { name: "Find customer" }), "r");
+  await screen.findByRole("option", { name: /Ramesh/ });
+  collectClasses(classes);
+  await user.keyboard("{Escape}");
+  // HelpTip bubble.
+  await user.click(screen.getByRole("button", { name: "Help" }));
+  await screen.findByText("h");
+  collectClasses(classes);
+  await user.keyboard("{Escape}");
+  // One toast of each variant.
+  await user.click(screen.getByRole("button", { name: "Show toasts" }));
+  await screen.findByText("Saved on phone");
+  collectClasses(classes);
+  // Dialog and ConfirmSheet.
+  await user.click(screen.getByRole("button", { name: "Open overlays" }));
+  await screen.findByText("It stops.");
+  await screen.findByText("body");
+  collectClasses(classes);
+  for (const shared of [
+    fieldBase,
+    focusRing,
+    focusWithinRing,
+    dialogOverlayClasses,
+    dialogPanelClasses,
+  ]) {
     for (const name of shared.split(/\s+/)) classes.add(name);
   }
   return [...classes].sort();
 }
 
-describe("primitive classes exist in the token theme", () => {
-  it("every rendered class compiles to CSS", async () => {
-    const classes = await renderedClasses();
-    expect(classes.length).toBeGreaterThan(80);
-    const css = theme.candidatesToCss(classes);
-    // `group` is a marker for `group-*` variants and has no CSS of its own.
-    const markers = new Set(["group"]);
-    const missing = classes.filter((name, index) => css[index] === null && !markers.has(name));
-    expect(missing).toEqual([]);
-  });
+describe("primitive and composite classes exist in the token theme", () => {
+  it(
+    "every rendered class compiles to CSS",
+    async () => {
+      const classes = await renderedClasses();
+      expect(classes.length).toBeGreaterThan(80);
+      const css = theme.candidatesToCss(classes);
+      // `group` is a marker for `group-*` variants and has no CSS of its own.
+      const markers = new Set(["group"]);
+      const missing = classes.filter((name, index) => css[index] === null && !markers.has(name));
+      expect(missing).toEqual([]);
+    },
+    GALLERY_TIMEOUT,
+  );
 
   it("is not vacuous: stock names the theme removed produce nothing", () => {
     const removed = ["bg-white", "text-xs", "shadow-md", "bg-red-500", "font-bold", "rounded-3xl"];
@@ -144,10 +349,14 @@ describe("primitive classes exist in the token theme", () => {
     expect(css).toContain("var(--color-focus)");
   });
 
-  it("no rendered class is a shadow or gradient", async () => {
-    const classes = await renderedClasses();
-    const css = theme.candidatesToCss(classes).join("\n");
-    expect(css).not.toMatch(/box-shadow:\s*(?!var\(--tw-ring-offset-shadow\)|0 0 #0000)/);
-    expect(css).not.toMatch(/gradient\(/);
-  });
+  it(
+    "no rendered class is a shadow or gradient",
+    async () => {
+      const classes = await renderedClasses();
+      const css = theme.candidatesToCss(classes).join("\n");
+      expect(css).not.toMatch(/box-shadow:\s*(?!var\(--tw-ring-offset-shadow\)|0 0 #0000)/);
+      expect(css).not.toMatch(/gradient\(/);
+    },
+    GALLERY_TIMEOUT,
+  );
 });

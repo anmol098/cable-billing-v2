@@ -43,6 +43,93 @@
     "whatsapp_opened": "WhatsApp opened",
     "yes": "Yes"
   },
+  "dev_ui": {
+    "add_customer": "Add customer",
+    "buttons": {
+      "disabled": "Not now",
+      "stop_connection": "Stop connection"
+    },
+    "card": {
+      "text": "Collected so far",
+      "title": "This month"
+    },
+    "confirm": {
+      "stopped": "Connection stopped",
+      "stopping": "Stopping…",
+      "summary": "{name}'s set-top box {vc} will stop. Rent stops from <b>{month}</b>. {amount} old due stays.",
+      "title": "Stop this connection?"
+    },
+    "dialog": {
+      "description": "The new rent starts next month.",
+      "open": "Change plan",
+      "title": "Change plan"
+    },
+    "empty": {
+      "message": "No customers yet. Add your first customer."
+    },
+    "fields": {
+      "amount": "Amount",
+      "method": "How did they pay?",
+      "name": "Customer name",
+      "name_hint": "e.g. Ramesh Kumar",
+      "note": "Note",
+      "phone": "Mobile number",
+      "phone_problem": "Enter 10 digits.",
+      "plan": "Plan",
+      "plan_basic": "Basic",
+      "plan_choose": "Choose a plan",
+      "plan_sports": "Sports",
+      "whatsapp_bill": "Open WhatsApp with the bill",
+      "whatsapp_bill_hint": "You press Send in WhatsApp.",
+      "whole_rupees": "Whole rupees only."
+    },
+    "help": {
+      "text": "Money the customer still has to pay."
+    },
+    "intro": "Every building block of the web app, in the language you choose.",
+    "search": {
+      "chosen": "Chosen: {name}",
+      "empty": "No customer found",
+      "hint": "Name, phone or VC number",
+      "label": "Find customer"
+    },
+    "sections": {
+      "buttons": "Buttons",
+      "cards": "Card",
+      "dialogs": "Dialog and confirm",
+      "empty": "Empty list",
+      "fields": "Fields",
+      "help": "Help",
+      "numbers": "Amounts and states",
+      "search": "Search",
+      "stepper": "Steps",
+      "table": "Table",
+      "toasts": "Messages"
+    },
+    "stepper": {
+      "check": "Check & save",
+      "check_text": "Check the details, then press Save.",
+      "connections": "Connections",
+      "customer": "Customer",
+      "saved": "Customer saved"
+    },
+    "table": {
+      "active": "Active",
+      "area": "Area",
+      "caption": "Customers",
+      "opened": "Opened {name}",
+      "status": "Status",
+      "stopped": "Stopped"
+    },
+    "title": "UI showcase",
+    "toasts": {
+      "problem_detail": "Check the internet and try again.",
+      "saved": "Saved",
+      "show_pending": "Show waiting",
+      "show_problem": "Show problem",
+      "show_success": "Show done"
+    }
+  },
   "mobile_shell": {
     "nav_search": "Search",
     "nav_today": "Today",
@@ -59,5 +146,17 @@
       "hindi": "Hindi",
       "title": "Font and number check"
     }
+  },
+  "ui": {
+    "help_about": "Help: {topic}",
+    "language": "Language",
+    "language_short_en": "EN",
+    "language_short_hi": "हिं",
+    "notifications": "Notifications",
+    "saving": "Saving…",
+    "search_failed": "Could not search. Try again.",
+    "search_results": "{count, plural, one {# match} other {# matches}}",
+    "searching": "Searching…",
+    "step_progress": "Step {current} of {total}"
   }
 }

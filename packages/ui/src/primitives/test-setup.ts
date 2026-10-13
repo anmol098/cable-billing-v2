@@ -7,6 +7,15 @@ afterEach(() => {
   cleanup();
 });
 
+// Radix Toast's swipe handling uses pointer capture, which jsdom does not implement.
+if (typeof Element !== "undefined" && !("hasPointerCapture" in Element.prototype)) {
+  Object.assign(Element.prototype, {
+    hasPointerCapture: () => false,
+    setPointerCapture: () => {},
+    releasePointerCapture: () => {},
+  });
+}
+
 // Radix Tooltip measures its trigger with ResizeObserver, which jsdom does not implement.
 if (!("ResizeObserver" in globalThis)) {
   globalThis.ResizeObserver = class {
