@@ -60,6 +60,19 @@ export interface PasswordResetEmail {
   readonly language: "hi" | "en";
   readonly resetUrl: string;
   readonly expiresInMinutes: number;
+  /**
+   * Set when the Owner just added this staff member and chose "email them a link" (T-032): the
+   * same single-use link, worded as an invitation ("set your password").
+   */
+  readonly invite?: PasswordResetInvite;
+}
+
+/** What an invitation email adds to the reset link (T-032). */
+export interface PasswordResetInvite {
+  /** The business that added them. */
+  readonly businessName: string;
+  /** Their sign-in name (they can also sign in with the email). */
+  readonly login: string;
 }
 
 export interface CreateAuthServiceOptions {
@@ -159,6 +172,8 @@ interface CallScope {
   readonly headers: Headers;
   /** Set by `onPasswordReset`. */
   resetSubject?: AuthAuditSubject;
+  /** Set by `requestPasswordReset({ invite })` (T-032): the link email is an invitation. */
+  readonly invite?: PasswordResetInvite;
 }
 
 /** Builds the auth service. No I/O until a method is called. */
@@ -319,12 +334,14 @@ export function createAuthService(options: CreateAuthServiceOptions) {
         if (subject) {
           await audit("auth.password_reset_requested", subject, scopedHeaders());
         }
+        const invite = scope.getStore()?.invite;
         try {
           await options.sendPasswordResetEmail({
             to: user.email,
             language: extra.language === "hi" ? "hi" : "en",
             resetUrl: `${options.baseURL}/reset/${encodeURIComponent(token)}`,
             expiresInMinutes: Math.round(SESSION_POLICY.resetTokenExpiresInSeconds / 60),
+            ...(invite ? { invite } : {}),
           });
           logger.info("auth.reset_email_sent", { user_id: user.id });
         } catch (error) {
@@ -667,16 +684,26 @@ export function createAuthService(options: CreateAuthServiceOptions) {
     /**
      * Emails a reset link to an owner/staff address. The answer is the same whether or not the
      * address has an account (only RATE_LIMITED differs, and it counts every address alike).
+     *
+     * `invite` (T-032, after the Owner added a staff member without a password): the same link,
+     * worded as an invitation in the email. Same rules, limits and audit as a reset.
      */
     async requestPasswordReset(input: {
       email: string;
       headers: Headers;
+      invite?: PasswordResetInvite;
     }): Promise<AuthResult<void>> {
       const email = input.email.trim().toLowerCase();
       if (!email.includes("@") || email.length > 254) return ok(undefined);
+      const store: CallScope = {
+        headers: input.headers,
+        ...(input.invite ? { invite: input.invite } : {}),
+      };
       try {
-        await withHeaders(input.headers, () =>
-          auth.api.requestPasswordReset({ body: { email }, headers: input.headers }),
+        await withHeaders(
+          input.headers,
+          () => auth.api.requestPasswordReset({ body: { email }, headers: input.headers }),
+          store,
         );
       } catch (error) {
         const failure = failureOf(error, "INVALID_CREDENTIALS");

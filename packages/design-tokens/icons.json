@@ -44,5 +44,8 @@
   "subscription": "credit-card",
   "undo": "undo-2",
   "email": "mail",
-  "share": "share-2"
+  "share": "share-2",
+  "device": "smartphone",
+  "switch-off": "user-x",
+  "switch-on": "user-check"
 }

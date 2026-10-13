@@ -16,6 +16,7 @@ export {
   type CreateAuthServiceOptions,
   createAuthService,
   type PasswordResetEmail,
+  type PasswordResetInvite,
   type SignInOutcome,
   type TwoFactorEnrolment,
   type WebSession,

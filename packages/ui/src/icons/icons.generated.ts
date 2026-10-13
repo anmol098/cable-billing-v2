@@ -296,6 +296,24 @@ export const ICON_NODES = {
     ["line", { x1: "8.59", x2: "15.42", y1: "13.51", y2: "17.49" }],
     ["line", { x1: "15.41", x2: "8.59", y1: "6.51", y2: "10.49" }],
   ],
+  // Lucide "smartphone"
+  "device": [
+    ["rect", { width: "14", height: "20", x: "5", y: "2", rx: "2", ry: "2" }],
+    ["path", { d: "M12 18h.01" }],
+  ],
+  // Lucide "user-x"
+  "switch-off": [
+    ["path", { d: "M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" }],
+    ["circle", { cx: "9", cy: "7", r: "4" }],
+    ["line", { x1: "17", x2: "22", y1: "8", y2: "13" }],
+    ["line", { x1: "22", x2: "17", y1: "8", y2: "13" }],
+  ],
+  // Lucide "user-check"
+  "switch-on": [
+    ["path", { d: "m16 11 2 2 4-4" }],
+    ["path", { d: "M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" }],
+    ["circle", { cx: "9", cy: "7", r: "4" }],
+  ],
 } as const;
 
 /** A semantic icon name from icons.json. */

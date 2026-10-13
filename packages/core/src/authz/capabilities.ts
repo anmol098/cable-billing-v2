@@ -115,6 +115,14 @@ export const CAPABILITIES = {
   },
   // T-082: exports are reads, but every export is audited.
   "exports.csv": { roles: [O], kind: "read", audited: true, row: "Exports (CSV)" },
+  // T-032: the Team page's list (people, sign-in names, phones). A read, so the Owner still sees
+  // the team in read-only mode (D-13 "viewing"); Staff never see it.
+  "team.view": {
+    roles: [O],
+    kind: "read",
+    audited: false,
+    row: "Team management, reset lineman password, sign out a phone",
+  },
   "team.manage": {
     roles: [O],
     kind: "write",

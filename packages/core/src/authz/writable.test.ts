@@ -30,6 +30,7 @@ const ALLOWED_WHEN_READ_ONLY: Readonly<Record<Capability, boolean>> = {
   "reports.view": true,
   "reports.own_day.view": true,
   "exports.csv": true, // a read (audited)
+  "team.view": true, // a read (T-032)
   "team.manage": false,
   "subscription.manage": true,
   "business_profile.manage": false,
