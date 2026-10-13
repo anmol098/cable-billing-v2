@@ -79,6 +79,7 @@ const EXPECTED_CHILDREN: Record<"owner" | "staff", Record<string, string[]>> = {
 
 const OWNER_ONLY = [
   "payments_reversals",
+  "payment_undo",
   "bills_adjustments",
   "reports_export",
   "settings_team",

@@ -142,6 +142,19 @@ export const NAV = [
         icon: "undo",
         capability: "payments.reverse",
       },
+      // T-048: one payment, and the Owner's undo screen for it.
+      {
+        id: "payment_detail",
+        path: "/payments/[id]",
+        icon: "collect",
+        capability: "payments.record",
+      },
+      {
+        id: "payment_undo",
+        path: "/payments/[id]/undo",
+        icon: "undo",
+        capability: "payments.reverse",
+      },
     ],
   },
   {
