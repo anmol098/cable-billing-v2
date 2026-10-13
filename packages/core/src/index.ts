@@ -50,6 +50,12 @@ export {
   type ServiceRuntimeOptions,
 } from "./context/runtime";
 export {
+  logRuntimeRoleCheck,
+  type RuntimeRoleCheckOptions,
+  shouldCheckRuntimeRole,
+  startRuntimeRoleCheck,
+} from "./context/runtime-role";
+export {
   type AnyService,
   defineService,
   isService,
