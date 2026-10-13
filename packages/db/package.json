@@ -21,13 +21,15 @@
   "dependencies": {
     "@neondatabase/serverless": "1.2.0",
     "drizzle-orm": "0.45.4",
-    "pg": "8.23.1"
+    "pg": "8.23.1",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@cb/config": "workspace:*",
     "@types/node": "catalog:",
     "@types/pg": "8.23.1",
     "@types/ws": "8.18.1",
+    "better-auth": "1.7.7",
     "drizzle-kit": "0.31.11",
     "tsx": "catalog:",
     "typescript": "catalog:",

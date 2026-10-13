@@ -47,6 +47,18 @@ reviewed) or is a global table allow-listed without RLS. It can't see tenant row
 tenant's data, list tenant ids in `withPlatform`, then call `withTenant` per tenant (PLAN §9.1).
 Platform admin "support access" is a separate, audited path (not built yet).
 
+Platform policies that exist (T-021, each one reviewed):
+
+| Table | `app_platform` may | Why |
+|---|---|---|
+| `operators` | SELECT | list tenants (jobs, admin console) |
+| `users` | SELECT, INSERT, UPDATE | Better Auth sign-in / sign-up / profile (no tenant yet) |
+| `sessions`, `accounts`, `verifications`, `two_factors` | ALL | Better Auth |
+| `mobile_refresh_tokens` | SELECT | find a refresh token by hash before the tenant is known; rotate/revoke in `withTenant` |
+| `subscriptions` | SELECT, UPDATE | state cron, webhooks, admin "extend" |
+| `subscription_events` | SELECT, INSERT, UPDATE | Razorpay webhooks (append-only except processing columns) |
+| `audit_events` | SELECT, INSERT where `operator_id IS NULL` | platform-level events only, never a tenant's |
+
 ## API
 
 ```ts
@@ -159,8 +171,9 @@ describeDb("areas", () => {
 - `t.current.db`: the app client (shape A). `t.current.admin`: raw owner pool for seeding and
   checking rows (bypasses RLS; never use it to test isolation). `t.current.createLoginRole()`:
   a shape-B login role URL. `t.current.url`: this database's admin URL.
-- `createTenant(t.current)` returns `{ operatorId, name }`. **T-021** must extend it to insert the
-  `operators` row once that table exists.
+- `createTenant(t.current, { name? })` inserts an `operators` row (default settings) and returns
+  `{ operatorId, name }`. `createUser(t.current, { operatorId, role?, login? })` inserts a user
+  (no password; `operatorId: null` makes a platform admin) and returns `{ userId, operatorId, role, login }`.
 - How it works: the first test file builds a template database `cb_tpl_<hash of migrations/>`
   (under an advisory lock), later files and runs clone it (`CREATE DATABASE … TEMPLATE`, ~100 ms),
   and each file's `cb_test_*` database is dropped afterwards. Leftovers older than 6 h are cleaned
