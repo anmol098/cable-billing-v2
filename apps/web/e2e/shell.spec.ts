@@ -11,6 +11,7 @@ import { hashPassword } from "@cb/core";
 import {
   accounts,
   createDb,
+  customers,
   type DbClient,
   operators,
   type SubscriptionStatus,
@@ -30,8 +31,19 @@ const DESKTOP = { width: 1280, height: 800 };
 const SOME_ID = "0190a3b2-0000-7000-8000-000000000001";
 const SECTION_NAMES = NAV.map((section) => en.shell.routes[section.id]);
 
-/** The URL to open for a route (dynamic segments get a made-up id: placeholders ignore it). */
-const urlOf = (path: string) => path.replace("[id]", SOME_ID);
+/** A real customer of the "Active" tenant: built customer pages answer 404 for made-up ids (T-033). */
+const CUSTOMER_ID = uuidv7();
+const CUSTOMER_NAME = "E2E Shell Customer";
+
+/** The URL to open for a route (other dynamic segments get a made-up id: placeholders ignore it). */
+const urlOf = (path: string) =>
+  path.startsWith("/customers/[id]")
+    ? path.replace("[id]", CUSTOMER_ID)
+    : path.replace("[id]", SOME_ID);
+
+/** The page title of a route: its menu word, or the customer's name on the customer profile. */
+const titleOf = (id: keyof typeof en.shell.routes) =>
+  id === "customer_summary" ? CUSTOMER_NAME : en.shell.routes[id];
 
 test.describe("operator shell", () => {
   test.skip(!DATABASE_URL, "needs DATABASE_URL (a migrated database) and BETTER_AUTH_SECRET");
@@ -75,6 +87,11 @@ test.describe("operator shell", () => {
           providerId: "credential",
           password: hash,
         });
+      }
+      if (name === "Active") {
+        await tx
+          .insert(customers)
+          .values({ id: CUSTOMER_ID, operatorId, customerCode: "1", name: CUSTOMER_NAME });
       }
     });
   }
@@ -138,7 +155,7 @@ test.describe("operator shell", () => {
       // id (T-062 `/linemen/[id]` is the first). Placeholders still answer 200 with their title.
       if (isDynamicPath(route.path) && response?.status() === 404) continue;
       expect(response?.status(), route.path).toBe(200);
-      await expect(heading(page), route.path).toHaveText(en.shell.routes[route.id]);
+      await expect(heading(page), route.path).toHaveText(titleOf(route.id));
     }
 
     // Section pages link to their sub-pages.

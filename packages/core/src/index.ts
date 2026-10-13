@@ -76,6 +76,7 @@ export {
   resolveTenantContext,
   type TenantContext,
 } from "./context/tenant-context";
+export * from "./customers";
 export {
   CORE_ERROR_CODES,
   type CoreErrorCode,
