@@ -1,0 +1,18 @@
+{
+  "_review": [
+    "hindi_voice_missing",
+    "hindi_voice_download",
+    "hindi_voice_later",
+    "customer_due",
+    "cash_from",
+    "upi_from",
+    "money_saved"
+  ],
+  "hindi_voice_missing": "फ़ोन में हिंदी आवाज़ नहीं है",
+  "hindi_voice_download": "डाउनलोड करें",
+  "hindi_voice_later": "बाद में",
+  "customer_due": "{name}, {amount} बाकी",
+  "cash_from": "{name} से {amount} नकद",
+  "upi_from": "{name} से {amount} UPI",
+  "money_saved": "पैसे फ़ोन में सेव हो गए"
+}

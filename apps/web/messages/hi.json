@@ -150,6 +150,15 @@
     "nav_today": "आज",
     "nav_waiting": "इंतज़ार में"
   },
+  "mobile_voice": {
+    "cash_from": "{name} से {amount} नकद",
+    "customer_due": "{name}, {amount} बाकी",
+    "hindi_voice_download": "डाउनलोड करें",
+    "hindi_voice_later": "बाद में",
+    "hindi_voice_missing": "फ़ोन में हिंदी आवाज़ नहीं है",
+    "money_saved": "पैसे फ़ोन में सेव हो गए",
+    "upi_from": "{name} से {amount} UPI"
+  },
   "scaffold": {
     "home": {
       "language": "भाषा",

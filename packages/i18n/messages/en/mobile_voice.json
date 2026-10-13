@@ -1,0 +1,9 @@
+{
+  "hindi_voice_missing": "Hindi voice is not on this phone",
+  "hindi_voice_download": "Download",
+  "hindi_voice_later": "Later",
+  "customer_due": "{name}, {amount} due",
+  "cash_from": "{amount} cash from {name}",
+  "upi_from": "{amount} UPI from {name}",
+  "money_saved": "Money saved on phone"
+}
