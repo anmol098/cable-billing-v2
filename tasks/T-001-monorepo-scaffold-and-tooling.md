@@ -3,10 +3,10 @@ id: T-001
 title: Monorepo scaffold and tooling
 phase: 0
 area: repo
-status: todo
-owner:
-claimed_at:
-branch:
+status: claimed
+owner: agent-t001
+claimed_at: 2026-10-13T04:21:44.727Z
+branch: task/T-001-monorepo-scaffold-and-tooling
 depends_on: []
 review: self
 claimable_by: agent
@@ -70,3 +70,7 @@ PLAN §4, PLAN §5, E-01, E-10, E-11 — see `docs/IMPLEMENTATION_PLAN.md`, `doc
 ## Completion notes
 
 _The agent fills this in before opening the PR: what was built, decisions taken, deviations, follow-up tasks created, and how it was verified._
+
+## Board log
+
+- 2026-10-13T04:21:44.727Z claimed by agent-t001
