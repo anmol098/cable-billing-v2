@@ -130,6 +130,32 @@
       "show_success": "हो गया दिखाएँ"
     }
   },
+  "job_alerts": {
+    "admin": {
+      "attempts": "कोशिशें: {maxAttempts} में से {attempts}",
+      "error": "आख़िरी गड़बड़ी: {error}",
+      "intro": "एक बैकग्राउंड जॉब फ़ेल हो गया है और अपने आप दोबारा नहीं चलेगा।",
+      "job_id": "जॉब आईडी: {jobId}",
+      "job_type": "जॉब: {jobType}",
+      "next_step": "जॉब मॉनिटर और लॉग देखें, वजह ठीक करें, फिर जॉब को दोबारा कतार में डालें।",
+      "operator": "ऑपरेटर आईडी: {operatorId}",
+      "platform": "ऑपरेटर: कोई नहीं (प्लेटफ़ॉर्म जॉब)",
+      "reason": "वजह: {reason}",
+      "subject": "जॉब फ़ेल हुआ: {jobType}",
+      "time": "फ़ेल होने का समय: {failedAt} IST"
+    },
+    "owner": {
+      "intro": "आपके बिज़नेस का अपने आप चलने वाला एक काम पूरा नहीं हुआ ({failedAt} IST)।",
+      "next_step": "हमारी टीम को बता दिया गया है और वह इसे ठीक कर रही है। अभी आपको कुछ नहीं करना है।",
+      "ref": "रेफ़रेंस: {jobId}",
+      "subject": "अपने आप चलने वाला एक काम पूरा नहीं हुआ"
+    },
+    "reason": {
+      "lease_expired": "आख़िरी कोशिश में समय ख़त्म हो गया",
+      "max_attempts": "हर कोशिश में फ़ेल हुआ",
+      "permanent": "दोबारा चलाने से ठीक नहीं होगा"
+    }
+  },
   "mobile_designsystem": {
     "catalogue_sample_area": "वार्ड 5",
     "catalogue_sample_customer_name": "रमेश कुमार",

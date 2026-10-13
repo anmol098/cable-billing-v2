@@ -1,0 +1,26 @@
+{
+  "admin": {
+    "subject": "Job failed: {jobType}",
+    "intro": "A background job failed and will not run again by itself.",
+    "job_type": "Job: {jobType}",
+    "job_id": "Job id: {jobId}",
+    "operator": "Operator id: {operatorId}",
+    "platform": "Operator: none (platform job)",
+    "attempts": "Tries: {attempts} of {maxAttempts}",
+    "reason": "Why: {reason}",
+    "error": "Last error: {error}",
+    "time": "Failed at: {failedAt} IST",
+    "next_step": "Check the job monitor and the logs, fix the cause, then add the job to the queue again."
+  },
+  "owner": {
+    "subject": "An automatic task did not finish",
+    "intro": "An automatic task for your business did not finish ({failedAt} IST).",
+    "next_step": "Our team has been told and is fixing it. You don't need to do anything now.",
+    "ref": "Reference: {jobId}"
+  },
+  "reason": {
+    "max_attempts": "it failed every time it was tried",
+    "permanent": "trying again cannot fix it",
+    "lease_expired": "it ran out of time on its last try"
+  }
+}
