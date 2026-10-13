@@ -3,10 +3,10 @@ id: T-066
 title: Android: collect flow, durable payment queue and push sync
 phase: 3
 area: android
-status: todo
-owner:
-claimed_at:
-branch:
+status: claimed
+owner: agent-t066
+claimed_at: 2026-10-13T14:25:34.419Z
+branch: task/T-066-android-collect-flow-durable-payment-que
 depends_on: [T-065]
 review: required
 claimable_by: agent
@@ -56,3 +56,7 @@ PLAN §10.4, PLAN §11.3 (Amount, Method, Confirm, Done, Waiting), FR-015, FR-01
 ## Completion notes
 
 _The agent fills this in before opening the PR: what was built, decisions taken, deviations, follow-up tasks created, and how it was verified._
+
+## Board log
+
+- 2026-10-13T14:25:34.420Z claimed by agent-t066
