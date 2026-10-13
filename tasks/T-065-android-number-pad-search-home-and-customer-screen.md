@@ -32,7 +32,7 @@ Find any customer with digits only and see what they owe at a glance.
 
 - [ ] Typing 4 digits returns results in < 100 ms on a 7.6k-customer roster on a low-end emulator profile.
   *Not ticked: no emulator in this container (no /dev/kvm). Measured on Robolectric/JVM SQLite with 7,616
-  customers: query median 10 ms, key press → results in the ViewModel median 9–11 ms after the 50 ms
+  customers: query median 9–10 ms, key press → results in the ViewModel median 9–13 ms after the 50 ms
   number-pad debounce (≈ 60 ms in all). The emulator / phone measurement is left for a human (see notes).*
 
 ## Tests required
@@ -145,7 +145,7 @@ PLAN §11.2, PLAN §11.3 (Search, Customer), D-10, D-11 — see `docs/IMPLEMENTA
 **Verification** (JDK 21, Android SDK, Node v24.21.0, pnpm 12.11.2, Postgres 17; no emulator)
 
 - `./gradlew ktlintCheck detekt lint testDevDebugUnitTest assembleDevDebug :detekt-rules:test`: BUILD
-  SUCCESSFUL. App JVM tests 150, 0 failures (24 new); designsystem 31; detekt-rules pass; lint 0 errors
+  SUCCESSFUL. App JVM tests 209 after rebasing onto T-068, 0 failures (24 new); designsystem 31; detekt-rules pass; lint 0 errors
   (2 existing warnings). New tests:
   - `SearchViewModelTest` (10, `StandardTestDispatcher`, no real time): 4 quick digits → one search after
     exactly the 50 ms pause; slow typing searches per digit, newest wins; backspace / long-press clear /
@@ -167,8 +167,8 @@ PLAN §11.2, PLAN §11.3 (Search, Customer), D-10, D-11 — see `docs/IMPLEMENTA
     tappable node on both screens ≥ 56 dp (non-vacuous: it failed on Robolectric's default 320 × 470 dp
     screen where the pad keys shrink to 21 dp).
   - `SearchPerformanceTest` (2, report-only with a loose 1 s bound on the median): 7,616 customers,
-    4 digits "4521": repository query median 10 ms (max 13–25 ms); key press → results in the ViewModel
-    median 9–11 ms (max 23–34 ms) after the 50 ms debounce (debounce on Robolectric's clock). JVM SQLite on
+    4 digits "4521": repository query median 9–10 ms (max 13–25 ms); key press → results in the ViewModel
+    median 9–13 ms (max 21–34 ms) after the 50 ms debounce (debounce on Robolectric's clock). JVM SQLite on
     a desktop CPU, **not** a low-end phone.
 - `pnpm install --frozen-lockfile`, `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build`, `pnpm generate`
   (no diff), `tokens:build --check`, `icons:build --check`, `i18n:check`, `i18n:build --check`,
