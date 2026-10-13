@@ -3,10 +3,10 @@ id: T-024
 title: Domain foundations: money, periods, business dates
 phase: 1
 area: domain
-status: todo
-owner:
-claimed_at:
-branch:
+status: claimed
+owner: agent-t024
+claimed_at: 2026-10-13T10:25:36.447Z
+branch: task/T-024-domain-foundations-money-periods-busines
 depends_on: [T-001]
 review: self
 claimable_by: agent
@@ -52,3 +52,7 @@ PLAN §7.1, D-17, PRD §12 — see `docs/IMPLEMENTATION_PLAN.md`, `docs/PRD.md`,
 ## Completion notes
 
 _The agent fills this in before opening the PR: what was built, decisions taken, deviations, follow-up tasks created, and how it was verified._
+
+## Board log
+
+- 2026-10-13T10:25:36.454Z claimed by agent-t024
