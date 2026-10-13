@@ -9,6 +9,7 @@ Web (Next.js on Vercel + Neon Postgres) for operators. Native Android (Kotlin) f
 - **How we build it:** `docs/IMPLEMENTATION_PLAN.md` (decisions `D-xx`, architecture, data model, algorithms).
 - **What to work on:** the task board in `tasks/`. **Read `tasks/README.md` before doing any work.**
   Claim a task with `node scripts/tasks.mjs claim <ID>` before you touch code.
+- **Picking up after an environment change?** Read `docs/HANDOFF.md` (current state, blockers, next wave, lessons learned).
 
 ## Commands
 
