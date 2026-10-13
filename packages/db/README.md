@@ -83,10 +83,11 @@ await db.end(); // scripts only
   `operator_id` first.
 - **References between tenant tables** are composite:
   `foreignKey({ columns: [t.operatorId, t.customerId], foreignColumns: [customers.operatorId, customers.id] })`.
-- **Money**: `bigint` columns named `*_paise` (integer paise, never floats). Use the TS mode that
-  matches `@cb/domain`'s money type (T-024).
+- **Money**: `bigint("…_paise", { mode: "number" })` (integer paise, never floats). `@cb/domain`'s
+  `Paise` is a branded safe-integer `number` (T-024): convert reads with `toPaise(...)`.
 - **Instants**: `timestamp("…_at", { withTimezone: true })` (timestamptz, UTC).
-  **Business dates**: `date`, computed in Asia/Kolkata. **Billing period**: `date` with
+  **Business dates**: `date("…", { mode: "string" })` (`BusinessDate`, computed in Asia/Kolkata).
+  **Billing period**: `date` (`Period`) with
   `check("…_period_first_day", sql\`extract(day from ${t.period}) = 1\`)`.
 - **Legacy**: `legacy_source text`, `legacy_id text` on migrated tables.
 - **Global tables** (no `operator_id`): enable RLS with explicit policies, or add the table to

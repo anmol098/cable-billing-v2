@@ -66,7 +66,7 @@ describeDb("app.forbid_update_delete() (append-only trigger)", () => {
     await t.current.db.withTenant(tenant.operatorId, (tx) =>
       tx
         .insert(demoPayments)
-        .values({ id: paymentId, operatorId: tenant.operatorId, amountPaise: 50_000n }),
+        .values({ id: paymentId, operatorId: tenant.operatorId, amountPaise: 50_000 }),
     );
   });
 
@@ -80,7 +80,7 @@ describeDb("app.forbid_update_delete() (append-only trigger)", () => {
 
   it("blocks UPDATE of a non-allowed column, as the app role", async () => {
     const update = t.current.db.withTenant(tenant.operatorId, (tx) =>
-      tx.update(demoPayments).set({ amountPaise: 1n }).where(eq(demoPayments.id, paymentId)),
+      tx.update(demoPayments).set({ amountPaise: 1 }).where(eq(demoPayments.id, paymentId)),
     );
     await expect(update).rejects.toSatisfy(isImmutableRowError);
     expect(await row()).toMatchObject({ amount: "50000" });
@@ -90,7 +90,7 @@ describeDb("app.forbid_update_delete() (append-only trigger)", () => {
     const update = t.current.db.withTenant(tenant.operatorId, (tx) =>
       tx
         .update(demoPayments)
-        .set({ reviewStatus: "needs_review", amountPaise: 2n })
+        .set({ reviewStatus: "needs_review", amountPaise: 2 })
         .where(eq(demoPayments.id, paymentId)),
     );
     await expect(update).rejects.toSatisfy(isImmutableRowError);
@@ -113,7 +113,7 @@ describeDb("app.forbid_update_delete() (append-only trigger)", () => {
 
   it("allows a no-op UPDATE that sets non-allowed columns to their current value", async () => {
     await t.current.db.withTenant(tenant.operatorId, (tx) =>
-      tx.update(demoPayments).set({ amountPaise: 50_000n }).where(eq(demoPayments.id, paymentId)),
+      tx.update(demoPayments).set({ amountPaise: 50_000 }).where(eq(demoPayments.id, paymentId)),
     );
     expect(await row()).toMatchObject({ amount: "50000" });
   });
@@ -166,7 +166,7 @@ describeDb("app.forbid_update_delete() (append-only trigger)", () => {
 
   it("allows INSERT (append) as usual", async () => {
     await t.current.db.withTenant(tenant.operatorId, (tx) =>
-      tx.insert(demoPayments).values({ operatorId: tenant.operatorId, amountPaise: 100n }),
+      tx.insert(demoPayments).values({ operatorId: tenant.operatorId, amountPaise: 100 }),
     );
     const count = await t.current.db.withTenant(tenant.operatorId, (tx) => tx.$count(demoPayments));
     expect(count).toBe(2);

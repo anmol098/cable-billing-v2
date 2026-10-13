@@ -26,7 +26,7 @@ export const demoPayments = pgTable(
   {
     id: primaryId(),
     operatorId: operatorIdColumn(),
-    amountPaise: bigint("amount_paise", { mode: "bigint" }).notNull(),
+    amountPaise: bigint("amount_paise", { mode: "number" }).notNull(),
     reviewStatus: text("review_status").notNull().default("none"),
     reviewReason: text("review_reason"),
   },
