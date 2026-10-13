@@ -1,0 +1,60 @@
+{
+  "_review": [
+    "open",
+    "title",
+    "language",
+    "voice",
+    "printer.title",
+    "printer.none",
+    "printer.set_up",
+    "account.signed_in",
+    "sign_out.button",
+    "sign_out.confirm_title",
+    "sign_out.confirm_body",
+    "sign_out.confirm_yes",
+    "sign_out.blocked_title",
+    "sign_out.blocked_count",
+    "sign_out.blocked_safe",
+    "sign_out.try_now",
+    "sign_out.open_waiting",
+    "sign_out.now_possible",
+    "version",
+    "diagnostics.title",
+    "diagnostics.explain",
+    "diagnostics.share",
+    "diagnostics.chooser",
+    "diagnostics.subject"
+  ],
+  "open": "सेटिंग",
+  "title": "सेटिंग",
+  "language": "भाषा",
+  "voice": "आवाज़",
+  "printer": {
+    "title": "प्रिंटर",
+    "none": "अभी कोई प्रिंटर नहीं",
+    "set_up": "प्रिंटर लगाएँ"
+  },
+  "account": {
+    "signed_in": "लॉग इन: {name}"
+  },
+  "sign_out": {
+    "button": "लॉग आउट करें",
+    "confirm_title": "इस फ़ोन से लॉग आउट करें?",
+    "confirm_body": "फिर से लॉग इन करने के लिए यूज़र नेम और पासवर्ड चाहिए।",
+    "confirm_yes": "हाँ, लॉग आउट करें",
+    "blocked_title": "अभी लॉग आउट नहीं हो सकता",
+    "blocked_count": "{count, plural, one {# पेमेंट अभी फ़ोन में है। पहले इसे ऑफिस पहुँचना है।} other {# पेमेंट अभी फ़ोन में हैं। पहले इन्हें ऑफिस पहुँचना है।}}",
+    "blocked_safe": "पेमेंट सुरक्षित हैं। लॉग आउट से ये कभी नहीं मिटते।",
+    "try_now": "अभी भेजें",
+    "open_waiting": "इंतज़ार में देखें",
+    "now_possible": "आपके सब पेमेंट ऑफिस पहुँच गए। अब लॉग आउट कर सकते हैं।"
+  },
+  "version": "ऐप वर्ज़न {version}",
+  "diagnostics": {
+    "title": "मदद के लिए",
+    "explain": "ऑफिस या सपोर्ट के लिए ऐप की छोटी रिपोर्ट। इसमें ग्राहक के नाम, फ़ोन नंबर या रकम नहीं हैं।",
+    "share": "ऐप रिपोर्ट शेयर करें",
+    "chooser": "ऐप रिपोर्ट शेयर करें",
+    "subject": "केबल बिलिंग ऐप रिपोर्ट"
+  }
+}

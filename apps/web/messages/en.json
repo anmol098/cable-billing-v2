@@ -894,6 +894,40 @@
     "updated_minutes": "{count, plural, one {Updated # min ago} other {Updated # min ago}}",
     "updated_now": "Updated just now"
   },
+  "mobile_settings": {
+    "account": {
+      "signed_in": "Signed in: {name}"
+    },
+    "diagnostics": {
+      "chooser": "Share app report",
+      "explain": "A short app report for the office or support. It has no customer names, phone numbers or amounts.",
+      "share": "Share app report",
+      "subject": "Cable Billing app report",
+      "title": "For support"
+    },
+    "language": "Language",
+    "open": "Settings",
+    "printer": {
+      "none": "No printer yet",
+      "set_up": "Set up printer",
+      "title": "Printer"
+    },
+    "sign_out": {
+      "blocked_count": "{count, plural, one {# payment is still on this phone. It must reach the office first.} other {# payments are still on this phone. They must reach the office first.}}",
+      "blocked_safe": "The payments are safe. Signing out never deletes them.",
+      "blocked_title": "You cannot sign out yet",
+      "button": "Sign out",
+      "confirm_body": "To sign in again you need your user name and password.",
+      "confirm_title": "Sign out of this phone?",
+      "confirm_yes": "Yes, sign out",
+      "now_possible": "All your payments reached the office. You can sign out now.",
+      "open_waiting": "Open Waiting",
+      "try_now": "Try now"
+    },
+    "title": "Settings",
+    "version": "App version {version}",
+    "voice": "Voice"
+  },
   "mobile_shell": {
     "nav_search": "Search",
     "nav_today": "Today",

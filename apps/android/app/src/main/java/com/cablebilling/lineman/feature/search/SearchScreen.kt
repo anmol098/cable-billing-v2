@@ -52,6 +52,7 @@ import com.cablebilling.designsystem.theme.CableSpacing
 import com.cablebilling.designsystem.theme.CableTheme
 import com.cablebilling.lineman.R
 import com.cablebilling.lineman.data.db.CustomerSummary
+import com.cablebilling.lineman.feature.settings.SettingsButton
 import com.cablebilling.designsystem.R as DesignR
 
 /**
@@ -59,12 +60,14 @@ import com.cablebilling.designsystem.R as DesignR
  *
  * @param onOpenCustomer a result row was tapped: open the customer screen for this id.
  * @param onOpenWaiting the strip says payments are on the phone and was tapped: open the Waiting tab.
+ * @param onOpenSettings the small gear at the end of the query row (T-071); no gear when null.
  */
 @Composable
 fun SearchScreen(
     onOpenCustomer: (customerId: String) -> Unit,
     onOpenWaiting: () -> Unit,
     modifier: Modifier = Modifier,
+    onOpenSettings: (() -> Unit)? = null,
     viewModel: SearchViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -78,6 +81,7 @@ fun SearchScreen(
         },
         onOpenCustomer = onOpenCustomer,
         modifier = modifier,
+        onOpenSettings = onOpenSettings,
     )
 }
 
@@ -95,6 +99,7 @@ fun SearchContent(
     onBannerClick: () -> Unit,
     onOpenCustomer: (customerId: String) -> Unit,
     modifier: Modifier = Modifier,
+    onOpenSettings: (() -> Unit)? = null,
 ) {
     // Back from the phone's keyboard returns to the number pad instead of leaving the app.
     BackHandler(enabled = state.mode == SearchMode.Letters, onBack = onShowNumberPad)
@@ -108,7 +113,7 @@ fun SearchContent(
             )
         }
         when (state.mode) {
-            SearchMode.Digits -> DigitsQuery(state.query)
+            SearchMode.Digits -> DigitsQuery(state.query, onOpenSettings)
             SearchMode.Letters -> LettersQuery(state.query, onTextChange, onShowNumberPad)
         }
         Results(
@@ -132,7 +137,10 @@ fun SearchContent(
 
 /** The digits typed on the pad, big, or the hint while nothing is typed. */
 @Composable
-private fun DigitsQuery(query: String) {
+private fun DigitsQuery(
+    query: String,
+    onOpenSettings: (() -> Unit)?,
+) {
     Row(
         modifier =
             Modifier
@@ -154,7 +162,7 @@ private fun DigitsQuery(query: String) {
                 text = stringResource(R.string.mobile_search_hint_digits),
                 style = MaterialTheme.typography.bodyLarge,
                 color = Tokens.Color.TextMuted,
-                modifier = Modifier.testTag(SearchTags.HINT),
+                modifier = Modifier.weight(1f).testTag(SearchTags.HINT),
             )
         } else {
             Text(
@@ -165,8 +173,11 @@ private fun DigitsQuery(query: String) {
                 softWrap = false,
                 // Long numbers keep their last digits in view (the ones just typed).
                 overflow = TextOverflow.StartEllipsis,
+                modifier = Modifier.weight(1f),
             )
         }
+        // T-071: the way into settings, small and muted at the end of the row.
+        if (onOpenSettings != null) SettingsButton(onClick = onOpenSettings)
     }
 }
 
