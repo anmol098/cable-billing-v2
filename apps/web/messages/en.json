@@ -359,6 +359,29 @@
       "title": "Test print"
     }
   },
+  "mobile_search": {
+    "customer_call": "Call",
+    "customer_connections": "{count, plural, one {# connection} other {# connections}}",
+    "customer_includes_phone_payments": "Including payments saved on phone",
+    "customer_no_internet": "No internet. Showing what is saved on the phone.",
+    "customer_not_found": "This customer is not on the list",
+    "customer_nothing_due": "Nothing due",
+    "first_download": "Getting the customer list…",
+    "hint_digits": "Type code, phone or VC number",
+    "hint_letters": "Type the customer's name",
+    "more_results": "Showing the first {count}. Type more.",
+    "never_downloaded": "Customer list is not on this phone yet. Turn on internet.",
+    "no_internet_updated": "No internet · {updated}",
+    "no_results": "No customer found",
+    "not_updated": "Could not update · {updated}",
+    "numbers_key": "123",
+    "numbers_key_description": "Number pad",
+    "payments_on_phone": "{count, plural, one {# payment on phone} other {# payments on phone}}",
+    "updated_days": "{count, plural, one {Updated # day ago} other {Updated # days ago}}",
+    "updated_hours": "{count, plural, one {Updated # hour ago} other {Updated # hours ago}}",
+    "updated_minutes": "{count, plural, one {Updated # min ago} other {Updated # min ago}}",
+    "updated_now": "Updated just now"
+  },
   "mobile_shell": {
     "nav_search": "Search",
     "nav_today": "Today",

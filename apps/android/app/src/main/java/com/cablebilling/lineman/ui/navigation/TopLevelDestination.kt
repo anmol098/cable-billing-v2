@@ -17,6 +17,15 @@ data object TodayRoute
 data object WaitingRoute
 
 /**
+ * Start of the collect flow (Amount → Method → Confirm → Done) for one customer, opened by the
+ * customer screen's "पैसे लें / Collect" button. A placeholder screen until T-066 builds the flow.
+ */
+@Serializable
+data class CollectRoute(
+    val customerId: String,
+)
+
+/**
  * The bottom bar, in order: 🔍 Search (home, D-11) | 📅 Today | ⏳ Waiting. Icons are the shared
  * semantic icons from packages/design-tokens/icons.json (T-003), the same glyphs as on the web.
  */

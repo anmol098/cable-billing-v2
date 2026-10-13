@@ -95,6 +95,20 @@ Generated, never edited by hand: `core/designsystem/.../generated/Tokens.kt` (`p
   `CableDatabaseMigrationTest`. Never use a destructive fallback: payments may exist only on the phone.
   Debug builds carry the schema JSONs as assets so `MigrationTestHelper` runs under Robolectric.
 
+## Search home and customer screen (T-065)
+
+- `feature/search`: `SearchScreen` (home, D-11): sync strip, the digits typed, result rows (due large and
+  red) and the big `NumberPad`; its ABC key switches to the phone's keyboard (name search), `123` back.
+  `SearchViewModel` debounces typing (50 ms on the pad, 200 ms on the keyboard) and reads `SearchData`
+  (`RosterSearchData` = `RosterRepository` + `RosterSyncScheduler`). `SearchBanner` turns
+  `RosterSyncStatus` into the strip ("Updated 5 min ago", "3 payments on phone" → opens Waiting).
+- `feature/customer`: `CustomerScreen(customerId, onCollect, onBack)` + `CustomerViewModel` (assisted
+  `customerId`): cached copy at once, `refreshCustomer` on open, due huge, credit apart, tap-to-call
+  (`ACTION_DIAL`), connections, read-out "name, ₹X due" (`SpeakOnShow`), giant Collect button.
+- Navigation (`ui/CableApp`): `SearchRoute` → `CustomerRoute(customerId)` → `CollectRoute(customerId)`
+  (placeholder until T-066), all on the Search tab (it stays highlighted; tapping it returns home).
+  `CableApp(searchHome = …, customerScreen = …)` lets tests run the shell without Hilt.
+
 ## Design-system components
 
 `core/designsystem/.../component/` holds the low-literacy kit (BigButton, MethodButton, NumberPad,

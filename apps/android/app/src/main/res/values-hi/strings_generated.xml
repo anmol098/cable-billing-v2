@@ -157,6 +157,50 @@
     <string name="mobile_printer_test_printer">प्रिंटर</string>
     <string name="mobile_printer_test_readable">अगर यह पढ़ पा रहे हैं, तो प्रिंटर ठीक है।</string>
     <string name="mobile_printer_test_title">टेस्ट प्रिंट</string>
+    <string name="mobile_search_customer_call">फ़ोन करें</string>
+    <!-- %1$d = count -->
+    <plurals name="mobile_search_customer_connections">
+        <item quantity="one">%1$d कनेक्शन</item>
+        <item quantity="other">%1$d कनेक्शन</item>
+    </plurals>
+    <string name="mobile_search_customer_includes_phone_payments">फ़ोन में सेव पेमेंट मिलाकर</string>
+    <string name="mobile_search_customer_no_internet">इंटरनेट नहीं है। फ़ोन में सेव जानकारी दिख रही है।</string>
+    <string name="mobile_search_customer_not_found">यह ग्राहक लिस्ट में नहीं है</string>
+    <string name="mobile_search_customer_nothing_due">कुछ बाकी नहीं</string>
+    <string name="mobile_search_first_download">ग्राहकों की लिस्ट आ रही है…</string>
+    <string name="mobile_search_hint_digits">कोड, फ़ोन या VC नंबर लिखें</string>
+    <string name="mobile_search_hint_letters">ग्राहक का नाम लिखें</string>
+    <!-- %1$s = count -->
+    <string name="mobile_search_more_results">पहले %1$s दिख रहे हैं। और लिखें।</string>
+    <string name="mobile_search_never_downloaded">ग्राहकों की लिस्ट अभी फ़ोन में नहीं है। इंटरनेट चालू करें।</string>
+    <!-- %1$s = updated -->
+    <string name="mobile_search_no_internet_updated">इंटरनेट नहीं है · %1$s</string>
+    <string name="mobile_search_no_results">कोई ग्राहक नहीं मिला</string>
+    <!-- %1$s = updated -->
+    <string name="mobile_search_not_updated">अपडेट नहीं हुआ · %1$s</string>
+    <string name="mobile_search_numbers_key">123</string>
+    <string name="mobile_search_numbers_key_description">नंबर पैड</string>
+    <!-- %1$d = count -->
+    <plurals name="mobile_search_payments_on_phone">
+        <item quantity="one">फ़ोन में %1$d पेमेंट</item>
+        <item quantity="other">फ़ोन में %1$d पेमेंट</item>
+    </plurals>
+    <!-- %1$d = count -->
+    <plurals name="mobile_search_updated_days">
+        <item quantity="one">%1$d दिन पहले अपडेट हुआ</item>
+        <item quantity="other">%1$d दिन पहले अपडेट हुआ</item>
+    </plurals>
+    <!-- %1$d = count -->
+    <plurals name="mobile_search_updated_hours">
+        <item quantity="one">%1$d घंटे पहले अपडेट हुआ</item>
+        <item quantity="other">%1$d घंटे पहले अपडेट हुआ</item>
+    </plurals>
+    <!-- %1$d = count -->
+    <plurals name="mobile_search_updated_minutes">
+        <item quantity="one">%1$d मिनट पहले अपडेट हुआ</item>
+        <item quantity="other">%1$d मिनट पहले अपडेट हुआ</item>
+    </plurals>
+    <string name="mobile_search_updated_now">अभी अपडेट हुआ</string>
     <string name="mobile_shell_nav_search">खोजें</string>
     <string name="mobile_shell_nav_today">आज</string>
     <string name="mobile_shell_nav_waiting">इंतज़ार में</string>

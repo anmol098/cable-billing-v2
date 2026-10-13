@@ -359,6 +359,29 @@
       "title": "टेस्ट प्रिंट"
     }
   },
+  "mobile_search": {
+    "customer_call": "फ़ोन करें",
+    "customer_connections": "{count, plural, one {# कनेक्शन} other {# कनेक्शन}}",
+    "customer_includes_phone_payments": "फ़ोन में सेव पेमेंट मिलाकर",
+    "customer_no_internet": "इंटरनेट नहीं है। फ़ोन में सेव जानकारी दिख रही है।",
+    "customer_not_found": "यह ग्राहक लिस्ट में नहीं है",
+    "customer_nothing_due": "कुछ बाकी नहीं",
+    "first_download": "ग्राहकों की लिस्ट आ रही है…",
+    "hint_digits": "कोड, फ़ोन या VC नंबर लिखें",
+    "hint_letters": "ग्राहक का नाम लिखें",
+    "more_results": "पहले {count} दिख रहे हैं। और लिखें।",
+    "never_downloaded": "ग्राहकों की लिस्ट अभी फ़ोन में नहीं है। इंटरनेट चालू करें।",
+    "no_internet_updated": "इंटरनेट नहीं है · {updated}",
+    "no_results": "कोई ग्राहक नहीं मिला",
+    "not_updated": "अपडेट नहीं हुआ · {updated}",
+    "numbers_key": "123",
+    "numbers_key_description": "नंबर पैड",
+    "payments_on_phone": "{count, plural, one {फ़ोन में # पेमेंट} other {फ़ोन में # पेमेंट}}",
+    "updated_days": "{count, plural, one {# दिन पहले अपडेट हुआ} other {# दिन पहले अपडेट हुआ}}",
+    "updated_hours": "{count, plural, one {# घंटे पहले अपडेट हुआ} other {# घंटे पहले अपडेट हुआ}}",
+    "updated_minutes": "{count, plural, one {# मिनट पहले अपडेट हुआ} other {# मिनट पहले अपडेट हुआ}}",
+    "updated_now": "अभी अपडेट हुआ"
+  },
   "mobile_shell": {
     "nav_search": "खोजें",
     "nav_today": "आज",

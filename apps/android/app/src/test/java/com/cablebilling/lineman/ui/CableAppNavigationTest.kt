@@ -24,7 +24,16 @@ class CableAppNavigationTest {
 
     @Test
     fun `bottom bar shows the three Hindi tabs and switches screens`() {
-        composeRule.setContent { CableTheme { CableApp() } }
+        // The search home and customer screen use Hilt ViewModels: stand-ins here
+        // (SearchToCustomerTest runs the real ones).
+        composeRule.setContent {
+            CableTheme {
+                CableApp(
+                    searchHome = { _, _ -> PlaceholderScreen(title = "search", testTag = "screen_search") },
+                    customerScreen = { _, _, _ -> PlaceholderScreen(title = "customer", testTag = "screen_customer") },
+                )
+            }
+        }
 
         // Starts on Search (home, D-11).
         composeRule.onNodeWithTag("nav_search").assertIsDisplayed().assert(hasText("खोजें"))

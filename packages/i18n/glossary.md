@@ -125,6 +125,17 @@ the office has the payment.
 | 2-step sign-in | 2-स्टेप लॉग इन | Password + code (platform admins) | — | 2FA, MFA |
 | Sign out on all devices | सभी डिवाइस से लॉग आउट करें | End every session of this user | log-out | Revoke sessions |
 
+## Search and customer words (lineman app)
+
+| English | हिंदी | Means | Icon / colour | Not this |
+|---|---|---|---|---|
+| Customer list | ग्राहकों की लिस्ट | The customers copied to the phone for offline search | — | Roster, Sync data |
+| Updated 5 min ago | 5 मिनट पहले अपडेट हुआ | When the phone last got the customer list | circle-check, `semantic.success` | Synced, Last sync |
+| Payments on phone | फ़ोन में 3 पेमेंट | Payments saved on the phone, not yet at the office | clock, `semantic.pending` | Pending, Unsynced |
+| Call (a customer) | फ़ोन करें | Opens the dialer with the customer's number | phone | Dial, कॉल करें |
+| Connections | कनेक्शन | How many VC cards a customer has | tv | Subscriptions |
+| Nothing due | कुछ बाकी नहीं | The customer owes nothing now | — | Paid, Cleared |
+
 ## Words we never show users
 
 Invoice, Ledger, Allocation, Adjustment, Reversal, Tenant, Sync / Synced / Pending sync,
