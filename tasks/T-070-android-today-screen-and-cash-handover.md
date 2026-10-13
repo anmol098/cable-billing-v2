@@ -3,10 +3,10 @@ id: T-070
 title: Android: Today screen and cash handover
 phase: 3
 area: android
-status: todo
-owner:
-claimed_at:
-branch:
+status: claimed
+owner: agent-t070
+claimed_at: 2026-10-13T20:26:00.143Z
+branch: task/T-070-android-today-screen-and-cash-handover
 depends_on: [T-066]
 review: self
 claimable_by: agent
@@ -49,3 +49,7 @@ PLAN §8.7, PLAN §11.3 (Today), FR-022, J-05 — see `docs/IMPLEMENTATION_PLAN.
 ## Completion notes
 
 _The agent fills this in before opening the PR: what was built, decisions taken, deviations, follow-up tasks created, and how it was verified._
+
+## Board log
+
+- 2026-10-13T20:26:00.144Z claimed by agent-t070
