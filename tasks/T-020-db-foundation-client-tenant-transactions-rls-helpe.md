@@ -3,10 +3,10 @@ id: T-020
 title: DB foundation: client, tenant transactions, RLS helpers, test harness
 phase: 1
 area: db
-status: todo
-owner:
-claimed_at:
-branch:
+status: claimed
+owner: agent-t020
+claimed_at: 2026-10-13T10:27:41.906Z
+branch: task/T-020-db-foundation-client-tenant-transactions
 depends_on: [T-001]
 review: required
 claimable_by: agent
@@ -66,3 +66,7 @@ PLAN §3, PLAN §7.1, PLAN §9.1, E-02, E-03 — see `docs/IMPLEMENTATION_PLAN.m
 ## Completion notes
 
 _The agent fills this in before opening the PR: what was built, decisions taken, deviations, follow-up tasks created, and how it was verified._
+
+## Board log
+
+- 2026-10-13T10:27:41.907Z claimed by agent-t020
