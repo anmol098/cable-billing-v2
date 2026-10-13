@@ -3,10 +3,10 @@ id: T-048
 title: Counter payments, payment register and reversals UI
 phase: 2
 area: web
-status: todo
-owner:
-claimed_at:
-branch:
+status: claimed
+owner: agent-t048
+claimed_at: 2026-10-13T20:30:59.208Z
+branch: task/T-048-counter-payments-payment-register-and-re
 depends_on: [T-046, T-033]
 review: self
 claimable_by: agent
@@ -53,3 +53,7 @@ FR-013, FR-014, BR-13, PLAN §12.1 — see `docs/IMPLEMENTATION_PLAN.md`, `docs/
 ## Completion notes
 
 _The agent fills this in before opening the PR: what was built, decisions taken, deviations, follow-up tasks created, and how it was verified._
+
+## Board log
+
+- 2026-10-13T20:30:59.209Z claimed by agent-t048
