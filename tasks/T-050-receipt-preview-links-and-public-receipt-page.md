@@ -3,10 +3,10 @@ id: T-050
 title: Receipt preview links and public receipt page
 phase: 2
 area: web
-status: todo
-owner:
-claimed_at:
-branch:
+status: claimed
+owner: agent-t050
+claimed_at: 2026-10-13T13:50:31.974Z
+branch: task/T-050-receipt-preview-links-and-public-receipt
 depends_on: [T-046, T-005]
 review: required
 claimable_by: agent
@@ -52,3 +52,7 @@ FR-019, FR-020, FR-021, RULE-19, RULE-22, D-14, PLAN §9.4 — see `docs/IMPLEME
 ## Completion notes
 
 _The agent fills this in before opening the PR: what was built, decisions taken, deviations, follow-up tasks created, and how it was verified._
+
+## Board log
+
+- 2026-10-13T13:50:31.974Z claimed by agent-t050
