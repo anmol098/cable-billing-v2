@@ -136,6 +136,21 @@ the office has the payment.
 | Connections | कनेक्शन | How many VC cards a customer has | tv | Subscriptions |
 | Nothing due | कुछ बाकी नहीं | The customer owes nothing now | — | Paid, Cleared |
 
+## Menu words (web)
+
+| English | हिंदी | Means | Icon / colour | Not this |
+|---|---|---|---|---|
+| Home | होम | The first page after sign-in | house | Dashboard, डैशबोर्ड |
+| Reports | रिपोर्ट | Lists and totals to check the business | chart-column | Analytics, MIS |
+| Settings | सेटिंग | Business details, plans, areas, team | settings | Configuration, Admin |
+| More | और | The rest of the menu on a phone | ellipsis | Menu, ☰ alone |
+| Bill changes | बिल में बदलाव | List of extra charges / discounts after bills | pencil | Adjustments |
+| Payments to check | जाँचने वाले पेमेंट | Payments the office must look at | alert-triangle | Review queue, Exceptions |
+| Download data | डेटा डाउनलोड करें | Owner takes the data out as a file | download | Export, CSV |
+| Who changed what | किसने क्या बदला | The record of every change | rotate-ccw-clock | Audit log, ऑडिट |
+| App subscription | ऐप सब्सक्रिप्शन | Our monthly fee for Cable Billing | credit-card | Plan (that word is the customer's rental), Billing |
+| Coming soon | जल्द आ रहा है | A page that is not built yet | — | Under construction, WIP |
+
 ## Words we never show users
 
 Invoice, Ledger, Allocation, Adjustment, Reversal, Tenant, Sync / Synced / Pending sync,
