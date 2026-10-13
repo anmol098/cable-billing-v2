@@ -42,6 +42,7 @@ import com.cablebilling.lineman.feature.customer.CustomerTags
 import com.cablebilling.lineman.feature.customer.CustomerViewModel
 import com.cablebilling.lineman.feature.customer.RosterCustomerData
 import com.cablebilling.lineman.ui.CableApp
+import com.cablebilling.lineman.ui.PlaceholderScreen
 import com.cablebilling.lineman.voice.VoiceLines
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -140,6 +141,9 @@ class SearchToCustomerTest {
                                 }
                             CustomerScreen(customerId, onCollect, onBack, viewModel = customerViewModel)
                         },
+                        // The collect flow and Waiting use Hilt ViewModels: stand-ins (CollectFlowTest runs them).
+                        collectScreen = { _, _, _ -> PlaceholderScreen(title = "collect", testTag = "screen_collect") },
+                        waitingScreen = { PlaceholderScreen(title = "waiting", testTag = "screen_waiting") },
                     )
                 }
             }

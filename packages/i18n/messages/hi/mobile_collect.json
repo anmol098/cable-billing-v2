@@ -1,0 +1,78 @@
+{
+  "_review": [
+    "amount.title",
+    "amount.hint",
+    "amount.due_now",
+    "amount.chip_due",
+    "method.title",
+    "upi.title",
+    "upi.hint",
+    "upi.skip",
+    "confirm.title",
+    "confirm.upi_ref",
+    "confirm.saving",
+    "confirm.not_saved",
+    "confirm.signed_out",
+    "done.title",
+    "done.receipt_no",
+    "done.temporary_no",
+    "done.goes_when_online",
+    "done.office_will_check",
+    "done.problem",
+    "done.printer_setup",
+    "waiting.title",
+    "waiting.count",
+    "waiting.nothing",
+    "waiting.try_now",
+    "waiting.sending",
+    "waiting.no_internet",
+    "waiting.failed",
+    "waiting.all_sent",
+    "waiting.held_explain",
+    "waiting.held_chip"
+  ],
+  "amount": {
+    "title": "कितने पैसे?",
+    "hint": "रकम लिखें",
+    "due_now": "अभी बाकी: {amount}",
+    "chip_due": "पूरा बाकी {amount}"
+  },
+  "method": {
+    "title": "पैसे कैसे दिए?"
+  },
+  "upi": {
+    "title": "UPI रेफ़. नं.",
+    "hint": "ज़रूरी नहीं। लिखें, या छोड़ें दबाएँ।",
+    "skip": "छोड़ें"
+  },
+  "confirm": {
+    "title": "देखें और सेव करें",
+    "upi_ref": "UPI रेफ़.: {reference}",
+    "saving": "सेव हो रहा है…",
+    "not_saved": "सेव नहीं हुआ। फिर से करें।",
+    "signed_out": "सेव नहीं हुआ। फिर से लॉग इन करें, फिर पैसे लें।"
+  },
+  "done": {
+    "title": "पैसे सेव हो गए",
+    "receipt_no": "रसीद नं.",
+    "temporary_no": "अस्थायी नं.",
+    "goes_when_online": "इंटरनेट आने पर यह अपने-आप ऑफिस पहुँच जाएगा।",
+    "office_will_check": "पैसे सुरक्षित हैं। ऑफिस इस पेमेंट को देखेगा।",
+    "problem": "ऑफिस ने यह पेमेंट नहीं लिया। ऑफिस को फ़ोन करें।",
+    "whatsapp": "WhatsApp",
+    "sms": "SMS",
+    "printer_setup": "प्रिंटर लगाएँ"
+  },
+  "waiting": {
+    "title": "इंतज़ार में",
+    "count": "{count, plural, one {# पेमेंट अभी ऑफिस नहीं पहुँचा} other {# पेमेंट अभी ऑफिस नहीं पहुँचे}}",
+    "nothing": "कुछ इंतज़ार में नहीं",
+    "try_now": "अभी भेजें",
+    "sending": "ऑफिस भेज रहे हैं…",
+    "no_internet": "इंटरनेट नहीं है। इंटरनेट आने पर अपने-आप जाएगा।",
+    "failed": "अभी नहीं गया। फ़ोन अपने-आप फिर से कोशिश करेगा।",
+    "all_sent": "ऑफिस पहुँच गया",
+    "held_explain": "{count, plural, one {इस फ़ोन में दूसरे लाइनमैन का # पेमेंट है। यह आपके लॉग इन से नहीं जाएगा। ऑफिस को फ़ोन करें।} other {इस फ़ोन में दूसरे लाइनमैन के # पेमेंट हैं। ये आपके लॉग इन से नहीं जाएँगे। ऑफिस को फ़ोन करें।}}",
+    "held_chip": "दूसरा लाइनमैन"
+  }
+}

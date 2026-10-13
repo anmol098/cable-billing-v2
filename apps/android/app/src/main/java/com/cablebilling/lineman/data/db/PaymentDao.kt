@@ -31,6 +31,26 @@ interface PaymentDao {
     @Query("SELECT * FROM payments WHERE state = 'SAVED_ON_PHONE' ORDER BY recorded_at, id LIMIT :limit")
     suspend fun oldestSavedOnPhone(limit: Int): List<PaymentEntity>
 
+    /**
+     * T-066: the oldest [limit] payments still on the phone that [collectorId] took. The push sends only
+     * the signed-in lineman's own payments; another lineman's stay held on the phone (PLAN §9.2).
+     */
+    @Query(
+        "SELECT * FROM payments WHERE state = 'SAVED_ON_PHONE' AND collector_id = :collectorId " +
+            "ORDER BY recorded_at, id LIMIT :limit",
+    )
+    suspend fun oldestSavedOnPhoneFor(
+        collectorId: String,
+        limit: Int,
+    ): List<PaymentEntity>
+
+    /**
+     * T-066: how many provisional refs start with [prefix] (`P-K7Q-`). Rows are never deleted, so the
+     * next local sequence for that device code is this + 1 (read inside the insert's transaction).
+     */
+    @Query("SELECT COUNT(*) FROM payments WHERE substr(provisional_ref, 1, length(:prefix)) = :prefix")
+    suspend fun countWithRefPrefix(prefix: String): Int
+
     /** Payments not yet accepted by the server: on the phone or needing office help (Waiting screen), newest first. */
     @Query("SELECT * FROM payments WHERE state != 'SENT_TO_OFFICE' ORDER BY recorded_at DESC, id")
     fun observeNotSent(): Flow<List<PaymentEntity>>
