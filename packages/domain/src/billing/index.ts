@@ -6,9 +6,7 @@ export {
   validateAssignmentTimeline,
 } from "./timeline";
 export {
-  type AdjustmentDirection,
   type AdjustmentLine,
-  type AdjustmentSource,
   ASSIGNMENT_EVENT_TYPES,
   type AssignmentEvent,
   type AssignmentEventType,

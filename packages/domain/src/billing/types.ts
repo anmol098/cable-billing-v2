@@ -5,6 +5,7 @@
  * `invoices`, `invoice_lines`; PLAN §7.2) closely enough that services can map rows one to one, but
  * hold only what the pure functions need. Ids are opaque strings (UUIDv7 in the DB).
  */
+import type { AdjustmentDirection, AdjustmentSource } from "../adjustments";
 import type { Paise } from "../money";
 import type { DomainError } from "../result";
 import type { BusinessDate, Period } from "../time";
@@ -82,19 +83,14 @@ export type BillingAssignment = AssignmentTimeline & {
   readonly initialRentalPaise: Paise;
 };
 
-/** `adjustments.direction` (PLAN §7.2). */
-export type AdjustmentDirection = "debit" | "credit";
-
-/** `adjustments.source` (PLAN §7.2). */
-export type AdjustmentSource = "plan_change" | "mid_month_start" | "manual" | "migration";
-
 /**
  * An adjustment that has not been invoiced yet (`adjustments.invoice_id IS NULL`).
  *
  * Only **debit** adjustments become invoice lines (PLAN §8.2: "+ pending debit adjustments").
- * Credit adjustments are credit sources that pay invoices through allocation (PLAN §8.5, T-041
- * `applyCredit`), so passing one to {@link buildInvoice} is refused: putting it on the invoice too
- * would count it twice.
+ * Credit adjustments (including T-042's credit drafts) are credit sources that pay invoices through
+ * allocation (PLAN §8.5, T-041 `applyCredit`), so passing one to {@link buildInvoice} is refused:
+ * putting it on the invoice too would count it twice. T-042's debit `AdjustmentDraft`s, once stored,
+ * are exactly the rows to pass here (`direction`, `amountPaise`, `assignmentId`, `period`, `source`).
  */
 export type PendingAdjustment = {
   readonly id: string;

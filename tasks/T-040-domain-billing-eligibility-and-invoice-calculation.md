@@ -176,13 +176,19 @@ documents say nothing, I followed the PLAN text literally.
   Otherwise `end_date_mismatch` is reported.
 
 **Deviations / files outside the owned paths**
-- `packages/domain/src/index.ts` (shared, T-024 is done): added `export * from "./billing";`. T-042
-  appends its own line too: keep both.
+- `packages/domain/src/index.ts` (shared, T-024 is done): added `export * from "./billing";`. I rebased
+  on T-042 and kept both lines.
+- **Aligned with T-042:** `AdjustmentDirection` and `AdjustmentSource` are imported from
+  `../adjustments` and not redefined, so `export *` has no duplicate names.
+  - A stored T-042 **debit** `AdjustmentDraft` maps field for field onto `PendingAdjustment`.
+  - **Credit** drafts are credit sources for T-041 `applyCredit`, and `buildInvoice` refuses them.
+  - Both cases are tested with `planChangeForPeriod` in `invoice.test.ts`.
 - The input is named `openingBalancePaise` instead of `openingBalance` (CLAUDE.md `*_paise` naming).
 - Additions beyond the scope list, because "who is charged **what**" needs them: `rentalForPeriod`,
   `assignmentStatusOn` and `validateAssignmentTimeline`.
 
-**Tests** (`packages/domain`: 16 files, 312 tests; billing adds 3 files and 93 tests, about 2.5 s)
+**Tests** (`packages/domain` after the rebase on T-042: 19 files, 373 tests; billing adds 3 files and
+95 tests, about 2.5 s; each property test has an explicit 60 s timeout for busy machines)
 - `eligibility.test.ts`:
   - The rule's two sentences and **every PLAN §8.1 consequence as a named test**, quoted word for word.
   - A 15-row edge-case table: the 1st/2nd, end of the previous month, reactivation on the 1st, same-day
@@ -196,6 +202,9 @@ documents say nothing, I followed the PLAN text literally.
   - RULE-08 arrears, adjustments (included, adjustment-only invoice, later period left pending, credit
     refused) and nothing-to-bill cases.
   - Every refusal reason, and purity (deep-frozen input, same answer twice).
+  - T-042 drafts:
+    - A plan change after the Nov bill: Dec bills the new rent plus the Nov difference.
+    - A plan change down produces a credit draft, which is refused as a line.
 - `billing.property.test.ts` (fast-check, 2,000 runs each). The generator builds the **true day-by-day
   status** first and then derives the events, so the oracle shares no code with `timeline.ts`.
   - isBillable(P) ⇔ the 1st is active, checked over 40 periods. Coverage counters require more than 30

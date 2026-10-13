@@ -3,6 +3,7 @@
  * refused input. Table-driven where the cases share a shape.
  */
 import { describe, expect, it } from "vitest";
+import { type AdjustmentDraft, planChangeForPeriod } from "../adjustments";
 import { type Paise, paise } from "../money";
 import { unwrap } from "../result";
 import { businessDate, type Period, period } from "../time";
@@ -394,5 +395,78 @@ describe("buildInvoice: purity", () => {
     const first = buildInvoice(value);
     expect(buildInvoice(value)).toEqual(first);
     expect(first.ok).toBe(true);
+  });
+});
+
+describe("buildInvoice with T-042 adjustment drafts", () => {
+  const novRentLine = {
+    kind: "rent" as const,
+    id: "line-nov",
+    assignmentId: "vc",
+    period: NOV,
+    amountPaise: paise(30_000),
+  };
+  const stored = (draft: AdjustmentDraft, id: string): PendingAdjustment => ({
+    id,
+    customerId: CUSTOMER,
+    assignmentId: draft.assignmentId,
+    period: draft.period,
+    direction: draft.direction,
+    amountPaise: draft.amountPaise,
+    source: draft.source,
+  });
+
+  it("a plan change after the Nov bill: Dec bills the new rent plus the Nov difference (PRD §15 #5)", () => {
+    const decision = unwrap(
+      planChangeForPeriod({
+        assignmentId: "vc",
+        period: NOV,
+        records: [novRentLine],
+        newAmountPaise: paise(45_000),
+      }),
+    );
+    if (decision.draft === null) throw new Error("expected a draft");
+    expect(decision.draft.direction).toBe("debit");
+
+    const invoice = invoiceOf({
+      period: DEC,
+      assignments: [
+        asg("vc", "2026-01-01", 30_000, {
+          events: [
+            { type: "plan_changed", effectiveDate: d("2026-11-15"), rentalPaise: paise(45_000) },
+          ],
+        }),
+      ],
+      pendingAdjustments: [stored(decision.draft, "adj-1")],
+    });
+    expect(invoice.lines).toEqual([
+      { type: "rent", assignmentId: "vc", adjustmentId: null, amountPaise: 45_000 },
+      {
+        type: "adjustment",
+        assignmentId: "vc",
+        adjustmentId: "adj-1",
+        adjustmentPeriod: NOV,
+        source: "plan_change",
+        amountPaise: 15_000,
+      },
+    ]);
+    // Nov in total: 30,000 on the Nov bill + 15,000 on this one = the new rental, charged once.
+    expect(novRentLine.amountPaise + decision.draft.amountPaise).toBe(45_000);
+  });
+
+  it("a plan change down gives a credit draft: it is credit, so it is refused as a line", () => {
+    const decision = unwrap(
+      planChangeForPeriod({
+        assignmentId: "vc",
+        period: NOV,
+        records: [novRentLine],
+        newAmountPaise: paise(20_000),
+      }),
+    );
+    if (decision.draft === null) throw new Error("expected a draft");
+    expect(decision.draft.direction).toBe("credit");
+    expect(reasonOf({ period: DEC, pendingAdjustments: [stored(decision.draft, "adj-2")] })).toBe(
+      "credit_adjustment",
+    );
   });
 });

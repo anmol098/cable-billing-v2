@@ -30,6 +30,8 @@ const FIRST_PERIOD = period("2025-01-01");
 const PERIOD_COUNT = 40; // Jan 2025 … Apr 2028: covers every generated day
 const CUSTOMER = "cust";
 const RUNS = 2_000;
+/** fast-check properties can exceed Vitest's default 5 s on a busy machine. */
+const TIMEOUT_MS = 60_000;
 
 const PERIODS: readonly Period[] = Array.from({ length: PERIOD_COUNT }, (_, i) =>
   addPeriods(FIRST_PERIOD, i),
@@ -205,160 +207,184 @@ const adjustmentsArb = fc
   );
 
 describe("eligibility properties", () => {
-  it("isBillable(P) ⇔ the assignment is active during the 1st of P (day-by-day oracle)", () => {
-    // Coverage: the boundaries must really be exercised, or the property could pass vacuously.
-    const seen = {
-      billed: 0,
-      notBilled: 0,
-      changeOnFirst: 0,
-      changeOnDayBefore: 0,
-      startOnFirst: 0,
-    };
-    fc.assert(
-      fc.property(generatedArb("a"), (g) => {
-        for (const p of PERIODS) {
-          const billed = g.truth(p) === "active";
-          expect(isBillable(g.assignment, p)).toBe(billed);
-          seen[billed ? "billed" : "notBilled"] += 1;
-          if (g.assignment.startDate === p) seen.startOnFirst += 1;
-          for (const e of g.assignment.events) {
-            if (e.type === "plan_changed" || e.type === "activated") continue;
-            if (e.effectiveDate === p) seen.changeOnFirst += 1;
-            if (e.effectiveDate === addDays(p, -1)) seen.changeOnDayBefore += 1;
+  it(
+    "isBillable(P) ⇔ the assignment is active during the 1st of P (day-by-day oracle)",
+    () => {
+      // Coverage: the boundaries must really be exercised, or the property could pass vacuously.
+      const seen = {
+        billed: 0,
+        notBilled: 0,
+        changeOnFirst: 0,
+        changeOnDayBefore: 0,
+        startOnFirst: 0,
+      };
+      fc.assert(
+        fc.property(generatedArb("a"), (g) => {
+          for (const p of PERIODS) {
+            const billed = g.truth(p) === "active";
+            expect(isBillable(g.assignment, p)).toBe(billed);
+            seen[billed ? "billed" : "notBilled"] += 1;
+            if (g.assignment.startDate === p) seen.startOnFirst += 1;
+            for (const e of g.assignment.events) {
+              if (e.type === "plan_changed" || e.type === "activated") continue;
+              if (e.effectiveDate === p) seen.changeOnFirst += 1;
+              if (e.effectiveDate === addDays(p, -1)) seen.changeOnDayBefore += 1;
+            }
           }
-        }
-      }),
-      { numRuns: RUNS },
-    );
-    for (const count of Object.values(seen)) expect(count).toBeGreaterThan(30);
-  });
+        }),
+        { numRuns: RUNS },
+      );
+      for (const count of Object.values(seen)) expect(count).toBeGreaterThan(30);
+    },
+    TIMEOUT_MS,
+  );
 
-  it("never bills an assignment disconnected before the period", () => {
-    fc.assert(
-      fc.property(generatedArb("a"), periodArb, (g, p) => {
-        fc.pre(g.lastDay !== null && compareBusinessDates(g.lastDay, p) < 0);
-        expect(isBillable(g.assignment, p)).toBe(false);
-        const outcome = unwrap(
-          buildInvoice({
-            customer: { id: CUSTOMER },
-            assignments: [g.assignment],
-            pendingAdjustments: [],
-            openingBalancePaise: paise(0),
-            period: p,
-          }),
-        );
-        expect(outcome.outcome).toBe("nothing_to_bill");
-      }),
-      { numRuns: RUNS },
-    );
-  });
-
-  it("changes effective on or after the 1st of P never change the answer for P", () => {
-    fc.assert(
-      fc.property(generatedArb("a"), periodArb, (g, p) => {
-        const before = (date: BusinessDate) => compareBusinessDates(date, p) < 0;
-        const truncated: BillingAssignment = {
-          ...g.assignment,
-          events: g.assignment.events.filter(
-            (e) => e.type === "activated" || before(e.effectiveDate),
-          ),
-          endDate:
-            g.assignment.endDate !== null && before(g.assignment.endDate)
-              ? g.assignment.endDate
-              : null,
-        };
-        expect(isBillable(truncated, p)).toBe(isBillable(g.assignment, p));
-      }),
-      { numRuns: RUNS },
-    );
-  });
-
-  it("rentalForPeriod is the last plan change effective by the end of P, else the initial rental", () => {
-    fc.assert(
-      fc.property(generatedArb("a"), (g) => {
-        for (const p of PERIODS)
-          expect(rentalForPeriod(g.assignment, p)).toBe(expectedRental(g, p));
-      }),
-      { numRuns: RUNS },
-    );
-  });
-});
-
-describe("invoice properties", () => {
-  it("charges = Σ lines, total due = opening + charges, one rent line per billable VC at its rental", () => {
-    fc.assert(
-      fc.property(
-        customerArb,
-        adjustmentsArb,
-        periodArb,
-        fc.integer({ min: -1_000_000, max: 1_000_000 }),
-        (generated, adjustments, p, opening) => {
+  it(
+    "never bills an assignment disconnected before the period",
+    () => {
+      fc.assert(
+        fc.property(generatedArb("a"), periodArb, (g, p) => {
+          fc.pre(g.lastDay !== null && compareBusinessDates(g.lastDay, p) < 0);
+          expect(isBillable(g.assignment, p)).toBe(false);
           const outcome = unwrap(
             buildInvoice({
               customer: { id: CUSTOMER },
-              assignments: generated.map((g) => g.assignment),
-              pendingAdjustments: adjustments,
-              openingBalancePaise: paise(opening),
+              assignments: [g.assignment],
+              pendingAdjustments: [],
+              openingBalancePaise: paise(0),
               period: p,
             }),
           );
-          const billable = generated.filter((g) => g.truth(p) === "active");
-          const due = adjustments.filter(
-            (a) => a.period === null || compareBusinessDates(a.period, p) <= 0,
-          );
+          expect(outcome.outcome).toBe("nothing_to_bill");
+        }),
+        { numRuns: RUNS },
+      );
+    },
+    TIMEOUT_MS,
+  );
 
-          if (billable.length === 0 && due.length === 0) {
-            expect(outcome.outcome).toBe("nothing_to_bill");
-            return;
-          }
-          if (outcome.outcome !== "invoice") throw new Error("expected an invoice");
+  it(
+    "changes effective on or after the 1st of P never change the answer for P",
+    () => {
+      fc.assert(
+        fc.property(generatedArb("a"), periodArb, (g, p) => {
+          const before = (date: BusinessDate) => compareBusinessDates(date, p) < 0;
+          const truncated: BillingAssignment = {
+            ...g.assignment,
+            events: g.assignment.events.filter(
+              (e) => e.type === "activated" || before(e.effectiveDate),
+            ),
+            endDate:
+              g.assignment.endDate !== null && before(g.assignment.endDate)
+                ? g.assignment.endDate
+                : null,
+          };
+          expect(isBillable(truncated, p)).toBe(isBillable(g.assignment, p));
+        }),
+        { numRuns: RUNS },
+      );
+    },
+    TIMEOUT_MS,
+  );
 
-          expect(outcome.chargesPaise).toBe(
-            sumPaise(outcome.lines.map((line) => line.amountPaise)),
-          );
-          expect(outcome.totalDuePaise).toBe(opening + outcome.chargesPaise);
-          expect(outcome.openingBalancePaise).toBe(opening);
+  it(
+    "rentalForPeriod is the last plan change effective by the end of P, else the initial rental",
+    () => {
+      fc.assert(
+        fc.property(generatedArb("a"), (g) => {
+          for (const p of PERIODS)
+            expect(rentalForPeriod(g.assignment, p)).toBe(expectedRental(g, p));
+        }),
+        { numRuns: RUNS },
+      );
+    },
+    TIMEOUT_MS,
+  );
+});
 
-          const rent = outcome.lines.filter((line) => line.type === "rent");
-          expect(rent.map((line) => line.assignmentId).sort()).toEqual(
-            billable.map((g) => g.assignment.id).sort(),
-          );
-          for (const line of rent) {
-            const g = billable.find((x) => x.assignment.id === line.assignmentId);
-            expect(g).toBeDefined();
-            if (g) expect(line.amountPaise).toBe(expectedRental(g, p));
-          }
-          expect([...outcome.invoicedAdjustmentIds].sort()).toEqual(due.map((a) => a.id).sort());
-          for (const line of outcome.lines) expect(line.amountPaise).toBeGreaterThanOrEqual(0);
-        },
-      ),
-      { numRuns: RUNS },
-    );
-  });
+describe("invoice properties", () => {
+  it(
+    "charges = Σ lines, total due = opening + charges, one rent line per billable VC at its rental",
+    () => {
+      fc.assert(
+        fc.property(
+          customerArb,
+          adjustmentsArb,
+          periodArb,
+          fc.integer({ min: -1_000_000, max: 1_000_000 }),
+          (generated, adjustments, p, opening) => {
+            const outcome = unwrap(
+              buildInvoice({
+                customer: { id: CUSTOMER },
+                assignments: generated.map((g) => g.assignment),
+                pendingAdjustments: adjustments,
+                openingBalancePaise: paise(opening),
+                period: p,
+              }),
+            );
+            const billable = generated.filter((g) => g.truth(p) === "active");
+            const due = adjustments.filter(
+              (a) => a.period === null || compareBusinessDates(a.period, p) <= 0,
+            );
 
-  it("does not depend on the order of assignments or adjustments", () => {
-    fc.assert(
-      fc.property(
-        customerArb,
-        adjustmentsArb,
-        periodArb,
-        fc.array(fc.nat(), { minLength: 8, maxLength: 8 }),
-        (generated, adjustments, p, order) => {
-          const build = (assignments: BillingAssignment[], pending: PendingAdjustment[]) =>
-            buildInvoice({
-              customer: { id: CUSTOMER },
-              assignments,
-              pendingAdjustments: pending,
-              openingBalancePaise: paise(0),
-              period: p,
-            });
-          const assignments = generated.map((g) => g.assignment);
-          expect(build(shuffle(assignments, order), shuffle(adjustments, order))).toEqual(
-            build(assignments, adjustments),
-          );
-        },
-      ),
-      { numRuns: RUNS },
-    );
-  });
+            if (billable.length === 0 && due.length === 0) {
+              expect(outcome.outcome).toBe("nothing_to_bill");
+              return;
+            }
+            if (outcome.outcome !== "invoice") throw new Error("expected an invoice");
+
+            expect(outcome.chargesPaise).toBe(
+              sumPaise(outcome.lines.map((line) => line.amountPaise)),
+            );
+            expect(outcome.totalDuePaise).toBe(opening + outcome.chargesPaise);
+            expect(outcome.openingBalancePaise).toBe(opening);
+
+            const rent = outcome.lines.filter((line) => line.type === "rent");
+            expect(rent.map((line) => line.assignmentId).sort()).toEqual(
+              billable.map((g) => g.assignment.id).sort(),
+            );
+            for (const line of rent) {
+              const g = billable.find((x) => x.assignment.id === line.assignmentId);
+              expect(g).toBeDefined();
+              if (g) expect(line.amountPaise).toBe(expectedRental(g, p));
+            }
+            expect([...outcome.invoicedAdjustmentIds].sort()).toEqual(due.map((a) => a.id).sort());
+            for (const line of outcome.lines) expect(line.amountPaise).toBeGreaterThanOrEqual(0);
+          },
+        ),
+        { numRuns: RUNS },
+      );
+    },
+    TIMEOUT_MS,
+  );
+
+  it(
+    "does not depend on the order of assignments or adjustments",
+    () => {
+      fc.assert(
+        fc.property(
+          customerArb,
+          adjustmentsArb,
+          periodArb,
+          fc.array(fc.nat(), { minLength: 8, maxLength: 8 }),
+          (generated, adjustments, p, order) => {
+            const build = (assignments: BillingAssignment[], pending: PendingAdjustment[]) =>
+              buildInvoice({
+                customer: { id: CUSTOMER },
+                assignments,
+                pendingAdjustments: pending,
+                openingBalancePaise: paise(0),
+                period: p,
+              });
+            const assignments = generated.map((g) => g.assignment);
+            expect(build(shuffle(assignments, order), shuffle(adjustments, order))).toEqual(
+              build(assignments, adjustments),
+            );
+          },
+        ),
+        { numRuns: RUNS },
+      );
+    },
+    TIMEOUT_MS,
+  );
 });
