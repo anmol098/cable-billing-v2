@@ -3,10 +3,10 @@ id: T-069
 title: Android: receipt PDF, WhatsApp/SMS sharing and receipt actions
 phase: 3
 area: android
-status: todo
-owner:
-claimed_at:
-branch:
+status: claimed
+owner: agent-t069
+claimed_at: 2026-10-13T20:48:51.202Z
+branch: task/T-069-android-receipt-pdf-whatsapp-sms-sharing
 depends_on: [T-066, T-068]
 review: self
 claimable_by: agent
@@ -55,3 +55,7 @@ PLAN §11.7, FR-017–FR-020, FR-004, J-07, RULE-18, RULE-19 — see `docs/IMPLE
 ## Completion notes
 
 _The agent fills this in before opening the PR: what was built, decisions taken, deviations, follow-up tasks created, and how it was verified._
+
+## Board log
+
+- 2026-10-13T20:48:51.203Z claimed by agent-t069
