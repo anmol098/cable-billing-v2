@@ -1,0 +1,9 @@
+{
+  "server_time": "2026-10-13T11:30:00.000Z",
+  "error": {
+    "code": "APP_TOO_OLD",
+    "message": "app version code 1 is below minimum 3",
+    "request_id": "req_01929b112c3d7e4f0009",
+    "min_app_version_code": 3
+  }
+}

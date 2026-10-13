@@ -1,0 +1,12 @@
+{
+  "server_time": "2026-10-13T11:30:00.000Z",
+  "min_app_version_code": 1,
+  "operator": {
+    "id": "01929a3e-5b10-7c4e-8a01-000000000001",
+    "name": "Shiv Cable Network",
+    "office_phone": "9800000001",
+    "receipt_footer": "Thank you. Pay by the 10th of every month."
+  },
+  "tenant_mode": "normal",
+  "features": {}
+}

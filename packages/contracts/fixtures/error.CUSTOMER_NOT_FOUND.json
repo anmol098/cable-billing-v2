@@ -1,0 +1,8 @@
+{
+  "server_time": "2026-10-13T11:30:00.000Z",
+  "error": {
+    "code": "CUSTOMER_NOT_FOUND",
+    "message": "customer not found in tenant",
+    "request_id": "req_01929b112c3d7e4f0017"
+  }
+}

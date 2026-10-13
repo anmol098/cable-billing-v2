@@ -1,0 +1,14 @@
+{
+  "server_time": "2026-10-13T11:30:00.000Z",
+  "min_app_version_code": 3,
+  "operator": {
+    "id": "01929a3e-5b10-7c4e-8a01-000000000001",
+    "name": "Shiv Cable Network",
+    "office_phone": null,
+    "receipt_footer": null
+  },
+  "tenant_mode": "read_only",
+  "features": {
+    "example_flag": true
+  }
+}

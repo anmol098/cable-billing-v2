@@ -1,0 +1,10 @@
+{
+  "server_time": "2026-10-13T04:44:10.000Z",
+  "tokens": {
+    "token_type": "Bearer",
+    "access_token": "example-access-token-2",
+    "access_token_expires_at": "2026-10-13T04:59:10.000Z",
+    "refresh_token": "example-refresh-token-2",
+    "refresh_token_expires_at": "2027-04-11T04:44:10.000Z"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "server_time": "2026-10-13T11:30:00.000Z",
+  "error": {
+    "code": "REFRESH_TOKEN_INVALID",
+    "message": "refresh token reuse detected; family revoked",
+    "request_id": "req_01929b112c3d7e4f0013"
+  }
+}

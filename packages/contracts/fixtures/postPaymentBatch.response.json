@@ -1,0 +1,114 @@
+{
+  "server_time": "2026-10-13T11:30:00.000Z",
+  "results": [
+    {
+      "id": "01929b11-2c3d-7e4f-9a05-000000000001",
+      "outcome": "posted",
+      "payment": {
+        "id": "01929b11-2c3d-7e4f-9a05-000000000001",
+        "customer_id": "01929a3e-5b10-7c4e-8a03-000000000001",
+        "amount_paise": 50000,
+        "method": "cash",
+        "receipt_number": "R-2610-00045",
+        "provisional_ref": "P-K7Q-0012",
+        "recorded_at": "2026-10-13T01:15:00.000Z",
+        "posted_at": "2026-10-13T11:29:58.000Z",
+        "business_date": "2026-10-13",
+        "allocations": [
+          {
+            "invoice_id": "01929a3e-5b10-7c4e-8a04-000000000001",
+            "invoice_number": "INV-2609-00098",
+            "kind": "regular",
+            "period": "2026-09-01",
+            "amount_paise": 45000,
+            "outstanding_after_paise": 0
+          },
+          {
+            "invoice_id": "01929a3e-5b10-7c4e-8a04-000000000002",
+            "invoice_number": "INV-2610-00123",
+            "kind": "regular",
+            "period": "2026-10-01",
+            "amount_paise": 5000,
+            "outstanding_after_paise": 40000
+          }
+        ],
+        "credit_added_paise": 0,
+        "balance_after_paise": 40000,
+        "credit_after_paise": 0
+      },
+      "review_reason": null,
+      "error": null
+    },
+    {
+      "id": "01929b11-2c3d-7e4f-9a05-000000000002",
+      "outcome": "duplicate",
+      "payment": {
+        "id": "01929b11-2c3d-7e4f-9a05-000000000002",
+        "customer_id": "01929a3e-5b10-7c4e-8a03-000000000002",
+        "amount_paise": 45000,
+        "method": "upi",
+        "receipt_number": "R-2610-00044",
+        "provisional_ref": "P-K7Q-0013",
+        "recorded_at": "2026-10-13T02:15:00.000Z",
+        "posted_at": "2026-10-13T02:15:04.000Z",
+        "business_date": "2026-10-13",
+        "allocations": [
+          {
+            "invoice_id": "01929a3e-5b10-7c4e-8a04-000000000003",
+            "invoice_number": "INV-2610-00124",
+            "kind": "regular",
+            "period": "2026-10-01",
+            "amount_paise": 40000,
+            "outstanding_after_paise": 0
+          }
+        ],
+        "credit_added_paise": 5000,
+        "balance_after_paise": -5000,
+        "credit_after_paise": 5000
+      },
+      "review_reason": null,
+      "error": null
+    },
+    {
+      "id": "01929b11-2c3d-7e4f-9a05-000000000003",
+      "outcome": "posted_needs_review",
+      "payment": {
+        "id": "01929b11-2c3d-7e4f-9a05-000000000003",
+        "customer_id": "01929a3e-5b10-7c4e-8a03-000000000003",
+        "amount_paise": 20000,
+        "method": "cash",
+        "receipt_number": "R-2610-00046",
+        "provisional_ref": "P-K7Q-0014",
+        "recorded_at": "2026-10-13T03:15:00.000Z",
+        "posted_at": "2026-10-13T11:29:58.000Z",
+        "business_date": "2026-10-13",
+        "allocations": [],
+        "credit_added_paise": 20000,
+        "balance_after_paise": -20000,
+        "credit_after_paise": 20000
+      },
+      "review_reason": "customer_inactive",
+      "error": null
+    },
+    {
+      "id": "01929b11-2c3d-7e4f-9a05-000000000004",
+      "outcome": "rejected",
+      "payment": null,
+      "review_reason": null,
+      "error": {
+        "code": "ID_REUSED_WITH_DIFFERENT_DATA",
+        "message": "payment id already posted with amount_paise 25000"
+      }
+    },
+    {
+      "id": "01929b11-2c3d-7e4f-9a05-000000000005",
+      "outcome": "retry_later",
+      "payment": null,
+      "review_reason": null,
+      "error": {
+        "code": "INTERNAL",
+        "message": "lock timeout on customer balance"
+      }
+    }
+  ]
+}

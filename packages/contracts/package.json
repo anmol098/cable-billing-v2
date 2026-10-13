@@ -6,17 +6,28 @@
   "type": "module",
   "sideEffects": false,
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./openapi.json": "./openapi.json"
   },
   "scripts": {
     "build": "tsc --noEmit",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "generate": "tsx scripts/openapi-build.ts",
+    "openapi:build": "tsx scripts/openapi-build.ts"
+  },
+  "dependencies": {
+    "@cb/domain": "workspace:*",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@cb/config": "workspace:*",
     "@types/node": "catalog:",
+    "ajv": "8.20.0",
+    "ajv-formats": "3.0.1",
+    "tsx": "catalog:",
     "typescript": "catalog:",
-    "vitest": "catalog:"
+    "vitest": "catalog:",
+    "zod-openapi": "catalog:"
   }
 }

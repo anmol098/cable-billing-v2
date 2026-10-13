@@ -1,0 +1,4707 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Cable Billing mobile API",
+    "version": "1.0.0",
+    "description": "The contract between the lineman Android app and the server (PLAN §10). Generated from the Zod schemas in packages/contracts; do not edit openapi.json by hand.\n\n- JSON field names are snake_case. Money is integer paise (*_paise). Instants are ISO-8601 UTC with 'Z'. Business dates and periods are YYYY-MM-DD in India time. Ids are UUIDs.\n- Every response, success or error, carries server_time. Errors use the ErrorResponse body with a stable error.code.\n- Every request carries the 'x-app-version-code' header (Android versionCode). Authenticated endpoints need 'Authorization: Bearer <access_token>'.\n- v1 changes are additive only: clients must ignore unknown response fields and unknown feature flags, and map unknown error codes by HTTP status. See packages/contracts/README.md."
+  },
+  "servers": [
+    {
+      "url": "/api/mobile/v1",
+      "description": "Relative to the web app's origin (dev, staging and production hosts differ)."
+    }
+  ],
+  "tags": [
+    {
+      "name": "auth",
+      "description": "Sign-in and tokens (T-028)."
+    },
+    {
+      "name": "app",
+      "description": "App configuration and the force-update gate (T-028)."
+    },
+    {
+      "name": "customers",
+      "description": "Roster sync, customer detail and phone correction (T-060)."
+    },
+    {
+      "name": "payments",
+      "description": "Pushing payments saved on the phone (T-061)."
+    },
+    {
+      "name": "collections",
+      "description": "The lineman's day and cash handover (T-061, T-062)."
+    },
+    {
+      "name": "receipts",
+      "description": "Receipt preview links and receipt actions (T-061, T-050)."
+    }
+  ],
+  "paths": {
+    "/auth/login": {
+      "post": {
+        "operationId": "login",
+        "tags": [
+          "auth"
+        ],
+        "summary": "Sign in a lineman on this phone",
+        "description": "Lineman role only (owners and staff get ROLE_NOT_ALLOWED). Registers or updates the device (install_id, model, app version), assigns its device_code and returns a token pair. Rate limited.",
+        "security": [],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "x-app-version-code",
+            "schema": {
+              "type": "string",
+              "pattern": "^[1-9][0-9]{0,9}$",
+              "description": "The app's Android versionCode, as decimal digits. Sent on every request; if it is below min_app_version_code the server answers APP_TOO_OLD (except GET /app/config and POST /auth/logout, which always answer)."
+            },
+            "required": true,
+            "description": "The app's Android versionCode, as decimal digits. Sent on every request; if it is below min_app_version_code the server answers APP_TOO_OLD (except GET /app/config and POST /auth/logout, which always answer)."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "JSON body.",
+          "content": {
+            "application/json": {
+              "example": {
+                "login": "9876501234",
+                "password": "example-password",
+                "device": {
+                  "install_id": "6f1c2d3e-4b5a-4c6d-8e7f-90a1b2c3d4e5",
+                  "model": "Xiaomi Redmi 9A",
+                  "os": "Android 11 (API 30)",
+                  "app_version": "1.0.0",
+                  "app_version_code": 1
+                }
+              },
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "server_time": "2026-10-13T04:30:00.000Z",
+                  "tokens": {
+                    "token_type": "Bearer",
+                    "access_token": "example-access-token-1",
+                    "access_token_expires_at": "2026-10-13T04:45:00.000Z",
+                    "refresh_token": "example-refresh-token-1",
+                    "refresh_token_expires_at": "2027-04-11T04:30:00.000Z"
+                  },
+                  "user": {
+                    "id": "01929a3e-5b10-7c4e-8a01-000000000002",
+                    "name": "Suresh Yadav",
+                    "login": "9876501234",
+                    "language": "hi"
+                  },
+                  "operator": {
+                    "id": "01929a3e-5b10-7c4e-8a01-000000000001",
+                    "name": "Shiv Cable Network",
+                    "office_phone": "9800000001",
+                    "receipt_footer": "Thank you. Pay by the 10th of every month."
+                  },
+                  "device": {
+                    "id": "01929a3e-5b10-7c4e-8a01-000000000003",
+                    "device_code": "K7Q"
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request. error.code is one of: VALIDATION.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "server_time": "2026-10-13T11:30:00.000Z",
+                  "error": {
+                    "code": "VALIDATION",
+                    "message": "Request body failed validation",
+                    "request_id": "req_01929b112c3d7e4f0001",
+                    "fields": [
+                      {
+                        "path": "payments.0.amount_paise",
+                        "issue": "too_small"
+                      },
+                      {
+                        "path": "payments.0.recorded_at",
+                        "issue": "invalid_format"
+                      }
+                    ]
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not signed in. error.code is one of: INVALID_CREDENTIALS.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "server_time": "2026-10-13T11:30:00.000Z",
+                  "error": {
+                    "code": "INVALID_CREDENTIALS",
+                    "message": "login or password does not match",
+                    "request_id": "req_01929b112c3d7e4f0010"
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed. error.code is one of: ACCOUNT_DISABLED, ROLE_NOT_ALLOWED.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "server_time": "2026-10-13T11:30:00.000Z",
+                  "error": {
+                    "code": "ACCOUNT_DISABLED",
+                    "message": "user is deactivated",
+                    "request_id": "req_01929b112c3d7e4f0011"
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "426": {
+            "description": "App too old. error.code is one of: APP_TOO_OLD.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "server_time": "2026-10-13T11:30:00.000Z",
+                  "error": {
+                    "code": "APP_TOO_OLD",
+                    "message": "app version code 1 is below minimum 3",
+                    "request_id": "req_01929b112c3d7e4f0009",
+                    "min_app_version_code": 3
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests. error.code is one of: RATE_LIMITED. The Retry-After header carries the same wait as retry_after_seconds.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "server_time": "2026-10-13T11:30:00.000Z",
+                  "error": {
+                    "code": "RATE_LIMITED",
+                    "message": "too many login attempts",
+                    "request_id": "req_01929b112c3d7e4f0015",
+                    "retry_after_seconds": 30
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error. error.code is one of: INTERNAL, INVARIANT_VIOLATION.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "server_time": "2026-10-13T11:30:00.000Z",
+                  "error": {
+                    "code": "INTERNAL",
+                    "message": "unexpected error",
+                    "request_id": "req_01929b112c3d7e4f0020"
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/refresh": {
+      "post": {
+        "operationId": "refreshTokens",
+        "tags": [
+          "auth"
+        ],
+        "summary": "Rotate the token pair",
+        "description": "Single-use refresh tokens: each call returns a new pair. A reused or unknown token revokes its family (REFRESH_TOKEN_INVALID); a phone the owner signed out gets DEVICE_REVOKED. On either, go to the login screen and keep every queued payment.",
+        "security": [],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "x-app-version-code",
+            "schema": {
+              "type": "string",
+              "pattern": "^[1-9][0-9]{0,9}$",
+              "description": "The app's Android versionCode, as decimal digits. Sent on every request; if it is below min_app_version_code the server answers APP_TOO_OLD (except GET /app/config and POST /auth/logout, which always answer)."
+            },
+            "required": true,
+            "description": "The app's Android versionCode, as decimal digits. Sent on every request; if it is below min_app_version_code the server answers APP_TOO_OLD (except GET /app/config and POST /auth/logout, which always answer)."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "JSON body.",
+          "content": {
+            "application/json": {
+              "example": {
+                "refresh_token": "example-refresh-token-1",
+                "install_id": "6f1c2d3e-4b5a-4c6d-8e7f-90a1b2c3d4e5"
+              },
+              "schema": {
+                "$ref": "#/components/schemas/RefreshRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "server_time": "2026-10-13T04:44:10.000Z",
+                  "tokens": {
+                    "token_type": "Bearer",
+                    "access_token": "example-access-token-2",
+                    "access_token_expires_at": "2026-10-13T04:59:10.000Z",
+                    "refresh_token": "example-refresh-token-2",
+                    "refresh_token_expires_at": "2027-04-11T04:44:10.000Z"
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/RefreshResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request. error.code is one of: VALIDATION.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "server_time": "2026-10-13T11:30:00.000Z",
+                  "error": {
+                    "code": "VALIDATION",
+                    "message": "Request body failed validation",
+                    "request_id": "req_01929b112c3d7e4f0001",
+                    "fields": [
+                      {
+                        "path": "payments.0.amount_paise",
+                        "issue": "too_small"
+                      },
+                      {
+                        "path": "payments.0.recorded_at",
+                        "issue": "invalid_format"
+                      }
+                    ]
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not signed in. error.code is one of: REFRESH_TOKEN_INVALID, DEVICE_REVOKED.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "server_time": "2026-10-13T11:30:00.000Z",
+                  "error": {
+                    "code": "REFRESH_TOKEN_INVALID",
+                    "message": "refresh token reuse detected; family revoked",
+                    "request_id": "req_01929b112c3d7e4f0013"
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed. error.code is one of: ACCOUNT_DISABLED.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "server_time": "2026-10-13T11:30:00.000Z",
+                  "error": {
+                    "code": "ACCOUNT_DISABLED",
+                    "message": "user is deactivated",
+                    "request_id": "req_01929b112c3d7e4f0011"
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "426": {
+            "description": "App too old. error.code is one of: APP_TOO_OLD.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "server_time": "2026-10-13T11:30:00.000Z",
+                  "error": {
+                    "code": "APP_TOO_OLD",
+                    "message": "app version code 1 is below minimum 3",
+                    "request_id": "req_01929b112c3d7e4f0009",
+                    "min_app_version_code": 3
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests. error.code is one of: RATE_LIMITED. The Retry-After header carries the same wait as retry_after_seconds.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "server_time": "2026-10-13T11:30:00.000Z",
+                  "error": {
+                    "code": "RATE_LIMITED",
+                    "message": "too many login attempts",
+                    "request_id": "req_01929b112c3d7e4f0015",
+                    "retry_after_seconds": 30
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error. error.code is one of: INTERNAL, INVARIANT_VIOLATION.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "server_time": "2026-10-13T11:30:00.000Z",
+                  "error": {
+                    "code": "INTERNAL",
+                    "message": "unexpected error",
+                    "request_id": "req_01929b112c3d7e4f0020"
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "operationId": "logout",
+        "tags": [
+          "auth"
+        ],
+        "summary": "Sign this phone out",
+        "description": "Revokes the refresh token's family. Always succeeds for a well-formed request, even if the token is already gone.",
+        "security": [],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "x-app-version-code",
+            "schema": {
+              "type": "string",
+              "pattern": "^[1-9][0-9]{0,9}$",
+              "description": "The app's Android versionCode, as decimal digits. Sent on every request; if it is below min_app_version_code the server answers APP_TOO_OLD (except GET /app/config and POST /auth/logout, which always answer)."
+            },
+            "required": true,
+            "description": "The app's Android versionCode, as decimal digits. Sent on every request; if it is below min_app_version_code the server answers APP_TOO_OLD (except GET /app/config and POST /auth/logout, which always answer)."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "JSON body.",
+          "content": {
+            "application/json": {
+              "example": {
+                "refresh_token": "example-refresh-token-2"
+              },
+              "schema": {
+                "$ref": "#/components/schemas/LogoutRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "server_time": "2026-10-13T11:30:00.000Z"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/LogoutResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request. error.code is one of: VALIDATION.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "server_time": "2026-10-13T11:30:00.000Z",
+                  "error": {
+                    "code": "VALIDATION",
+                    "message": "Request body failed validation",
+                    "request_id": "req_01929b112c3d7e4f0001",
+                    "fields": [
+                      {
+                        "path": "payments.0.amount_paise",
+                        "issue": "too_small"
+                      },
+                      {
+                        "path": "payments.0.recorded_at",
+                        "issue": "invalid_format"
+                      }
+                    ]
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests. error.code is one of: RATE_LIMITED. The Retry-After header carries the same wait as retry_after_seconds.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "server_time": "2026-10-13T11:30:00.000Z",
+                  "error": {
+                    "code": "RATE_LIMITED",
+                    "message": "too many login attempts",
+                    "request_id": "req_01929b112c3d7e4f0015",
+                    "retry_after_seconds": 30
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error. error.code is one of: INTERNAL, INVARIANT_VIOLATION.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "server_time": "2026-10-13T11:30:00.000Z",
+                  "error": {
+                    "code": "INTERNAL",
+                    "message": "unexpected error",
+                    "request_id": "req_01929b112c3d7e4f0020"
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/app/config": {
+      "get": {
+        "operationId": "getAppConfig",
+        "tags": [
+          "app"
+        ],
+        "summary": "App configuration and force-update gate",
+        "description": "Read on app start and after each sync. Never answers APP_TOO_OLD: compare min_app_version_code with the installed versionCode instead (PLAN §11.9).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "x-app-version-code",
+            "schema": {
+              "type": "string",
+              "pattern": "^[1-9][0-9]{0,9}$",
+              "description": "The app's Android versionCode, as decimal digits. Sent on every request; if it is below min_app_version_code the server answers APP_TOO_OLD (except GET /app/config and POST /auth/logout, which always answer)."
+            },
+            "required": true,
+            "description": "The app's Android versionCode, as decimal digits. Sent on every request; if it is below min_app_version_code the server answers APP_TOO_OLD (except GET /app/config and POST /auth/logout, which always answer)."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "server_time": "2026-10-13T11:30:00.000Z",
+                  "min_app_version_code": 1,
+                  "operator": {
+                    "id": "01929a3e-5b10-7c4e-8a01-000000000001",
+                    "name": "Shiv Cable Network",
+                    "office_phone": "9800000001",
+                    "receipt_footer": "Thank you. Pay by the 10th of every month."
+                  },
+                  "tenant_mode": "normal",
+                  "features": {}
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/AppConfigResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request. error.code is one of: VALIDATION.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "server_time": "2026-10-13T11:30:00.000Z",
+                  "error": {
+                    "code": "VALIDATION",
+                    "message": "Request body failed validation",
+                    "request_id": "req_01929b112c3d7e4f0001",
+                    "fields": [
+                      {
+                        "path": "payments.0.amount_paise",
+                        "issue": "too_small"
+                      },
+                      {
+                        "path": "payments.0.recorded_at",
+                        "issue": "invalid_format"
+                      }
+                    ]
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not signed in. error.code is one of: UNAUTHENTICATED.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "server_time": "2026-10-13T11:30:00.000Z",
+                  "error": {
+                    "code": "UNAUTHENTICATED",
+                    "message": "access token expired",
+                    "request_id": "req_01929b112c3d7e4f0004"
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed. error.code is one of: FORBIDDEN.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "server_time": "2026-10-13T11:30:00.000Z",
+                  "error": {
+                    "code": "FORBIDDEN",
+                    "message": "role owner may not use the mobile API",
+                    "request_id": "req_01929b112c3d7e4f0003"
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests. error.code is one of: RATE_LIMITED. The Retry-After header carries the same wait as retry_after_seconds.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "server_time": "2026-10-13T11:30:00.000Z",
+                  "error": {
+                    "code": "RATE_LIMITED",
+                    "message": "too many login attempts",
+                    "request_id": "req_01929b112c3d7e4f0015",
+                    "retry_after_seconds": 30
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error. error.code is one of: INTERNAL.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "server_time": "2026-10-13T11:30:00.000Z",
+                  "error": {
+                    "code": "INTERNAL",
+                    "message": "unexpected error",
+                    "request_id": "req_01929b112c3d7e4f0020"
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sync/customers": {
+      "get": {
+        "operationId": "syncCustomers",
+        "tags": [
+          "customers"
+        ],
+        "summary": "Delta sync of the customer roster",
+        "description": "Pages through roster changes ordered by (updated_at, id) with tombstones (PLAN §10.3). Pull on app open, every 30 minutes and after every payment push. CURSOR_INVALID → start a full sync.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "x-app-version-code",
+            "schema": {
+              "type": "string",
+              "pattern": "^[1-9][0-9]{0,9}$",
+              "description": "The app's Android versionCode, as decimal digits. Sent on every request; if it is below min_app_version_code the server answers APP_TOO_OLD (except GET /app/config and POST /auth/logout, which always answer)."
+            },
+            "required": true,
+            "description": "The app's Android versionCode, as decimal digits. Sent on every request; if it is below min_app_version_code the server answers APP_TOO_OLD (except GET /app/config and POST /auth/logout, which always answer)."
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "schema": {
+              "description": "The next_cursor from the previous sync. Omit for a full sync from the start.",
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "example": "eyJ1IjoiMjAyNi0xMC0xM1QwNTozMDowMC4wMDBaIiwiaSI6IjAxOTJhM2I0In0"
+            },
+            "description": "The next_cursor from the previous sync. Omit for a full sync from the start."
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "description": "Maximum rows (customers + removed ids) in this page, 1–500. Default 500.",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 500
+            },
+            "description": "Maximum rows (customers + removed ids) in this page, 1–500. Default 500."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "server_time": "2026-10-13T11:30:00.000Z",
+                  "customers": [
+                    {
+                      "id": "01929a3e-5b10-7c4e-8a03-000000000001",
+                      "code": "1045",
+                      "name": "Ramesh Kumar",
+                      "phone": "9876543210",
+                      "alt_phone": null,
+                      "address": "House 12, Gali 3, Shiv Nagar",
+                      "area": {
+                        "id": "01929a3e-5b10-7c4e-8a02-000000000001",
+                        "name": "Shiv Nagar"
+                      },
+                      "active": true,
+                      "connections": [
+                        {
+                          "vc_number": "000123456789",
+                          "status": "active"
+                        },
+                        {
+                          "vc_number": "000123456790",
+                          "status": "suspended"
+                        }
+                      ],
+                      "balance_paise": 90000,
+                      "credit_paise": 0,
+                      "open_bills": {
+                        "count": 2,
+                        "outstanding_paise": 90000,
+                        "oldest_period": "2026-09-01"
+                      },
+                      "updated_at": "2026-10-01T00:20:11.000Z"
+                    },
+                    {
+                      "id": "01929a3e-5b10-7c4e-8a03-000000000002",
+                      "code": "1046",
+                      "name": "Sunita Devi",
+                      "phone": null,
+                      "alt_phone": null,
+                      "address": null,
+                      "area": null,
+                      "active": true,
+                      "connections": [
+                        {
+                          "vc_number": "000123450001",
+                          "status": "active"
+                        }
+                      ],
+                      "balance_paise": -5000,
+                      "credit_paise": 5000,
+                      "open_bills": {
+                        "count": 0,
+                        "outstanding_paise": 0,
+                        "oldest_period": null
+                      },
+                      "updated_at": "2026-10-12T09:02:45.120Z"
+                    }
+                  ],
+                  "removed_customer_ids": [
+                    "01929a3e-5b10-7c4e-8a03-000000000005"
+                  ],
+                  "next_cursor": "eyJ1IjoiMjAyNi0xMC0xMlQwOTowMjo0NS4xMjBaIiwiaSI6IjAxOTJhM2U1In0",
+                  "has_more": false
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/SyncCustomersResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request. error.code is one of: VALIDATION, CURSOR_INVALID.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "server_time": "2026-10-13T11:30:00.000Z",
+                  "error": {
+                    "code": "VALIDATION",
+                    "message": "Request body failed validation",
+                    "request_id": "req_01929b112c3d7e4f0001",
+                    "fields": [
+                      {
+                        "path": "payments.0.amount_paise",
+                        "issue": "too_small"
+                      },
+                      {
+                        "path": "payments.0.recorded_at",
+                        "issue": "invalid_format"
+                      }
+                    ]
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not signed in. error.code is one of: UNAUTHENTICATED.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "server_time": "2026-10-13T11:30:00.000Z",
+                  "error": {
+                    "code": "UNAUTHENTICATED",
+                    "message": "access token expired",
+                    "request_id": "req_01929b112c3d7e4f0004"
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed. error.code is one of: FORBIDDEN.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "server_time": "2026-10-13T11:30:00.000Z",
+                  "error": {
+                    "code": "FORBIDDEN",
+                    "message": "role owner may not use the mobile API",
+                    "request_id": "req_01929b112c3d7e4f0003"
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "426": {
+            "description": "App too old. error.code is one of: APP_TOO_OLD.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "server_time": "2026-10-13T11:30:00.000Z",
+                  "error": {
+                    "code": "APP_TOO_OLD",
+                    "message": "app version code 1 is below minimum 3",
+                    "request_id": "req_01929b112c3d7e4f0009",
+                    "min_app_version_code": 3
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests. error.code is one of: RATE_LIMITED. The Retry-After header carries the same wait as retry_after_seconds.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "server_time": "2026-10-13T11:30:00.000Z",
+                  "error": {
+                    "code": "RATE_LIMITED",
+                    "message": "too many login attempts",
+                    "request_id": "req_01929b112c3d7e4f0015",
+                    "retry_after_seconds": 30
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error. error.code is one of: INTERNAL.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "server_time": "2026-10-13T11:30:00.000Z",
+                  "error": {
+                    "code": "INTERNAL",
+                    "message": "unexpected error",
+                    "request_id": "req_01929b112c3d7e4f0020"
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/customers/{id}": {
+      "get": {
+        "operationId": "getCustomer",
+        "tags": [
+          "customers"
+        ],
+        "summary": "Fresh customer detail",
+        "description": "Open bills and latest payments for the customer screen when online. Offline, the app shows the cached roster row instead.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "x-app-version-code",
+            "schema": {
+              "type": "string",
+              "pattern": "^[1-9][0-9]{0,9}$",
+              "description": "The app's Android versionCode, as decimal digits. Sent on every request; if it is below min_app_version_code the server answers APP_TOO_OLD (except GET /app/config and POST /auth/logout, which always answer)."
+            },
+            "required": true,
+            "description": "The app's Android versionCode, as decimal digits. Sent on every request; if it is below min_app_version_code the server answers APP_TOO_OLD (except GET /app/config and POST /auth/logout, which always answer)."
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "Customer id.",
+              "example": "0192a3b4-c5d6-7e8f-9a0b-1c2d3e4f5a6b"
+            },
+            "required": true,
+            "description": "Customer id."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "server_time": "2026-10-13T11:30:00.000Z",
+                  "customer": {
+                    "id": "01929a3e-5b10-7c4e-8a03-000000000001",
+                    "code": "1045",
+                    "name": "Ramesh Kumar",
+                    "phone": "9876543210",
+                    "alt_phone": null,
+                    "address": "House 12, Gali 3, Shiv Nagar",
+                    "area": {
+                      "id": "01929a3e-5b10-7c4e-8a02-000000000001",
+                      "name": "Shiv Nagar"
+                    },
+                    "active": true,
+                    "connections": [
+                      {
+                        "vc_number": "000123456789",
+                        "status": "active"
+                      },
+                      {
+                        "vc_number": "000123456790",
+                        "status": "suspended"
+                      }
+                    ],
+                    "balance_paise": 90000,
+                    "credit_paise": 0,
+                    "open_bills": {
+                      "count": 2,
+                      "outstanding_paise": 90000,
+                      "oldest_period": "2026-09-01"
+                    },
+                    "updated_at": "2026-10-01T00:20:11.000Z"
+                  },
+                  "open_bills": [
+                    {
+                      "invoice_id": "01929a3e-5b10-7c4e-8a04-000000000001",
+                      "invoice_number": "INV-2609-00098",
+                      "kind": "regular",
+                      "period": "2026-09-01",
+                      "charges_paise": 45000,
+                      "outstanding_paise": 45000
+                    },
+                    {
+                      "invoice_id": "01929a3e-5b10-7c4e-8a04-000000000002",
+                      "invoice_number": "INV-2610-00123",
+                      "kind": "regular",
+                      "period": "2026-10-01",
+                      "charges_paise": 45000,
+                      "outstanding_paise": 45000
+                    }
+                  ],
+                  "recent_payments": [
+                    {
+                      "payment_id": "01929a3e-5b10-7c4e-8a05-000000000001",
+                      "amount_paise": 45000,
+                      "method": "cash",
+                      "recorded_at": "2026-08-14T06:10:00.000Z",
+                      "posted_at": "2026-08-14T06:10:03.000Z",
+                      "receipt_number": "R-2608-00031",
+                      "provisional_ref": "P-K7Q-0007",
+                      "collected_by_name": "Suresh Yadav",
+                      "reversed": false
+                    }
+                  ]
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerDetailResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request. error.code is one of: VALIDATION.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "server_time": "2026-10-13T11:30:00.000Z",
+                  "error": {
+                    "code": "VALIDATION",
+                    "message": "Request body failed validation",
+                    "request_id": "req_01929b112c3d7e4f0001",
+                    "fields": [
+                      {
+                        "path": "payments.0.amount_paise",
+                        "issue": "too_small"
+                      },
+                      {
+                        "path": "payments.0.recorded_at",
+                        "issue": "invalid_format"
+                      }
+                    ]
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not signed in. error.code is one of: UNAUTHENTICATED.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "server_time": "2026-10-13T11:30:00.000Z",
+                  "error": {
+                    "code": "UNAUTHENTICATED",
+                    "message": "access token expired",
+                    "request_id": "req_01929b112c3d7e4f0004"
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed. error.code is one of: FORBIDDEN.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "server_time": "2026-10-13T11:30:00.000Z",
+                  "error": {
+                    "code": "FORBIDDEN",
+                    "message": "role owner may not use the mobile API",
+                    "request_id": "req_01929b112c3d7e4f0003"
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found. error.code is one of: CUSTOMER_NOT_FOUND.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "server_time": "2026-10-13T11:30:00.000Z",
+                  "error": {
+                    "code": "CUSTOMER_NOT_FOUND",
+                    "message": "customer not found in tenant",
+                    "request_id": "req_01929b112c3d7e4f0017"
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "426": {
+            "description": "App too old. error.code is one of: APP_TOO_OLD.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "server_time": "2026-10-13T11:30:00.000Z",
+                  "error": {
+                    "code": "APP_TOO_OLD",
+                    "message": "app version code 1 is below minimum 3",
+                    "request_id": "req_01929b112c3d7e4f0009",
+                    "min_app_version_code": 3
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests. error.code is one of: RATE_LIMITED. The Retry-After header carries the same wait as retry_after_seconds.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "server_time": "2026-10-13T11:30:00.000Z",
+                  "error": {
+                    "code": "RATE_LIMITED",
+                    "message": "too many login attempts",
+                    "request_id": "req_01929b112c3d7e4f0015",
+                    "retry_after_seconds": 30
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error. error.code is one of: INTERNAL.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "server_time": "2026-10-13T11:30:00.000Z",
+                  "error": {
+                    "code": "INTERNAL",
+                    "message": "unexpected error",
+                    "request_id": "req_01929b112c3d7e4f0020"
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/customers/{id}/phone": {
+      "patch": {
+        "operationId": "updateCustomerPhone",
+        "tags": [
+          "customers"
+        ],
+        "summary": "Correct the customer's phone number",
+        "description": "From the receipt flow after the lineman confirms the number (FR-004). Audited with old and new value, actor and source 'android'. Idempotent: sending the current number again changes nothing.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "x-app-version-code",
+            "schema": {
+              "type": "string",
+              "pattern": "^[1-9][0-9]{0,9}$",
+              "description": "The app's Android versionCode, as decimal digits. Sent on every request; if it is below min_app_version_code the server answers APP_TOO_OLD (except GET /app/config and POST /auth/logout, which always answer)."
+            },
+            "required": true,
+            "description": "The app's Android versionCode, as decimal digits. Sent on every request; if it is below min_app_version_code the server answers APP_TOO_OLD (except GET /app/config and POST /auth/logout, which always answer)."
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "Customer id.",
+              "example": "0192a3b4-c5d6-7e8f-9a0b-1c2d3e4f5a6b"
+            },
+            "required": true,
+            "description": "Customer id."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "JSON body.",
+          "content": {
+            "application/json": {
+              "example": {
+                "phone": "9876543211"
+              },
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePhoneRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "server_time": "2026-10-13T11:30:00.000Z",
+                  "changed": true,
+                  "customer": {
+                    "id": "01929a3e-5b10-7c4e-8a03-000000000001",
+                    "code": "1045",
+                    "name": "Ramesh Kumar",
+                    "phone": "9876543211",
+                    "alt_phone": null,
+                    "address": "House 12, Gali 3, Shiv Nagar",
+                    "area": {
+                      "id": "01929a3e-5b10-7c4e-8a02-000000000001",
+                      "name": "Shiv Nagar"
+                    },
+                    "active": true,
+                    "connections": [
+                      {
+                        "vc_number": "000123456789",
+                        "status": "active"
+                      },
+                      {
+                        "vc_number": "000123456790",
+                        "status": "suspended"
+                      }
+                    ],
+                    "balance_paise": 90000,
+                    "credit_paise": 0,
+                    "open_bills": {
+                      "count": 2,
+                      "outstanding_paise": 90000,
+                      "oldest_period": "2026-09-01"
+                    },
+                    "updated_at": "2026-10-13T11:30:00.000Z"
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/UpdatePhoneResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request. error.code is one of: VALIDATION.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "server_time": "2026-10-13T11:30:00.000Z",
+                  "error": {
+                    "code": "VALIDATION",
+                    "message": "Request body failed validation",
+                    "request_id": "req_01929b112c3d7e4f0001",
+                    "fields": [
+                      {
+                        "path": "payments.0.amount_paise",
+                        "issue": "too_small"
+                      },
+                      {
+                        "path": "payments.0.recorded_at",
+                        "issue": "invalid_format"
+                      }
+                    ]
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not signed in. error.code is one of: UNAUTHENTICATED.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "server_time": "2026-10-13T11:30:00.000Z",
+                  "error": {
+                    "code": "UNAUTHENTICATED",
+                    "message": "access token expired",
+                    "request_id": "req_01929b112c3d7e4f0004"
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed. error.code is one of: FORBIDDEN, TENANT_READ_ONLY.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "server_time": "2026-10-13T11:30:00.000Z",
+                  "error": {
+                    "code": "FORBIDDEN",
+                    "message": "role owner may not use the mobile API",
+                    "request_id": "req_01929b112c3d7e4f0003"
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found. error.code is one of: CUSTOMER_NOT_FOUND.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "server_time": "2026-10-13T11:30:00.000Z",
+                  "error": {
+                    "code": "CUSTOMER_NOT_FOUND",
+                    "message": "customer not found in tenant",
+                    "request_id": "req_01929b112c3d7e4f0017"
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "426": {
+            "description": "App too old. error.code is one of: APP_TOO_OLD.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "server_time": "2026-10-13T11:30:00.000Z",
+                  "error": {
+                    "code": "APP_TOO_OLD",
+                    "message": "app version code 1 is below minimum 3",
+                    "request_id": "req_01929b112c3d7e4f0009",
+                    "min_app_version_code": 3
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests. error.code is one of: RATE_LIMITED. The Retry-After header carries the same wait as retry_after_seconds.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "server_time": "2026-10-13T11:30:00.000Z",
+                  "error": {
+                    "code": "RATE_LIMITED",
+                    "message": "too many login attempts",
+                    "request_id": "req_01929b112c3d7e4f0015",
+                    "retry_after_seconds": 30
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error. error.code is one of: INTERNAL, INVARIANT_VIOLATION.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "server_time": "2026-10-13T11:30:00.000Z",
+                  "error": {
+                    "code": "INTERNAL",
+                    "message": "unexpected error",
+                    "request_id": "req_01929b112c3d7e4f0020"
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/payments:batch": {
+      "post": {
+        "operationId": "postPaymentBatch",
+        "tags": [
+          "payments"
+        ],
+        "summary": "Push queued payments",
+        "description": "Up to 50 payments saved on the phone, each posted idempotently on its id (PLAN §8.4, §10.4). Per-item outcomes are in the 200 body; a bad item is rejected on its own and does not fail the batch. Accepted in read-only mode (D-13). Retrofit note: write the relative URL as './payments:batch' (a bare 'payments:batch' parses as a URL scheme).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "x-app-version-code",
+            "schema": {
+              "type": "string",
+              "pattern": "^[1-9][0-9]{0,9}$",
+              "description": "The app's Android versionCode, as decimal digits. Sent on every request; if it is below min_app_version_code the server answers APP_TOO_OLD (except GET /app/config and POST /auth/logout, which always answer)."
+            },
+            "required": true,
+            "description": "The app's Android versionCode, as decimal digits. Sent on every request; if it is below min_app_version_code the server answers APP_TOO_OLD (except GET /app/config and POST /auth/logout, which always answer)."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "JSON body.",
+          "content": {
+            "application/json": {
+              "example": {
+                "payments": [
+                  {
+                    "id": "01929b11-2c3d-7e4f-9a05-000000000001",
+                    "customer_id": "01929a3e-5b10-7c4e-8a03-000000000001",
+                    "amount_paise": 50000,
+                    "method": "cash",
+                    "upi_reference": null,
+                    "notes": null,
+                    "recorded_at": "2026-10-13T01:15:00.000Z",
+                    "provisional_ref": "P-K7Q-0012",
+                    "collector_id": "01929a3e-5b10-7c4e-8a01-000000000002",
+                    "device_id": "01929a3e-5b10-7c4e-8a01-000000000003"
+                  },
+                  {
+                    "id": "01929b11-2c3d-7e4f-9a05-000000000002",
+                    "customer_id": "01929a3e-5b10-7c4e-8a03-000000000002",
+                    "amount_paise": 45000,
+                    "method": "upi",
+                    "upi_reference": "429876123456",
+                    "notes": null,
+                    "recorded_at": "2026-10-13T02:15:00.000Z",
+                    "provisional_ref": "P-K7Q-0013",
+                    "collector_id": "01929a3e-5b10-7c4e-8a01-000000000002",
+                    "device_id": "01929a3e-5b10-7c4e-8a01-000000000003"
+                  },
+                  {
+                    "id": "01929b11-2c3d-7e4f-9a05-000000000003",
+                    "customer_id": "01929a3e-5b10-7c4e-8a03-000000000003",
+                    "amount_paise": 20000,
+                    "method": "cash",
+                    "upi_reference": null,
+                    "notes": "Paid at the shop",
+                    "recorded_at": "2026-10-13T03:15:00.000Z",
+                    "provisional_ref": "P-K7Q-0014",
+                    "collector_id": "01929a3e-5b10-7c4e-8a01-000000000002",
+                    "device_id": "01929a3e-5b10-7c4e-8a01-000000000003"
+                  },
+                  {
+                    "id": "01929b11-2c3d-7e4f-9a05-000000000004",
+                    "customer_id": "01929a3e-5b10-7c4e-8a03-000000000004",
+                    "amount_paise": 30000,
+                    "method": "cash",
+                    "upi_reference": null,
+                    "notes": null,
+                    "recorded_at": "2026-10-13T04:15:00.000Z",
+                    "provisional_ref": "P-K7Q-0015",
+                    "collector_id": "01929a3e-5b10-7c4e-8a01-000000000002",
+                    "device_id": "01929a3e-5b10-7c4e-8a01-000000000003"
+                  },
+                  {
+                    "id": "01929b11-2c3d-7e4f-9a05-000000000005",
+                    "customer_id": "01929a3e-5b10-7c4e-8a03-000000000001",
+                    "amount_paise": 10000,
+                    "method": "cash",
+                    "upi_reference": null,
+                    "notes": null,
+                    "recorded_at": "2026-10-13T05:15:00.000Z",
+                    "provisional_ref": "P-K7Q-0016",
+                    "collector_id": "01929a3e-5b10-7c4e-8a01-000000000002",
+                    "device_id": "01929a3e-5b10-7c4e-8a01-000000000003"
+                  }
+                ]
+              },
+              "schema": {
+                "$ref": "#/components/schemas/PaymentBatchRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "server_time": "2026-10-13T11:30:00.000Z",
+                  "results": [
+                    {
+                      "id": "01929b11-2c3d-7e4f-9a05-000000000001",
+                      "outcome": "posted",
+                      "payment": {
+                        "id": "01929b11-2c3d-7e4f-9a05-000000000001",
+                        "customer_id": "01929a3e-5b10-7c4e-8a03-000000000001",
+                        "amount_paise": 50000,
+                        "method": "cash",
+                        "receipt_number": "R-2610-00045",
+                        "provisional_ref": "P-K7Q-0012",
+                        "recorded_at": "2026-10-13T01:15:00.000Z",
+                        "posted_at": "2026-10-13T11:29:58.000Z",
+                        "business_date": "2026-10-13",
+                        "allocations": [
+                          {
+                            "invoice_id": "01929a3e-5b10-7c4e-8a04-000000000001",
+                            "invoice_number": "INV-2609-00098",
+                            "kind": "regular",
+                            "period": "2026-09-01",
+                            "amount_paise": 45000,
+                            "outstanding_after_paise": 0
+                          },
+                          {
+                            "invoice_id": "01929a3e-5b10-7c4e-8a04-000000000002",
+                            "invoice_number": "INV-2610-00123",
+                            "kind": "regular",
+                            "period": "2026-10-01",
+                            "amount_paise": 5000,
+                            "outstanding_after_paise": 40000
+                          }
+                        ],
+                        "credit_added_paise": 0,
+                        "balance_after_paise": 40000,
+                        "credit_after_paise": 0
+                      },
+                      "review_reason": null,
+                      "error": null
+                    },
+                    {
+                      "id": "01929b11-2c3d-7e4f-9a05-000000000002",
+                      "outcome": "duplicate",
+                      "payment": {
+                        "id": "01929b11-2c3d-7e4f-9a05-000000000002",
+                        "customer_id": "01929a3e-5b10-7c4e-8a03-000000000002",
+                        "amount_paise": 45000,
+                        "method": "upi",
+                        "receipt_number": "R-2610-00044",
+                        "provisional_ref": "P-K7Q-0013",
+                        "recorded_at": "2026-10-13T02:15:00.000Z",
+                        "posted_at": "2026-10-13T02:15:04.000Z",
+                        "business_date": "2026-10-13",
+                        "allocations": [
+                          {
+                            "invoice_id": "01929a3e-5b10-7c4e-8a04-000000000003",
+                            "invoice_number": "INV-2610-00124",
+                            "kind": "regular",
+                            "period": "2026-10-01",
+                            "amount_paise": 40000,
+                            "outstanding_after_paise": 0
+                          }
+                        ],
+                        "credit_added_paise": 5000,
+                        "balance_after_paise": -5000,
+                        "credit_after_paise": 5000
+                      },
+                      "review_reason": null,
+                      "error": null
+                    },
+                    {
+                      "id": "01929b11-2c3d-7e4f-9a05-000000000003",
+                      "outcome": "posted_needs_review",
+                      "payment": {
+                        "id": "01929b11-2c3d-7e4f-9a05-000000000003",
+                        "customer_id": "01929a3e-5b10-7c4e-8a03-000000000003",
+                        "amount_paise": 20000,
+                        "method": "cash",
+                        "receipt_number": "R-2610-00046",
+                        "provisional_ref": "P-K7Q-0014",
+                        "recorded_at": "2026-10-13T03:15:00.000Z",
+                        "posted_at": "2026-10-13T11:29:58.000Z",
+                        "business_date": "2026-10-13",
+                        "allocations": [],
+                        "credit_added_paise": 20000,
+                        "balance_after_paise": -20000,
+                        "credit_after_paise": 20000
+                      },
+                      "review_reason": "customer_inactive",
+                      "error": null
+                    },
+                    {
+                      "id": "01929b11-2c3d-7e4f-9a05-000000000004",
+                      "outcome": "rejected",
+                      "payment": null,
+                      "review_reason": null,
+                      "error": {
+                        "code": "ID_REUSED_WITH_DIFFERENT_DATA",
+                        "message": "payment id already posted with amount_paise 25000"
+                      }
+                    },
+                    {
+                      "id": "01929b11-2c3d-7e4f-9a05-000000000005",
+                      "outcome": "retry_later",
+                      "payment": null,
+                      "review_reason": null,
+                      "error": {
+                        "code": "INTERNAL",
+                        "message": "lock timeout on customer balance"
+                      }
+                    }
+                  ]
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentBatchResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request. error.code is one of: VALIDATION.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "server_time": "2026-10-13T11:30:00.000Z",
+                  "error": {
+                    "code": "VALIDATION",
+                    "message": "Request body failed validation",
+                    "request_id": "req_01929b112c3d7e4f0001",
+                    "fields": [
+                      {
+                        "path": "payments.0.amount_paise",
+                        "issue": "too_small"
+                      },
+                      {
+                        "path": "payments.0.recorded_at",
+                        "issue": "invalid_format"
+                      }
+                    ]
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not signed in. error.code is one of: UNAUTHENTICATED.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "server_time": "2026-10-13T11:30:00.000Z",
+                  "error": {
+                    "code": "UNAUTHENTICATED",
+                    "message": "access token expired",
+                    "request_id": "req_01929b112c3d7e4f0004"
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed. error.code is one of: FORBIDDEN.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "server_time": "2026-10-13T11:30:00.000Z",
+                  "error": {
+                    "code": "FORBIDDEN",
+                    "message": "role owner may not use the mobile API",
+                    "request_id": "req_01929b112c3d7e4f0003"
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "426": {
+            "description": "App too old. error.code is one of: APP_TOO_OLD.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "server_time": "2026-10-13T11:30:00.000Z",
+                  "error": {
+                    "code": "APP_TOO_OLD",
+                    "message": "app version code 1 is below minimum 3",
+                    "request_id": "req_01929b112c3d7e4f0009",
+                    "min_app_version_code": 3
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests. error.code is one of: RATE_LIMITED. The Retry-After header carries the same wait as retry_after_seconds.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "server_time": "2026-10-13T11:30:00.000Z",
+                  "error": {
+                    "code": "RATE_LIMITED",
+                    "message": "too many login attempts",
+                    "request_id": "req_01929b112c3d7e4f0015",
+                    "retry_after_seconds": 30
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error. error.code is one of: INTERNAL, INVARIANT_VIOLATION.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "server_time": "2026-10-13T11:30:00.000Z",
+                  "error": {
+                    "code": "INTERNAL",
+                    "message": "unexpected error",
+                    "request_id": "req_01929b112c3d7e4f0020"
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/collections/{date}": {
+      "get": {
+        "operationId": "getCollectionDay",
+        "tags": [
+          "collections"
+        ],
+        "summary": "The lineman's totals for a day",
+        "description": "Server-known cash and UPI totals, payments and handover status for the signed-in lineman on one India-time business date (FR-022).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "x-app-version-code",
+            "schema": {
+              "type": "string",
+              "pattern": "^[1-9][0-9]{0,9}$",
+              "description": "The app's Android versionCode, as decimal digits. Sent on every request; if it is below min_app_version_code the server answers APP_TOO_OLD (except GET /app/config and POST /auth/logout, which always answer)."
+            },
+            "required": true,
+            "description": "The app's Android versionCode, as decimal digits. Sent on every request; if it is below min_app_version_code the server answers APP_TOO_OLD (except GET /app/config and POST /auth/logout, which always answer)."
+          },
+          {
+            "in": "path",
+            "name": "date",
+            "schema": {
+              "type": "string",
+              "format": "date",
+              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+              "description": "The India-time business date (YYYY-MM-DD). Linemen can read only their own days; future dates are VALIDATION.",
+              "example": "2026-10-13"
+            },
+            "required": true,
+            "description": "The India-time business date (YYYY-MM-DD). Linemen can read only their own days; future dates are VALIDATION."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "server_time": "2026-10-13T11:30:00.000Z",
+                  "session": {
+                    "business_date": "2026-10-13",
+                    "cash_total_paise": 70000,
+                    "upi_total_paise": 45000,
+                    "payment_count": 3,
+                    "status": "open",
+                    "handover": null,
+                    "payments": [
+                      {
+                        "payment_id": "01929b11-2c3d-7e4f-9a05-000000000003",
+                        "customer_id": "01929a3e-5b10-7c4e-8a03-000000000003",
+                        "customer_code": "1047",
+                        "customer_name": "Mohan Lal",
+                        "amount_paise": 20000,
+                        "method": "cash",
+                        "recorded_at": "2026-10-13T03:15:00.000Z",
+                        "posted_at": "2026-10-13T11:29:58.000Z",
+                        "receipt_number": "R-2610-00046",
+                        "provisional_ref": "P-K7Q-0014",
+                        "reversed": false
+                      },
+                      {
+                        "payment_id": "01929b11-2c3d-7e4f-9a05-000000000002",
+                        "customer_id": "01929a3e-5b10-7c4e-8a03-000000000002",
+                        "customer_code": "1046",
+                        "customer_name": "Sunita Devi",
+                        "amount_paise": 45000,
+                        "method": "upi",
+                        "recorded_at": "2026-10-13T02:15:00.000Z",
+                        "posted_at": "2026-10-13T02:15:04.000Z",
+                        "receipt_number": "R-2610-00044",
+                        "provisional_ref": "P-K7Q-0013",
+                        "reversed": false
+                      },
+                      {
+                        "payment_id": "01929b11-2c3d-7e4f-9a05-000000000001",
+                        "customer_id": "01929a3e-5b10-7c4e-8a03-000000000001",
+                        "customer_code": "1045",
+                        "customer_name": "Ramesh Kumar",
+                        "amount_paise": 50000,
+                        "method": "cash",
+                        "recorded_at": "2026-10-13T01:15:00.000Z",
+                        "posted_at": "2026-10-13T11:29:58.000Z",
+                        "receipt_number": "R-2610-00045",
+                        "provisional_ref": "P-K7Q-0012",
+                        "reversed": false
+                      }
+                    ]
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/CollectionDayResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request. error.code is one of: VALIDATION.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "server_time": "2026-10-13T11:30:00.000Z",
+                  "error": {
+                    "code": "VALIDATION",
+                    "message": "Request body failed validation",
+                    "request_id": "req_01929b112c3d7e4f0001",
+                    "fields": [
+                      {
+                        "path": "payments.0.amount_paise",
+                        "issue": "too_small"
+                      },
+                      {
+                        "path": "payments.0.recorded_at",
+                        "issue": "invalid_format"
+                      }
+                    ]
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not signed in. error.code is one of: UNAUTHENTICATED.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "server_time": "2026-10-13T11:30:00.000Z",
+                  "error": {
+                    "code": "UNAUTHENTICATED",
+                    "message": "access token expired",
+                    "request_id": "req_01929b112c3d7e4f0004"
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed. error.code is one of: FORBIDDEN.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "server_time": "2026-10-13T11:30:00.000Z",
+                  "error": {
+                    "code": "FORBIDDEN",
+                    "message": "role owner may not use the mobile API",
+                    "request_id": "req_01929b112c3d7e4f0003"
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "426": {
+            "description": "App too old. error.code is one of: APP_TOO_OLD.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "server_time": "2026-10-13T11:30:00.000Z",
+                  "error": {
+                    "code": "APP_TOO_OLD",
+                    "message": "app version code 1 is below minimum 3",
+                    "request_id": "req_01929b112c3d7e4f0009",
+                    "min_app_version_code": 3
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests. error.code is one of: RATE_LIMITED. The Retry-After header carries the same wait as retry_after_seconds.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "server_time": "2026-10-13T11:30:00.000Z",
+                  "error": {
+                    "code": "RATE_LIMITED",
+                    "message": "too many login attempts",
+                    "request_id": "req_01929b112c3d7e4f0015",
+                    "retry_after_seconds": 30
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error. error.code is one of: INTERNAL.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "server_time": "2026-10-13T11:30:00.000Z",
+                  "error": {
+                    "code": "INTERNAL",
+                    "message": "unexpected error",
+                    "request_id": "req_01929b112c3d7e4f0020"
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/collections/{date}/handover": {
+      "post": {
+        "operationId": "submitHandover",
+        "tags": [
+          "collections"
+        ],
+        "summary": "Submit the day's cash handover",
+        "description": "The server computes the expected cash and the discrepancy (PLAN §8.7). A reason is required when they differ. Idempotent on submission_id. Accepted in read-only mode (D-13).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "x-app-version-code",
+            "schema": {
+              "type": "string",
+              "pattern": "^[1-9][0-9]{0,9}$",
+              "description": "The app's Android versionCode, as decimal digits. Sent on every request; if it is below min_app_version_code the server answers APP_TOO_OLD (except GET /app/config and POST /auth/logout, which always answer)."
+            },
+            "required": true,
+            "description": "The app's Android versionCode, as decimal digits. Sent on every request; if it is below min_app_version_code the server answers APP_TOO_OLD (except GET /app/config and POST /auth/logout, which always answer)."
+          },
+          {
+            "in": "path",
+            "name": "date",
+            "schema": {
+              "type": "string",
+              "format": "date",
+              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+              "description": "The India-time business date (YYYY-MM-DD). Linemen can read only their own days; future dates are VALIDATION.",
+              "example": "2026-10-13"
+            },
+            "required": true,
+            "description": "The India-time business date (YYYY-MM-DD). Linemen can read only their own days; future dates are VALIDATION."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "JSON body.",
+          "content": {
+            "application/json": {
+              "example": {
+                "submission_id": "01929b11-2c3d-7e4f-9a07-000000000001",
+                "cash_handed_over_paise": 80000,
+                "discrepancy_reason": "pending_sync",
+                "note": null,
+                "unsynced_payment_count": 1,
+                "unsynced_cash_paise": 10000
+              },
+              "schema": {
+                "$ref": "#/components/schemas/HandoverRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "server_time": "2026-10-13T12:00:01.000Z",
+                  "session": {
+                    "business_date": "2026-10-13",
+                    "cash_total_paise": 70000,
+                    "upi_total_paise": 45000,
+                    "payment_count": 3,
+                    "status": "submitted",
+                    "handover": {
+                      "submission_id": "01929b11-2c3d-7e4f-9a07-000000000001",
+                      "cash_expected_paise": 70000,
+                      "cash_handed_over_paise": 80000,
+                      "discrepancy_paise": 10000,
+                      "discrepancy_reason": "pending_sync",
+                      "note": null,
+                      "unsynced_payment_count": 1,
+                      "unsynced_cash_paise": 10000,
+                      "submitted_at": "2026-10-13T12:00:01.000Z",
+                      "reviewed_at": null,
+                      "review_note": null
+                    },
+                    "payments": [
+                      {
+                        "payment_id": "01929b11-2c3d-7e4f-9a05-000000000003",
+                        "customer_id": "01929a3e-5b10-7c4e-8a03-000000000003",
+                        "customer_code": "1047",
+                        "customer_name": "Mohan Lal",
+                        "amount_paise": 20000,
+                        "method": "cash",
+                        "recorded_at": "2026-10-13T03:15:00.000Z",
+                        "posted_at": "2026-10-13T11:29:58.000Z",
+                        "receipt_number": "R-2610-00046",
+                        "provisional_ref": "P-K7Q-0014",
+                        "reversed": false
+                      },
+                      {
+                        "payment_id": "01929b11-2c3d-7e4f-9a05-000000000002",
+                        "customer_id": "01929a3e-5b10-7c4e-8a03-000000000002",
+                        "customer_code": "1046",
+                        "customer_name": "Sunita Devi",
+                        "amount_paise": 45000,
+                        "method": "upi",
+                        "recorded_at": "2026-10-13T02:15:00.000Z",
+                        "posted_at": "2026-10-13T02:15:04.000Z",
+                        "receipt_number": "R-2610-00044",
+                        "provisional_ref": "P-K7Q-0013",
+                        "reversed": false
+                      },
+                      {
+                        "payment_id": "01929b11-2c3d-7e4f-9a05-000000000001",
+                        "customer_id": "01929a3e-5b10-7c4e-8a03-000000000001",
+                        "customer_code": "1045",
+                        "customer_name": "Ramesh Kumar",
+                        "amount_paise": 50000,
+                        "method": "cash",
+                        "recorded_at": "2026-10-13T01:15:00.000Z",
+                        "posted_at": "2026-10-13T11:29:58.000Z",
+                        "receipt_number": "R-2610-00045",
+                        "provisional_ref": "P-K7Q-0012",
+                        "reversed": false
+                      }
+                    ]
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/HandoverResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request. error.code is one of: VALIDATION.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "server_time": "2026-10-13T11:30:00.000Z",
+                  "error": {
+                    "code": "VALIDATION",
+                    "message": "Request body failed validation",
+                    "request_id": "req_01929b112c3d7e4f0001",
+                    "fields": [
+                      {
+                        "path": "payments.0.amount_paise",
+                        "issue": "too_small"
+                      },
+                      {
+                        "path": "payments.0.recorded_at",
+                        "issue": "invalid_format"
+                      }
+                    ]
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not signed in. error.code is one of: UNAUTHENTICATED.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "server_time": "2026-10-13T11:30:00.000Z",
+                  "error": {
+                    "code": "UNAUTHENTICATED",
+                    "message": "access token expired",
+                    "request_id": "req_01929b112c3d7e4f0004"
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed. error.code is one of: FORBIDDEN.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "server_time": "2026-10-13T11:30:00.000Z",
+                  "error": {
+                    "code": "FORBIDDEN",
+                    "message": "role owner may not use the mobile API",
+                    "request_id": "req_01929b112c3d7e4f0003"
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict. error.code is one of: HANDOVER_ALREADY_ACCEPTED, ID_REUSED_WITH_DIFFERENT_DATA.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "server_time": "2026-10-13T11:30:00.000Z",
+                  "error": {
+                    "code": "HANDOVER_ALREADY_ACCEPTED",
+                    "message": "handover for 2026-10-13 already accepted",
+                    "request_id": "req_01929b112c3d7e4f0019"
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "426": {
+            "description": "App too old. error.code is one of: APP_TOO_OLD.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "server_time": "2026-10-13T11:30:00.000Z",
+                  "error": {
+                    "code": "APP_TOO_OLD",
+                    "message": "app version code 1 is below minimum 3",
+                    "request_id": "req_01929b112c3d7e4f0009",
+                    "min_app_version_code": 3
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests. error.code is one of: RATE_LIMITED. The Retry-After header carries the same wait as retry_after_seconds.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "server_time": "2026-10-13T11:30:00.000Z",
+                  "error": {
+                    "code": "RATE_LIMITED",
+                    "message": "too many login attempts",
+                    "request_id": "req_01929b112c3d7e4f0015",
+                    "retry_after_seconds": 30
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error. error.code is one of: INTERNAL, INVARIANT_VIOLATION.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "server_time": "2026-10-13T11:30:00.000Z",
+                  "error": {
+                    "code": "INTERNAL",
+                    "message": "unexpected error",
+                    "request_id": "req_01929b112c3d7e4f0020"
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/receipts/{paymentId}/link": {
+      "post": {
+        "operationId": "createReceiptLink",
+        "tags": [
+          "receipts"
+        ],
+        "summary": "Get a receipt preview link",
+        "description": "Creates or returns the secure preview link for a synced payment (FR-021). No request body. Online only; offline the app queues the WhatsApp/SMS action with 'Link will be ready after sync'.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "x-app-version-code",
+            "schema": {
+              "type": "string",
+              "pattern": "^[1-9][0-9]{0,9}$",
+              "description": "The app's Android versionCode, as decimal digits. Sent on every request; if it is below min_app_version_code the server answers APP_TOO_OLD (except GET /app/config and POST /auth/logout, which always answer)."
+            },
+            "required": true,
+            "description": "The app's Android versionCode, as decimal digits. Sent on every request; if it is below min_app_version_code the server answers APP_TOO_OLD (except GET /app/config and POST /auth/logout, which always answer)."
+          },
+          {
+            "in": "path",
+            "name": "paymentId",
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "The payment id. The payment must already be on the server (PAYMENT_NOT_FOUND otherwise: 'Link will be ready after sync').",
+              "example": "0192a3b4-c5d6-7e8f-9a0b-1c2d3e4f5a6b"
+            },
+            "required": true,
+            "description": "The payment id. The payment must already be on the server (PAYMENT_NOT_FOUND otherwise: 'Link will be ready after sync')."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "server_time": "2026-10-13T11:30:00.000Z",
+                  "link": {
+                    "url": "https://cablebilling.example/r/3q2-7wEXAMPLEtokenONLYnotREAL_0123456789ab",
+                    "expires_at": "2027-01-11T11:30:00.000Z",
+                    "receipt_number": "R-2610-00045"
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ReceiptLinkResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request. error.code is one of: VALIDATION.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "server_time": "2026-10-13T11:30:00.000Z",
+                  "error": {
+                    "code": "VALIDATION",
+                    "message": "Request body failed validation",
+                    "request_id": "req_01929b112c3d7e4f0001",
+                    "fields": [
+                      {
+                        "path": "payments.0.amount_paise",
+                        "issue": "too_small"
+                      },
+                      {
+                        "path": "payments.0.recorded_at",
+                        "issue": "invalid_format"
+                      }
+                    ]
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not signed in. error.code is one of: UNAUTHENTICATED.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "server_time": "2026-10-13T11:30:00.000Z",
+                  "error": {
+                    "code": "UNAUTHENTICATED",
+                    "message": "access token expired",
+                    "request_id": "req_01929b112c3d7e4f0004"
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed. error.code is one of: FORBIDDEN.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "server_time": "2026-10-13T11:30:00.000Z",
+                  "error": {
+                    "code": "FORBIDDEN",
+                    "message": "role owner may not use the mobile API",
+                    "request_id": "req_01929b112c3d7e4f0003"
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found. error.code is one of: PAYMENT_NOT_FOUND.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "server_time": "2026-10-13T11:30:00.000Z",
+                  "error": {
+                    "code": "PAYMENT_NOT_FOUND",
+                    "message": "payment not found in tenant",
+                    "request_id": "req_01929b112c3d7e4f0018"
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "426": {
+            "description": "App too old. error.code is one of: APP_TOO_OLD.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "server_time": "2026-10-13T11:30:00.000Z",
+                  "error": {
+                    "code": "APP_TOO_OLD",
+                    "message": "app version code 1 is below minimum 3",
+                    "request_id": "req_01929b112c3d7e4f0009",
+                    "min_app_version_code": 3
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests. error.code is one of: RATE_LIMITED. The Retry-After header carries the same wait as retry_after_seconds.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "server_time": "2026-10-13T11:30:00.000Z",
+                  "error": {
+                    "code": "RATE_LIMITED",
+                    "message": "too many login attempts",
+                    "request_id": "req_01929b112c3d7e4f0015",
+                    "retry_after_seconds": 30
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error. error.code is one of: INTERNAL, INVARIANT_VIOLATION.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "server_time": "2026-10-13T11:30:00.000Z",
+                  "error": {
+                    "code": "INTERNAL",
+                    "message": "unexpected error",
+                    "request_id": "req_01929b112c3d7e4f0020"
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/receipts/actions:batch": {
+      "post": {
+        "operationId": "postReceiptActions",
+        "tags": [
+          "receipts"
+        ],
+        "summary": "Record what was done with receipts",
+        "description": "Printed, print failed, WhatsApp opened, SMS opened, PDF shared: observable states only, never 'sent' or 'delivered' (RULE-19). Idempotent per action id; per-item outcomes in the 200 body.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "x-app-version-code",
+            "schema": {
+              "type": "string",
+              "pattern": "^[1-9][0-9]{0,9}$",
+              "description": "The app's Android versionCode, as decimal digits. Sent on every request; if it is below min_app_version_code the server answers APP_TOO_OLD (except GET /app/config and POST /auth/logout, which always answer)."
+            },
+            "required": true,
+            "description": "The app's Android versionCode, as decimal digits. Sent on every request; if it is below min_app_version_code the server answers APP_TOO_OLD (except GET /app/config and POST /auth/logout, which always answer)."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "JSON body.",
+          "content": {
+            "application/json": {
+              "example": {
+                "actions": [
+                  {
+                    "id": "01929b11-2c3d-7e4f-9a06-000000000001",
+                    "payment_id": "01929b11-2c3d-7e4f-9a05-000000000001",
+                    "action": "printed",
+                    "at": "2026-10-13T01:16:10.000Z"
+                  },
+                  {
+                    "id": "01929b11-2c3d-7e4f-9a06-000000000002",
+                    "payment_id": "01929b11-2c3d-7e4f-9a05-000000000002",
+                    "action": "whatsapp_opened",
+                    "at": "2026-10-13T02:16:30.000Z"
+                  },
+                  {
+                    "id": "01929b11-2c3d-7e4f-9a06-000000000003",
+                    "payment_id": "01929b11-2c3d-7e4f-9a05-000000000005",
+                    "action": "sms_opened",
+                    "at": "2026-10-13T05:16:00.000Z"
+                  }
+                ]
+              },
+              "schema": {
+                "$ref": "#/components/schemas/ReceiptActionsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "server_time": "2026-10-13T11:30:00.000Z",
+                  "results": [
+                    {
+                      "id": "01929b11-2c3d-7e4f-9a06-000000000001",
+                      "outcome": "recorded",
+                      "error": null
+                    },
+                    {
+                      "id": "01929b11-2c3d-7e4f-9a06-000000000002",
+                      "outcome": "duplicate",
+                      "error": null
+                    },
+                    {
+                      "id": "01929b11-2c3d-7e4f-9a06-000000000003",
+                      "outcome": "retry_later",
+                      "error": {
+                        "code": "PAYMENT_NOT_FOUND",
+                        "message": "payment not posted yet"
+                      }
+                    }
+                  ]
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ReceiptActionsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request. error.code is one of: VALIDATION.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "server_time": "2026-10-13T11:30:00.000Z",
+                  "error": {
+                    "code": "VALIDATION",
+                    "message": "Request body failed validation",
+                    "request_id": "req_01929b112c3d7e4f0001",
+                    "fields": [
+                      {
+                        "path": "payments.0.amount_paise",
+                        "issue": "too_small"
+                      },
+                      {
+                        "path": "payments.0.recorded_at",
+                        "issue": "invalid_format"
+                      }
+                    ]
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not signed in. error.code is one of: UNAUTHENTICATED.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "server_time": "2026-10-13T11:30:00.000Z",
+                  "error": {
+                    "code": "UNAUTHENTICATED",
+                    "message": "access token expired",
+                    "request_id": "req_01929b112c3d7e4f0004"
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed. error.code is one of: FORBIDDEN.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "server_time": "2026-10-13T11:30:00.000Z",
+                  "error": {
+                    "code": "FORBIDDEN",
+                    "message": "role owner may not use the mobile API",
+                    "request_id": "req_01929b112c3d7e4f0003"
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "426": {
+            "description": "App too old. error.code is one of: APP_TOO_OLD.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "server_time": "2026-10-13T11:30:00.000Z",
+                  "error": {
+                    "code": "APP_TOO_OLD",
+                    "message": "app version code 1 is below minimum 3",
+                    "request_id": "req_01929b112c3d7e4f0009",
+                    "min_app_version_code": 3
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests. error.code is one of: RATE_LIMITED. The Retry-After header carries the same wait as retry_after_seconds.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "server_time": "2026-10-13T11:30:00.000Z",
+                  "error": {
+                    "code": "RATE_LIMITED",
+                    "message": "too many login attempts",
+                    "request_id": "req_01929b112c3d7e4f0015",
+                    "retry_after_seconds": 30
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error. error.code is one of: INTERNAL, INVARIANT_VIOLATION.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "server_time": "2026-10-13T11:30:00.000Z",
+                  "error": {
+                    "code": "INTERNAL",
+                    "message": "unexpected error",
+                    "request_id": "req_01929b112c3d7e4f0020"
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "LoginRequest": {
+        "type": "object",
+        "properties": {
+          "login": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "description": "The lineman's login (usually their mobile number). Compared case-insensitively after trimming."
+          },
+          "password": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "description": "The password, exactly as typed."
+          },
+          "device": {
+            "description": "The phone signing in.",
+            "$ref": "#/components/schemas/DeviceInfo"
+          }
+        },
+        "required": [
+          "login",
+          "password",
+          "device"
+        ],
+        "description": "Sign in a lineman on this phone."
+      },
+      "DeviceInfo": {
+        "type": "object",
+        "properties": {
+          "install_id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "Random UUID the app makes once per installation and keeps until it is uninstalled. Identifies this phone's install to the server.",
+            "example": "0192a3b4-c5d6-7e8f-9a0b-1c2d3e4f5a6b"
+          },
+          "model": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "description": "Phone maker and model (Build.MANUFACTURER + Build.MODEL), e.g. 'Xiaomi Redmi 9A'."
+          },
+          "os": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 50,
+            "description": "Android version, e.g. 'Android 13 (API 33)'."
+          },
+          "app_version": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 50,
+            "description": "App version name for display and support, e.g. '1.0.3'. Not compared."
+          },
+          "app_version_code": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2100000000,
+            "description": "Android versionCode of the installed app (an integer that grows with every release). The force-update gate compares this, never the version name.",
+            "example": 12
+          }
+        },
+        "required": [
+          "install_id",
+          "model",
+          "os",
+          "app_version",
+          "app_version_code"
+        ],
+        "description": "The phone signing in (registered in `devices`)."
+      },
+      "RefreshRequest": {
+        "type": "object",
+        "properties": {
+          "refresh_token": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096,
+            "description": "The current refresh token."
+          },
+          "install_id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "This installation's install_id (must match the token's device).",
+            "example": "0192a3b4-c5d6-7e8f-9a0b-1c2d3e4f5a6b"
+          }
+        },
+        "required": [
+          "refresh_token",
+          "install_id"
+        ],
+        "description": "Swap the refresh token for a new token pair. Reusing an old refresh token revokes the whole token family (REFRESH_TOKEN_INVALID)."
+      },
+      "LogoutRequest": {
+        "type": "object",
+        "properties": {
+          "refresh_token": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096,
+            "description": "The refresh token to revoke. Works even when the access token has expired."
+          }
+        },
+        "required": [
+          "refresh_token"
+        ],
+        "description": "Sign this phone out: revokes the refresh token's family. The app must not delete queued payments (PLAN §9.2)."
+      },
+      "UpdatePhoneRequest": {
+        "type": "object",
+        "properties": {
+          "phone": {
+            "type": "string",
+            "pattern": "^[6-9][0-9]{9}$",
+            "description": "The confirmed or corrected primary mobile number.",
+            "example": "9876543210"
+          }
+        },
+        "required": [
+          "phone"
+        ],
+        "description": "Correct the customer's primary phone from the receipt flow (FR-004). Audited with source 'android'. Sending the current number again changes nothing."
+      },
+      "PaymentBatchRequest": {
+        "type": "object",
+        "properties": {
+          "payments": {
+            "minItems": 1,
+            "maxItems": 50,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PaymentBatchItem"
+            },
+            "description": "1–50 queued payments, oldest first. The server posts them in this order."
+          }
+        },
+        "required": [
+          "payments"
+        ],
+        "description": "Push queued payments. Safe to send again after a timeout or crash."
+      },
+      "PaymentBatchItem": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "Payment id = idempotency key. A UUIDv7 the phone creates before saving the payment locally (FR-015); it never changes, so a retry can never post twice.",
+            "example": "0192a3b4-c5d6-7e8f-9a0b-1c2d3e4f5a6b"
+          },
+          "customer_id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "The customer who paid.",
+            "example": "0192a3b4-c5d6-7e8f-9a0b-1c2d3e4f5a6b"
+          },
+          "amount_paise": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 999999999999900,
+            "description": "Amount received, in paise (> 0). The app takes whole rupees (D-17), so this is a multiple of 100 today.",
+            "example": 50000
+          },
+          "method": {
+            "description": "Cash or UPI.",
+            "$ref": "#/components/schemas/PaymentMethod"
+          },
+          "upi_reference": {
+            "description": "UPI reference the lineman typed (optional, only with method 'upi'). Not proof of payment (BR-10). Omit or null when skipped.",
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 64
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "notes": {
+            "description": "Optional note. Omit or null for none.",
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "recorded_at": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "description": "When the lineman saved the payment, by the phone's clock (UTC). More than 10 minutes in the future or more than 7 days old → posted_needs_review.",
+            "example": "2026-10-13T05:30:00.000Z"
+          },
+          "provisional_ref": {
+            "type": "string",
+            "pattern": "^P-[A-Z0-9]{3}-[0-9]{4,9}$",
+            "description": "The provisional receipt reference shown to the customer before sync (P-{device_code}-{seq}). Kept forever as an alias of the permanent receipt number (FR-016).",
+            "example": "P-K7Q-0012"
+          },
+          "collector_id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "Id of the user who took the payment (UserInfo.id when it was saved). The server takes identity from the token and flags a mismatch for review; it never trusts this for access.",
+            "example": "0192a3b4-c5d6-7e8f-9a0b-1c2d3e4f5a6b"
+          },
+          "device_id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "RegisteredDevice.id of this phone when the payment was saved. A mismatch with the token's device is flagged for review.",
+            "example": "0192a3b4-c5d6-7e8f-9a0b-1c2d3e4f5a6b"
+          }
+        },
+        "required": [
+          "id",
+          "customer_id",
+          "amount_paise",
+          "method",
+          "recorded_at",
+          "provisional_ref",
+          "collector_id",
+          "device_id"
+        ],
+        "description": "One payment saved on the phone (PRD §13.3). upi_reference must be absent for cash."
+      },
+      "PaymentMethod": {
+        "type": "string",
+        "enum": [
+          "cash",
+          "upi"
+        ],
+        "description": "How the customer paid: 'cash' or 'upi' (UPI is recorded by hand, not verified)."
+      },
+      "HandoverRequest": {
+        "type": "object",
+        "properties": {
+          "submission_id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "Idempotency key for this submission (a new UUID per Submit tap; reuse it when retrying the same submission).",
+            "example": "0192a3b4-c5d6-7e8f-9a0b-1c2d3e4f5a6b"
+          },
+          "cash_handed_over_paise": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 999999999999900,
+            "description": "Cash the lineman hands over, in paise (≥ 0).",
+            "example": 0
+          },
+          "discrepancy_reason": {
+            "description": "Required when the cash differs from the server's expected cash (VALIDATION otherwise); omit or null when it matches.",
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DiscrepancyReason"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "note": {
+            "description": "Optional note (e.g. for 'other'). Omit or null for none.",
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "unsynced_payment_count": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 10000,
+            "description": "How many of this day's payments are still on the phone (0 when all synced)."
+          },
+          "unsynced_cash_paise": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 999999999999900,
+            "description": "Total cash of those unsynced payments, in paise (0 when all synced).",
+            "example": 0
+          }
+        },
+        "required": [
+          "submission_id",
+          "cash_handed_over_paise",
+          "unsynced_payment_count",
+          "unsynced_cash_paise"
+        ],
+        "description": "Hand over the day's cash. Allowed while the day is open, submitted or returned; a new submission replaces the previous one. Once accepted: HANDOVER_ALREADY_ACCEPTED."
+      },
+      "DiscrepancyReason": {
+        "type": "string",
+        "enum": [
+          "short",
+          "extra",
+          "pending_sync",
+          "other"
+        ],
+        "description": "Why the cash handed over differs from the expected cash (picked from icon tiles, PLAN §11.3):\n- short: less cash than expected.\n- extra: more cash than expected.\n- pending_sync: some payments are still on the phone, so the server total is behind.\n- other: anything else (explain in the note)."
+      },
+      "ReceiptActionsRequest": {
+        "type": "object",
+        "properties": {
+          "actions": {
+            "minItems": 1,
+            "maxItems": 100,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReceiptActionItem"
+            },
+            "description": "1–100 actions, oldest first. Send them after their payments have synced."
+          }
+        },
+        "required": [
+          "actions"
+        ],
+        "description": "Push the receipt-action outbox."
+      },
+      "ReceiptActionItem": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "Idempotency key for this action, made on the phone when it happened.",
+            "example": "0192a3b4-c5d6-7e8f-9a0b-1c2d3e4f5a6b"
+          },
+          "payment_id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "The payment whose receipt it was.",
+            "example": "0192a3b4-c5d6-7e8f-9a0b-1c2d3e4f5a6b"
+          },
+          "action": {
+            "description": "What happened.",
+            "$ref": "#/components/schemas/ReceiptActionType"
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "description": "When it happened, by the phone's clock (UTC).",
+            "example": "2026-10-13T05:30:00.000Z"
+          }
+        },
+        "required": [
+          "id",
+          "payment_id",
+          "action",
+          "at"
+        ],
+        "description": "One receipt action from the phone's outbox."
+      },
+      "ReceiptActionType": {
+        "type": "string",
+        "enum": [
+          "printed",
+          "print_failed",
+          "whatsapp_opened",
+          "sms_opened",
+          "pdf_shared"
+        ],
+        "description": "What the lineman did with a receipt. Observable states only: never 'sent' or 'delivered' (BR-12, RULE-19).\n- printed: the printer accepted the receipt.\n- print_failed: printing failed (printer off, no paper, not paired).\n- whatsapp_opened: WhatsApp was opened with the message ready.\n- sms_opened: the SMS app was opened with the message ready.\n- pdf_shared: the receipt PDF was handed to the share sheet or WhatsApp."
+      },
+      "LoginResponse": {
+        "type": "object",
+        "properties": {
+          "server_time": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "description": "Server clock when the response was made (UTC). The phone uses it to spot a wrong device clock and to label 'Updated X min ago'.",
+            "example": "2026-10-13T05:30:00.000Z"
+          },
+          "tokens": {
+            "description": "The token pair for this phone. Store it encrypted.",
+            "$ref": "#/components/schemas/TokenPair"
+          },
+          "user": {
+            "description": "Who signed in (the collector printed on receipts).",
+            "$ref": "#/components/schemas/UserInfo"
+          },
+          "operator": {
+            "description": "The lineman's operator.",
+            "$ref": "#/components/schemas/OperatorInfo"
+          },
+          "device": {
+            "description": "This phone's registration.",
+            "$ref": "#/components/schemas/RegisteredDevice"
+          }
+        },
+        "required": [
+          "server_time",
+          "tokens",
+          "user",
+          "operator",
+          "device"
+        ],
+        "description": "Signed in. Store the tokens encrypted; keep user, operator and device for offline use."
+      },
+      "TokenPair": {
+        "type": "object",
+        "properties": {
+          "token_type": {
+            "type": "string",
+            "const": "Bearer",
+            "description": "Always 'Bearer': send 'Authorization: Bearer <access_token>'."
+          },
+          "access_token": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096,
+            "description": "Short-lived access token (about 15 minutes). Opaque; never parse it."
+          },
+          "access_token_expires_at": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "description": "When the access token stops working (UTC). Refresh a little before this, or on UNAUTHENTICATED.",
+            "example": "2026-10-13T05:30:00.000Z"
+          },
+          "refresh_token": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096,
+            "description": "Refresh token for this device (180 days, sliding). Single use: every refresh returns a new one; store it encrypted and replace the old one atomically."
+          },
+          "refresh_token_expires_at": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "description": "When the refresh token expires if it is not used (UTC). Each refresh extends it.",
+            "example": "2026-10-13T05:30:00.000Z"
+          }
+        },
+        "required": [
+          "token_type",
+          "access_token",
+          "access_token_expires_at",
+          "refresh_token",
+          "refresh_token_expires_at"
+        ],
+        "description": "Tokens for this phone."
+      },
+      "UserInfo": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "User id.",
+            "example": "0192a3b4-c5d6-7e8f-9a0b-1c2d3e4f5a6b"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200,
+            "description": "Display name, printed on receipts as the collector."
+          },
+          "login": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "description": "Login (lower-cased)."
+          },
+          "language": {
+            "type": "string",
+            "enum": [
+              "hi",
+              "en"
+            ],
+            "description": "The user's preferred UI language.",
+            "example": "hi"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "login",
+          "language"
+        ],
+        "description": "The signed-in lineman."
+      },
+      "OperatorInfo": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "Operator (tenant) id.",
+            "example": "0192a3b4-c5d6-7e8f-9a0b-1c2d3e4f5a6b"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200,
+            "description": "Business name, shown in the app and on receipts."
+          },
+          "office_phone": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 20
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Office phone for the 'Call office' buttons, digits only (may include a leading +). Null if the operator has not set one."
+          },
+          "receipt_footer": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Footer text the operator wants printed on receipts. Null for none."
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "office_phone",
+          "receipt_footer"
+        ],
+        "description": "The cable operator this lineman works for."
+      },
+      "RegisteredDevice": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "Server id of this device registration. Sent back on payments as device_id.",
+            "example": "0192a3b4-c5d6-7e8f-9a0b-1c2d3e4f5a6b"
+          },
+          "device_code": {
+            "type": "string",
+            "pattern": "^[A-Z0-9]{3}$",
+            "description": "Three-character code unique within the operator, used in provisional receipt references: P-{device_code}-{seq}.",
+            "example": "K7Q"
+          }
+        },
+        "required": [
+          "id",
+          "device_code"
+        ],
+        "description": "This phone as the server registered it."
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "server_time": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "description": "Server clock when the response was made (UTC).",
+            "example": "2026-10-13T05:30:00.000Z"
+          },
+          "error": {
+            "description": "The error: stable code plus details for logs.",
+            "$ref": "#/components/schemas/ApiError"
+          }
+        },
+        "required": [
+          "server_time",
+          "error"
+        ],
+        "description": "Body of every error response (4xx/5xx). The HTTP status follows the code (see ErrorCode)."
+      },
+      "ErrorCode": {
+        "type": "string",
+        "enum": [
+          "VALIDATION",
+          "NOT_FOUND",
+          "FORBIDDEN",
+          "UNAUTHENTICATED",
+          "CONFLICT",
+          "TENANT_READ_ONLY",
+          "ID_REUSED_WITH_DIFFERENT_DATA",
+          "INVARIANT_VIOLATION",
+          "APP_TOO_OLD",
+          "INVALID_CREDENTIALS",
+          "ACCOUNT_DISABLED",
+          "ROLE_NOT_ALLOWED",
+          "REFRESH_TOKEN_INVALID",
+          "DEVICE_REVOKED",
+          "RATE_LIMITED",
+          "CURSOR_INVALID",
+          "CUSTOMER_NOT_FOUND",
+          "PAYMENT_NOT_FOUND",
+          "HANDOVER_ALREADY_ACCEPTED",
+          "INTERNAL"
+        ],
+        "description": "Stable machine error code. The app maps it to Hindi/English text and an icon; it never shows `message`.\nNew codes may be added within v1: map an unknown code by the HTTP status.\n\n- VALIDATION (400): The request is malformed or a value is out of range. `fields` says which.\n- NOT_FOUND (404): No such route or entity in this tenant.\n- FORBIDDEN (403): This user's role may not do this (PLAN §9.3).\n- UNAUTHENTICATED (401): The access token is missing, expired or invalid. Call /auth/refresh once, then retry the request.\n- CONFLICT (409): The data changed underneath the request.\n- TENANT_READ_ONLY (403): The operator's subscription is read-only (D-13). Collections still work (payments, handovers, receipt links and receipt actions); in the mobile API only the phone-number update can get this.\n- ID_REUSED_WITH_DIFFERENT_DATA (409): An idempotency key (payment id, action id, submission id) was already used with a different payload (PLAN §8.4). Never retry it; call the office.\n- INVARIANT_VIOLATION (500): A financial invariant would break. Always a server bug; nothing was saved.\n- APP_TOO_OLD (426): The app is older than min_app_version_code. Show the full-screen 'Update app' screen; queued payments stay on the phone.\n- INVALID_CREDENTIALS (401): Wrong login or password.\n- ACCOUNT_DISABLED (403): The user (or the operator) is deactivated. Call the office.\n- ROLE_NOT_ALLOWED (403): Only linemen sign in on the Android app; owners and staff use the web.\n- REFRESH_TOKEN_INVALID (401): The refresh token is unknown, expired or was already used. Sign in again (queued payments are kept).\n- DEVICE_REVOKED (401): The owner signed this phone out. Sign in again (queued payments are kept and flagged if another user signs in).\n- RATE_LIMITED (429): Too many requests. Wait `retry_after_seconds` (also sent as Retry-After).\n- CURSOR_INVALID (400): The sync cursor is unknown or too old. Drop it and start a full sync (no cursor).\n- CUSTOMER_NOT_FOUND (404): No such customer in this operator (cross-tenant ids also get this).\n- PAYMENT_NOT_FOUND (404): The server has no such payment in this operator, usually because it has not synced yet. Keep the request and retry after the payment syncs.\n- HANDOVER_ALREADY_ACCEPTED (409): The office already accepted this day's handover; it can no longer change.\n- INTERNAL (500): Unexpected server error. Nothing was saved by the failed part; retry later."
+      },
+      "FieldIssue": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Where the problem is, as a dot path into the request body or parameters, e.g. 'payments.3.amount_paise' or 'query.limit'."
+          },
+          "issue": {
+            "type": "string",
+            "description": "Machine reason, e.g. 'too_small', 'invalid_format', 'required'. For logs and tests, not shown to users."
+          }
+        },
+        "required": [
+          "path",
+          "issue"
+        ],
+        "description": "One invalid field in a VALIDATION error."
+      },
+      "ApiError": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "description": "Stable machine code; see ErrorCode.",
+            "$ref": "#/components/schemas/ErrorCode"
+          },
+          "message": {
+            "type": "string",
+            "maxLength": 1000,
+            "description": "Developer-facing English detail for logs. Never shown to users; never contains PII."
+          },
+          "request_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128,
+            "description": "Server request id. Shown in diagnostics so support can find the server logs."
+          },
+          "fields": {
+            "description": "Only for VALIDATION: the invalid fields. Absent for other codes.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FieldIssue"
+            }
+          },
+          "min_app_version_code": {
+            "description": "Only for APP_TOO_OLD: the lowest Android versionCode the server accepts. Absent otherwise.",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "retry_after_seconds": {
+            "description": "Only for RATE_LIMITED: seconds to wait before retrying. Absent otherwise.",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "request_id"
+        ],
+        "description": "Why the request failed."
+      },
+      "RefreshResponse": {
+        "type": "object",
+        "properties": {
+          "server_time": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "description": "Server clock when the response was made (UTC). The phone uses it to spot a wrong device clock and to label 'Updated X min ago'.",
+            "example": "2026-10-13T05:30:00.000Z"
+          },
+          "tokens": {
+            "description": "The new tokens; replace both stored tokens.",
+            "$ref": "#/components/schemas/TokenPair"
+          }
+        },
+        "required": [
+          "server_time",
+          "tokens"
+        ],
+        "description": "New tokens. The old refresh token no longer works."
+      },
+      "LogoutResponse": {
+        "type": "object",
+        "properties": {
+          "server_time": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "description": "Server clock when the response was made (UTC). The phone uses it to spot a wrong device clock and to label 'Updated X min ago'.",
+            "example": "2026-10-13T05:30:00.000Z"
+          }
+        },
+        "required": [
+          "server_time"
+        ],
+        "description": "Signed out (also returned when the token was already revoked or unknown)."
+      },
+      "AppConfigResponse": {
+        "type": "object",
+        "properties": {
+          "server_time": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "description": "Server clock when the response was made (UTC). The phone uses it to spot a wrong device clock and to label 'Updated X min ago'.",
+            "example": "2026-10-13T05:30:00.000Z"
+          },
+          "min_app_version_code": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991,
+            "description": "The lowest Android versionCode the server accepts. If the installed app is older, show only the full-screen 'Update app' button; queued payments stay on the phone and sync after the update."
+          },
+          "operator": {
+            "description": "The lineman's operator (name, office phone, receipt footer).",
+            "$ref": "#/components/schemas/OperatorInfo"
+          },
+          "tenant_mode": {
+            "description": "Whether the operator is in normal or read-only mode.",
+            "$ref": "#/components/schemas/TenantMode"
+          },
+          "features": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*$"
+            },
+            "additionalProperties": {
+              "type": "boolean"
+            },
+            "description": "Feature flags by name (snake_case). A missing flag means off; unknown flags must be ignored. New flags may appear at any time within v1."
+          }
+        },
+        "required": [
+          "server_time",
+          "min_app_version_code",
+          "operator",
+          "tenant_mode",
+          "features"
+        ],
+        "description": "Settings the app reads on start and after every sync."
+      },
+      "TenantMode": {
+        "type": "string",
+        "enum": [
+          "normal",
+          "read_only"
+        ],
+        "description": "'normal', or 'read_only' when the operator's subscription lapsed (D-13). The app keeps collecting and syncing normally in read_only and shows no banner to linemen."
+      },
+      "SyncCustomersResponse": {
+        "type": "object",
+        "properties": {
+          "server_time": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "description": "Server clock when the response was made (UTC). The phone uses it to spot a wrong device clock and to label 'Updated X min ago'.",
+            "example": "2026-10-13T05:30:00.000Z"
+          },
+          "customers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RosterCustomer"
+            },
+            "description": "Active customers that are new or changed since the cursor. Upsert by id."
+          },
+          "removed_customer_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "A UUID (RFC 9562) as 36 hex characters with dashes; the server sends lower case. Ids are UUIDv7 in practice.",
+              "example": "0192a3b4-c5d6-7e8f-9a0b-1c2d3e4f5a6b"
+            },
+            "description": "Tombstones: customers deactivated since the cursor. Delete them from the phone (queued payments for them are kept and still synced)."
+          },
+          "next_cursor": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "Where the next page or the next delta sync starts. Always present; store it after applying this page.",
+            "example": "eyJ1IjoiMjAyNi0xMC0xM1QwNTozMDowMC4wMDBaIiwiaSI6IjAxOTJhM2I0In0"
+          },
+          "has_more": {
+            "type": "boolean",
+            "description": "True if more changes are waiting: request again at once with next_cursor."
+          }
+        },
+        "required": [
+          "server_time",
+          "customers",
+          "removed_customer_ids",
+          "next_cursor",
+          "has_more"
+        ],
+        "description": "One page of roster changes, ordered by (updated_at, id). Send gzip-accepting requests: about 1,000 customers fit in under 1 MB gzipped."
+      },
+      "RosterCustomer": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "Customer id.",
+            "example": "0192a3b4-c5d6-7e8f-9a0b-1c2d3e4f5a6b"
+          },
+          "code": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64,
+            "description": "Customer code, unique within the operator (searchable, e.g. '1045')."
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200,
+            "description": "Customer name."
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 20
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Primary phone as stored (legacy data may not be a clean 10-digit number; confirm before using it, FR-004). Null when missing."
+          },
+          "alt_phone": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 20
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Second phone as stored, or null."
+          },
+          "address": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Address as one line of text, or null."
+          },
+          "area": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AreaRef"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The customer's area, or null when none is set."
+          },
+          "active": {
+            "type": "boolean",
+            "description": "False when the customer is deactivated. The roster never sends inactive customers (they come as removed_customer_ids); customer detail may."
+          },
+          "connections": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Connection"
+            },
+            "description": "Current connections (active or suspended), oldest first. May be empty."
+          },
+          "balance_paise": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "The customer's ledger balance in paise. Positive: the customer owes this much in total. Zero or negative: nothing is due (negative means paid in advance). Show max(balance_paise, 0) as the due amount.",
+            "example": -5000
+          },
+          "credit_paise": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "Advance (credit) in paise: money paid that is not yet used for any bill. Shown separately from the due (D-14).",
+            "example": 45000
+          },
+          "open_bills": {
+            "description": "Summary of unpaid bills.",
+            "$ref": "#/components/schemas/OpenBillsSummary"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "description": "When anything in this row last changed on the server (UTC). Part of the sync order.",
+            "example": "2026-10-13T05:30:00.000Z"
+          }
+        },
+        "required": [
+          "id",
+          "code",
+          "name",
+          "phone",
+          "alt_phone",
+          "address",
+          "area",
+          "active",
+          "connections",
+          "balance_paise",
+          "credit_paise",
+          "open_bills",
+          "updated_at"
+        ],
+        "description": "A customer as cached on the phone for search and the customer screen (PLAN §10.3). The roster and the customer detail use the same shape, so the app can upsert either."
+      },
+      "AreaRef": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "Area id.",
+            "example": "0192a3b4-c5d6-7e8f-9a0b-1c2d3e4f5a6b"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200,
+            "description": "Area name as the operator typed it."
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ],
+        "description": "The area (locality) a customer belongs to."
+      },
+      "Connection": {
+        "type": "object",
+        "properties": {
+          "vc_number": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64,
+            "description": "VC (viewing card) number as stored, searched by the number pad. Match on digits; never parse it."
+          },
+          "status": {
+            "description": "Whether the connection is on or suspended.",
+            "$ref": "#/components/schemas/ConnectionStatus"
+          }
+        },
+        "required": [
+          "vc_number",
+          "status"
+        ],
+        "description": "One current connection (VC assignment) of the customer."
+      },
+      "ConnectionStatus": {
+        "type": "string",
+        "enum": [
+          "active",
+          "suspended"
+        ],
+        "description": "'active' or 'suspended' (temporarily off). Disconnected connections are not sent to the phone."
+      },
+      "OpenBillsSummary": {
+        "type": "object",
+        "properties": {
+          "count": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "Number of bills that still have money left to pay."
+          },
+          "outstanding_paise": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "Money left to pay on those bills, in paise (the sum of their outstanding amounts).",
+            "example": 45000
+          },
+          "oldest_period": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+                "description": "A billing period (calendar month), written as its first day: YYYY-MM-01.",
+                "example": "2026-10-01"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Month of the oldest unpaid bill (YYYY-MM-01), or null when nothing is unpaid."
+          }
+        },
+        "required": [
+          "count",
+          "outstanding_paise",
+          "oldest_period"
+        ],
+        "description": "Summary of the customer's unpaid bills."
+      },
+      "CustomerDetailResponse": {
+        "type": "object",
+        "properties": {
+          "server_time": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "description": "Server clock when the response was made (UTC). The phone uses it to spot a wrong device clock and to label 'Updated X min ago'.",
+            "example": "2026-10-13T05:30:00.000Z"
+          },
+          "customer": {
+            "description": "The customer, same shape as a roster row.",
+            "$ref": "#/components/schemas/RosterCustomer"
+          },
+          "open_bills": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OpenBill"
+            },
+            "description": "Unpaid bills, oldest first (the order payments are applied, PRD §13.2)."
+          },
+          "recent_payments": {
+            "maxItems": 20,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RecentPayment"
+            },
+            "description": "The latest payments, newest first (at most 20; the server usually sends 10)."
+          }
+        },
+        "required": [
+          "server_time",
+          "customer",
+          "open_bills",
+          "recent_payments"
+        ],
+        "description": "Fresh customer detail for the customer screen when online. Upsert `customer` into the roster cache."
+      },
+      "OpenBill": {
+        "type": "object",
+        "properties": {
+          "invoice_id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "Bill (invoice) id.",
+            "example": "0192a3b4-c5d6-7e8f-9a0b-1c2d3e4f5a6b"
+          },
+          "invoice_number": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64,
+            "description": "Bill number.",
+            "example": "INV-2610-00123"
+          },
+          "kind": {
+            "description": "Monthly bill or old dues.",
+            "$ref": "#/components/schemas/BillKind"
+          },
+          "period": {
+            "type": "string",
+            "format": "date",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+            "description": "The month the bill is for (YYYY-MM-01).",
+            "example": "2026-10-01"
+          },
+          "charges_paise": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "This bill's own charges in paise (rent and adjustments of the month; old dues for an opening_balance bill). Excludes earlier months' arrears.",
+            "example": 45000
+          },
+          "outstanding_paise": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 999999999999900,
+            "description": "Money still to pay on this bill, in paise (always > 0 for an open bill).",
+            "example": 50000
+          }
+        },
+        "required": [
+          "invoice_id",
+          "invoice_number",
+          "kind",
+          "period",
+          "charges_paise",
+          "outstanding_paise"
+        ],
+        "description": "A bill that still has money left to pay."
+      },
+      "BillKind": {
+        "type": "string",
+        "enum": [
+          "regular",
+          "opening_balance"
+        ],
+        "description": "'regular' for a monthly bill, 'opening_balance' for old dues brought in when the operator started using Cable Billing."
+      },
+      "RecentPayment": {
+        "type": "object",
+        "properties": {
+          "payment_id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "Payment id (the phone's idempotency key for phone payments).",
+            "example": "0192a3b4-c5d6-7e8f-9a0b-1c2d3e4f5a6b"
+          },
+          "amount_paise": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 999999999999900,
+            "description": "Amount paid, in paise.",
+            "example": 50000
+          },
+          "method": {
+            "description": "Cash or UPI.",
+            "$ref": "#/components/schemas/PaymentMethod"
+          },
+          "recorded_at": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "description": "When the payment was taken, by the collecting device's clock (UTC).",
+            "example": "2026-10-13T05:30:00.000Z"
+          },
+          "posted_at": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "description": "When the server accepted it (UTC).",
+            "example": "2026-10-13T05:30:00.000Z"
+          },
+          "receipt_number": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64,
+            "description": "Permanent receipt number.",
+            "example": "R-2610-00045"
+          },
+          "provisional_ref": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^P-[A-Z0-9]{3}-[0-9]{4,9}$",
+                "description": "Provisional receipt reference made on the phone before sync: P-{device_code}-{local sequence, at least 4 digits}. Linked forever to the permanent receipt number (FR-016).",
+                "example": "P-K7Q-0012"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The phone's provisional reference if the payment was taken on a phone, else null."
+          },
+          "collected_by_name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Name of the person who took the payment, or null if unknown (migrated data)."
+          },
+          "reversed": {
+            "type": "boolean",
+            "description": "True if the owner cancelled (reversed) this payment; its receipt is 'Cancelled'."
+          }
+        },
+        "required": [
+          "payment_id",
+          "amount_paise",
+          "method",
+          "recorded_at",
+          "posted_at",
+          "receipt_number",
+          "provisional_ref",
+          "collected_by_name",
+          "reversed"
+        ],
+        "description": "One of the customer's latest payments."
+      },
+      "UpdatePhoneResponse": {
+        "type": "object",
+        "properties": {
+          "server_time": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "description": "Server clock when the response was made (UTC). The phone uses it to spot a wrong device clock and to label 'Updated X min ago'.",
+            "example": "2026-10-13T05:30:00.000Z"
+          },
+          "changed": {
+            "type": "boolean",
+            "description": "True if the number changed; false if it already was this number."
+          },
+          "customer": {
+            "description": "The customer after the change.",
+            "$ref": "#/components/schemas/RosterCustomer"
+          }
+        },
+        "required": [
+          "server_time",
+          "changed",
+          "customer"
+        ],
+        "description": "The customer after the change. Upsert it into the roster cache."
+      },
+      "PaymentBatchResponse": {
+        "type": "object",
+        "properties": {
+          "server_time": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "description": "Server clock when the response was made (UTC). The phone uses it to spot a wrong device clock and to label 'Updated X min ago'.",
+            "example": "2026-10-13T05:30:00.000Z"
+          },
+          "results": {
+            "minItems": 1,
+            "maxItems": 50,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PaymentBatchResult"
+            },
+            "description": "Results in request order, one per item, matched by id."
+          }
+        },
+        "required": [
+          "server_time",
+          "results"
+        ],
+        "description": "One result per request item, in the same order. Replaying a batch gives the same results (duplicates instead of posted)."
+      },
+      "PaymentBatchResult": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "The payment id this result is for.",
+            "example": "0192a3b4-c5d6-7e8f-9a0b-1c2d3e4f5a6b"
+          },
+          "outcome": {
+            "description": "What happened to this payment.",
+            "$ref": "#/components/schemas/PaymentOutcome"
+          },
+          "payment": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PostedPayment"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The saved payment for posted, duplicate and posted_needs_review; null for rejected and retry_later."
+          },
+          "review_reason": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ReviewReason"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Why the office must check it; set only for posted_needs_review, else null."
+          },
+          "error": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ItemError"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Why it failed; set only for rejected and retry_later, else null."
+          }
+        },
+        "required": [
+          "id",
+          "outcome",
+          "payment",
+          "review_reason",
+          "error"
+        ],
+        "description": "The result for one payment. Exactly one of `payment` (saved) or `error` (not saved) is set."
+      },
+      "PaymentOutcome": {
+        "type": "string",
+        "enum": [
+          "posted",
+          "duplicate",
+          "posted_needs_review",
+          "rejected",
+          "retry_later"
+        ],
+        "description": "What happened to one payment:\n- posted: saved now; `payment` has the permanent receipt.\n- duplicate: this id was already saved with the same data; `payment` is the original result.\n- posted_needs_review: saved, but the office must check it (see review_reason). The money is safe.\n- rejected: not saved and will never be (see error); show 'Call office'. Includes ID_REUSED_WITH_DIFFERENT_DATA.\n- retry_later: a temporary server problem for this item; nothing saved. Keep it and send it again later."
+      },
+      "PostedPayment": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "Payment id (the idempotency key).",
+            "example": "0192a3b4-c5d6-7e8f-9a0b-1c2d3e4f5a6b"
+          },
+          "customer_id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "The customer who paid.",
+            "example": "0192a3b4-c5d6-7e8f-9a0b-1c2d3e4f5a6b"
+          },
+          "amount_paise": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 999999999999900,
+            "description": "Amount, in paise.",
+            "example": 50000
+          },
+          "method": {
+            "description": "Cash or UPI.",
+            "$ref": "#/components/schemas/PaymentMethod"
+          },
+          "receipt_number": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64,
+            "description": "The permanent receipt number. Replace the provisional reference with it everywhere (keep the link).",
+            "example": "R-2610-00045"
+          },
+          "provisional_ref": {
+            "type": "string",
+            "pattern": "^P-[A-Z0-9]{3}-[0-9]{4,9}$",
+            "description": "The provisional reference it replaces (FR-016).",
+            "example": "P-K7Q-0012"
+          },
+          "recorded_at": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "description": "When it was taken, by the phone's clock (UTC), as sent.",
+            "example": "2026-10-13T05:30:00.000Z"
+          },
+          "posted_at": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "description": "When the server accepted it (UTC). Show both times where they differ (PRD §13.3).",
+            "example": "2026-10-13T05:30:00.000Z"
+          },
+          "business_date": {
+            "type": "string",
+            "format": "date",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+            "description": "The India-time day it counts for (from recorded_at): the collection session it belongs to.",
+            "example": "2026-10-13"
+          },
+          "allocations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Allocation"
+            },
+            "description": "Bills this payment paid, oldest first. Empty if it all went to advance."
+          },
+          "credit_added_paise": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "Part of this payment kept as advance (credit) because no bill was left to pay, in paise.",
+            "example": 45000
+          },
+          "balance_after_paise": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "The customer's balance right after this payment was posted, in paise (same meaning as RosterCustomer.balance_paise). A replay returns the same value.",
+            "example": -5000
+          },
+          "credit_after_paise": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "The customer's advance right after this payment was posted, in paise. A replay returns the same value.",
+            "example": 45000
+          }
+        },
+        "required": [
+          "id",
+          "customer_id",
+          "amount_paise",
+          "method",
+          "receipt_number",
+          "provisional_ref",
+          "recorded_at",
+          "posted_at",
+          "business_date",
+          "allocations",
+          "credit_added_paise",
+          "balance_after_paise",
+          "credit_after_paise"
+        ],
+        "description": "A payment the server has saved: what the final receipt prints (PLAN §11.8)."
+      },
+      "Allocation": {
+        "type": "object",
+        "properties": {
+          "invoice_id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "The bill this money went to.",
+            "example": "0192a3b4-c5d6-7e8f-9a0b-1c2d3e4f5a6b"
+          },
+          "invoice_number": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64,
+            "description": "Bill number.",
+            "example": "INV-2610-00123"
+          },
+          "kind": {
+            "description": "Monthly bill or old dues.",
+            "$ref": "#/components/schemas/BillKind"
+          },
+          "period": {
+            "type": "string",
+            "format": "date",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+            "description": "Month of that bill (YYYY-MM-01).",
+            "example": "2026-10-01"
+          },
+          "amount_paise": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 999999999999900,
+            "description": "How much of this payment went to that bill, in paise.",
+            "example": 50000
+          },
+          "outstanding_after_paise": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "What was left to pay on that bill right after this payment (0 = fully paid). For the receipt line 'Oct bill paid, Nov bill ₹50 left'.",
+            "example": 45000
+          }
+        },
+        "required": [
+          "invoice_id",
+          "invoice_number",
+          "kind",
+          "period",
+          "amount_paise",
+          "outstanding_after_paise"
+        ],
+        "description": "Part of a payment applied to one bill (oldest bill first, PRD §13.2)."
+      },
+      "ReviewReason": {
+        "type": "string",
+        "enum": [
+          "customer_inactive",
+          "collector_inactive",
+          "collector_mismatch",
+          "device_mismatch",
+          "recorded_at_out_of_range",
+          "other"
+        ],
+        "description": "Why a posted payment needs an office check (the payment is kept, PRD §13.3):\n- customer_inactive: the customer was deactivated before the payment synced.\n- collector_inactive: the lineman was deactivated before it synced.\n- collector_mismatch: saved by a different user than the one now signed in (PLAN §9.2).\n- device_mismatch: saved on a different device registration than the token's.\n- recorded_at_out_of_range: recorded_at is > 10 min in the future or > 7 days old (PLAN §10.4).\n- other: any other reason the server flags."
+      },
+      "ItemError": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "description": "Stable machine code; see ErrorCode.",
+            "$ref": "#/components/schemas/ErrorCode"
+          },
+          "message": {
+            "type": "string",
+            "maxLength": 1000,
+            "description": "Developer-facing English detail for logs. Never shown to users; never contains PII."
+          },
+          "fields": {
+            "description": "Only for VALIDATION: the invalid fields. Absent for other codes.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FieldIssue"
+            }
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ],
+        "description": "Why one item of a batch was rejected."
+      },
+      "CollectionDayResponse": {
+        "type": "object",
+        "properties": {
+          "server_time": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "description": "Server clock when the response was made (UTC). The phone uses it to spot a wrong device clock and to label 'Updated X min ago'.",
+            "example": "2026-10-13T05:30:00.000Z"
+          },
+          "session": {
+            "description": "The day's totals, payments and handover.",
+            "$ref": "#/components/schemas/CollectionDay"
+          }
+        },
+        "required": [
+          "server_time",
+          "session"
+        ],
+        "description": "The lineman's own totals for the day (the Today screen)."
+      },
+      "HandoverStatus": {
+        "type": "string",
+        "enum": [
+          "open",
+          "submitted",
+          "accepted",
+          "returned"
+        ],
+        "description": "Where the day's cash handover stands:\n- open: not handed over yet.\n- submitted: the lineman handed over; the office has not checked it.\n- accepted: the office accepted it (final).\n- returned: the office sent it back with a note; the lineman can submit again."
+      },
+      "Handover": {
+        "type": "object",
+        "properties": {
+          "submission_id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "The submission_id of the latest handover.",
+            "example": "0192a3b4-c5d6-7e8f-9a0b-1c2d3e4f5a6b"
+          },
+          "cash_expected_paise": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "Cash the server expected when the handover was submitted, in paise (server-side cash total; UPI excluded).",
+            "example": 45000
+          },
+          "cash_handed_over_paise": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "Cash the lineman handed over, in paise.",
+            "example": 45000
+          },
+          "discrepancy_paise": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "cash_handed_over_paise − cash_expected_paise, computed by the server. Negative = short, positive = extra.",
+            "example": -5000
+          },
+          "discrepancy_reason": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DiscrepancyReason"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The lineman's reason when there is a discrepancy, else null."
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The lineman's note, or null."
+          },
+          "unsynced_payment_count": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "Payments still on the phone when the handover was submitted (warning for office)."
+          },
+          "unsynced_cash_paise": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "Cash of those unsynced payments, in paise, as the phone reported it.",
+            "example": 45000
+          },
+          "submitted_at": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "description": "When the server received the handover (UTC).",
+            "example": "2026-10-13T05:30:00.000Z"
+          },
+          "reviewed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                "description": "An instant in UTC as ISO-8601 with a 'Z' suffix (no other offset), e.g. 2026-10-13T05:30:00.000Z. Millisecond precision.",
+                "example": "2026-10-13T05:30:00.000Z"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "When the office accepted or returned it (UTC), or null while submitted."
+          },
+          "review_note": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The office's note when it returned (or accepted) the handover, or null."
+          }
+        },
+        "required": [
+          "submission_id",
+          "cash_expected_paise",
+          "cash_handed_over_paise",
+          "discrepancy_paise",
+          "discrepancy_reason",
+          "note",
+          "unsynced_payment_count",
+          "unsynced_cash_paise",
+          "submitted_at",
+          "reviewed_at",
+          "review_note"
+        ],
+        "description": "The latest cash handover for the day."
+      },
+      "DayPayment": {
+        "type": "object",
+        "properties": {
+          "payment_id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "Payment id.",
+            "example": "0192a3b4-c5d6-7e8f-9a0b-1c2d3e4f5a6b"
+          },
+          "customer_id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "Customer id.",
+            "example": "0192a3b4-c5d6-7e8f-9a0b-1c2d3e4f5a6b"
+          },
+          "customer_code": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64,
+            "description": "Customer code."
+          },
+          "customer_name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200,
+            "description": "Customer name."
+          },
+          "amount_paise": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 999999999999900,
+            "description": "Amount, in paise.",
+            "example": 50000
+          },
+          "method": {
+            "description": "Cash or UPI.",
+            "$ref": "#/components/schemas/PaymentMethod"
+          },
+          "recorded_at": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "description": "When it was taken, by the phone's clock (UTC).",
+            "example": "2026-10-13T05:30:00.000Z"
+          },
+          "posted_at": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "description": "When the server accepted it (UTC).",
+            "example": "2026-10-13T05:30:00.000Z"
+          },
+          "receipt_number": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64,
+            "description": "Permanent receipt number.",
+            "example": "R-2610-00045"
+          },
+          "provisional_ref": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^P-[A-Z0-9]{3}-[0-9]{4,9}$",
+                "description": "Provisional receipt reference made on the phone before sync: P-{device_code}-{local sequence, at least 4 digits}. Linked forever to the permanent receipt number (FR-016).",
+                "example": "P-K7Q-0012"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The phone's provisional reference, or null for a payment not taken on a phone."
+          },
+          "reversed": {
+            "type": "boolean",
+            "description": "True if the owner reversed it; reversed payments are not in the totals."
+          }
+        },
+        "required": [
+          "payment_id",
+          "customer_id",
+          "customer_code",
+          "customer_name",
+          "amount_paise",
+          "method",
+          "recorded_at",
+          "posted_at",
+          "receipt_number",
+          "provisional_ref",
+          "reversed"
+        ],
+        "description": "A payment the server has for this lineman and day."
+      },
+      "CollectionDay": {
+        "type": "object",
+        "properties": {
+          "business_date": {
+            "type": "string",
+            "format": "date",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+            "description": "The India-time day (YYYY-MM-DD).",
+            "example": "2026-10-13"
+          },
+          "cash_total_paise": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "Cash collected (server-known, not reversed), in paise: the cash the office expects.",
+            "example": 45000
+          },
+          "upi_total_paise": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "UPI collected (server-known, not reversed), in paise. Not part of the cash handover.",
+            "example": 45000
+          },
+          "payment_count": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "Number of server-known payments, not reversed."
+          },
+          "status": {
+            "description": "Where the cash handover stands.",
+            "$ref": "#/components/schemas/HandoverStatus"
+          },
+          "handover": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Handover"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The latest handover, or null while status is open."
+          },
+          "payments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DayPayment"
+            },
+            "description": "The day's server-known payments by this lineman, newest first (including reversed ones, flagged)."
+          }
+        },
+        "required": [
+          "business_date",
+          "cash_total_paise",
+          "upi_total_paise",
+          "payment_count",
+          "status",
+          "handover",
+          "payments"
+        ],
+        "description": "The lineman's collection session for one business date (PLAN §8.7). All zero with status 'open' if nothing was collected."
+      },
+      "HandoverResponse": {
+        "type": "object",
+        "properties": {
+          "server_time": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "description": "Server clock when the response was made (UTC). The phone uses it to spot a wrong device clock and to label 'Updated X min ago'.",
+            "example": "2026-10-13T05:30:00.000Z"
+          },
+          "session": {
+            "description": "The day's totals, payments and handover.",
+            "$ref": "#/components/schemas/CollectionDay"
+          }
+        },
+        "required": [
+          "server_time",
+          "session"
+        ],
+        "description": "The day after the handover (status 'submitted'). Repeating the same submission_id returns the current state."
+      },
+      "ReceiptLinkResponse": {
+        "type": "object",
+        "properties": {
+          "server_time": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "description": "Server clock when the response was made (UTC). The phone uses it to spot a wrong device clock and to label 'Updated X min ago'.",
+            "example": "2026-10-13T05:30:00.000Z"
+          },
+          "link": {
+            "description": "The preview link.",
+            "$ref": "#/components/schemas/ReceiptLink"
+          }
+        },
+        "required": [
+          "server_time",
+          "link"
+        ],
+        "description": "A usable preview link for the payment's receipt: an existing unexpired one or a new one. Online only."
+      },
+      "ReceiptLink": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "maxLength": 2048,
+            "format": "uri",
+            "description": "The public preview page (https, unguessable token). Put it in the WhatsApp/SMS text as is."
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "description": "When the link stops working (90 days, D-14), UTC.",
+            "example": "2026-10-13T05:30:00.000Z"
+          },
+          "receipt_number": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64,
+            "description": "The receipt the link shows.",
+            "example": "R-2610-00045"
+          }
+        },
+        "required": [
+          "url",
+          "expires_at",
+          "receipt_number"
+        ],
+        "description": "A receipt preview link (FR-021). The page shows minimal personal data."
+      },
+      "ReceiptActionsResponse": {
+        "type": "object",
+        "properties": {
+          "server_time": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "description": "Server clock when the response was made (UTC). The phone uses it to spot a wrong device clock and to label 'Updated X min ago'.",
+            "example": "2026-10-13T05:30:00.000Z"
+          },
+          "results": {
+            "minItems": 1,
+            "maxItems": 100,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReceiptActionResult"
+            },
+            "description": "Results in request order, one per item, matched by id."
+          }
+        },
+        "required": [
+          "server_time",
+          "results"
+        ],
+        "description": "One result per request item, in the same order."
+      },
+      "ReceiptActionResult": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "description": "The action id this result is for.",
+            "example": "0192a3b4-c5d6-7e8f-9a0b-1c2d3e4f5a6b"
+          },
+          "outcome": {
+            "description": "What happened to this action.",
+            "$ref": "#/components/schemas/ReceiptActionOutcome"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ItemError"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Why it was not saved; set only for rejected and retry_later, else null."
+          }
+        },
+        "required": [
+          "id",
+          "outcome",
+          "error"
+        ],
+        "description": "The result for one receipt action."
+      },
+      "ReceiptActionOutcome": {
+        "type": "string",
+        "enum": [
+          "recorded",
+          "duplicate",
+          "rejected",
+          "retry_later"
+        ],
+        "description": "What happened to one action:\n- recorded: saved now.\n- duplicate: already saved with the same data.\n- rejected: invalid and never will be saved (see error); drop it from the outbox.\n- retry_later: not saved yet (e.g. PAYMENT_NOT_FOUND because the payment has not synced); keep it and send again later."
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "The access_token from /auth/login or /auth/refresh. On UNAUTHENTICATED, refresh once and retry."
+      }
+    }
+  }
+}

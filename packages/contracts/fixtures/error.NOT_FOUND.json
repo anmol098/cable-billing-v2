@@ -1,0 +1,8 @@
+{
+  "server_time": "2026-10-13T11:30:00.000Z",
+  "error": {
+    "code": "NOT_FOUND",
+    "message": "No route GET /api/mobile/v1/unknown",
+    "request_id": "req_01929b112c3d7e4f0002"
+  }
+}

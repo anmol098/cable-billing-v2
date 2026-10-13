@@ -1,0 +1,8 @@
+{
+  "server_time": "2026-10-13T11:30:00.000Z",
+  "error": {
+    "code": "TENANT_READ_ONLY",
+    "message": "tenant is read_only; customer edits are paused",
+    "request_id": "req_01929b112c3d7e4f0006"
+  }
+}

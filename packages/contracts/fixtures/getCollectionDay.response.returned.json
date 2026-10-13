@@ -1,0 +1,64 @@
+{
+  "server_time": "2026-10-13T13:05:00.000Z",
+  "session": {
+    "business_date": "2026-10-13",
+    "cash_total_paise": 70000,
+    "upi_total_paise": 45000,
+    "payment_count": 3,
+    "status": "returned",
+    "handover": {
+      "submission_id": "01929b11-2c3d-7e4f-9a07-000000000002",
+      "cash_expected_paise": 70000,
+      "cash_handed_over_paise": 60000,
+      "discrepancy_paise": -10000,
+      "discrepancy_reason": "short",
+      "note": null,
+      "unsynced_payment_count": 0,
+      "unsynced_cash_paise": 0,
+      "submitted_at": "2026-10-13T12:00:00.000Z",
+      "reviewed_at": "2026-10-13T12:40:00.000Z",
+      "review_note": "Count again"
+    },
+    "payments": [
+      {
+        "payment_id": "01929b11-2c3d-7e4f-9a05-000000000003",
+        "customer_id": "01929a3e-5b10-7c4e-8a03-000000000003",
+        "customer_code": "1047",
+        "customer_name": "Mohan Lal",
+        "amount_paise": 20000,
+        "method": "cash",
+        "recorded_at": "2026-10-13T03:15:00.000Z",
+        "posted_at": "2026-10-13T11:29:58.000Z",
+        "receipt_number": "R-2610-00046",
+        "provisional_ref": "P-K7Q-0014",
+        "reversed": false
+      },
+      {
+        "payment_id": "01929b11-2c3d-7e4f-9a05-000000000002",
+        "customer_id": "01929a3e-5b10-7c4e-8a03-000000000002",
+        "customer_code": "1046",
+        "customer_name": "Sunita Devi",
+        "amount_paise": 45000,
+        "method": "upi",
+        "recorded_at": "2026-10-13T02:15:00.000Z",
+        "posted_at": "2026-10-13T02:15:04.000Z",
+        "receipt_number": "R-2610-00044",
+        "provisional_ref": "P-K7Q-0013",
+        "reversed": false
+      },
+      {
+        "payment_id": "01929b11-2c3d-7e4f-9a05-000000000001",
+        "customer_id": "01929a3e-5b10-7c4e-8a03-000000000001",
+        "customer_code": "1045",
+        "customer_name": "Ramesh Kumar",
+        "amount_paise": 50000,
+        "method": "cash",
+        "recorded_at": "2026-10-13T01:15:00.000Z",
+        "posted_at": "2026-10-13T11:29:58.000Z",
+        "receipt_number": "R-2610-00045",
+        "provisional_ref": "P-K7Q-0012",
+        "reversed": false
+      }
+    ]
+  }
+}
