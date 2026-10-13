@@ -12,5 +12,8 @@ export default defineConfig({
     include: ["src/**/*.test.{ts,tsx}"],
     environment: "jsdom",
     setupFiles: ["./vitest.setup.ts"],
+    // jsdom renders of big trees (the /dev/ui showcase, forms) exceed Vitest's 5 s default on a busy
+    // machine or CI runner; same budget as @cb/core and @cb/db.
+    testTimeout: 30_000,
   },
 });
