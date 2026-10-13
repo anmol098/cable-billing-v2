@@ -3,10 +3,10 @@ id: T-041
 title: Domain: allocation, credit application and reversal
 phase: 2
 area: domain
-status: todo
-owner:
-claimed_at:
-branch:
+status: claimed
+owner: agent-t041
+claimed_at: 2026-10-13T10:41:47.018Z
+branch: task/T-041-domain-allocation-credit-application-and
 depends_on: [T-024]
 review: required
 claimable_by: agent
@@ -50,3 +50,7 @@ PLAN §8.4, PLAN §8.5, PLAN §8.6, FR-014, RULE-11, RULE-12, RULE-13, BR-09, BR
 ## Completion notes
 
 _The agent fills this in before opening the PR: what was built, decisions taken, deviations, follow-up tasks created, and how it was verified._
+
+## Board log
+
+- 2026-10-13T10:41:47.019Z claimed by agent-t041
