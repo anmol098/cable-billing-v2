@@ -1,0 +1,22 @@
+{
+  "name": "@cb/i18n",
+  "version": "0.0.0",
+  "private": true,
+  "description": "English and Hindi message catalogues; emits web messages and Android strings.",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "tsc --noEmit",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@cb/config": "workspace:*",
+    "@types/node": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

@@ -12,15 +12,33 @@ Web (Next.js on Vercel + Neon Postgres) for operators. Native Android (Kotlin) f
 
 ## Commands
 
-> T-001 (monorepo scaffold) replaces this section with the real commands.
+Node 24 (`.nvmrc`) and pnpm via Corepack (`corepack enable pnpm`; the version is pinned in `package.json` `packageManager`).
 
 ```bash
-node scripts/tasks.mjs next        # tasks you can claim
-pnpm install                        # after T-001
-pnpm lint && pnpm typecheck && pnpm test
-pnpm generate                       # tokens, icons, i18n, openapi
+node scripts/tasks.mjs next              # tasks you can claim
+pnpm install                             # whole workspace (engine-strict: needs Node >= 24)
+pnpm lint                                # Biome check (lint + format + imports) on the repo, then turbo `lint`
+pnpm lint:fix                            # apply Biome's safe fixes and formatting
+pnpm format                              # Biome format only
+pnpm typecheck                           # turbo: tsc --noEmit in every package
+pnpm test                                # turbo: vitest run in every package
+pnpm build                               # turbo: build every package/app
+pnpm generate                            # turbo: tokens, icons, i18n, openapi generators
+pnpm --filter @cb/domain test            # one package (any script, any @cb/* package)
+pnpm --filter @cb/domain exec vitest     # watch mode for one package
 cd apps/android && ./gradlew ktlintCheck detekt testDevDebugUnitTest assembleDevDebug
 ```
+
+Definition of done for TS changes: `pnpm lint && pnpm typecheck && pnpm test` (and `pnpm build` once apps exist).
+
+**Workspace conventions (from T-001)**
+
+- Packages are `@cb/<name>` in `packages/<name>`; apps go in `apps/<name>`; tools in `tools/<name>`. All three globs are in `pnpm-workspace.yaml`, so a new folder with a `package.json` is picked up by `pnpm install`.
+- Library packages are **source-only**: `exports` points at `src/index.ts`, there is no `dist`. Next.js bundles them (`transpilePackages`), Vitest reads TS directly, Node scripts run with `tsx`. Their `build` script is a no-emit compile check.
+- Each package has `tsconfig.json` extending `@cb/config/tsconfig.lib.json` (apps/web: `@cb/config/tsconfig.next.json`), a `vitest.config.ts`, tests as `src/**/*.test.ts`, and scripts `build`, `typecheck`, `test` (add `generate`/`dev`/`lint` only if the package needs them).
+- Shared tool versions come from the pnpm catalog: write `"typescript": "catalog:"` etc. (see `pnpm-workspace.yaml`). Depend on other packages with `"@cb/domain": "workspace:*"`.
+- Formatting is Biome's (2 spaces, double quotes, semicolons, trailing commas, width 100). Don't hand-format; run `pnpm lint:fix`.
+- `packages/domain/src` may not import Node built-ins (Biome `noNodejsModules`): keep it pure.
 
 ## Non-negotiable conventions
 

@@ -1,0 +1,22 @@
+{
+  "name": "@cb/contracts",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Zod schemas for the mobile API; emits openapi.json.",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "tsc --noEmit",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@cb/config": "workspace:*",
+    "@types/node": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

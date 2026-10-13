@@ -1,0 +1,66 @@
+# ---- Node / pnpm ----
+node_modules/
+.pnpm-store/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.tsbuildinfo
+
+# ---- Build output ----
+dist/
+out/
+coverage/
+
+# ---- Turborepo ----
+.turbo/
+
+# ---- Next.js / Vercel ----
+.next/
+.vercel/
+
+# ---- Env and secrets (only .env.example is committed) ----
+.env
+.env.*
+!.env.example
+*.pem
+*.keystore
+*.jks
+keystore.properties
+
+# ---- Legacy database dumps and real data (D-09: never in git) ----
+*.sql
+*.sql.gz
+*.sql.zip
+*.sql.zst
+*.dump
+*.bak
+tools/migration/data/
+# Our own SQL (Drizzle migrations, RLS policies) is source code and IS committed.
+!packages/db/**/*.sql
+
+# ---- Android / Gradle / Kotlin ----
+.gradle/
+.kotlin/
+build/
+local.properties
+captures/
+.externalNativeBuild/
+.cxx/
+*.apk
+*.aab
+*.ap_
+*.iml
+
+# ---- Editors / OS ----
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.DS_Store
+Thumbs.db
+*.log
+
+# ---- Claude Code local state ----
+.claude/worktrees/
+.claude/settings.local.json

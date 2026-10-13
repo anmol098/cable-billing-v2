@@ -1,0 +1,15 @@
+# apps/android is a Gradle project with no package.json, so pnpm ignores it (PLAN E-01).
+packages:
+  - apps/*
+  - packages/*
+  - tools/*
+
+# Shared dev-tool versions. Reference them as "catalog:" in a package.json
+# instead of repeating a version range.
+catalog:
+  "@types/node": ^24.19.2
+  typescript: ^7.0.2
+  vitest: ^5.0.3
+
+# Refuse to install under an older Node than package.json "engines" allows.
+engineStrict: true
