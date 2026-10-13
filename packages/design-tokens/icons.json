@@ -36,5 +36,6 @@
   "backspace": "delete",
   "password": "lock",
   "show": "eye",
-  "hide": "eye-off"
+  "hide": "eye-off",
+  "bluetooth": "bluetooth"
 }

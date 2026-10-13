@@ -249,6 +249,10 @@ export const ICON_NODES = {
     ["path", { d: "M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143" }],
     ["path", { d: "m2 2 20 20" }],
   ],
+  // Lucide "bluetooth"
+  "bluetooth": [
+    ["path", { d: "m7 7 10 10-5 5V2l5 5L7 17" }],
+  ],
 } as const;
 
 /** A semantic icon name from icons.json. */

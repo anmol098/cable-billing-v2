@@ -207,3 +207,18 @@ androidComponents {
         variant.sources.assets?.addStaticSourceDirectory(file("schemas").path)
     }
 }
+
+// T-068: ReceiptDatesTest checks the receipt month names against packages/domain (T-024), so that
+// file is a test input. ReceiptRendererSnapshotTest compares receipts with the PNGs in
+// src/test/resources/receipt-snapshots; rewrite them after an intended layout change with
+// ./gradlew :app:testDevDebugUnitTest --tests '*ReceiptRendererSnapshotTest' -Pcb.writeReceiptSnapshots=true
+val domainLabels: RegularFile = rootProject.layout.projectDirectory.file("../../packages/domain/src/time/labels.ts")
+val writeReceiptSnapshots: String? = providers.gradleProperty("cb.writeReceiptSnapshots").orNull
+
+tasks.withType<Test>().configureEach {
+    inputs
+        .file(domainLabels)
+        .withPropertyName("domainLabels")
+        .withPathSensitivity(PathSensitivity.RELATIVE)
+    if (writeReceiptSnapshots != null) systemProperty("cb.writeReceiptSnapshots", writeReceiptSnapshots)
+}

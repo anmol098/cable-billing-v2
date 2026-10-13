@@ -23,6 +23,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.cablebilling.designsystem.generated.Tokens
+import com.cablebilling.lineman.feature.printer.PrinterSetup
+import com.cablebilling.lineman.feature.printer.PrinterSetupRoute
 import com.cablebilling.lineman.feature.queue.WaitingScreen
 import com.cablebilling.lineman.feature.search.SearchScreen
 import com.cablebilling.lineman.feature.today.TodayScreen
@@ -52,6 +54,8 @@ fun CableApp(navController: NavHostController = rememberNavController()) {
             composable<SearchRoute> { SearchScreen() }
             composable<TodayRoute> { TodayScreen() }
             composable<WaitingRoute> { WaitingScreen() }
+            // Printer setup (T-068): opened from settings (T-071) and the receipt screen (T-069).
+            composable<PrinterSetupRoute> { PrinterSetup(onBack = { navController.popBackStack() }) }
         }
     }
 }

@@ -105,6 +105,21 @@ icon, or `adb shell am start -n com.cablebilling.lineman.dev/com.cablebilling.li
 The module's own tests (`./gradlew :core:designsystem:testDebugUnitTest`) also run as part of
 `testDevDebugUnitTest`.
 
+## Bluetooth receipt printing (T-068)
+
+`app/.../printing/`: receipts are drawn with the bundled fonts on a 384-dot-wide bitmap (58 mm), so
+Hindi prints on printers without Devanagari (D-08), then sent as ESC/POS raster (`GS v 0`, in bands)
+over Bluetooth SPP. Inject `ReceiptPrinter` and call `print(receiptModel)`: it never throws and
+returns `PrintResult.Printed` or `PrintResult.Failed(problem)` (show and speak `problem.message`).
+Printer setup is the `PrinterSetupRoute` screen (`feature/printer`).
+
+- No real printer in CI: the transport is behind `PrinterTransport` / `SppSocketFactory` and tested
+  with fakes. Test on real printers before release (see the T-068 task notes).
+- Renderer snapshots: `app/src/test/resources/receipt-snapshots/*.png` are the golden receipts
+  (Robolectric native graphics, thresholded to printer dots). After an intended layout change:
+  `./gradlew :app:testDevDebugUnitTest --tests '*ReceiptRendererSnapshotTest' -Pcb.writeReceiptSnapshots=true`,
+  look at the new PNGs and commit them.
+
 ## Fonts
 
 `core/designsystem/src/main/res/font/`: Inter and Noto Sans Devanagari, Regular (400) and

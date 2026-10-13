@@ -91,6 +91,20 @@ the office has the payment.
 | Sign out | लॉग आउट करें | log-out |
 | Show / Hide (password) | दिखाएँ / छिपाएँ | eye / eye-off |
 | Update app | ऐप अपडेट करें | download |
+| Allow (a phone permission) | इजाज़त दें | circle-check |
+| Find printer | प्रिंटर खोजें | search |
+| Test print | टेस्ट प्रिंट | printer |
+
+## Printer words (lineman app)
+
+| English | हिंदी | Means | Icon / colour | Not this |
+|---|---|---|---|---|
+| Printer | प्रिंटर | The small Bluetooth receipt printer | printer | Thermal printer, POS, मुद्रक |
+| Bluetooth | ब्लूटूथ | How the phone talks to the printer | bluetooth | BT, Wireless |
+| Paired | जुड़ा हुआ | The phone already knows this printer ("Printers on this phone") | — | Bonded, Connected |
+| Paper | कागज़ | The printer's paper roll | — | Roll, Media |
+| Temporary no. | अस्थायी नं. | A `P-…` receipt number before the office gives the final `R-…` one | clock, `semantic.pending` (amber) | Provisional, Draft |
+| The printer got it | प्रिंटर को मिल गया | Every byte reached the printer; we cannot see the paper | check-circle, `semantic.success` | Printed successfully, Done |
 
 ## Sign-in words (lineman app)
 
