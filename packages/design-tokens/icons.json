@@ -47,5 +47,6 @@
   "share": "share-2",
   "device": "smartphone",
   "switch-off": "user-x",
-  "switch-on": "user-check"
+  "switch-on": "user-check",
+  "retry": "refresh-cw"
 }

@@ -53,6 +53,7 @@ import { notFound } from "../errors/errors";
 import { toRunView } from "./runs";
 import { BillingPeriodInput } from "./services";
 import {
+  BILL_PAY_STATES,
   type BillAdjustmentView,
   type BillConnectionView,
   type BillCustomerLabel,
@@ -61,9 +62,8 @@ import {
   type BillingMonthsView,
   type BillingRunProblemsView,
   type BillLineView,
-  BILL_PAY_STATES,
-  type BillPayState,
   type BillPaymentView,
+  type BillPayState,
   type BillRegisterView,
   type BillRow,
 } from "./view-types";
@@ -213,7 +213,10 @@ export const billingRunProblems = defineService({
           eq(customers.id, billingRunItems.customerId),
         ),
       )
-      .leftJoin(areas, and(eq(areas.operatorId, customers.operatorId), eq(areas.id, customers.areaId)))
+      .leftJoin(
+        areas,
+        and(eq(areas.operatorId, customers.operatorId), eq(areas.id, customers.areaId)),
+      )
       .where(failed)
       .orderBy(asc(customers.customerCode), asc(customers.id))
       .limit(RUN_PROBLEMS_LIMIT);
@@ -250,7 +253,10 @@ export const billingCustomerLabels = defineService({
         areaName: areas.name,
       })
       .from(customers)
-      .leftJoin(areas, and(eq(areas.operatorId, customers.operatorId), eq(areas.id, customers.areaId)))
+      .leftJoin(
+        areas,
+        and(eq(areas.operatorId, customers.operatorId), eq(areas.id, customers.areaId)),
+      )
       .where(and(eq(customers.operatorId, ctx.operatorId), inArray(customers.id, ids)))
       .orderBy(asc(customers.customerCode), asc(customers.id));
     if (rows.length !== ids.length) return err(notFound());
@@ -338,7 +344,10 @@ export const listBills = defineService({
         customers,
         and(eq(customers.operatorId, invoices.operatorId), eq(customers.id, invoices.customerId)),
       )
-      .leftJoin(areas, and(eq(areas.operatorId, customers.operatorId), eq(areas.id, customers.areaId)))
+      .leftJoin(
+        areas,
+        and(eq(areas.operatorId, customers.operatorId), eq(areas.id, customers.areaId)),
+      )
       .leftJoin(paid, eq(paid.invoiceId, invoices.id))
       .where(where)
       .orderBy(asc(customers.customerCode), asc(invoices.invoiceNumber), asc(invoices.id))
@@ -415,7 +424,10 @@ export const getBill = defineService({
         address: customers.address,
       })
       .from(customers)
-      .leftJoin(areas, and(eq(areas.operatorId, customers.operatorId), eq(areas.id, customers.areaId)))
+      .leftJoin(
+        areas,
+        and(eq(areas.operatorId, customers.operatorId), eq(areas.id, customers.areaId)),
+      )
       .where(and(eq(customers.operatorId, operatorId), eq(customers.id, invoice.customerId)));
     const [operator] = await tx.select().from(operators).where(eq(operators.id, operatorId));
     if (!customer || !operator) return err(notFound());
@@ -498,11 +510,17 @@ export const getBill = defineService({
       .from(allocations)
       .leftJoin(
         payments,
-        and(eq(payments.operatorId, allocations.operatorId), eq(payments.id, allocations.paymentId)),
+        and(
+          eq(payments.operatorId, allocations.operatorId),
+          eq(payments.id, allocations.paymentId),
+        ),
       )
       .leftJoin(
         receipts,
-        and(eq(receipts.operatorId, allocations.operatorId), eq(receipts.paymentId, allocations.paymentId)),
+        and(
+          eq(receipts.operatorId, allocations.operatorId),
+          eq(receipts.paymentId, allocations.paymentId),
+        ),
       )
       .leftJoin(
         paymentReversals,

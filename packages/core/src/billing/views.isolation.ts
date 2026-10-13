@@ -11,7 +11,13 @@ import { areas, billingRunItems, billingRuns, customers, invoices, uuidv7 } from
 import { periodOfInstant } from "@cb/domain";
 import type { IsolationSeedArgs } from "../testing/isolation";
 import { defineIsolationCases } from "../testing/isolation";
-import { billingCustomerLabels, billingMonths, billingRunProblems, getBill, listBills } from "./views";
+import {
+  billingCustomerLabels,
+  billingMonths,
+  billingRunProblems,
+  getBill,
+  listBills,
+} from "./views";
 
 /** The current IST month (the harness runs on the real clock). */
 const thisPeriod = () => periodOfInstant(new Date());

@@ -86,6 +86,209 @@
       "title": "Turn on 2-step sign-in"
     }
   },
+  "bills": {
+    "calendar": {
+      "before_start": "Before you joined",
+      "bills": "{count, plural, =0 {No bills} one {# bill} other {# bills}}",
+      "label": "Bills by month",
+      "later": "Not yet"
+    },
+    "detail": {
+      "account_now": "Customer's account now",
+      "amounts": "Amounts",
+      "back": "All bills",
+      "cancelled": "Cancelled",
+      "code": "Code {code}",
+      "connections": "Connections",
+      "credit_now": "Credit",
+      "credit_used": "Credit used",
+      "customer": "Customer",
+      "due_now": "Due",
+      "made_on": "Made on",
+      "month": "Month",
+      "no_payments": "No payment on this bill yet.",
+      "nothing_due": "Nothing due",
+      "old_dues_bill": "Old dues brought from your old records",
+      "open_customer": "Open customer",
+      "other_lines": "Other charges",
+      "paid_on_bill": "Paid on this bill",
+      "payments": "Payments on this bill",
+      "previous_credit": "Credit before this bill",
+      "previous_due": "Old due",
+      "print": "Print bill",
+      "receipt": "Receipt {number}",
+      "still_due": "Still due on this bill",
+      "this_month": "This month",
+      "title": "Bill {number}",
+      "total": "Total to pay",
+      "vc": "VC {number}",
+      "void": "This bill was cancelled: {reason}"
+    },
+    "error": {
+      "forbidden": "Only the owner can make bills.",
+      "generic": "Something went wrong. Try again.",
+      "not_found": "This month's bills were not found. Reload the page.",
+      "period": "Bills can't be made for this month.",
+      "read_only": "Bills are paused: the app is in view-only mode.",
+      "run_skipped": "This month was missed. Use Make bills now."
+    },
+    "line": {
+      "manual": "Bill change",
+      "mid_month_start": "Started this month",
+      "migration": "From old records",
+      "plan_change": "Plan changed",
+      "rent": "Monthly rent"
+    },
+    "method": {
+      "cash": "Cash",
+      "upi": "UPI"
+    },
+    "missed": {
+      "open": "Check {month}",
+      "text": "Bills were not made for these months because the app was in view-only mode. They are never made by themselves: check each month, then make its bills.",
+      "title": "Missed bill runs"
+    },
+    "month": {
+      "label": "Month",
+      "next": "Next month",
+      "previous": "Previous month"
+    },
+    "page_description": "Bills for every month: make them, check them, print them.",
+    "paused": {
+      "owner": "Bills are paused: the app is in view-only mode. Pay for the app to make bills again.",
+      "staff": "Bills are paused: the app is in view-only mode. Ask the owner to pay for the app."
+    },
+    "pay_state": {
+      "no_charge": "Nothing to pay",
+      "paid": "Paid",
+      "part_paid": "Part paid",
+      "unpaid": "Not paid",
+      "void": "Cancelled"
+    },
+    "preview": {
+      "already": "{count, plural, one {# customer already has a bill for this month.} other {# customers already have a bill for this month.}}",
+      "button": "Preview {month}",
+      "hide": "Hide preview",
+      "note": "Nothing is saved. This is what making bills now would do.",
+      "nothing": "{count, plural, one {# customer has nothing to bill.} other {# customers have nothing to bill.}}",
+      "problems": "{count, plural, =0 {No problems.} one {# problem} other {# problems}}",
+      "title": "Preview: {month}",
+      "total": "Total",
+      "will_bill": "{count, plural, =0 {No customer will get a new bill.} one {# customer will get a bill.} other {# customers will get a bill.}}"
+    },
+    "print": {
+      "area": "Area",
+      "back": "Back to the bill",
+      "cancelled": "Cancelled bill",
+      "code": "Customer code",
+      "credit_today": "Credit on {date}",
+      "customer": "Customer",
+      "date": "Date",
+      "due_today": "To pay on {date}",
+      "month": "Month",
+      "nothing_due_today": "Nothing to pay on {date}",
+      "number": "Bill no.",
+      "page_title": "Bill {number}",
+      "phone": "Phone",
+      "previous_credit": "Credit",
+      "previous_due": "Old due",
+      "print": "Print",
+      "this_month": "This month",
+      "title": "Bill",
+      "total": "Total to pay",
+      "vc": "VC {number}"
+    },
+    "problems": {
+      "more": "Showing {shown} of {total}.",
+      "reason": {
+        "books": "Account total does not match. Call support.",
+        "connection": "Connection dates are wrong. Check this customer's connections.",
+        "other": "The bill could not be made. Try again."
+      },
+      "title": "Customers with a problem",
+      "tries": "{count, plural, one {Tried # time} other {Tried # times}}"
+    },
+    "register": {
+      "all_areas": "All areas",
+      "all_pay_states": "All bills",
+      "area": "Area",
+      "billed": "Billed",
+      "col": {
+        "amount": "Bill amount",
+        "customer": "Customer",
+        "number": "Bill no.",
+        "paid": "Paid",
+        "status": "Status"
+      },
+      "count": "{count, plural, one {# bill} other {# bills}}",
+      "due": "Still due",
+      "empty": "No bills for {month} here.",
+      "filters": "Choose bills",
+      "list_label": "Bills of {month}",
+      "next": "Next page",
+      "page": "Page {page} of {pages}",
+      "paid": "Paid",
+      "pay_state": "Paid?",
+      "previous": "Previous page",
+      "show": "Show",
+      "totals_label": "Totals"
+    },
+    "register_description": "Every bill of a month, and how much is paid.",
+    "retry": {
+      "button": "Try problems again",
+      "confirm": "Try again",
+      "confirm_summary": "{count, plural, one {# customer is tried again.} other {# customers are tried again.}} Bills already made do not change.",
+      "confirm_title": "Try again for customers with a problem?",
+      "nothing_toast": "No problems left to try",
+      "started_toast": "Trying again now"
+    },
+    "run": {
+      "already_running_toast": "Bills are already being made",
+      "button": "Make bills now",
+      "confirm": "Make bills",
+      "confirm_summary": "Every customer who has no bill for {month} gets one now. Nobody gets a second bill.",
+      "confirm_summary_preview": "{count, plural, one {# customer gets a bill} other {# customers get a bill}}, total ₹{amount}. Nobody gets a second bill.",
+      "confirm_title": "Make bills for {month}?",
+      "started_toast": "Making bills now",
+      "starting": "Starting…"
+    },
+    "run_status": {
+      "completed": "Bills made",
+      "completed_with_errors": "Some problems",
+      "failed": "Stopped",
+      "none": "Not made",
+      "pending": "Making bills",
+      "running": "Making bills",
+      "skipped": "Missed"
+    },
+    "runs_description": "Check the month's bills before they are made, then make them.",
+    "see_bills": "See bills of {month}",
+    "status": {
+      "already": "Already had a bill",
+      "completed": "Bills for {month} are made.",
+      "completed_with_errors": "Bills for {month} are made, but some customers have a problem.",
+      "failed": "Making bills for {month} stopped. Try again.",
+      "finished_at": "Finished {when}",
+      "in_progress": "Making bills for {month}. This page updates by itself.",
+      "label": "Bills of {month}",
+      "new_bills": "New bills",
+      "none": "Bills for {month} are not made yet.",
+      "nothing": "Nothing to bill",
+      "problems": "Problems",
+      "skipped": "Bills for {month} were not made: the app was in view-only mode.",
+      "total": "Total of new bills"
+    },
+    "this_month": {
+      "open": "Open {month}",
+      "preview": "Preview this month",
+      "title": "This month: {month}"
+    },
+    "year": {
+      "label": "Year {year}",
+      "next": "Next year",
+      "previous": "Previous year"
+    }
+  },
   "common": {
     "amount": "₹{amount}",
     "amount_credit": "₹{amount} credit",

@@ -76,7 +76,13 @@ describeDb("bills read services", () => {
       const asha = await insertCustomer(tx, op);
       await tx
         .update(customers)
-        .set({ customerCode: "A-1", name: "Asha Devi", areaId, phone: "9876543210", address: "Gali 4" })
+        .set({
+          customerCode: "A-1",
+          name: "Asha Devi",
+          areaId,
+          phone: "9876543210",
+          address: "Gali 4",
+        })
         .where(eq(customers.id, asha));
       const vc1 = await addConnection(tx, op, asha, { startDate: OCT, rentalPaise: 30_000 });
       const vc2 = await addConnection(tx, op, asha, { startDate: OCT, rentalPaise: 20_000 });
@@ -97,7 +103,10 @@ describeDb("bills read services", () => {
         reason: "Repair visit",
       });
       const bina = await insertCustomer(tx, op);
-      await tx.update(customers).set({ customerCode: "B-2", name: "Bina Rao" }).where(eq(customers.id, bina));
+      await tx
+        .update(customers)
+        .set({ customerCode: "B-2", name: "Bina Rao" })
+        .where(eq(customers.id, bina));
       await addConnection(tx, op, bina, { startDate: OCT, rentalPaise: 25_000 });
       const drifted = await insertCustomer(tx, op);
       await tx
@@ -161,7 +170,10 @@ describeDb("bills read services", () => {
       createdCount: 2,
       failedCount: 1,
     });
-    expect(nov).toMatchObject({ billCount: 2, billTotalPaise: 30_000 + 20_000 + 5_000 + 2_500 + 25_000 });
+    expect(nov).toMatchObject({
+      billCount: 2,
+      billTotalPaise: 30_000 + 20_000 + 5_000 + 2_500 + 25_000,
+    });
     const tooMany = await billingMonths.call(now, w.owner, { from: "2024-12-01", to: DEC });
     expect(tooMany.ok ? "ok" : tooMany.error.code).toBe("VALIDATION");
     const backwards = await billingMonths.call(now, w.owner, { from: DEC, to: OCT });
@@ -199,7 +211,9 @@ describeDb("bills read services", () => {
     if (!all.ok) throw new Error(all.error.code);
     const ashaCharges = 30_000 + 20_000 + 5_000 + 2_500;
     expect(all.value.areas).toEqual([{ id: w.areaId, name: "North" }]);
-    expect(all.value.rows.map((r) => [r.customer.code, r.chargesPaise, r.paidPaise, r.payState])).toEqual([
+    expect(
+      all.value.rows.map((r) => [r.customer.code, r.chargesPaise, r.paidPaise, r.payState]),
+    ).toEqual([
       ["A-1", ashaCharges, 40_000, "part_paid"],
       ["B-2", 25_000, 0, "unpaid"],
     ]);
