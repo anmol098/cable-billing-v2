@@ -3,10 +3,10 @@ id: T-052
 title: Nightly invariants job
 phase: 2
 area: core
-status: todo
-owner:
-claimed_at:
-branch:
+status: claimed
+owner: agent-t052
+claimed_at: 2026-10-13T14:46:56.987Z
+branch: task/T-052-nightly-invariants-job
 depends_on: [T-043, T-044, T-046]
 review: self
 claimable_by: agent
@@ -48,3 +48,7 @@ PLAN §14, PLAN §8.4 — see `docs/IMPLEMENTATION_PLAN.md`, `docs/PRD.md`, `doc
 ## Completion notes
 
 _The agent fills this in before opening the PR: what was built, decisions taken, deviations, follow-up tasks created, and how it was verified._
+
+## Board log
+
+- 2026-10-13T14:46:56.988Z claimed by agent-t052
