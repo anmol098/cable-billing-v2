@@ -3,10 +3,10 @@ id: T-020a
 title: Production runtime DB role (non-owner login role) and boot check
 phase: 1
 area: infra
-status: todo
-owner:
-claimed_at:
-branch:
+status: claimed
+owner: agent-t020a
+claimed_at: 2026-10-13T12:24:54.718Z
+branch: task/T-020a-production-runtime-db-role-non-owner-log
 depends_on: [T-020]
 review: required
 claimable_by: agent
@@ -62,3 +62,7 @@ PLAN §9.1, E-03, T-020 completion notes, `packages/db/README.md` "Who connects 
 ## Completion notes
 
 _The agent fills this in before opening the PR._
+
+## Board log
+
+- 2026-10-13T12:24:54.718Z claimed by agent-t020a
