@@ -3,10 +3,10 @@ id: T-005
 title: Next.js web app scaffold
 phase: 0
 area: web
-status: todo
-owner:
-claimed_at:
-branch:
+status: claimed
+owner: agent-t005
+claimed_at: 2026-10-13T05:36:59.977Z
+branch: task/T-005-next-js-web-app-scaffold
 depends_on: [T-001, T-002, T-004]
 review: self
 claimable_by: agent
@@ -61,3 +61,7 @@ PLAN §4, PLAN §5, PLAN §6.3, E-06, E-08 — see `docs/IMPLEMENTATION_PLAN.md`
 ## Completion notes
 
 _The agent fills this in before opening the PR: what was built, decisions taken, deviations, follow-up tasks created, and how it was verified._
+
+## Board log
+
+- 2026-10-13T05:36:59.978Z claimed by agent-t005
