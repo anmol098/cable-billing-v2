@@ -10,6 +10,8 @@
  *   `withTenant(newOperatorId)`), and `app_platform` may list all operators (jobs, admin console).
  * - `settings` is jsonb validated by {@link operatorSettingsSchema} (and partly by a CHECK).
  */
+
+import { MID_MONTH_START_POLICIES } from "@cb/domain";
 import { sql } from "drizzle-orm";
 import {
   check,
@@ -42,10 +44,6 @@ export const OPERATOR_STATUSES = ["active", "suspended"] as const;
 export type OperatorStatus = (typeof OPERATOR_STATUSES)[number];
 export const operatorStatusEnum = pgEnum("operator_status", OPERATOR_STATUSES);
 
-/** D-18: what a mid-month new connection or reactivation costs (PLAN §8.3). */
-export const MID_MONTH_START_POLICIES = ["charge_full_month", "start_next_month"] as const;
-export type MidMonthStartPolicy = (typeof MID_MONTH_START_POLICIES)[number];
-
 /**
  * `operators.settings` (jsonb, snake_case keys). Parse every read with
  * {@link parseOperatorSettings}: missing keys get their defaults, unknown keys are dropped, so new
@@ -53,7 +51,7 @@ export type MidMonthStartPolicy = (typeof MID_MONTH_START_POLICIES)[number];
  * `OperatorInfo` (office_phone ≤ 20, digits with an optional leading +; receipt_footer ≤ 500).
  */
 export const operatorSettingsSchema = z.object({
-  /** D-18. Default: start billing from the next month (no surprise charge). */
+  /** D-18 (values from @cb/domain, T-042). Default: start billing from the next month. */
   mid_month_start_policy: z.enum(MID_MONTH_START_POLICIES).default("start_next_month"),
   /** Invoice number prefix: `{prefix}-{YYMM}-{seq:05}` (PLAN §7.3). Upper-case letters/digits. */
   invoice_prefix: z
