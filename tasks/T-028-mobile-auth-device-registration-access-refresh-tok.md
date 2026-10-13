@@ -3,10 +3,10 @@ id: T-028
 title: Mobile auth: device registration, access/refresh tokens, app config
 phase: 1
 area: api
-status: todo
-owner:
-claimed_at:
-branch:
+status: claimed
+owner: agent-t028
+claimed_at: 2026-10-13T14:08:16.104Z
+branch: task/T-028-mobile-auth-device-registration-access-r
 depends_on: [T-026, T-051]
 review: required
 claimable_by: agent
@@ -54,3 +54,7 @@ PLAN §9.2, PLAN §10.2, PLAN §11.6, PLAN §11.9, D-07 — see `docs/IMPLEMENTA
 ## Completion notes
 
 _The agent fills this in before opening the PR: what was built, decisions taken, deviations, follow-up tasks created, and how it was verified._
+
+## Board log
+
+- 2026-10-13T14:08:16.105Z claimed by agent-t028
