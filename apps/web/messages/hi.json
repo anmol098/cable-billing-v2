@@ -130,6 +130,21 @@
       "show_success": "हो गया दिखाएँ"
     }
   },
+  "mobile_designsystem": {
+    "catalogue_sample_area": "वार्ड 5",
+    "catalogue_sample_customer_name": "रमेश कुमार",
+    "catalogue_sample_on_phone": "{count, plural, one {फ़ोन में # पेमेंट} other {फ़ोन में # पेमेंट}}",
+    "catalogue_sample_sms": "SMS",
+    "catalogue_sample_speech": "रमेश कुमार, चार सौ पचास रुपये बाकी",
+    "catalogue_sample_updated": "5 मिनट पहले अपडेट हुआ",
+    "catalogue_sample_whatsapp": "WhatsApp",
+    "catalogue_title": "कॉम्पोनेंट (टेस्ट)",
+    "numpad_delete": "मिटाएँ",
+    "numpad_letters": "ABC",
+    "speak": "सुनें",
+    "voice_off": "आवाज़ बंद",
+    "voice_on": "आवाज़ चालू"
+  },
   "mobile_shell": {
     "nav_search": "खोजें",
     "nav_today": "आज",

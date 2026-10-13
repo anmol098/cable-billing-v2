@@ -51,6 +51,23 @@
     <string name="common_vc_number">VC नंबर</string>
     <string name="common_whatsapp_opened">WhatsApp खुल गया</string>
     <string name="common_yes">हाँ</string>
+    <string name="mobile_designsystem_catalogue_sample_area">वार्ड 5</string>
+    <string name="mobile_designsystem_catalogue_sample_customer_name">रमेश कुमार</string>
+    <!-- %1$d = count -->
+    <plurals name="mobile_designsystem_catalogue_sample_on_phone">
+        <item quantity="one">फ़ोन में %1$d पेमेंट</item>
+        <item quantity="other">फ़ोन में %1$d पेमेंट</item>
+    </plurals>
+    <string name="mobile_designsystem_catalogue_sample_sms">SMS</string>
+    <string name="mobile_designsystem_catalogue_sample_speech">रमेश कुमार, चार सौ पचास रुपये बाकी</string>
+    <string name="mobile_designsystem_catalogue_sample_updated">5 मिनट पहले अपडेट हुआ</string>
+    <string name="mobile_designsystem_catalogue_sample_whatsapp">WhatsApp</string>
+    <string name="mobile_designsystem_catalogue_title">कॉम्पोनेंट (टेस्ट)</string>
+    <string name="mobile_designsystem_numpad_delete">मिटाएँ</string>
+    <string name="mobile_designsystem_numpad_letters">ABC</string>
+    <string name="mobile_designsystem_speak">सुनें</string>
+    <string name="mobile_designsystem_voice_off">आवाज़ बंद</string>
+    <string name="mobile_designsystem_voice_on">आवाज़ चालू</string>
     <string name="mobile_shell_nav_search">खोजें</string>
     <string name="mobile_shell_nav_today">आज</string>
     <string name="mobile_shell_nav_waiting">इंतज़ार में</string>
