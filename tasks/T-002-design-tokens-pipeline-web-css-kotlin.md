@@ -3,10 +3,10 @@ id: T-002
 title: Design tokens pipeline (web CSS + Kotlin)
 phase: 0
 area: design-system
-status: todo
-owner:
-claimed_at:
-branch:
+status: claimed
+owner: agent-t002
+claimed_at: 2026-10-13T04:34:06.627Z
+branch: task/T-002-design-tokens-pipeline-web-css-kotlin
 depends_on: [T-001]
 review: self
 claimable_by: agent
@@ -62,3 +62,7 @@ PLAN §6.1, PLAN §6.2, PLAN §6.3, D-04 — see `docs/IMPLEMENTATION_PLAN.md`, 
 ## Completion notes
 
 _The agent fills this in before opening the PR: what was built, decisions taken, deviations, follow-up tasks created, and how it was verified._
+
+## Board log
+
+- 2026-10-13T04:34:06.628Z claimed by agent-t002
