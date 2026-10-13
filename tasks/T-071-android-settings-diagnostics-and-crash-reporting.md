@@ -3,10 +3,10 @@ id: T-071
 title: Android: settings, diagnostics and crash reporting
 phase: 3
 area: android
-status: todo
-owner:
-claimed_at:
-branch:
+status: claimed
+owner: agent-t071
+claimed_at: 2026-10-13T16:18:48.674Z
+branch: task/T-071-android-settings-diagnostics-and-crash-r
 depends_on: [T-063, T-067, T-068]
 review: self
 claimable_by: agent
@@ -46,3 +46,7 @@ PLAN §11.3 (Settings), PLAN §11.1 — see `docs/IMPLEMENTATION_PLAN.md`, `docs
 ## Completion notes
 
 _The agent fills this in before opening the PR: what was built, decisions taken, deviations, follow-up tasks created, and how it was verified._
+
+## Board log
+
+- 2026-10-13T16:18:48.674Z claimed by agent-t071
