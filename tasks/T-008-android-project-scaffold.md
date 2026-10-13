@@ -3,7 +3,7 @@ id: T-008
 title: Android project scaffold
 phase: 0
 area: android
-status: blocked
+status: todo
 owner:
 claimed_at:
 branch:
@@ -58,3 +58,4 @@ _The agent fills this in before opening the PR: what was built, decisions taken,
 ## Board log
 
 - 2026-10-13T04:21:04.114Z blocked by coordinator: Android SDK download blocked: network policy denies dl.google.com in this cloud environment. Unblock after the host is allowed.
+- 2026-10-13T05:34:04.510Z unblocked by coordinator
