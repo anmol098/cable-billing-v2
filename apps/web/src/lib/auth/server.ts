@@ -12,6 +12,7 @@
  * | local, CI, e2e | in memory | Resend when set, else captured (`next dev` prints them) |
  */
 import {
+  type AuthEmailTransport,
   type AuthService,
   createAuthService,
   createCaptureTransport,
@@ -20,7 +21,6 @@ import {
   createResendTransport,
   createServiceRuntime,
   createUpstashRateLimiter,
-  type EmailTransport,
   type Logger,
   type RateLimiter,
   type ServiceRuntime,
@@ -49,7 +49,7 @@ function rateLimiterFor(logger: Logger): RateLimiter {
   return createMemoryRateLimiter();
 }
 
-function emailTransportFor(logger: Logger): EmailTransport {
+function emailTransportFor(logger: Logger): AuthEmailTransport {
   const apiKey = serverEnv.RESEND_API_KEY;
   const from = serverEnv.EMAIL_FROM;
   if (apiKey && from) return createResendTransport({ apiKey, from });

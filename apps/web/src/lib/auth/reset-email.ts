@@ -2,14 +2,14 @@
  * The password-reset email in the user's language (`users.language`), words from the `auth`
  * namespace. Plain text: short, works in every mail app.
  */
-import type { EmailMessage, PasswordResetEmail } from "@cb/core";
+import type { AuthEmailMessage, PasswordResetEmail } from "@cb/core";
 import { createTranslator } from "next-intl";
 import en from "../../../messages/en.json";
 import hi from "../../../messages/hi.json";
 
 const MESSAGES = { en, hi } as const;
 
-export function renderResetEmail(email: PasswordResetEmail): EmailMessage {
+export function renderResetEmail(email: PasswordResetEmail): AuthEmailMessage {
   const t = createTranslator({
     locale: email.language,
     messages: MESSAGES[email.language],

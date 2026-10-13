@@ -24,9 +24,11 @@ export {
   type CaptureTransport,
   createCaptureTransport,
   createResendTransport,
-  type EmailMessage,
-  type EmailTransport,
-  type ResendTransportOptions,
+  // Aliased: T-043's job alerts export their own EmailMessage / EmailTransport /
+  // ResendTransportOptions from @cb/core. Follow-up: merge both into one shared email module.
+  type EmailMessage as AuthEmailMessage,
+  type EmailTransport as AuthEmailTransport,
+  type ResendTransportOptions as AuthResendTransportOptions,
 } from "./email";
 export {
   ARGON2_PARAMETERS,
