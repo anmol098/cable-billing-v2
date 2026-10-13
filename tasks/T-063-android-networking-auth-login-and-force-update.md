@@ -3,10 +3,10 @@ id: T-063
 title: Android: networking, auth, login and force update
 phase: 3
 area: android
-status: todo
-owner:
-claimed_at:
-branch:
+status: claimed
+owner: agent-t063
+claimed_at: 2026-10-13T11:55:28.078Z
+branch: task/T-063-android-networking-auth-login-and-force
 depends_on: [T-008, T-009, T-051]
 review: self
 claimable_by: agent
@@ -55,3 +55,7 @@ PLAN §11.3 (Login), PLAN §11.6, PLAN §11.9, D-07 — see `docs/IMPLEMENTATION
 ## Completion notes
 
 _The agent fills this in before opening the PR: what was built, decisions taken, deviations, follow-up tasks created, and how it was verified._
+
+## Board log
+
+- 2026-10-13T11:55:28.078Z claimed by agent-t063
