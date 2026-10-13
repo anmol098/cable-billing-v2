@@ -3,10 +3,10 @@ id: T-062
 title: Collection sessions, cash handover and web Linemen page
 phase: 3
 area: web
-status: todo
-owner:
-claimed_at:
-branch:
+status: claimed
+owner: agent-t062
+claimed_at: 2026-10-13T15:52:48.116Z
+branch: task/T-062-collection-sessions-cash-handover-and-we
 depends_on: [T-046, T-029]
 review: self
 claimable_by: agent
@@ -50,3 +50,7 @@ PLAN §8.7, FR-022, J-05, B-016 — see `docs/IMPLEMENTATION_PLAN.md`, `docs/PRD
 ## Completion notes
 
 _The agent fills this in before opening the PR: what was built, decisions taken, deviations, follow-up tasks created, and how it was verified._
+
+## Board log
+
+- 2026-10-13T15:52:48.116Z claimed by agent-t062
