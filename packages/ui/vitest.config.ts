@@ -6,5 +6,8 @@ export default defineConfig({
     // the rest run in Node.
     include: ["src/**/*.test.{ts,tsx}"],
     setupFiles: ["./src/primitives/test-setup.ts"],
+    // jsdom renders of composites and overlays exceed Vitest's 5 s default on a busy machine or CI
+    // runner; same budget as @cb/core and @cb/db.
+    testTimeout: 30_000,
   },
 });
