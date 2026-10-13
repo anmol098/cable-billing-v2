@@ -3,10 +3,10 @@ id: T-003
 title: Icon pipeline (Lucide → React map + Android vectors)
 phase: 0
 area: design-system
-status: todo
-owner:
-claimed_at:
-branch:
+status: claimed
+owner: agent-t003
+claimed_at: 2026-10-13T05:36:26.343Z
+branch: task/T-003-icon-pipeline-lucide-react-map-android-v
 depends_on: [T-002]
 review: self
 claimable_by: agent
@@ -53,3 +53,7 @@ PLAN §2.2 (colour/icon meanings), PLAN §6.2, E-09 — see `docs/IMPLEMENTATION
 ## Completion notes
 
 _The agent fills this in before opening the PR: what was built, decisions taken, deviations, follow-up tasks created, and how it was verified._
+
+## Board log
+
+- 2026-10-13T05:36:26.344Z claimed by agent-t003
