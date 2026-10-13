@@ -1,0 +1,8 @@
+{
+  "server_time": "2026-10-13T11:30:00.000Z",
+  "link": {
+    "url": "https://cablebilling.example/r/3q2-7wEXAMPLEtokenONLYnotREAL_0123456789ab",
+    "expires_at": "2027-01-11T11:30:00.000Z",
+    "receipt_number": "R-2610-00045"
+  }
+}

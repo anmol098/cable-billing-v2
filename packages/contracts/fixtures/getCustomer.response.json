@@ -1,0 +1,65 @@
+{
+  "server_time": "2026-10-13T11:30:00.000Z",
+  "customer": {
+    "id": "01929a3e-5b10-7c4e-8a03-000000000001",
+    "code": "1045",
+    "name": "Ramesh Kumar",
+    "phone": "9876543210",
+    "alt_phone": null,
+    "address": "House 12, Gali 3, Shiv Nagar",
+    "area": {
+      "id": "01929a3e-5b10-7c4e-8a02-000000000001",
+      "name": "Shiv Nagar"
+    },
+    "active": true,
+    "connections": [
+      {
+        "vc_number": "000123456789",
+        "status": "active"
+      },
+      {
+        "vc_number": "000123456790",
+        "status": "suspended"
+      }
+    ],
+    "balance_paise": 90000,
+    "credit_paise": 0,
+    "open_bills": {
+      "count": 2,
+      "outstanding_paise": 90000,
+      "oldest_period": "2026-09-01"
+    },
+    "updated_at": "2026-10-01T00:20:11.000Z"
+  },
+  "open_bills": [
+    {
+      "invoice_id": "01929a3e-5b10-7c4e-8a04-000000000001",
+      "invoice_number": "INV-2609-00098",
+      "kind": "regular",
+      "period": "2026-09-01",
+      "charges_paise": 45000,
+      "outstanding_paise": 45000
+    },
+    {
+      "invoice_id": "01929a3e-5b10-7c4e-8a04-000000000002",
+      "invoice_number": "INV-2610-00123",
+      "kind": "regular",
+      "period": "2026-10-01",
+      "charges_paise": 45000,
+      "outstanding_paise": 45000
+    }
+  ],
+  "recent_payments": [
+    {
+      "payment_id": "01929a3e-5b10-7c4e-8a05-000000000001",
+      "amount_paise": 45000,
+      "method": "cash",
+      "recorded_at": "2026-08-14T06:10:00.000Z",
+      "posted_at": "2026-08-14T06:10:03.000Z",
+      "receipt_number": "R-2608-00031",
+      "provisional_ref": "P-K7Q-0007",
+      "collected_by_name": "Suresh Yadav",
+      "reversed": false
+    }
+  ]
+}

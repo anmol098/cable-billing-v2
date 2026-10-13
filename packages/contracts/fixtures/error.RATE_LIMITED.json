@@ -1,0 +1,9 @@
+{
+  "server_time": "2026-10-13T11:30:00.000Z",
+  "error": {
+    "code": "RATE_LIMITED",
+    "message": "too many login attempts",
+    "request_id": "req_01929b112c3d7e4f0015",
+    "retry_after_seconds": 30
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "server_time": "2026-10-13T11:30:00.000Z",
+  "changed": true,
+  "customer": {
+    "id": "01929a3e-5b10-7c4e-8a03-000000000001",
+    "code": "1045",
+    "name": "Ramesh Kumar",
+    "phone": "9876543211",
+    "alt_phone": null,
+    "address": "House 12, Gali 3, Shiv Nagar",
+    "area": {
+      "id": "01929a3e-5b10-7c4e-8a02-000000000001",
+      "name": "Shiv Nagar"
+    },
+    "active": true,
+    "connections": [
+      {
+        "vc_number": "000123456789",
+        "status": "active"
+      },
+      {
+        "vc_number": "000123456790",
+        "status": "suspended"
+      }
+    ],
+    "balance_paise": 90000,
+    "credit_paise": 0,
+    "open_bills": {
+      "count": 2,
+      "outstanding_paise": 90000,
+      "oldest_period": "2026-09-01"
+    },
+    "updated_at": "2026-10-13T11:30:00.000Z"
+  }
+}

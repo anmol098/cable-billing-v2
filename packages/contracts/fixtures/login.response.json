@@ -1,0 +1,26 @@
+{
+  "server_time": "2026-10-13T04:30:00.000Z",
+  "tokens": {
+    "token_type": "Bearer",
+    "access_token": "example-access-token-1",
+    "access_token_expires_at": "2026-10-13T04:45:00.000Z",
+    "refresh_token": "example-refresh-token-1",
+    "refresh_token_expires_at": "2027-04-11T04:30:00.000Z"
+  },
+  "user": {
+    "id": "01929a3e-5b10-7c4e-8a01-000000000002",
+    "name": "Suresh Yadav",
+    "login": "9876501234",
+    "language": "hi"
+  },
+  "operator": {
+    "id": "01929a3e-5b10-7c4e-8a01-000000000001",
+    "name": "Shiv Cable Network",
+    "office_phone": "9800000001",
+    "receipt_footer": "Thank you. Pay by the 10th of every month."
+  },
+  "device": {
+    "id": "01929a3e-5b10-7c4e-8a01-000000000003",
+    "device_code": "K7Q"
+  }
+}
