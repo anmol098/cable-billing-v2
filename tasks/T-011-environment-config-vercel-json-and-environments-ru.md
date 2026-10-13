@@ -3,10 +3,10 @@ id: T-011
 title: Environment config, vercel.json and environments runbook
 phase: 0
 area: infra
-status: todo
-owner:
-claimed_at:
-branch:
+status: claimed
+owner: agent-t011
+claimed_at: 2026-10-13T06:06:13.112Z
+branch: task/T-011-environment-config-vercel-json-and-envir
 depends_on: [T-005]
 review: self
 claimable_by: agent
@@ -50,3 +50,7 @@ PLAN §17, E-06, E-07 — see `docs/IMPLEMENTATION_PLAN.md`, `docs/PRD.md`, `doc
 ## Completion notes
 
 _The agent fills this in before opening the PR: what was built, decisions taken, deviations, follow-up tasks created, and how it was verified._
+
+## Board log
+
+- 2026-10-13T06:06:13.112Z claimed by agent-t011
