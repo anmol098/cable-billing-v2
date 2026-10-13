@@ -3,10 +3,10 @@ id: T-036
 title: Seed data generator for dev and preview
 phase: 1
 area: db
-status: todo
-owner:
-claimed_at:
-branch:
+status: claimed
+owner: agent-t036
+claimed_at: 2026-10-13T13:37:55.087Z
+branch: task/T-036-seed-data-generator-for-dev-and-preview
 depends_on: [T-023, T-024]
 review: self
 claimable_by: agent
@@ -46,3 +46,7 @@ PRD §11 (scale), PRD Appendix A — see `docs/IMPLEMENTATION_PLAN.md`, `docs/PR
 ## Completion notes
 
 _The agent fills this in before opening the PR: what was built, decisions taken, deviations, follow-up tasks created, and how it was verified._
+
+## Board log
+
+- 2026-10-13T13:37:55.088Z claimed by agent-t036
