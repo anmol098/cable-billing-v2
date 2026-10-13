@@ -4,7 +4,7 @@
  * replays, NOT_FOUND for unknown or another tenant's payments, per-tenant keys, append-only rows,
  * every role and read-only tenants (D-13).
  */
-import { type Tx, uuidv7 } from "@cb/db";
+import { createDb, type Tx, uuidv7 } from "@cb/db";
 import { describeDb, useTestDatabase } from "@cb/db/testing";
 import { describe, expect, it } from "vitest";
 import type { ServiceRuntime } from "../../context/runtime";
@@ -180,17 +180,50 @@ describeDb("receipt actions (T-061)", () => {
   }, 60_000);
 
   it("concurrent identical actions store one row; every caller gets recorded or duplicate", async () => {
-    const s = await setup();
-    const input = { id: uuidv7(), paymentId: s.paymentId, action: "whatsapp_opened", at: AT };
-    const results = await Promise.all(
-      Array.from({ length: 6 }, () =>
-        recordReceiptAction.call(s.rt, s.lineman, input as typeof input & { action: "printed" }),
-      ),
-    );
-    const outcomes = results.map((r) => (r.ok ? r.value.outcome : r.error.code)).sort();
-    expect(outcomes.filter((o) => o === "recorded")).toHaveLength(1);
-    expect(outcomes.filter((o) => o === "duplicate")).toHaveLength(5);
-    expect(await rows(s.tenant.operatorId)).toHaveLength(1);
+    const PARALLEL = 6;
+    const pool = createDb({
+      connectionString: t.current.url,
+      driver: "pg",
+      max: PARALLEL + 2,
+      onIdleError: () => {},
+    });
+    const holder = await t.current.admin.connect();
+    try {
+      const s = await setup();
+      const rt = testRuntime(pool, { now: () => NOW });
+      const input = {
+        id: uuidv7(),
+        paymentId: s.paymentId,
+        action: "whatsapp_opened" as const,
+        at: AT,
+      };
+      // Every caller passes its look-ups and blocks at its INSERT (SHARE conflicts with the
+      // INSERT's ROW EXCLUSIVE lock); then all inserts race for the same key at once.
+      await holder.query("BEGIN");
+      await holder.query("LOCK TABLE receipt_actions IN SHARE MODE");
+      const pending = Promise.all(
+        Array.from({ length: PARALLEL }, () => recordReceiptAction.call(rt, s.lineman, input)),
+      );
+      const deadline = Date.now() + 20_000;
+      for (;;) {
+        const { rows: waiting } = await t.current.admin.query<{ n: number }>(
+          `SELECT count(*)::int AS n FROM pg_stat_activity
+            WHERE datname = current_database() AND wait_event_type = 'Lock'`,
+        );
+        if ((waiting[0]?.n ?? 0) >= PARALLEL) break;
+        if (Date.now() > deadline) throw new Error("callers never blocked on the table lock");
+        await new Promise((resolve) => setTimeout(resolve, 10));
+      }
+      await holder.query("COMMIT");
+      const results = await pending;
+      const outcomes = results.map((r) => (r.ok ? r.value.outcome : r.error.code));
+      expect(outcomes.filter((o) => o === "recorded")).toHaveLength(1);
+      expect(outcomes.filter((o) => o === "duplicate")).toHaveLength(PARALLEL - 1);
+      expect(await rows(s.tenant.operatorId)).toHaveLength(1);
+    } finally {
+      holder.release();
+      await pool.end();
+    }
   }, 60_000);
 
   it("works for every role and in a read-only tenant (D-13); rows are append-only", async () => {

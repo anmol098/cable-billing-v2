@@ -292,8 +292,8 @@ describeDb("POST /payments:batch (T-061)", () => {
       expect(r.payment).toBeNull();
     }
     const after = await moneyRowCounts(t.current, op);
-    expect(after.payments - (before.payments ?? 0)).toBe(2);
-    expect(after.receipts - (before.receipts ?? 0)).toBe(2);
+    expect(after.payments - before.payments).toBe(2);
+    expect(after.receipts - before.receipts).toBe(2);
     expect((await moneyRowCounts(t.current, other.tenant.operatorId)).payments).toBe(0);
     // No customer id or other value of another tenant in the answer.
     expect(JSON.stringify(body)).not.toContain(theirs);
@@ -358,11 +358,36 @@ describeDb("POST /payments:batch (T-061)", () => {
         );
       const counterBefore = await counter();
 
-      const bodies = await Promise.all(
-        Array.from({ length: 10 }, async () =>
-          ok(await send(lineman.accessToken, { payments: items }, handler), items),
-        ),
-      );
+      // A real race, not a matter of timing: an admin connection holds customer a's balance
+      // row lock until all ten requests are blocked on it (each at its first item), then lets
+      // them all go at once.
+      const holder = await t.current.admin.connect();
+      let bodies: BatchResponse[];
+      try {
+        await holder.query("BEGIN");
+        await holder.query("SELECT 1 FROM customer_balances WHERE customer_id = $1 FOR UPDATE", [
+          a,
+        ]);
+        const pending = Promise.all(
+          Array.from({ length: 10 }, async () =>
+            ok(await send(lineman.accessToken, { payments: items }, handler), items),
+          ),
+        );
+        const deadline = Date.now() + 30_000;
+        for (;;) {
+          const { rows } = await t.current.admin.query<{ n: number }>(
+            `SELECT count(*)::int AS n FROM pg_stat_activity
+              WHERE datname = current_database() AND wait_event_type = 'Lock'`,
+          );
+          if ((rows[0]?.n ?? 0) >= 10) break;
+          if (Date.now() > deadline) throw new Error("the requests never blocked on the lock");
+          await new Promise((resolve) => setTimeout(resolve, 10));
+        }
+        await holder.query("COMMIT");
+        bodies = await pending;
+      } finally {
+        holder.release();
+      }
 
       // Per item: exactly one request posted it, the other nine got `duplicate`, and every
       // request got the very same payment (receipt number, snapshots, allocations).

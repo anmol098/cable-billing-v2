@@ -247,23 +247,24 @@ export async function issueBill(
   return { invoiceId, invoiceNumber };
 }
 
+const MONEY_TABLES = [
+  "payments",
+  "receipts",
+  "ledger_entries",
+  "allocations",
+  "collection_sessions",
+  "receipt_actions",
+  "receipt_links",
+  "handover_events",
+] as const;
+
 /** Row counts of everything a payment writes, for "nothing doubled / nothing written" checks. */
 export async function moneyRowCounts(
   database: TestDatabase,
   operatorId: string,
-): Promise<Record<string, number>> {
-  const tables = [
-    "payments",
-    "receipts",
-    "ledger_entries",
-    "allocations",
-    "collection_sessions",
-    "receipt_actions",
-    "receipt_links",
-    "handover_events",
-  ];
-  const counts: Record<string, number> = {};
-  for (const table of tables) {
+): Promise<Record<(typeof MONEY_TABLES)[number], number>> {
+  const counts = {} as Record<(typeof MONEY_TABLES)[number], number>;
+  for (const table of MONEY_TABLES) {
     const { rows } = await database.admin.query<{ n: string }>(
       `SELECT count(*) AS n FROM ${table} WHERE operator_id = $1`,
       [operatorId],
