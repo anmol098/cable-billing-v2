@@ -209,6 +209,21 @@ the office has the payment.
 | Cancelled (a payment) | रद्द | A payment the owner undid; not in the totals | `semantic.danger` | Reversed, Void |
 | Switched off (a lineman) | बंद | A deactivated lineman's account | — | Disabled, Inactive |
 
+## Customer words (web)
+
+| English | हिंदी | Means | Icon / colour | Not this |
+|---|---|---|---|---|
+| Customer code | ग्राहक कोड | The number or code people know a customer by (`1045`, `A-101`) | — | Account no., ID, Subscriber ID |
+| Next number | अगला नंबर | The code the app gives when the code box is left empty | — | Auto-generated, Sequence |
+| Other mobile no. | दूसरा मोबाइल नंबर | A second number for the same customer | phone | Alternate contact, Secondary phone |
+| Closed (customer) | बंद | The customer left; kept for old bills and payments, gets no new bills | x, grey | Deactivated, Deleted, Inactive |
+| Make active again | फिर से चालू करें | Undo "Closed" | check-circle | Reactivate, Restore |
+| Removed (connection) | हटाया गया | A connection that ended for good (the VC can go to another customer) | — | Disconnected, Terminated |
+| Change details | जानकारी बदलें | Edit a customer's name, numbers, area, address | pencil | Edit profile, Update record |
+| Summary | सारांश | The first tab of a customer: due, connections, last payment | — | Overview, Dashboard |
+| Unpaid since | … से बाकी | The oldest month that is still not fully paid | `semantic.due` (red text) | Overdue since, Ageing |
+| Own amount | अपनी रकम | A connection's monthly rent typed by hand instead of a plan | — | Custom rental, Override |
+
 ## Words we never show users
 
 Invoice, Ledger, Allocation, Adjustment, Reversal, Tenant, Sync / Synced / Pending sync,
