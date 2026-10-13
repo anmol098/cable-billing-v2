@@ -396,6 +396,46 @@
     "money_saved": "पैसे फ़ोन में सेव हो गए",
     "upi_from": "{name} से {amount} UPI"
   },
+  "receipt": {
+    "amount": "रकम",
+    "bill_left": "{month} का बिल: {amount} बाकी",
+    "bill_paid": "{month} का बिल पूरा",
+    "cancelled": "रद्द",
+    "cancelled_note": "ऑफिस ने यह पेमेंट रद्द कर दिया है। यह रसीद मान्य नहीं है।",
+    "cash": "नकद",
+    "credit_now": "एडवांस",
+    "customer": "ग्राहक",
+    "customer_phone": "फ़ोन",
+    "date": "तारीख",
+    "date_time": "{date}, {time}",
+    "download_pdf": "PDF डाउनलोड करें",
+    "due_now": "अब बाकी",
+    "error": {
+      "body": "थोड़ी देर बाद फिर से कोशिश करें।",
+      "title": "कुछ गड़बड़ हो गई"
+    },
+    "language_en": "English",
+    "language_hi": "हिंदी",
+    "nothing_due": "कुछ बाकी नहीं",
+    "number": "रसीद नं.",
+    "old_due_left": "पुराना बाकी: {amount}",
+    "old_due_paid": "पुराना बाकी पूरा",
+    "page_title": "रसीद {number}",
+    "phone": "फ़ोन: {phone}",
+    "rate_limited": {
+      "body": "यह पेज बहुत बार खोला गया। कुछ मिनट बाद फिर से खोलें।",
+      "title": "थोड़ा रुकें"
+    },
+    "temporary_number": "अस्थायी नं.",
+    "time_am": "{time} AM",
+    "time_pm": "{time} PM",
+    "title": "रसीद",
+    "unavailable": {
+      "body": "लिंक पुराना हो गया है या बंद कर दिया गया है। अपने केबल वाले से रसीद फिर से माँगें।",
+      "title": "यह लिंक काम नहीं कर रहा"
+    },
+    "upi": "UPI"
+  },
   "scaffold": {
     "home": {
       "language": "भाषा",

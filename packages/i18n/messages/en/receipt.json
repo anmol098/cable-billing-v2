@@ -1,0 +1,40 @@
+{
+  "page_title": "Receipt {number}",
+  "title": "Receipt",
+  "phone": "Phone: {phone}",
+  "number": "Receipt no.",
+  "temporary_number": "Temporary no.",
+  "date": "Date",
+  "date_time": "{date}, {time}",
+  "time_am": "{time} AM",
+  "time_pm": "{time} PM",
+  "customer": "Customer",
+  "customer_phone": "Phone",
+  "amount": "Amount",
+  "cash": "Cash",
+  "upi": "UPI",
+  "bill_paid": "{month} bill paid",
+  "bill_left": "{month} bill: {amount} left",
+  "old_due_paid": "Old due paid",
+  "old_due_left": "Old due: {amount} left",
+  "due_now": "Due now",
+  "credit_now": "Credit",
+  "nothing_due": "Nothing due",
+  "cancelled": "Cancelled",
+  "cancelled_note": "The office cancelled this payment. This receipt is not valid.",
+  "download_pdf": "Download PDF",
+  "language_en": "English",
+  "language_hi": "हिंदी",
+  "unavailable": {
+    "title": "This link does not work",
+    "body": "It may be old or switched off. Ask your cable operator for the receipt again."
+  },
+  "rate_limited": {
+    "title": "Please wait",
+    "body": "This page was opened too many times. Try again in a few minutes."
+  },
+  "error": {
+    "title": "Something went wrong",
+    "body": "Please try again later."
+  }
+}

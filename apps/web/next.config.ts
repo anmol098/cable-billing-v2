@@ -32,6 +32,15 @@ const nextConfig: NextConfig = {
           sentryDsn: clientEnv.NEXT_PUBLIC_SENTRY_DSN,
         }),
       },
+      {
+        // Public receipt links (T-050): the token is in the URL, so never send it as a referrer
+        // (this rule comes last, so it overrides the default Referrer-Policy above), and never index.
+        source: "/r/:path*",
+        headers: [
+          { key: "Referrer-Policy", value: "no-referrer" },
+          { key: "X-Robots-Tag", value: "noindex, nofollow, noarchive" },
+        ],
+      },
     ];
   },
 };

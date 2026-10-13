@@ -15,6 +15,7 @@
   "dependencies": {
     "@cb/core": "workspace:*",
     "@cb/db": "workspace:*",
+    "@cb/design-tokens": "workspace:*",
     "@cb/domain": "workspace:*",
     "@cb/i18n": "workspace:*",
     "@cb/ui": "workspace:*",
@@ -24,6 +25,7 @@
     "better-auth": "1.7.7",
     "next": "^16.4.0",
     "next-intl": "^4.14.9",
+    "pdfkit": "^0.20.2",
     "react": "catalog:",
     "react-dom": "catalog:",
     "zod": "catalog:"
@@ -36,6 +38,7 @@
     "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.3",
     "@types/node": "catalog:",
+    "@types/pdfkit": "^0.17.6",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "@vitejs/plugin-react": "^6.1.2",

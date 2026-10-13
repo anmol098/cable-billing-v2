@@ -396,6 +396,46 @@
     "money_saved": "Money saved on phone",
     "upi_from": "{amount} UPI from {name}"
   },
+  "receipt": {
+    "amount": "Amount",
+    "bill_left": "{month} bill: {amount} left",
+    "bill_paid": "{month} bill paid",
+    "cancelled": "Cancelled",
+    "cancelled_note": "The office cancelled this payment. This receipt is not valid.",
+    "cash": "Cash",
+    "credit_now": "Credit",
+    "customer": "Customer",
+    "customer_phone": "Phone",
+    "date": "Date",
+    "date_time": "{date}, {time}",
+    "download_pdf": "Download PDF",
+    "due_now": "Due now",
+    "error": {
+      "body": "Please try again later.",
+      "title": "Something went wrong"
+    },
+    "language_en": "English",
+    "language_hi": "हिंदी",
+    "nothing_due": "Nothing due",
+    "number": "Receipt no.",
+    "old_due_left": "Old due: {amount} left",
+    "old_due_paid": "Old due paid",
+    "page_title": "Receipt {number}",
+    "phone": "Phone: {phone}",
+    "rate_limited": {
+      "body": "This page was opened too many times. Try again in a few minutes.",
+      "title": "Please wait"
+    },
+    "temporary_number": "Temporary no.",
+    "time_am": "{time} AM",
+    "time_pm": "{time} PM",
+    "title": "Receipt",
+    "unavailable": {
+      "body": "It may be old or switched off. Ask your cable operator for the receipt again.",
+      "title": "This link does not work"
+    },
+    "upi": "UPI"
+  },
   "scaffold": {
     "home": {
       "language": "Language",
