@@ -1,0 +1,117 @@
+# Android lineman app checks (apps/android, PLAN §17).
+#
+# Path filtering happens at JOB level, not with workflow-level `paths:`: a workflow that never starts
+# leaves a required status check "Expected — waiting" forever, while a job skipped by `if:` reports
+# as passed. So the "Android" check is safe to make required: it runs when the Android app or one of
+# its generated inputs changed, and is skipped (= success) for web-only changes.
+#
+# Check name for branch protection: "Android". ("Android changes" is the cheap filter job.)
+name: Android
+
+on:
+  pull_request:
+    branches: [main, "feature/**"]
+  push:
+    branches: [main, "feature/**"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+jobs:
+  changes:
+    name: Android changes
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      # dorny/paths-filter lists a PR's changed files through the REST API.
+      pull-requests: read
+    outputs:
+      android: ${{ steps.filter.outputs.android }}
+    steps:
+      # Pull requests use the API; pushes diff against the commit before the push, which needs git.
+      - name: Check out
+        if: github.event_name != 'pull_request'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Detect Android-relevant changes
+        id: filter
+        uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
+        with:
+          # On push: compare with the commit before the push (base = the pushed branch itself).
+          base: ${{ github.ref_name }}
+          # Sources of committed files the app compiles: tokens/icons (design-tokens), strings
+          # (i18n), API contract fixtures (contracts). Plus this workflow itself.
+          filters: |
+            android:
+              - 'apps/android/**'
+              - 'packages/design-tokens/**'
+              - 'packages/i18n/**'
+              - 'packages/contracts/**'
+              - '.github/workflows/android.yml'
+
+  android:
+    name: Android
+    needs: changes
+    # Manual runs always build; otherwise only when relevant files changed.
+    if: needs.changes.outputs.android == 'true' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: apps/android
+    steps:
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # JDK 21, not 17 (deviation from the T-010 text): Robolectric runs the unit tests at API 36,
+      # which refuses to start on Java < 21 (T-008 notes). Building alone works on JDK 17+.
+      - name: Set up JDK 21
+        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      # Installs the SDK command-line tools and accepts the licences. AGP then downloads the exact
+      # platform / build-tools the build asks for (compileSdk 37, build-tools 36), so this workflow
+      # does not repeat the SDK levels from build.gradle.kts.
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@be39fa834029ff78f1a44aa3bb0819b8fc2bd8fd # v4.0.4
+        with:
+          log-accepted-android-sdk-licenses: false
+
+      # Caches the Gradle user home (dependencies, wrapper) with the open-source "basic" provider
+      # (plain GitHub Actions cache; the default "enhanced" provider is a commercial component).
+      # Also validates the committed gradle-wrapper.jar checksum. Pushes to main / feature/** write
+      # the cache; pull requests only read it (they can read their base branch's cache).
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6.4.0
+        with:
+          cache-provider: basic
+          cache-read-only: ${{ github.event_name == 'pull_request' }}
+          add-job-summary: on-failure
+
+      - name: ktlint, detekt, Android lint, unit tests, assemble dev debug
+        run: >-
+          ./gradlew --stacktrace
+          ktlintCheck detekt lint testDevDebugUnitTest assembleDevDebug :detekt-rules:test
+
+      - name: Upload reports
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: android-reports
+          path: |
+            apps/android/**/build/reports/
+            apps/android/**/build/test-results/
+          retention-days: 7
+          if-no-files-found: ignore

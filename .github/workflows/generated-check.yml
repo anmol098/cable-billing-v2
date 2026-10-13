@@ -1,0 +1,89 @@
+# Generated files must match their sources (PLAN §17 "tokens-check"; tasks/README.md §3.5).
+#
+# 1. Each generator's own --check mode (clear, per-generator error messages).
+# 2. Catch-all: `pnpm generate` (every package's `generate` script, through turbo), then fail if
+#    anything tracked changed or any new untracked file appeared. This also covers generators added
+#    later without editing this file, as long as they hang off a package's `generate` script.
+#
+# Check name for branch protection: "Generated files".
+name: Generated files
+
+on:
+  pull_request:
+    branches: [main, "feature/**"]
+  push:
+    branches: [main, "feature/**"]
+    paths-ignore: ["tasks/**", "docs/**"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+env:
+  TURBO_TELEMETRY_DISABLED: "1"
+  TURBO_UI: "false"
+
+jobs:
+  generated:
+    name: Generated files
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up pnpm (version from package.json packageManager)
+        uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+        with:
+          cache: true
+
+      - name: Set up Node (version from .nvmrc)
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Design tokens (theme.css, Tokens.kt)
+        run: pnpm tokens:build --check
+
+      - name: Icons (React map, Android drawables)
+        run: pnpm icons:build --check
+
+      - name: i18n sources
+        run: pnpm i18n:check
+
+      - name: i18n outputs (web messages, Android strings)
+        run: pnpm i18n:build --check
+
+      # T-051 adds the Zod → OpenAPI generator. Until @cb/contracts has an `openapi:build` script this
+      # step only reports that it was skipped; once the script exists it must support --check.
+      - name: OpenAPI (packages/contracts/openapi.json)
+        run: |
+          if node -e 'const p=require("./packages/contracts/package.json"); process.exit(p.scripts && p.scripts["openapi:build"] ? 0 : 1)'; then
+            pnpm --filter @cb/contracts openapi:build --check
+          else
+            echo "::notice title=OpenAPI check skipped::@cb/contracts has no openapi:build script yet (T-051)."
+          fi
+
+      - name: Regenerate everything (pnpm generate)
+        run: pnpm generate
+
+      - name: No drift after regenerating
+        run: |
+          status="$(git status --porcelain --untracked-files=all)"
+          if [ -n "$status" ]; then
+            echo "::error title=Generated files are stale::Run 'pnpm generate' and commit the result."
+            echo "$status"
+            git --no-pager diff --stat
+            git --no-pager diff | head -n 200
+            exit 1
+          fi
+          echo "All generated files match their sources."

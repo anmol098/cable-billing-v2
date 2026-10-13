@@ -1,0 +1,71 @@
+# Weekly, grouped dependency updates. PRs target the integration branch (feature/mvp), like task PRs;
+# switch target-branch to main once feature/mvp is retired.
+#
+# Cooldown: pnpm 12 refuses to install a version published less than a day ago (minimumReleaseAge,
+# see docs/HANDOFF.md §6), so a brand-new release would make `pnpm install --frozen-lockfile` fail.
+# Dependabot waits a few days before proposing a release, which keeps its PRs installable and gives
+# bad releases time to be pulled. The same cooldown applies to Gradle and Actions for supply-chain
+# safety.
+version: 2
+
+updates:
+  # pnpm workspace: root lockfile, the catalog in pnpm-workspace.yaml and every apps/* packages/*
+  # tools/* package.json. @biomejs/biome is pinned exact on purpose (formatter output must not drift);
+  # its bump still comes through here and needs `pnpm lint:fix` in the same PR if the format changed.
+  - package-ecosystem: npm
+    directory: /
+    target-branch: feature/mvp
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Asia/Kolkata
+    cooldown:
+      default-days: 3
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "deps"
+    groups:
+      npm-minor-and-patch:
+        update-types: [minor, patch]
+      npm-major:
+        update-types: [major]
+
+  # Android: Gradle version catalog (apps/android/gradle/libs.versions.toml) and plugins.
+  - package-ecosystem: gradle
+    directory: /apps/android
+    target-branch: feature/mvp
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Asia/Kolkata
+    cooldown:
+      default-days: 3
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "deps(android)"
+    groups:
+      gradle-minor-and-patch:
+        update-types: [minor, patch]
+      gradle-major:
+        update-types: [major]
+
+  # GitHub Actions used by .github/workflows (pinned to commit SHAs; Dependabot updates the SHA and
+  # the version comment together).
+  - package-ecosystem: github-actions
+    directory: /
+    target-branch: feature/mvp
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Asia/Kolkata
+    cooldown:
+      default-days: 7
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "ci"
+    groups:
+      github-actions:
+        patterns: ["*"]
