@@ -28,7 +28,7 @@ export const THEME_TEXT_SIZES = ["sm", "base", "lg", "xl", "2xl", "amount"] as c
 export const THEME_FONTS = ["sans", "numeric"] as const;
 export const THEME_FONT_WEIGHTS = ["regular", "strong"] as const;
 export const THEME_RADII = ["none", "sm", "md", "lg", "full"] as const;
-export const THEME_SIZES = ["touch-min", "primary-button"] as const;
+export const THEME_SIZES = ["touch-min", "primary-button", "icon", "icon-large"] as const;
 export const THEME_BORDER_WIDTHS = ["hairline", "strong"] as const;
 
 const borderWidths = [...THEME_BORDER_WIDTHS];

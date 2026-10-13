@@ -56,7 +56,12 @@ describe("Tokens.kt", () => {
     expect(objectBody("Radius")).toContain("val Md = 8.dp");
     expect(objectBody("Border")).toEqual(["val Hairline = 1.dp", "val Strong = 2.dp"]);
     expect(objectBody("Space")).toContain("val Base = 4.dp");
-    expect(objectBody("Size")).toEqual(["val TouchMin = 56.dp", "val PrimaryButton = 64.dp"]);
+    expect(objectBody("Size")).toEqual([
+      "val TouchMin = 56.dp",
+      "val PrimaryButton = 64.dp",
+      "val Icon = 24.dp",
+      "val IconLarge = 40.dp",
+    ]);
     expect(objectBody("Elevation")).toEqual(["val None = 0.dp"]);
   });
 

@@ -49,7 +49,9 @@ app/                      the app: feature packages under com.cablebilling.linem
   locale/                 AppLanguage (Hindi default, per-app language)
   diagnostics/            CrashReporting (Sentry)
   schemas/                Room exported schemas (committed; created by the first @Database)
-core/designsystem/        GENERATED Tokens.kt + ic_cb_* icons, CableTheme, fonts
+core/designsystem/        GENERATED Tokens.kt + ic_cb_* icons, CableTheme, fonts, components
+                          (component/), Rupees formatting (money/), Speaker (voice/)
+app/src/debug/            debug-only component catalogue (second launcher icon "Components (test)")
 detekt-rules/             project detekt rules (no raw Color(0x…) / .dp / .sp outside core/designsystem)
 config/detekt, config/lint  shared static-analysis config
 gradle/libs.versions.toml version catalog (append-only shared file)
@@ -58,6 +60,16 @@ gradle/libs.versions.toml version catalog (append-only shared file)
 Generated, never edited by hand: `core/designsystem/.../generated/Tokens.kt` (`pnpm tokens:build`),
 `core/designsystem/src/main/res/drawable/ic_cb_*.xml` (icons), and
 `app/src/main/res/values*/strings_generated.xml` (`pnpm i18n:build`).
+
+## Design-system components
+
+`core/designsystem/.../component/` holds the low-literacy kit (BigButton, MethodButton, NumberPad,
+AmountDisplay, StatusChip, CustomerRow, SyncBanner, ConfirmCard, ReceiptActionTile, SpeakButton,
+VoiceToggle). Components take their words as parameters; screens pass `stringResource(...)`. Debug
+builds have a catalogue of all of them in Hindi and English: open the "Components (test)" launcher
+icon, or `adb shell am start -n com.cablebilling.lineman.dev/com.cablebilling.lineman.catalogue.ComponentCatalogueActivity`.
+The module's own tests (`./gradlew :core:designsystem:testDebugUnitTest`) also run as part of
+`testDevDebugUnitTest`.
 
 ## Fonts
 
