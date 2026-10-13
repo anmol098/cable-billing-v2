@@ -41,6 +41,7 @@ import * as Sentry from "@sentry/nextjs";
 import { nextCookies } from "better-auth/next-js";
 import { after } from "next/server";
 import { baseUrls, deploymentTarget, requireServerEnv, serverEnv } from "@/env";
+import { renderInviteEmail } from "./invite-email";
 import { renderResetEmail } from "./reset-email";
 import { renderSignupEmail } from "./signup-email";
 
@@ -136,7 +137,13 @@ function create(): Singletons {
     secret: BETTER_AUTH_SECRET,
     baseURL: baseUrls().app,
     rateLimiter,
-    sendPasswordResetEmail: (email) => transport.send(renderResetEmail(email)),
+    // T-032: the same link, worded as an invitation when the Owner just added a staff member.
+    sendPasswordResetEmail: (email) =>
+      transport.send(
+        email.invite
+          ? renderInviteEmail({ ...email, invite: email.invite })
+          : renderResetEmail(email),
+      ),
     logger,
     runInBackground,
     // Copies Better Auth's Set-Cookie headers into Next's cookie store; must be the last plugin.

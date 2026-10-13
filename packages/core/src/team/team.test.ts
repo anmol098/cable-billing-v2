@@ -197,7 +197,10 @@ describeDb("team management (T-032)", () => {
           mobile,
           password: LINEMAN_PASSWORD,
         });
-        expect(result).toMatchObject({ ok: true, value: { login: `${mobile}-2`, loginChanged: true } });
+        expect(result).toMatchObject({
+          ok: true,
+          value: { login: `${mobile}-2`, loginChanged: true },
+        });
         expect(JSON.stringify(result)).not.toContain(elsewhere.userId);
         expect(JSON.stringify(result)).not.toContain(other.operatorId);
         // The other business's user is untouched.
@@ -251,7 +254,10 @@ describeDb("team management (T-032)", () => {
         });
         expect(bad).toMatchObject({
           ok: false,
-          error: { code: "VALIDATION", details: { fields: [{ path: "login", code: "bad_characters" }] } },
+          error: {
+            code: "VALIDATION",
+            details: { fields: [{ path: "login", code: "bad_characters" }] },
+          },
         });
       },
       TIMEOUT,
@@ -270,7 +276,11 @@ describeDb("team management (T-032)", () => {
           [mobile, "same_as_login"],
         ];
         for (const [password, code] of cases) {
-          const result = await addLineman.call(runtime(), owner, { name: "Ravi", mobile, password });
+          const result = await addLineman.call(runtime(), owner, {
+            name: "Ravi",
+            mobile,
+            password,
+          });
           expect(result).toMatchObject({
             ok: false,
             error: { code: "VALIDATION", details: { fields: [{ path: "password", code }] } },
@@ -317,7 +327,12 @@ describeDb("team management (T-032)", () => {
         });
         expect(result).toMatchObject({
           ok: true,
-          value: { role: "staff", login: mobile, email: `meena.${mobile}@cable.test`, invite: false },
+          value: {
+            role: "staff",
+            login: mobile,
+            email: `meena.${mobile}@cable.test`,
+            invite: false,
+          },
         });
         const signIn = await webAuth().signIn({
           login: mobile,
@@ -480,7 +495,10 @@ describeDb("team management (T-032)", () => {
         });
         expect(short).toMatchObject({
           ok: false,
-          error: { code: "VALIDATION", details: { fields: [{ path: "password", code: "too_short" }] } },
+          error: {
+            code: "VALIDATION",
+            details: { fields: [{ path: "password", code: "too_short" }] },
+          },
         });
         const result = await resetMemberPassword.call(runtime(), owner, {
           userId: staff.value.userId,
@@ -580,9 +598,9 @@ describeDb("team management (T-032)", () => {
           ),
         ).toMatchObject({ ok: false });
         expect((await phoneLogin(lineman.login, LINEMAN_PASSWORD)).ok).toBe(true);
-        expect(await reactivateMember.call(runtime(), owner, { userId: lineman.userId })).toMatchObject(
-          { ok: true, value: { unchanged: true } },
-        );
+        expect(
+          await reactivateMember.call(runtime(), owner, { userId: lineman.userId }),
+        ).toMatchObject({ ok: true, value: { unchanged: true } });
       },
       TIMEOUT,
     );

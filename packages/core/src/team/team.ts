@@ -17,16 +17,7 @@
  *   (`password_changed`) and deletes their web sessions: every phone and browser signs in again.
  * - The Owner's own account is never changed here (FORBIDDEN `owner_account`).
  */
-import {
-  accounts,
-  devices,
-  LANGUAGES,
-  sessions,
-  sqlStateOf,
-  type Tx,
-  users,
-  uuidv7,
-} from "@cb/db";
+import { accounts, devices, LANGUAGES, sessions, sqlStateOf, type Tx, users, uuidv7 } from "@cb/db";
 import { err, ok, type Result } from "@cb/domain";
 import { and, asc, desc, eq, inArray, sql } from "drizzle-orm";
 import * as z from "zod";

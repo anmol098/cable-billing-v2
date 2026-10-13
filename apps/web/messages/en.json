@@ -1212,6 +1212,148 @@
       "wrong_password": "Wrong password. Type the password you chose when you created the account."
     }
   },
+  "team": {
+    "actions": {
+      "new_password": "New password",
+      "new_password_label": "New password for {name}",
+      "share": "Share sign-in on WhatsApp",
+      "share_label": "Share {name}'s sign-in on WhatsApp",
+      "switch_off": "Switch off",
+      "switch_off_label": "Switch off {name}",
+      "switch_on": "Switch on",
+      "switch_on_label": "Switch on {name}",
+      "whatsapp_opened": "WhatsApp opened"
+    },
+    "add_lineman": "Add lineman",
+    "add_staff": "Add staff",
+    "added": {
+      "done": "Done",
+      "invite_failed": "The email could not be sent now. They can use \"Forgot password?\" on the sign-in page with {email}.",
+      "invite_sent": "We are emailing a link to {email}. It works for {minutes} minutes. After that, they can use \"Forgot password?\" on the sign-in page.",
+      "login": "User name",
+      "login_changed": "{suggested} was already used, so the user name is {login}.",
+      "password": "Password",
+      "password_note": "Tell {name} the password yourself. It is not in the WhatsApp message.",
+      "title": "{name} is added"
+    },
+    "description": "Linemen sign in on the phone app. Staff sign in on this website.",
+    "email": {
+      "invite_action": "Set your password here (the link works for {minutes} minutes):",
+      "invite_intro": "{business} added you to {app}. Your user name is {login}. You can also sign in with this email.",
+      "invite_later": "If the link stops working, open the sign-in page and tap \"Forgot password?\".",
+      "invite_subject": "{business} added you to {app}"
+    },
+    "error": {
+      "email": {
+        "invalid": "This email does not look right.",
+        "required": "Write the email to send the link to.",
+        "taken": "Someone already uses this email. Use another email.",
+        "too_long": "The email is too long."
+      },
+      "login": {
+        "bad_characters": "Use only letters, numbers, dot (.), dash (-) or underscore (_). No spaces.",
+        "in_team": "This person is already in your team.",
+        "required": "Write a user name.",
+        "taken": "Someone else uses this user name. Try another one.",
+        "too_long": "The user name is too long.",
+        "too_short": "The user name needs at least 3 letters or numbers."
+      },
+      "mobile": {
+        "invalid": "Write a 10-digit mobile number.",
+        "required": "Write the mobile number."
+      },
+      "name": {
+        "required": "Write the name.",
+        "too_long": "The name is too long."
+      },
+      "not_found": "This person or phone was not found. Reload the page.",
+      "not_owner": "Only the owner can change the team.",
+      "owner_account": "Your own account is not changed here.",
+      "password": {
+        "required": "Write a password.",
+        "same_as_login": "The password can't be the user name or the mobile number.",
+        "too_long": "The password is too long.",
+        "too_short": "Use at least {min} letters or numbers.",
+        "too_simple": "This password is too easy to guess. Try another one, or tap \"Make one for me\"."
+      },
+      "tenant_read_only": "View only: pay the app fee to change the team.",
+      "unexpected": "Something went wrong. Try again."
+    },
+    "form": {
+      "add_lineman_submit": "Add lineman",
+      "add_lineman_title": "Add lineman",
+      "add_staff_submit": "Add staff",
+      "add_staff_title": "Add staff",
+      "email": "Email",
+      "email_optional": "Email (if they have one)",
+      "language": "App language",
+      "login": "User name",
+      "login_note": "They type this to sign in. Usually the mobile number.",
+      "make_password": "Make one for me",
+      "mobile": "Mobile no.",
+      "mobile_optional": "Mobile no. (if they have one)",
+      "name": "Name",
+      "password": "Password",
+      "password_note_lineman": "At least {min} letters or numbers. Not 123456, not the mobile number.",
+      "password_note_staff": "At least {min} letters or numbers.",
+      "saving": "Saving…",
+      "setup": "How will they get a password?",
+      "setup_invite": "Email them a link",
+      "setup_invite_note": "They set their own password from the email.",
+      "setup_password": "I type it now"
+    },
+    "linemen_empty": "No linemen yet. Add your first lineman.",
+    "linemen_title": "Linemen",
+    "member": {
+      "email": "Email: {email}",
+      "login": "User name: {login}",
+      "mobile": "Mobile no.: {mobile}"
+    },
+    "phones": {
+      "app_version": "App {version}",
+      "last_online": "Phone last online {when}",
+      "name": "{model} ({code})",
+      "never_online": "Not online yet",
+      "none": "Not signed in on any phone yet.",
+      "sign_out": "Sign out this phone",
+      "sign_out_confirm": "Sign out phone",
+      "sign_out_summary": "{phone} will need the user name and password again. Payments saved on it stay on it.",
+      "sign_out_title": "Sign out this phone?",
+      "signed_in": "Signed in",
+      "signed_out": "Signed out",
+      "signed_out_done": "Phone signed out.",
+      "title": "Phones",
+      "unknown_model": "Phone"
+    },
+    "read_only": "View only: the app fee is not paid. You can see your team but not change it.",
+    "reset": {
+      "done_lineman": "{name}'s phone is signed out. Tell {name} the new password.",
+      "done_staff": "{name} is signed out. Tell {name} the new password.",
+      "done_title": "New password saved",
+      "note_lineman": "{name}'s phone will be signed out. {name} signs in again with the new password.",
+      "note_staff": "{name} will be signed out of the website and signs in again with the new password.",
+      "submit": "Save new password",
+      "title": "New password for {name}"
+    },
+    "share_message": "{business}: sign-in for the {app} lineman app.\nApp: {app_url}\nUser name: {login}\nPassword: the owner will tell you.",
+    "staff_empty": "No staff yet.",
+    "staff_title": "Staff",
+    "status": {
+      "active": "Active",
+      "no_password": "Has not set a password yet",
+      "switched_off": "Switched off"
+    },
+    "switch_off": {
+      "confirm": "Switch off",
+      "done": "{name} is switched off.",
+      "summary_lineman": "{name} can't sign in any more, and the phone is signed out now. Payments and history stay. Payments still saved on the phone are not lost: they reach the office and are marked for checking.",
+      "summary_staff": "{name} can't sign in any more and is signed out now. Their work stays.",
+      "title": "Switch off {name}?"
+    },
+    "switch_on": {
+      "done": "{name} can sign in again."
+    }
+  },
   "ui": {
     "help_about": "Help: {topic}",
     "language": "Language",

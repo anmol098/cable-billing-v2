@@ -139,7 +139,11 @@ describe("form fields", () => {
       checkStaffFields({ name: "Asha", email: "Asha.R@Cable.in", setup: "invite" }),
     ).toMatchObject({
       ok: true,
-      value: { email: "asha.r@cable.in", password: null, loginCandidates: expect.arrayContaining(["asha.r", "asha.r-2"]) },
+      value: {
+        email: "asha.r@cable.in",
+        password: null,
+        loginCandidates: expect.arrayContaining(["asha.r", "asha.r-2"]),
+      },
     });
     expect(
       checkStaffFields({
