@@ -417,6 +417,18 @@ that it opened another app (RULE-19). `HonestReceiptWordsTest` checks every `mob
 | Next bill (waiting) | अगला बिल | An extra charge not yet on a bill | clock, `semantic.pending` | Pending, Unbilled |
 | Why? | क्यों? | The reason the Owner writes for a bill change | — | Remarks, Justification |
 
+## Home words (web Home page)
+
+| English | हिंदी | Means | Icon / colour | Not this |
+|---|---|---|---|---|
+| Cash today / UPI today | आज नकद / आज UPI | Money taken today (IST day), cash and UPI apart; undone payments left out | banknote `semantic.cash` / qr-code `semantic.upi` | Today's collection, Revenue |
+| Bills made | बिल बने | Σ of this month's bills | receipt-text | Billed amount, Invoiced |
+| Money taken | पैसे मिले | Σ of this month's payments (cash + UPI) | hand-coins | Collected, Receipts, Realised |
+| Total due | कुल बाकी | What all customers owe now (customers with credit count 0) | chart-column, `semantic.due` | Outstanding, Receivables, AR |
+| To check | जाँचना है | Things the office should look at: handovers, payments to check, missed bills, the free trial | triangle-alert / handshake | Alerts, Notifications, Exceptions |
+| Free trial: {n} days left | फ़्री ट्रायल: {n} दिन बाकी | Days until the free trial ends (Owner only) | credit-card, `semantic.pending` | Trial expiry, Subscription status |
+| Scan this with the lineman's phone | लाइनमैन के फ़ोन से यह QR स्कैन करें | The QR code that opens the app on Google Play | qr-code | Download APK, Install link |
+
 ## Words we never show users
 
 Invoice, Ledger, Allocation, Adjustment, Reversal, Tenant, Sync / Synced / Pending sync,

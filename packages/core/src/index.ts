@@ -80,6 +80,7 @@ export {
   type TenantContext,
 } from "./context/tenant-context";
 export * from "./customers";
+export * from "./dashboard";
 export {
   CORE_ERROR_CODES,
   type CoreErrorCode,

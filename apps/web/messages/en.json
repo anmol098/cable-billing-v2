@@ -812,6 +812,43 @@
       "show_success": "Show done"
     }
   },
+  "home": {
+    "alerts": {
+      "handovers": "{count, plural, one {# cash handover to check} other {# cash handovers to check}}",
+      "missed": "{count, plural, one {Bills of # month were missed} other {Bills of # months were missed}}",
+      "none": "Nothing to check now.",
+      "pay": "Pay now",
+      "payments": "{count, plural, one {# payment to check} other {# payments to check}}",
+      "title": "To check",
+      "trial": "{days, plural, =0 {Free trial ends today} one {Free trial: # day left} other {Free trial: # days left}}",
+      "trial_until": "Free until {date}."
+    },
+    "app": {
+      "qr": "QR code: the lineman app on Google Play",
+      "scan": "Scan this with the lineman's phone, or open the link on it."
+    },
+    "due": {
+      "customers": "{count, plural, =0 {Nobody owes money} one {# customer owes money} other {# customers owe money}}",
+      "title": "Total due"
+    },
+    "month": {
+      "bill_count": "{count, plural, =0 {No bills yet} one {# bill} other {# bills}}",
+      "billed": "Bills made",
+      "collected": "Money taken",
+      "title": "This month: {month}"
+    },
+    "page_description": "How today and this month are going.",
+    "run": {
+      "none": "No bills made yet. Bills are made by themselves on the 1st of every month.",
+      "title": "Bills of {month}"
+    },
+    "take_payment": "Take payment",
+    "today": {
+      "cash": "Cash today",
+      "title": "Today, {date}",
+      "upi": "UPI today"
+    }
+  },
   "job_alerts": {
     "admin": {
       "attempts": "Tries: {attempts} of {maxAttempts}",

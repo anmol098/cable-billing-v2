@@ -1,0 +1,62 @@
+{
+  "_review": [
+    "page_description",
+    "take_payment",
+    "today.title",
+    "today.cash",
+    "today.upi",
+    "month.title",
+    "month.billed",
+    "month.bill_count",
+    "month.collected",
+    "due.title",
+    "due.customers",
+    "run.title",
+    "run.none",
+    "alerts.title",
+    "alerts.none",
+    "alerts.handovers",
+    "alerts.payments",
+    "alerts.missed",
+    "alerts.trial",
+    "alerts.trial_until",
+    "alerts.pay",
+    "app.scan",
+    "app.qr"
+  ],
+  "page_description": "आज और इस महीने का हाल।",
+  "take_payment": "पैसे लें",
+  "today": {
+    "title": "आज, {date}",
+    "cash": "आज नकद",
+    "upi": "आज UPI"
+  },
+  "month": {
+    "title": "इस महीने: {month}",
+    "billed": "बिल बने",
+    "bill_count": "{count, plural, =0 {अभी कोई बिल नहीं} one {# बिल} other {# बिल}}",
+    "collected": "पैसे मिले"
+  },
+  "due": {
+    "title": "कुल बाकी",
+    "customers": "{count, plural, =0 {किसी का बाकी नहीं} one {# ग्राहक का बाकी है} other {# ग्राहकों का बाकी है}}"
+  },
+  "run": {
+    "title": "{month} के बिल",
+    "none": "अभी कोई बिल नहीं बना। हर महीने की 1 तारीख को बिल अपने आप बनते हैं।"
+  },
+  "alerts": {
+    "title": "जाँचना है",
+    "none": "अभी कुछ जाँचना नहीं है।",
+    "handovers": "{count, plural, one {# कैश जाँचना बाकी} other {# कैश जाँचने बाकी}}",
+    "payments": "{count, plural, one {# पेमेंट जाँचना है} other {# पेमेंट जाँचने हैं}}",
+    "missed": "{count, plural, one {# महीने के बिल छूट गए} other {# महीनों के बिल छूट गए}}",
+    "trial": "{days, plural, =0 {फ़्री ट्रायल आज ख़त्म} one {फ़्री ट्रायल: # दिन बाकी} other {फ़्री ट्रायल: # दिन बाकी}}",
+    "trial_until": "{date} तक मुफ़्त।",
+    "pay": "अभी पेमेंट करें"
+  },
+  "app": {
+    "scan": "लाइनमैन के फ़ोन से यह QR स्कैन करें, या उस फ़ोन पर लिंक खोलें।",
+    "qr": "QR कोड: Google Play पर लाइनमैन ऐप"
+  }
+}
