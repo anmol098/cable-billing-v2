@@ -3,10 +3,10 @@ id: T-031
 title: Rental plans
 phase: 1
 area: web
-status: todo
-owner:
-claimed_at:
-branch:
+status: claimed
+owner: agent-t031
+claimed_at: 2026-10-14T04:47:40.053Z
+branch: task/T-031-rental-plans
 depends_on: [T-029, T-022, T-025]
 review: self
 claimable_by: agent
@@ -55,3 +55,7 @@ FR-007, D-16 — see `docs/IMPLEMENTATION_PLAN.md`, `docs/PRD.md`, `docs/BRD.md`
 ## Completion notes
 
 _The agent fills this in before opening the PR: what was built, decisions taken, deviations, follow-up tasks created, and how it was verified._
+
+## Board log
+
+- 2026-10-14T04:47:40.054Z claimed by agent-t031
