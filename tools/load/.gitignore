@@ -1,0 +1,4 @@
+# Run output (summary.json / summary.md per run). Commit a report on purpose with `git add -f`.
+results/
+# Cached sign-ins (refresh tokens and session cookies of seed users on a test target). Never commit.
+.cache/
