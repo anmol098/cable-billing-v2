@@ -3,10 +3,10 @@ id: T-087b
 title: Language switch label (accessible name, Devanagari font on English pages)
 phase: 4
 area: web-ui
-status: todo
-owner:
-claimed_at:
-branch:
+status: claimed
+owner: agent-t087b
+claimed_at: 2026-10-14T20:57:22.784Z
+branch: task/T-087b-language-switch-label-accessible-name-de
 depends_on: [T-087a]
 review: self
 claimable_by: agent
@@ -70,3 +70,7 @@ measurably on a busy machine; it is 121 KB of transfer on a first visit).
 ## Completion notes
 
 _The agent fills this in before opening the PR._
+
+## Board log
+
+- 2026-10-14T20:57:22.794Z claimed by agent-t087b
