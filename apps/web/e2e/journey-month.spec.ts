@@ -4,9 +4,10 @@
  * lineman app's API; each step checks that the numbers agree with the pages before it.
  *
  * 1. Sign up (email link) → areas, plans and a lineman (Settings).
- * 2. Customers with connections: Asha has two VCs (₹250 + ₹350), Bina's code is also used by
- *    another business (allowed) but not twice in this one, Chandu has a ₹700 old due (brought from
- *    the old records, as the import does).
+ * 2. Customers with connections: Asha (3 steps + Connections tab) has two VCs (₹250 + ₹350); Bina
+ *    and Chandu come from an Excel/CSV file. Bina's code is also used by another business (allowed)
+ *    but not twice in this one. Chandu has a ₹700 old due from the old records (written directly:
+ *    the import file has no old-due column; migration brings it the same way).
  * 3. Make the month's bills: preview → run → register → Asha's one bill has both VCs.
  * 4. Counter payments: Chandu's ₹800 pays the old bill first, then part of this month's; Bina's
  *    ₹300 leaves ₹50 credit.
@@ -327,43 +328,22 @@ test.describe("journey: an operator's first month", () => {
     test.setTimeout(150_000);
     const page = await ownerPage(browser);
 
-    const addCustomer = async (input: {
-      code: string;
-      name: string;
-      area: string;
-      vc: string;
-      rent: { plan: string } | { own: string };
-    }) => {
-      await page.goto("/customers/new");
-      await page.getByLabel("Customer code").fill(input.code);
-      await page.getByLabel("Name").fill(input.name);
-      await page.getByLabel("Mobile no.", { exact: true }).fill("+91 98111 22233");
-      await page.getByLabel("Area").selectOption({ label: input.area });
-      await page.getByRole("button", { name: "Next" }).click();
-      await expect(page.getByText("Step 2 of 3")).toBeVisible();
-      await page.getByLabel("VC number").fill(input.vc);
-      if ("plan" in input.rent) {
-        await page.getByLabel("Monthly rent").selectOption({ label: input.rent.plan });
-      } else {
-        await page.getByLabel("Monthly rent").selectOption({ label: "Own amount" });
-        await page.getByLabel("Rent (₹ a month)").fill(input.rent.own);
-      }
-      // From the 1st, so this month's bill has the full rent.
-      await page.getByLabel("Start day").fill(period);
-      await page.getByRole("button", { name: "Next" }).click();
-      await page.getByRole("button", { name: "Save customer" }).click();
-      await expect(page).toHaveURL(/\/customers\/[0-9a-f-]{36}$/);
-      await expect(page.getByRole("heading", { level: 1 })).toHaveText(input.name);
-      return page.url().split("/").pop() ?? "";
-    };
-
-    ids.asha = await addCustomer({
-      code: "101",
-      name: "Asha Devi",
-      area: "North",
-      vc: vc.a1,
-      rent: { plan: "Basic · ₹250" },
-    });
+    // Asha, through the 3 steps; her box starts on the 1st, so this month's bill has full rent.
+    await page.goto("/customers/new");
+    await page.getByLabel("Customer code").fill("101");
+    await page.getByLabel("Name").fill("Asha Devi");
+    await page.getByLabel("Mobile no.", { exact: true }).fill("+91 98111 22233");
+    await page.getByLabel("Area").selectOption({ label: "North" });
+    await page.getByRole("button", { name: "Next" }).click();
+    await expect(page.getByText("Step 2 of 3")).toBeVisible();
+    await page.getByLabel("VC number").fill(vc.a1);
+    await page.getByLabel("Monthly rent").selectOption({ label: "Basic · ₹250" });
+    await page.getByLabel("Start day").fill(period);
+    await page.getByRole("button", { name: "Next" }).click();
+    await page.getByRole("button", { name: "Save customer" }).click();
+    await expect(page).toHaveURL(/\/customers\/[0-9a-f-]{36}$/);
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Asha Devi");
+    ids.asha = page.url().split("/").pop() ?? "";
     // Asha's second box, from the Connections tab.
     await page.goto(`/customers/${ids.asha}/connections`);
     await page.getByRole("link", { name: "Add connection" }).click();
@@ -373,21 +353,33 @@ test.describe("journey: an operator's first month", () => {
     await page.getByRole("button", { name: "Save connection" }).click();
     await expect(page.getByText("Connection added.", { exact: true })).toBeVisible();
 
+    // Bina and Chandu come from an Excel/CSV file (day-first start dates, as people write them).
     // 102 is also the other business's customer's code: that's fine (PRD §15 #2).
-    ids.bina = await addCustomer({
-      code: "102",
-      name: "Bina Rao",
-      area: "South",
-      vc: vc.b1,
-      rent: { plan: "Basic · ₹250" },
+    const first = `${period.slice(8, 10)}/${period.slice(5, 7)}/${period.slice(0, 4)}`;
+    const csv = [
+      "Customer code,Name,Mobile no.,Area,VC number,Plan,Rent (₹ per month),Start day",
+      `102,Bina Rao,+91 98111 22244,South,${vc.b1},basic,,${first}`,
+      `103,Chandu Lal,+91 98111 22255,north,${vc.c1},,200,${first}`,
+    ].join("\r\n");
+    await page.goto("/customers/import");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Add from Excel");
+    await page.getByRole("button", { name: "Next" }).click();
+    await page.getByLabel("The filled form (.xlsx or .csv)").setInputFiles({
+      name: "customers.csv",
+      mimeType: "text/csv",
+      buffer: Buffer.from(`﻿${csv}`, "utf8"),
     });
-    ids.chandu = await addCustomer({
-      code: "103",
-      name: "Chandu Lal",
-      area: "North",
-      vc: vc.c1,
-      rent: { own: "200" },
-    });
+    await page.getByRole("button", { name: "Check the file" }).click();
+    await expect(page.getByText("2 customers ready to add")).toBeVisible();
+    await expect(page.getByText("with 2 connections (VC)")).toBeVisible();
+    await page.getByRole("button", { name: "Add 2 customers" }).click();
+    await expect(page.getByRole("heading", { name: "Done" })).toBeVisible();
+    await expect(page.getByText("2 customers added")).toBeVisible();
+    const imported = await db.withTenant(operatorId, (tx) => tx.select().from(customers));
+    ids.bina = imported.find((c) => c.customerCode === "102")?.id ?? "";
+    ids.chandu = imported.find((c) => c.customerCode === "103")?.id ?? "";
+    expect(ids.bina).not.toBe("");
+    expect(ids.chandu).not.toBe("");
 
     // ...but not twice in this business.
     await page.goto("/customers/new");
@@ -398,7 +390,7 @@ test.describe("journey: an operator's first month", () => {
     await page.getByRole("button", { name: "Save customer" }).click();
     await expect(page.getByText("Code 102 is already used by another customer.")).toBeVisible();
 
-    // Chandu's old due of ₹700 from the old records, as the import brings it: a bill four months
+    // Chandu's old due of ₹700 from the old records, as the migration brings it: a bill four months
     // ago and its ledger line (the balance row now matches the ledger).
     await db.withTenant(operatorId, async (tx) => {
       const madeAt = istStartOfDay(addDays(oldPeriod, 4));
