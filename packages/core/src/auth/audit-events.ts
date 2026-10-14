@@ -24,6 +24,10 @@ export const AUTH_AUDIT_ACTIONS = [
   "auth.two_factor_enabled",
   /** T-086b: turning on TOTP ended the user's other sessions (`{ sessions, reason }`). */
   "auth.other_sessions_ended",
+  /** T-086d: a platform admin's one-time setup link was made (`{ reissued }`). */
+  "auth.admin_setup_link_issued",
+  /** T-086d: a platform admin set their password and turned on TOTP with their setup link. */
+  "auth.admin_setup_completed",
 ] as const;
 export type AuthAuditAction = (typeof AUTH_AUDIT_ACTIONS)[number];
 

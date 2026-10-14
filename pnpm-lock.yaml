@@ -372,6 +372,9 @@ importers:
 
   packages/core:
     dependencies:
+      '@better-auth/utils':
+        specifier: 0.4.2
+        version: 0.4.2
       '@cb/db':
         specifier: workspace:*
         version: link:../db
@@ -403,6 +406,9 @@ importers:
       '@types/node':
         specifier: 'catalog:'
         version: 24.19.2
+      tsx:
+        specifier: 'catalog:'
+        version: 4.23.15
       typescript:
         specifier: 'catalog:'
         version: 7.0.2

@@ -5,7 +5,7 @@
  * in the environment of both the test runner and the server (the CI "Web e2e" job sets them).
  * Each run seeds its own operator and users with random names, so runs don't collide.
  */
-import { createHash, createHmac, randomBytes } from "node:crypto";
+import { createHash, randomBytes } from "node:crypto";
 import { hashPassword } from "@cb/core";
 import {
   accounts,
@@ -221,43 +221,21 @@ test.describe("sign-in", () => {
     await expect(formAlert(page)).toContainText("This link does not work any more");
   });
 
-  test("a platform admin must turn on 2-step sign-in, then needs the code", async ({ page }) => {
+  test("a platform admin without 2-step sign-in is refused and told to ask for a setup link (T-086d)", async ({
+    page,
+  }) => {
     await page.goto("/admin");
     await expect(page).toHaveURL(/\/login\?next=%2Fadmin$/);
     await signIn(page, "admin");
-    await expect(page).toHaveURL(/\/login\/2fa\/setup$/);
-    await page.getByLabel("Your password").fill(PASSWORD);
-    await page.getByRole("button", { name: "Next" }).click();
-    const secret = (await page.getByTestId("totp-secret").textContent())?.trim() ?? "";
-    expect(secret).toMatch(/^[A-Z2-7]+=*$/);
-    await page.getByLabel("6-digit code from the app").fill(totp(secret));
-    await page.getByRole("button", { name: "Turn on" }).click();
-    await expect(page).toHaveURL(/\/admin$/);
-
-    await page.context().clearCookies();
-    await page.goto("/login");
-    await signIn(page, "admin");
-    await expect(page).toHaveURL(/\/login\/2fa$/);
-    await page.getByLabel("6-digit code").fill("000000");
-    await page.getByRole("button", { name: "Check code" }).click();
-    await expect(formAlert(page)).toContainText("Wrong code");
-    await page.getByLabel("6-digit code").fill(totp(secret));
-    await page.getByRole("button", { name: "Check code" }).click();
-    await expect(page).toHaveURL(/\/admin$/);
+    // The password is right, but no session and no self-enrolment: only a setup link helps.
+    await expect(formAlert(page)).toContainText("Ask for a new setup link.");
+    await expect(page).toHaveURL(/\/login(\?|$)/);
+    const cookies = await page.context().cookies();
+    expect(cookies.find((c) => c.name.endsWith("cb.session_token"))).toBeUndefined();
+    await page.goto("/admin");
+    await expect(page).toHaveURL(/\/login\?next=%2Fadmin$/);
+    // The old self-enrolment page gives an admin nothing either (no session to enrol from).
+    await page.goto("/login/2fa/setup");
+    await expect(page).toHaveURL(/\/login$/);
   });
 });
-
-/** RFC 6238 TOTP (SHA-1, 6 digits, 30 s) from a base32 secret. */
-function totp(base32Secret: string, at = Date.now()): string {
-  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
-  let bits = "";
-  for (const char of base32Secret.replace(/=+$/, "")) {
-    bits += alphabet.indexOf(char).toString(2).padStart(5, "0");
-  }
-  const key = Buffer.from((bits.match(/.{8}/g) ?? []).map((byte) => Number.parseInt(byte, 2)));
-  const counter = Buffer.alloc(8);
-  counter.writeBigUInt64BE(BigInt(Math.floor(at / 1000 / 30)));
-  const mac = createHmac("sha1", key).update(counter).digest();
-  const offset = (mac[mac.length - 1] ?? 0) & 0x0f;
-  return String((mac.readUInt32BE(offset) & 0x7fffffff) % 1_000_000).padStart(6, "0");
-}

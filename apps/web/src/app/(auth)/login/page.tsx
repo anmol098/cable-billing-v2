@@ -15,7 +15,13 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: t("title"), robots: { index: false, follow: false } };
 }
 
-const NOTICES = ["signed_out", "session_ended", "password_changed"] as const;
+const NOTICES = [
+  "signed_out",
+  "session_ended",
+  "password_changed",
+  // T-086d: set up with the link, but the automatic sign-in after it did not go through.
+  "admin_setup_done",
+] as const;
 type Notice = (typeof NOTICES)[number];
 
 function first(value: string | string[] | undefined): string | undefined {

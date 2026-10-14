@@ -67,7 +67,9 @@
       "password_reset_requested": "{who} asked for a link to set a new password",
       "password_reset_completed": "{who} set a new password with the email link",
       "two_factor_enabled": "{who} turned on 2-step sign-in",
-      "other_sessions_ended": "{who} turned on 2-step sign-in, so {count, plural, one {# other device was} other {# other devices were}} signed out"
+      "other_sessions_ended": "{who} turned on 2-step sign-in, so {count, plural, one {# other device was} other {# other devices were}} signed out",
+      "admin_setup_link_issued": "A one-time setup link was made for {who}",
+      "admin_setup_completed": "{who} set a password and turned on 2-step sign-in with the setup link"
     },
     "mobile_auth": {
       "refresh_reuse_detected": "The app signed out phone {target} of {who}: an old sign-in was used again"
@@ -193,7 +195,9 @@
       "password_reset_requested": "Asked for a new password",
       "password_reset_completed": "Set a new password",
       "two_factor_enabled": "Turned on 2-step sign-in",
-      "other_sessions_ended": "Signed out on other devices"
+      "other_sessions_ended": "Signed out on other devices",
+      "admin_setup_link_issued": "Setup link made",
+      "admin_setup_completed": "Set up with the link"
     },
     "mobile_auth": {
       "refresh_reuse_detected": "Phone signed out for safety"

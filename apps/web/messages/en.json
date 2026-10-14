@@ -490,6 +490,8 @@
         "restore": "Area shown again"
       },
       "auth": {
+        "admin_setup_completed": "Set up with the link",
+        "admin_setup_link_issued": "Setup link made",
         "other_sessions_ended": "Signed out on other devices",
         "password_reset_completed": "Set a new password",
         "password_reset_requested": "Asked for a new password",
@@ -754,6 +756,8 @@
         "restore": "{who} showed area {target} again"
       },
       "auth": {
+        "admin_setup_completed": "{who} set a password and turned on 2-step sign-in with the setup link",
+        "admin_setup_link_issued": "A one-time setup link was made for {who}",
         "other_sessions_ended": "{who} turned on 2-step sign-in, so {count, plural, one {# other device was} other {# other devices were}} signed out",
         "password_reset_completed": "{who} set a new password with the email link",
         "password_reset_requested": "{who} asked for a link to set a new password",
@@ -861,6 +865,19 @@
     }
   },
   "auth": {
+    "admin_setup": {
+      "account_label": "Account",
+      "confirm_label": "New password again",
+      "description": "Set your password and turn on 2-step sign-in. This link works once.",
+      "invalid": "This setup link does not work any more. Ask for a new setup link.",
+      "password_label": "New password",
+      "start": "Start",
+      "start_intro": "You need an authenticator app on your phone (Google Authenticator, Authy, …).",
+      "starting": "Please wait…",
+      "submit": "Turn on and sign in",
+      "submitting": "Checking…",
+      "title": "Set up your admin account"
+    },
     "email": {
       "reset_action": "Open this link to set it. It works once, for {minutes} minutes:",
       "reset_ignore": "If it was not you, ignore this email. Your password stays the same.",
@@ -877,6 +894,7 @@
       "rate_limited": "Too many tries. Try again in {minutes, plural, one {# minute} other {# minutes}}.",
       "required": "Fill this in.",
       "role_not_allowed": "This login is for the phone app. Linemen sign in on the phone, not here.",
+      "setup_link_required": "2-step sign-in is not set up for this admin account. Ask for a new setup link.",
       "sign_in_again": "2-step sign-in did not turn on. Sign in again and try once more.",
       "title": "Could not sign in",
       "two_factor_expired": "This took too long. Sign in again.",
@@ -893,6 +911,7 @@
       "title": "Sign in"
     },
     "notice": {
+      "admin_setup_done": "Your admin account is ready. Sign in with your password and the code.",
       "password_changed": "Password changed. Sign in with your new password.",
       "session_ended": "Please sign in again.",
       "signed_out": "You are signed out."

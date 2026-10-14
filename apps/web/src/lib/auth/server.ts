@@ -16,10 +16,12 @@ import { randomUUID } from "node:crypto";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import {
+  type AdminSetupService,
   type AuthEmailMessage,
   type AuthEmailTransport,
   type AuthService,
   type BotCheck,
+  createAdminSetupService,
   createAuthService,
   createCaptureTransport,
   createLogger,
@@ -50,6 +52,7 @@ type Singletons = {
   auth: AuthService;
   rateLimiter: RateLimiter;
   signup: SignupService;
+  adminSetup: AdminSetupService;
 };
 
 // Kept on globalThis so `next dev` hot reloads don't open a new pool each time.
@@ -156,7 +159,9 @@ function create(): Singletons {
     botCheck: botCheckFor(logger),
     sendEmail: (email) => transport.send(renderSignupEmail(email)),
   });
-  return { runtime, auth, rateLimiter, signup };
+  // T-086d: the platform admin's one-time setup link (`/admin-setup/<token>`).
+  const adminSetup = createAdminSetupService({ auth, db: runtime.db, rateLimiter, logger });
+  return { runtime, auth, rateLimiter, signup, adminSetup };
 }
 
 function singletons(): Singletons {
@@ -189,4 +194,9 @@ export function getRateLimiter(): RateLimiter {
 /** Self sign-up (`/signup`, `/verify/<token>`, T-027). */
 export function getSignupService(): SignupService {
   return singletons().signup;
+}
+
+/** The platform admin's one-time setup link (`/admin-setup/<token>`, T-086d). */
+export function getAdminSetupService(): AdminSetupService {
+  return singletons().adminSetup;
 }
