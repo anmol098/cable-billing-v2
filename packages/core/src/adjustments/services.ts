@@ -449,7 +449,14 @@ export const listAdjustments = defineService({
     const op = ctx.operatorId;
     const filters: SQL[] = [eq(adjustments.operatorId, op)];
     if (input.source) filters.push(eq(adjustments.source, input.source));
-    if (input.customerId) filters.push(eq(adjustments.customerId, input.customerId));
+    if (input.customerId) {
+      const [customer] = await tx
+        .select({ id: customers.id })
+        .from(customers)
+        .where(and(eq(customers.operatorId, op), eq(customers.id, input.customerId)));
+      if (!customer) return err(notFound());
+      filters.push(eq(adjustments.customerId, customer.id));
+    }
     if (input.state === "pending") {
       filters.push(eq(adjustments.direction, "debit"), isNull(adjustments.invoiceId));
     } else if (input.state === "billed") {
