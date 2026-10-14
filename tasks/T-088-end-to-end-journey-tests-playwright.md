@@ -3,10 +3,10 @@ id: T-088
 title: End-to-end journey tests (Playwright)
 phase: 4
 area: qa
-status: todo
-owner:
-claimed_at:
-branch:
+status: claimed
+owner: agent-t088
+claimed_at: 2026-10-14T11:47:52.264Z
+branch: task/T-088-end-to-end-journey-tests-playwright
 depends_on: [T-027, T-047, T-048, T-062]
 review: self
 claimable_by: agent
@@ -45,3 +45,7 @@ PLAN §16, PRD §15 — see `docs/IMPLEMENTATION_PLAN.md`, `docs/PRD.md`, `docs/
 ## Completion notes
 
 _The agent fills this in before opening the PR: what was built, decisions taken, deviations, follow-up tasks created, and how it was verified._
+
+## Board log
+
+- 2026-10-14T11:47:52.264Z claimed by agent-t088
