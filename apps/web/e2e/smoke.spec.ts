@@ -1,12 +1,13 @@
 import { expect, test } from "@playwright/test";
 
 test.describe("smoke", () => {
-  test("GET /api/health reports ok with a version", async ({ request }) => {
+  test("GET /api/health reports ok with a version and a live database", async ({ request }) => {
     const response = await request.get("/api/health");
     expect(response.status()).toBe(200);
     expect(response.headers()["cache-control"]).toContain("no-store");
     const body = await response.json();
-    expect(body).toMatchObject({ status: "ok", checks: { db: { status: "not_configured" } } });
+    // The e2e server runs with the migrated Postgres service, so the `select 1` ping answers (T-096a).
+    expect(body).toMatchObject({ status: "ok", checks: { db: { status: "ok" } } });
     expect(body.version).toMatch(/^\d+\.\d+\.\d+/);
   });
 

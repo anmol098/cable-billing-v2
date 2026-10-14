@@ -25,7 +25,11 @@ Severities: **P1** act now (any hour), **P2** same working day, **P3** next work
 | `unsafe-db-role` | P1 | Sentry message `Unsafe database runtime role` (boot check) | the app connects as a role that can bypass RLS | [environments.md §4.12](environments.md#412-runtime-database-role-cb_app-staging-and-production-after-the-first-migration) |
 | `new-issue` | P3 | any new or regressed Sentry issue in `production` | a new kind of error | [§4 below](#4-triage-a-sentry-alert) |
 | `nightly-backup` | P1 | Sentry **cron monitor**, checked in by `backup.yml` | no successful backup by 21:00 UTC, or it reported an error | [backup-and-restore.md §7](backup-and-restore.md#7-when-the-backup-alert-fires) |
-| `health` | P1 | **uptime check** on `/api/health` | 3 failed checks in a row (not 200, or no answer in 10 s) | [§5 below](#5-site-down) |
+| `cron-billing-scheduler` | P1 | Sentry **cron monitor**, checked in by `/api/cron/billing-scheduler` | no check-in by 19:15 UTC (00:45 IST), a run over 6 min, or an error answer | [§8 below](#8-a-cron-missed-a-run-or-reported-an-error) |
+| `cron-job-worker` | P1 | cron monitor, `/api/cron/job-worker` | 3 runs in a row missed (2 min margin), over 6 min, or failed | [§8 below](#8-a-cron-missed-a-run-or-reported-an-error) |
+| `cron-invariants` | P2 | cron monitor, `/api/cron/invariants` | no check-in by 21:30 UTC (03:00 IST), or an error | [§8 below](#8-a-cron-missed-a-run-or-reported-an-error) |
+| `cron-subscription-states` | P2 | cron monitor, `/api/cron/subscription-states` | no check-in by 01:00 UTC (06:30 IST), or an error | [§8 below](#8-a-cron-missed-a-run-or-reported-an-error) |
+| `health` | P1 | **uptime check** on `/api/health` (DB `select 1`, 2 s timeout) | 3 failed checks in a row (not 200, or no answer in 10 s); 503 = database not answering | [§5 below](#5-site-down) |
 
 Alerts that exist without Sentry (already built):
 
@@ -35,15 +39,32 @@ Alerts that exist without Sentry (already built):
 - **GitHub** emails the last editor of `backup.yml` when a scheduled run fails.
 - **Razorpay** shows failed webhook deliveries in its dashboard (and retries them).
 
-### Known gaps (follow-up task T-096a)
+### Database health and cron check-ins (T-096a)
 
-- `/api/health` does not touch the database yet: its `db` check reports `not_configured` (T-005's
-  placeholder), so the uptime check catches "site down" but not "database down". T-096a adds a
-  `select 1` with a short timeout.
-- The Vercel crons do not check in with Sentry, so a cron that **silently stops running** (cron
-  disabled, project paused) raises nothing; only crashes do (`cron-failed`). T-096a wraps the cron
-  routes in Sentry cron check-ins and adds monitors for `billing-scheduler`, `job-worker` and
-  `invariants` to `alerts.json`. Until then the daily check in §6 covers it.
+- `/api/health` runs `select 1` (read-only, as `app_platform`, no table read) through its own small
+  pool with a **2 s** timeout. Database up: `200`, `"db":{"status":"ok"}`. Refused, failing or
+  slower than 2 s: `503`, `"status":"degraded"`, `"db":{"status":"error"}`. The body never carries
+  the error, the host or a timing. Concurrent requests share one ping, so a burst of calls costs
+  one query.
+- The Vercel crons in the table above check in with their Sentry cron monitor (`in_progress`, then
+  `ok` for a 2xx answer or `error` otherwise) **only when `SENTRY_DSN` is set**; without it nothing
+  is sent. A call that fails the `CRON_SECRET` check never checks in. Sentry being down or slow never
+  changes a cron's answer: check-ins are fire-and-forget, the final flush waits at most ~2.5 s, and
+  a failure is logged as `cron.check_in_failed` / `cron.check_in_not_flushed`.
+- The monitors (schedule, margin, max runtime, failure threshold) are defined only in `alerts.json`;
+  check-ins carry just the slug, so **run `sentry-alerts.mjs --apply` before relying on them** (§2).
+  `alerts.test.mjs` fails if a monitor's schedule differs from `apps/web/vercel.json`, or if the
+  monitored crons differ from `CRON_MONITORS` in `apps/web/src/app/api/cron/_lib/monitor.ts`.
+
+### Known gaps
+
+- Not monitored yet: `session-close` (still a 501 stub; add it to `CRON_MONITORS` and `alerts.json`
+  when T-062a lands) and the weekly `receipt-links-cleanup` (housekeeping; a crash still raises
+  `cron-failed`).
+- Vercel runs crons on the **production** deployment only, so the monitors see the `production`
+  environment. Previews never check in.
+- None of this has been run against a real Sentry org (H-01): the check-in envelopes were checked
+  with the SDK's own transport hook in tests, not received by Sentry.
 
 ## 2. Setting up the Sentry side (H-01, after environments.md §4.3)
 
@@ -69,8 +90,12 @@ Alerts that exist without Sentry (already built):
    the org small (the people who are on call). For P1 at night, each on-call person installs the
    Sentry mobile app and allows push notifications. Who else gets billing-failure alerts is open
    question Q-11 (default: platform admin + tenant Owner by email, which T-043 already does).
-6. Check it works: Sentry → Alerts lists the 8 rules and the `nightly-backup` monitor; trigger a test
-   with Actions → Backup → Run workflow → `backup` and watch the monitor turn green.
+6. Check it works: Sentry → Alerts lists the 8 rules; Crons lists `nightly-backup` and the four
+   `cron-*` monitors. Trigger a test with Actions → Backup → Run workflow → `backup` and watch
+   `nightly-backup` turn green. The `cron-*` monitors turn green on their own once production has
+   `SENTRY_DSN` and the crons run (`cron-job-worker` within a few minutes of the deploy). On each
+   monitor's page, check that its notifications reach the on-call people (Sentry decides that per
+   monitor; the script does not set it).
 
 ## 3. Uptime check (H-01, by hand)
 
@@ -105,7 +130,7 @@ point an uptime check at a preview URL.
 The uptime check failed three times.
 
 1. Open `/api/health` yourself. `200` = a blip (note it). `503` with `"db":{"status":"error"}` =
-   database (Neon status page, Neon console: is the compute up, is the project suspended for
+   the database refused, failed or took over 2 s to answer `select 1` (Neon status page, Neon console: is the compute up, is the project suspended for
    billing?). `500` = the app fails at boot: Vercel → Deployments → latest → Runtime logs; an
    `EnvError` names the missing variable (environments.md §2).
 2. Did a deploy just go out? Vercel → Deployments. If yes and the previous one was fine: **Instant
@@ -116,9 +141,11 @@ The uptime check failed three times.
 4. After recovery: check crons ran (Vercel → Crons); if the bill scheduler's run at 00:15 IST was
    missed, the next run's catch-up handles it, or call it by hand (billing-run-failure.md §2).
 
-## 6. Daily check (until T-096a, and during hypercare after cutover)
+## 6. Daily check (during hypercare after cutover, or while Sentry is not set up)
 
-Two minutes each morning (IST). Read-only SQL on production, as the owner, from your machine
+The cron monitors (§1) now raise a missed or failed cron on their own, once `SENTRY_DSN` is set and
+`--apply` has created them. Until then, and every morning of hypercare, this check covers the same
+ground. Two minutes each morning (IST). Read-only SQL on production, as the owner, from your machine
 (environments.md §4.12 for the URL; never a screenshot of results with names in it):
 
 ```sql
@@ -143,3 +170,33 @@ Until the admin console shows them (T-086), read them with SQL (counts only):
 | Payment sync success / duplicates | Vercel logs: `mobile_api.payment_batch` lines carry `posted`, `posted_needs_review`, `duplicate`, `rejected`, `retry_later` counts per request |
 | Payments needing review | `SELECT review_reason, count(*) FROM payments WHERE review_status = 'needs_review' GROUP BY 1` |
 | Handover discrepancy rate | `SELECT count(*) FILTER (WHERE discrepancy_paise <> 0)::float / nullif(count(*) FILTER (WHERE discrepancy_paise IS NOT NULL), 0) FROM collection_sessions WHERE business_date >= current_date - 30` |
+
+## 8. A cron missed a run or reported an error
+
+Alerts `cron-billing-scheduler`, `cron-job-worker`, `cron-invariants`, `cron-subscription-states`
+(Sentry → Crons). The monitor page says which kind: **missed** (no check-in in time), **timeout**
+(`in_progress` for longer than 6 min: the function was killed at its 300 s limit) or **error** (the
+route answered something other than 2xx).
+
+1. **Error**: the same run usually also raised `cron-failed` with the exception (tag `cron=<name>`).
+   Follow [billing-run-failure.md §2](billing-run-failure.md#2-a-cron-route-crashed) for that cron.
+   An error without an exception is a non-2xx answer the route chose: find the request in the
+   Vercel logs (`/api/cron/<name>`, `cron.finished` / `cron.failed` and its `request_id`).
+2. **Missed**: nothing called the route, or it was refused before running.
+   - Vercel → project → Settings → Cron Jobs: are crons enabled, and is the job listed with the
+     schedule in `apps/web/vercel.json`? Was the latest production deploy missing it?
+   - Vercel → Logs for `/api/cron/<name>`: `503 CRON_NOT_CONFIGURED` = `CRON_SECRET` missing in
+     Production; `401` = Vercel and the project disagree on the secret (environments.md §6). Those
+     calls never check in, so they show up here as missed.
+   - Is the project paused, out of its plan's limits, or is Vercel having an incident (status page)?
+   - Is `SENTRY_DSN` still set in Production? Without it nothing checks in and every monitor goes
+     missed at once (all four `cron-*` monitors turning red together while the site is fine points
+     here; `nightly-backup` checks in by URL and is not affected).
+3. **Timeout**: the run hit the 300 s function limit. For `job-worker` that should not happen (it
+   stops claiming at 240 s); look for a job type that does not yield (`continueLater`). For the
+   others: logs for `cron.started` without `cron.finished`, and the database (Neon) being slow.
+4. Once fixed, call the cron by hand if the missed run matters (each one is idempotent):
+   `curl -H "Authorization: Bearer $CRON_SECRET" https://<production>/api/cron/<name>`. The
+   billing scheduler and books check catch up on their next run anyway; `job-worker` needs nothing:
+   queued jobs wait, nothing is lost.
+5. The monitor turns green on the next successful check-in (`recovery_threshold` 1).

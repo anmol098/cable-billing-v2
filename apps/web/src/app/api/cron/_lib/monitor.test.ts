@@ -115,7 +115,10 @@ describe("cronRoute check-ins", () => {
 
   it("ok for a 2xx answer, with the in_progress id and a duration in seconds", async () => {
     const { sink, sent } = fakeSink();
-    const response = await monitored(async () => ({ created: 1 }), sink)(request(`Bearer ${SECRET}`));
+    const response = await monitored(
+      async () => ({ created: 1 }),
+      sink,
+    )(request(`Bearer ${SECRET}`));
     expect(response.status).toBe(200);
     expect(sent).toEqual([
       { monitorSlug: "cron-billing-scheduler", status: "in_progress" },
@@ -195,9 +198,10 @@ describe("cronRoute check-ins", () => {
       },
       flush: () => Promise.reject(new Error("network unreachable")),
     });
-    const response = await monitored(async () => ({ created: 3 }), throwing.sink)(
-      request(`Bearer ${SECRET}`),
-    );
+    const response = await monitored(
+      async () => ({ created: 3 }),
+      throwing.sink,
+    )(request(`Bearer ${SECRET}`));
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual({ created: 3 });
 

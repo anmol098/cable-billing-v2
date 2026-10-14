@@ -179,7 +179,10 @@ describeDb("database health against Postgres", () => {
       const response = await GET();
       expect(response.status).toBe(200);
       expect(response.headers.get("cache-control")).toBe("no-store");
-      expect(await response.json()).toMatchObject({ status: "ok", checks: { db: { status: "ok" } } });
+      expect(await response.json()).toMatchObject({
+        status: "ok",
+        checks: { db: { status: "ok" } },
+      });
     });
 
     it("503 and db error when the database is down, with statuses only in the body", async () => {

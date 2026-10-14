@@ -24,6 +24,17 @@ const call = () =>
 
 type Item = [{ type: string }, Record<string, unknown>];
 
+/** Sentry's `transport` option: keeps every envelope item instead of sending it. */
+function capturingTransport(items: Item[]) {
+  return () => ({
+    send: async (envelope: unknown) => {
+      for (const item of (envelope as [unknown, Item[]])[1]) items.push(item);
+      return {};
+    },
+    flush: async () => true,
+  });
+}
+
 describe("check-ins through the real Sentry SDK", () => {
   beforeEach(() => {
     vi.spyOn(process.stdout, "write").mockImplementation(() => true);
@@ -39,13 +50,7 @@ describe("check-ins through the real Sentry SDK", () => {
       dsn: DSN,
       environment: "test",
       tracesSampleRate: 0,
-      transport: () => ({
-        send: async (envelope) => {
-          for (const item of envelope[1] as unknown as Item[]) items.push(item);
-          return {};
-        },
-        flush: async () => true,
-      }),
+      transport: capturingTransport(items),
     });
     const route = cronRoute("job_worker", async () => ({ claimed: 0 }), { secret: () => SECRET });
     expect((await route(call())).status).toBe(200);
@@ -69,13 +74,7 @@ describe("check-ins through the real Sentry SDK", () => {
     Sentry.init({
       dsn: DSN,
       tracesSampleRate: 0,
-      transport: () => ({
-        send: async (envelope) => {
-          for (const item of envelope[1] as unknown as Item[]) items.push(item);
-          return {};
-        },
-        flush: async () => true,
-      }),
+      transport: capturingTransport(items),
     });
     const route = cronRoute(
       "invariants",
