@@ -141,5 +141,8 @@
     "save": "Save bill change",
     "saved": "Bill change saved.",
     "back": "All bill changes"
+  },
+  "add_backdated": {
+    "headline": "New connection: ₹{amount} a month from {date}."
   }
 }

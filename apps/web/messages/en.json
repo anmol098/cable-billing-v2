@@ -1,5 +1,8 @@
 {
   "adjustments": {
+    "add_backdated": {
+      "headline": "New connection: ₹{amount} a month from {date}."
+    },
     "backdate": {
       "description": "For a change that bills already made should have had. Only the owner can do this. Every bill change gets your reason.",
       "kind": {
@@ -723,7 +726,7 @@
     },
     "sentence": {
       "adjustments": {
-        "back_dated_change": "{kind, select, plan {{who} changed the plan of VC {target} (customer {customer}) from an earlier day, {date}} suspend {{who} stopped VC {target} (customer {customer}) from an earlier day, {date}} reactivate {{who} started VC {target} (customer {customer}) again from an earlier day, {date}} disconnect {{who} removed VC {target} (customer {customer}) from an earlier day, {date}} other {{who} changed VC {target} (customer {customer}) from an earlier day, {date}}}",
+        "back_dated_change": "{kind, select, plan {{who} changed the plan of VC {target} (customer {customer}) from an earlier day, {date}} suspend {{who} stopped VC {target} (customer {customer}) from an earlier day, {date}} reactivate {{who} started VC {target} (customer {customer}) again from an earlier day, {date}} disconnect {{who} removed VC {target} (customer {customer}) from an earlier day, {date}} start {{who} added VC {target} (customer {customer}) from an earlier day, {date}} other {{who} changed VC {target} (customer {customer}) from an earlier day, {date}}}",
         "create": "{direction, select, credit {{who} gave customer {target} a discount of ₹{amount}} other {{who} added an extra charge of ₹{amount} for customer {target}}}"
       },
       "admin": {

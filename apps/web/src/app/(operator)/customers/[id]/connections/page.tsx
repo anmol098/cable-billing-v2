@@ -1,7 +1,8 @@
 /**
  * Customer profile, Connections (VC) tab (T-034, PLAN §12.1): every connection with its status,
  * rent and history; Stop / Start again / Remove with the effect in plain words (Owner and Staff,
- * `connections.status.change`); "Add connection" (`?add=1`, `customers.manage`). Another
+ * `connections.status.change`); "Add connection" (`?add=1`, `customers.manage`; for the Owner
+ * T-045a's form, which also takes a start day in a billed month, with its effect and a reason). Another
  * business's customer and made-up ids answer 404.
  */
 import { can, connectionChargedMonths, connectionFormOptions, listConnections } from "@cb/core";
@@ -16,6 +17,7 @@ import { getTenantContext } from "@/lib/auth/session";
 import { CustomerProfileShell } from "../../_components/profile-shell";
 import { callAsUser, loadCustomerProfile } from "../../_components/server";
 import { SavedNotice } from "../summary/saved-notice";
+import { BackDatedAddPanel } from "./_backdated-add/panel";
 import { AddConnectionForm } from "./_parts/add-connection-form";
 import { ConnectionsView } from "./_parts/connections-view";
 import { ConnectionChangePanel, changeRequestOf } from "./_plan-change/panel";
@@ -106,7 +108,17 @@ export default async function CustomerConnectionsPage({
               today={options.value.today}
             />
           ) : null}
-          {adding && options?.ok ? (
+          {adding && options?.ok && isOwner ? (
+            // T-045a: the Owner may date the start into a billed month (effect + reason).
+            <BackDatedAddPanel
+              customerId={profile.id}
+              plans={options.value.plans}
+              today={options.value.today}
+              latestStartDate={options.value.latestStartDate}
+              cancelHref={`/customers/${profile.id}/connections`}
+            />
+          ) : null}
+          {adding && options?.ok && !isOwner ? (
             <AddConnectionForm
               action={addConnectionAction.bind(null, profile.id)}
               plans={options.value.plans}
