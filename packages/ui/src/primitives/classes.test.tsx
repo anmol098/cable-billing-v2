@@ -274,8 +274,11 @@ function CompositeGallery() {
   );
 }
 
-/** The gallery opens overlays and types into the combobox: slower than one render on a busy CI box. */
-const GALLERY_TIMEOUT = 30_000;
+/**
+ * The gallery opens overlays and types into the combobox: slower than one render on a busy CI box.
+ * Seen at 31 s with a load average of 44 on a shared machine, so the budget leaves room for that.
+ */
+const GALLERY_TIMEOUT = 120_000;
 
 function collectClasses(into: Set<string>): void {
   for (const element of document.querySelectorAll("[class]")) {
