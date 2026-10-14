@@ -243,7 +243,8 @@ test.describe("customer bills and history", () => {
     await expect(page.getByTestId("statement-headline")).toHaveText("Due now");
     await expect(page.getByTestId("statement-closing")).toContainText("₹300");
     await expect(page.getByTestId("sum-undone")).toContainText("+₹100");
-    await expect(page.getByRole("alert")).toHaveCount(0);
+    // (Next.js has its own route-announcer alert, so look inside the tab only.)
+    await expect(page.locator("[data-statement]").getByRole("alert")).toHaveCount(0);
 
     // Everything: same closing balance, no "Balance before".
     await page.getByRole("link", { name: "Everything" }).click();
@@ -266,7 +267,9 @@ test.describe("customer bills and history", () => {
 
     // Typed dates that make no sense fall back to the last 3 months, saying so.
     await page.goto(`/customers/${customerId}/history?from=2026-13-01`);
-    await expect(page.getByRole("alert")).toContainText("Check the dates.");
+    await expect(page.locator("[data-statement]").getByRole("alert")).toContainText(
+      "Check the dates.",
+    );
     await expect(page.getByTestId("statement-line")).toHaveCount(4);
 
     // Another business's customer and made-up ids are 404s, tabs and print alike.
