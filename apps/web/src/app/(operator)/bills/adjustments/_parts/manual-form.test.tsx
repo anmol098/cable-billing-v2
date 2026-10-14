@@ -36,8 +36,8 @@ describe("new bill change (T-045)", () => {
   it("asks for the kind, the amount and why before saving, then says it with the number", async () => {
     const { save } = renderForm();
     fireEvent.click(screen.getByRole("button", { name: /Save bill change/ }));
-    expect(await screen.findByText("Choose extra charge or take money off.")).toBeTruthy();
-    fireEvent.click(screen.getByRole("radio", { name: /Take money off/ }));
+    expect(await screen.findByText("Choose extra charge or discount.")).toBeTruthy();
+    fireEvent.click(screen.getByRole("radio", { name: /Discount/ }));
     fireEvent.change(screen.getByLabelText("Amount (₹)"), { target: { value: "150" } });
     fireEvent.click(screen.getByRole("button", { name: /Save bill change/ }));
     expect(await screen.findByText("Write why (at least 3 letters).")).toBeTruthy();
@@ -58,7 +58,7 @@ describe("new bill change (T-045)", () => {
 
   it("Hindi words", () => {
     renderForm("hi");
-    expect(screen.getByRole("radio", { name: /ज़्यादा पैसा/ })).toBeTruthy();
+    expect(screen.getByRole("radio", { name: /एक्स्ट्रा चार्ज/ })).toBeTruthy();
     expect(screen.getByRole("button", { name: /बिल में बदलाव सेव करें/ })).toBeTruthy();
   });
 

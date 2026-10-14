@@ -252,7 +252,7 @@ test.describe("bill changes", () => {
     // New bill change for Meena: take ₹100 off, with why.
     await page.goto(`/bills/adjustments/new?customer=${ids.meena}`);
     await expect(page.locator("[data-chosen-customer]")).toHaveText("Meena Devi");
-    await page.getByRole("radio", { name: /Take money off/ }).click();
+    await page.getByRole("radio", { name: /Discount/ }).click();
     await page.getByLabel("Amount (₹)").fill("100");
     await page.getByLabel("Why?").fill("Cable was cut for 10 days");
     await expect(page.locator("[data-manual-summary]")).toHaveText(
