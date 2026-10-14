@@ -3,10 +3,10 @@ id: T-086
 title: Platform admin console
 phase: 4
 area: web
-status: todo
-owner:
-claimed_at:
-branch:
+status: claimed
+owner: agent-t086
+claimed_at: 2026-10-14T08:08:26.671Z
+branch: task/T-086-platform-admin-console
 depends_on: [T-026, T-043, T-085]
 review: required
 claimable_by: agent
@@ -51,3 +51,7 @@ PLAN §12.4, PLAN §9.4, PRD §3 — see `docs/IMPLEMENTATION_PLAN.md`, `docs/PR
 ## Completion notes
 
 _The agent fills this in before opening the PR: what was built, decisions taken, deviations, follow-up tasks created, and how it was verified._
+
+## Board log
+
+- 2026-10-14T08:08:26.672Z claimed by agent-t086
