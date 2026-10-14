@@ -230,6 +230,31 @@ only routes admins to it). The review decided to keep this:
   from every admin route, and it gets in only after password + code. The enrolment flow is
   unchanged.
 
+**Verification after the review fixes** (rebased on `feature/mvp` b70a86c, after T-088 and T-082)
+
+- New core tests in `auth.test.ts`:
+  - **Tenant owner, two browsers, enrols in one:** `otherSessionsEnded: 1`, and the other browser
+    is signed out. In the tenant's own log: `auth.other_sessions_ended {sessions: 1, reason}`
+    (operator_id = the tenant, actor owner), then `auth.two_factor_enabled`. The enrolled session
+    has `twoFactorVerified: true` and still gets its TenantContext.
+  - A code typed in that already signed-in browser → `TWO_FACTOR_EXPIRED`. No audit row, no new
+    session.
+  - **Incomplete enrolment** (`two_factors.verified` true, the user's flag off) → `SIGN_IN_AGAIN`.
+    Both browsers' sessions are gone, the only audit rows are the two `signed_in`, and the
+    `auth.two_factor_enrolment_incomplete` error log is checked.
+  - Mutation check: removing the new `verifyTwoFactor` guard fails the owner test (reverted).
+- `audit.test.tsx`: the Owner's sentence in en ("Suresh (Owner) turned on 2-step sign-in, so 1
+  other device was signed out", and the plural) and in hi ("… इसलिए 1 दूसरे डिवाइस से लॉग आउट कर
+  दिया गया", plural "दूसरे डिवाइसों").
+- `pnpm install --frozen-lockfile`, `pnpm lint`, `pnpm typecheck` (10/10) and `pnpm build`
+  (10/10) pass.
+- `TURBO_FORCE=1 pnpm test --concurrency=1`: 10/10 packages, `@cb/core` 1257 passed + 3 skipped,
+  `@cb/db` 269, `@cb/web` 565.
+- `pnpm generate` leaves no diff. The tokens/icons/i18n/openapi `--check` modes, `db:check` and
+  `tasks.mjs check --local` pass.
+- Playwright on a fresh scratch DB: `admin.spec.ts` + `auth.spec.ts` + `audit.spec.ts`
+  **14/14**.
+
 ## Board log
 - 2026-10-14T14:14:33.782Z claimed by agent-t086b
 - 2026-10-14T19:56:56.251Z completed on task/T-086b-platform-admin-sessions-must-each-pass-t
