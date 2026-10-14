@@ -92,6 +92,20 @@
       "when": 1791952936291,
       "tag": "0012_subscription_razorpay_status",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1791962205110,
+      "tag": "0013_roster_versions",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1791962208421,
+      "tag": "0014_roster_versions_triggers",
+      "breakpoints": true
     }
   ]
 }

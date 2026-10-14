@@ -17,5 +17,6 @@ export * from "./ledger";
 export * from "./payments";
 export * from "./plans";
 export * from "./receipts";
+export * from "./roster";
 export * from "./subscriptions";
 export * from "./tenancy";

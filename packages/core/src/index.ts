@@ -111,6 +111,7 @@ export {
 } from "./logging/logger";
 export { findPii, isPiiKey, type PiiFinding, piiKindOfValue, scrubText } from "./logging/pii";
 export * from "./mobile-auth";
+export * from "./mobile-sync";
 export * from "./operators";
 export * from "./payment-register";
 export * from "./payments";
