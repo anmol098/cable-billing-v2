@@ -112,8 +112,10 @@ describe("effect text of a change (T-045)", () => {
       "effect.billed_owner",
     );
     expect(
-      effectText({ ...PREVIEW, noChange: true, months: [] }, { locale: "en", rupees, isOwner: true })
-        .headline.key,
+      effectText(
+        { ...PREVIEW, noChange: true, months: [] },
+        { locale: "en", rupees, isOwner: true },
+      ).headline.key,
     ).toBe("effect.same");
   });
 
@@ -199,8 +201,7 @@ describe("the change form", () => {
           minDate="2026-09-01"
           preview={preview}
           save={save}
-          doneHref="/customers/c1/connections?saved=plan"
-          cancelHref="/customers/c1/connections"
+          tabHref="/customers/c1/connections"
           {...overrides}
         />
       </ToastProvider>,

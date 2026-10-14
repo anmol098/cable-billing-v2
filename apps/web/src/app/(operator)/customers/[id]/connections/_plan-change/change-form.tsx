@@ -72,8 +72,8 @@ export interface ConnectionChangeFormProps {
   readonly save: (
     input: ChangeInput & { backDated: boolean; reason?: string | null },
   ) => Promise<SaveResult>;
-  readonly doneHref: string;
-  readonly cancelHref: string;
+  /** The Connections tab (where the form goes back to). */
+  readonly tabHref: string;
 }
 
 type PreviewState =
@@ -179,11 +179,8 @@ export function ConnectionChangeForm(props: ConnectionChangeFormProps) {
     }
     setSaving(false);
     if (result.ok) {
-      toast({
-        variant: "success",
-        title: t(props.mode === "plan" && !backDated ? "plan_change.saved" : "backdate.saved"),
-      });
-      router.push(props.doneHref);
+      // The tab shows the "saved" toast (`?saved=`) and drops the parameter.
+      router.push(`${props.tabHref}?saved=${backDated ? "backdate" : "plan"}`);
       router.refresh();
       return;
     }
@@ -425,7 +422,7 @@ export function ConnectionChangeForm(props: ConnectionChangeFormProps) {
           {t(needsReason ? "backdate.save" : "plan_change.save")}
         </Button>
         <Button asChild variant="quiet" icon="close">
-          <Link href={props.cancelHref}>{t("plan_change.cancel")}</Link>
+          <Link href={props.tabHref}>{t("plan_change.cancel")}</Link>
         </Button>
       </div>
     </Card>

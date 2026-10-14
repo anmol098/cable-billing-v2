@@ -70,8 +70,7 @@ export function ConnectionChangePanel({
       minDate={lastChangeOf(connection)}
       preview={previewChangeAction}
       save={saveChangeAction.bind(null, customerId)}
-      doneHref={`${tabHref}?saved=${mode === "plan" ? "plan" : "backdate"}`}
-      cancelHref={tabHref}
+      tabHref={tabHref}
     />
   );
 }
