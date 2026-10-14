@@ -2,9 +2,10 @@
 
 /**
  * "Add customer" (PLAN §12.2): a 3-step Stepper inside one form — 1 Customer (the six fields),
- * 2 Connections (VC) (a slot: T-034 passes its fields as `connectionsStep`; until then a note says
- * connections are added after saving), 3 Check & save (what was typed, in words). After a failed
- * save the form goes back to step 1 and shows what is wrong under the field.
+ * 2 Connections (VC) (a slot: T-034 passes its fields as `connectionsStep` and what step 3 shows
+ * for them as `connectionsCheck`; without them a note says connections are added after saving),
+ * 3 Check & save (what was typed, in words). After a failed save the form goes back to the step
+ * the state names (`state.step`, default step 1) and shows what is wrong under the field.
  */
 import type { CustomerAreaOption } from "@cb/core";
 import { Stepper } from "@cb/ui";
@@ -22,11 +23,18 @@ import {
 type Action = (state: CustomerFormState, formData: FormData) => Promise<CustomerFormState>;
 
 export interface AddCustomerFormProps {
+  /** May return a richer state (T-034 adds step 2's problems); it comes back to `connectionsStep`. */
   action: Action;
   areas: readonly CustomerAreaOption[];
   nextAutoCode: string;
-  /** Step 2's fields (T-034). Default: a note that connections are added after saving. */
-  connectionsStep?: ReactNode;
+  /**
+   * Step 2's fields (T-034), or a function of the last save's state and a counter that changes
+   * after each failed save (use it as a `key` to show what was typed). Default: a note that
+   * connections are added after saving.
+   */
+  connectionsStep?: ReactNode | ((state: CustomerFormState, version: number) => ReactNode);
+  /** What step 3 shows for step 2's fields, from the form's data when step 3 opened (T-034). */
+  connectionsCheck?: (form: FormData) => ReactNode;
 }
 
 function CheckRow({ label, value }: { label: string; value: ReactNode }) {
@@ -43,25 +51,31 @@ export function AddCustomerForm({
   areas,
   nextAutoCode,
   connectionsStep,
+  connectionsCheck,
 }: AddCustomerFormProps) {
   const t = useTranslations("customers");
   const common = useTranslations("common");
   const [state, formAction, pending] = useActionState(action, {});
   const [step, setStep] = useState(0);
   const [typed, setTyped] = useState<CustomerFormValues>(EMPTY_VALUES);
+  const [snapshot, setSnapshot] = useState<FormData | null>(null);
   const [version, setVersion] = useState(0);
   const form = useRef<HTMLFormElement>(null);
 
   // A failed save: back to the fields, which re-mount with what was typed and the problems.
   useEffect(() => {
     if (state.error) {
-      setStep(0);
+      setStep(state.step ?? 0);
       setVersion((v) => v + 1);
     }
   }, [state]);
 
   const onStepChange = (next: number) => {
-    if (next === 2 && form.current) setTyped(valuesFrom(new FormData(form.current)));
+    if (next === 2 && form.current) {
+      const data = new FormData(form.current);
+      setTyped(valuesFrom(data));
+      setSnapshot(data);
+    }
     setStep(next);
   };
 
@@ -99,9 +113,12 @@ export function AddCustomerForm({
           {
             id: "connections",
             title: t("new.step_connections"),
-            content: connectionsStep ?? (
-              <p className="text-base text-text-muted">{t("new.connections_later")}</p>
-            ),
+            content:
+              typeof connectionsStep === "function"
+                ? connectionsStep(state, version)
+                : (connectionsStep ?? (
+                    <p className="text-base text-text-muted">{t("new.connections_later")}</p>
+                  )),
           },
           {
             id: "check",
@@ -132,6 +149,7 @@ export function AddCustomerForm({
                   <CheckRow label={t("field.area")} value={areaName ?? t("field.area_none")} />
                   <CheckRow label={t("field.address")} value={text(typed.address)} />
                 </dl>
+                {connectionsCheck && snapshot ? connectionsCheck(snapshot) : null}
               </div>
             ),
           },

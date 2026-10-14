@@ -48,5 +48,8 @@
   "device": "smartphone",
   "switch-off": "user-x",
   "switch-on": "user-check",
-  "retry": "refresh-cw"
+  "retry": "refresh-cw",
+  "pause": "circle-pause",
+  "resume": "circle-play",
+  "disconnect": "unplug"
 }

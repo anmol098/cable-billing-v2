@@ -41,6 +41,8 @@ export interface CustomerFormState {
   readonly values?: CustomerFormValues;
   /** For `code_taken`: the customer that has the code (same business), to link to it. */
   readonly takenBy?: string;
+  /** "Add customer": the step (0-based) to go back to after a failed save. Default 0 (T-034). */
+  readonly step?: number;
 }
 
 export const EMPTY_VALUES: CustomerFormValues = {
