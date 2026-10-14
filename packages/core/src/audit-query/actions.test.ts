@@ -111,6 +111,15 @@ function scanSource(): { literals: Found[]; templates: Found[] } {
   return { literals, templates };
 }
 
+/**
+ * Audited services whose own name is never written as an action, with why. Their capability is
+ * audited, so they would otherwise count as writing their default action.
+ */
+const NEVER_THE_DEFAULT_ACTION: Readonly<Record<string, string>> = {
+  "subscriptions.overview": "a read that always calls audit.skip('no_change')",
+  "subscriptions.record_checkout": "always records `subscriptions.checkout_started`",
+};
+
 async function writtenActions(): Promise<Map<string, string>> {
   const found = new Map<string, string>();
   const { literals, templates } = scanSource();
@@ -141,7 +150,8 @@ async function writtenActions(): Promise<Map<string, string>> {
     const records =
       spec?.audited ||
       (spec?.kind === "write" && (definedIn.get(service.name) ?? "").includes("audit.record("));
-    if (records) found.set(service.name, `packages/core/src/${file} (service default)`);
+    if (records && !Object.hasOwn(NEVER_THE_DEFAULT_ACTION, service.name))
+      found.set(service.name, `packages/core/src/${file} (service default)`);
   }
   return found;
 }
@@ -191,7 +201,7 @@ describe("audit action sentences (T-035)", () => {
     const missing = [...found].filter(([action]) => !Object.hasOwn(AUDIT_ACTIONS, action));
     expect(
       missing.map(([action, where]) => `${action} (${where})`),
-      "add these to AUDIT_ACTIONS (packages/core/src/audit-query/actions.ts) and audit.json",
+      "add these to AUDIT_ACTIONS (packages/core/src/audit-query/actions.ts) and audit.json (a service that never records its own name: NEVER_THE_DEFAULT_ACTION here)",
     ).toEqual([]);
     const stale = KNOWN_AUDIT_ACTIONS.filter((action) => !found.has(action));
     expect(stale, "no code writes these any more: remove them").toEqual([]);

@@ -115,6 +115,8 @@ describe("presentAuditValue", () => {
     expect(
       presentAuditValue("customer_id", "0190a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b"),
     ).toBeUndefined();
+    expect(presentAuditValue("razorpay_subscription_id", "sub_Abc123")).toBeUndefined();
+    expect(presentAuditValue("plan_id", null)).toBeUndefined();
     expect(presentAuditValue("revoked_link_ids", ["0190a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b"])).toEqual(
       { kind: "items", value: 1 },
     );

@@ -42,6 +42,7 @@ const ENTITY_ICON: Readonly<Record<string, IconName>> = {
   device: "device",
   area: "area",
   operator: "business",
+  subscription: "subscription",
 };
 
 /** Entity kinds offered in the "What" filter, in this order. */
@@ -57,6 +58,7 @@ const WHAT_OPTIONS = [
   "device",
   "area",
   "operator",
+  "subscription",
   "receipt_link",
 ] as const;
 

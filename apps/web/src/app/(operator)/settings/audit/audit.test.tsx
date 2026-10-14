@@ -198,6 +198,22 @@ describe("values", () => {
     expect(shownValueText(t, { kind: "items", value: 2 }, "en")).toBe("2 items");
     expect(shownValueText(t, { kind: "text", value: "2026-10-01" }, "en")).toBe("1 Oct 2026");
     expect(valueText(t, { kind: "period", value: "2026-10-01" }, "en")).toBe("October 2026");
+    expect(shownValueText(t, { kind: "text", value: "2026-10-14T10:35:00.000Z" }, "en")).toBe(
+      "14 Oct 2026, 4:05 PM",
+    );
+    expect(
+      auditSentence(
+        t,
+        event({
+          actor: { kind: "system" },
+          action: "subscription.state_changed",
+          entityType: "subscription",
+          target: null,
+          details: { status: { kind: "code", value: "read_only" } },
+        }),
+        "en",
+      ),
+    ).toBe("The app set the app subscription to: View only");
     expect(fieldLabel(t, "settings.receipt_footer")).toBe("Receipt message");
   });
 });

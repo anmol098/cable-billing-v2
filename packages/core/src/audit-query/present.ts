@@ -13,7 +13,7 @@
  *    keys that name a phone or mobile, and phone-like digit runs inside any other text (a lineman's
  *    user name is often their mobile number).
  * 3. **Emails masked** (`r•••@example.com`): keys that name an email, and emails inside any text.
- * 4. **Ids dropped**: UUID values are internal; the sentence already names the thing.
+ * 4. **Ids dropped**: UUID values and `*_id` fields are internal; the sentence names the thing.
  * 5. Long text is cut, nested lists are counted, and at most {@link MAX_CHANGES} rows are shown.
  *
  * Amounts (`*_paise`) stay integer paise; the web shows whole rupees.
@@ -124,6 +124,8 @@ function cut(value: string): string {
  */
 export function presentAuditValue(snake: string, value: unknown): AuditShownValue | undefined {
   if (isHiddenKey(snake) || value === REDACTED) return HIDDEN;
+  // Internal references (`plan_id`, `razorpay_subscription_id`): the sentence names the thing.
+  if (/(^|_)id$/.test(snake) && (value === null || typeof value === "string")) return undefined;
   if (value === null || value === undefined) return EMPTY;
   if (typeof value === "string") {
     if (UUID.test(value)) return undefined;

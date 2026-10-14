@@ -56,6 +56,7 @@ export const AUDIT_ENTITY_TYPES = [
   "device",
   "area",
   "operator",
+  "subscription",
 ] as const;
 export type AuditEntityType = (typeof AUDIT_ENTITY_TYPES)[number];
 
@@ -233,6 +234,14 @@ export const AUDIT_ACTIONS = {
   "handover.submit": { details: handover },
   "handover.accept": { details: handover },
   "handover.return": { details: handover },
+  // App subscription (T-085)
+  "subscriptions.checkout_started": {},
+  "subscription.state_changed": {
+    details: ({ after }) => ({ status: code(field(after, "status")) }),
+  },
+  "subscription.notice_sent": {
+    details: ({ after }) => ({ count: count(field(after, "recipients")) }),
+  },
   // Bills (T-043, T-044)
   "billing.run_scheduled": { details: billingRun },
   "billing.run_skipped": { details: billingRun },

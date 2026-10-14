@@ -45,6 +45,7 @@
     "entity.area",
     "entity.operator",
     "entity.other",
+    "entity.subscription",
     "unknown_target",
     "sentence.auth.signed_in",
     "sentence.auth.sign_in_blocked",
@@ -97,6 +98,9 @@
     "sentence.billing.start_run",
     "sentence.billing.retry_failed",
     "sentence.billing.run_completed",
+    "sentence.subscriptions.checkout_started",
+    "sentence.subscription.state_changed",
+    "sentence.subscription.notice_sent",
     "generic",
     "action.auth.signed_in",
     "action.auth.sign_in_blocked",
@@ -149,6 +153,9 @@
     "action.billing.start_run",
     "action.billing.retry_failed",
     "action.billing.run_completed",
+    "action.subscriptions.checkout_started",
+    "action.subscription.state_changed",
+    "action.subscription.notice_sent",
     "changes.show",
     "changes.caption",
     "changes.field",
@@ -208,7 +215,15 @@
     "field.sign_in_setup",
     "field.password",
     "field.monthly_amount_paise",
-    "field.connection_count"
+    "field.connection_count",
+    "field.trial_ends_at",
+    "field.current_period_end",
+    "field.grace_ends_at",
+    "field.cancelled_at",
+    "field.razorpay_status",
+    "field.transitions",
+    "field.recipients",
+    "field.days_left"
   ],
   "description": "आपके बिज़नेस में हर बदलाव: किसने किया और कब। यह पेज सिर्फ़ आप (मालिक) देख सकते हैं।",
   "filters": {
@@ -263,7 +278,8 @@
     "device": "फ़ोन",
     "area": "एरिया",
     "operator": "बिज़नेस",
-    "other": "दूसरा"
+    "other": "दूसरा",
+    "subscription": "ऐप सब्सक्रिप्शन"
   },
   "unknown_target": "(नहीं मिला)",
   "sentence": {
@@ -347,6 +363,13 @@
       "start_run": "{who} ने {target} के बिल बनाना शुरू किया",
       "retry_failed": "{who} ने {target} के दिक्कत वाले बिल फिर से बनाने शुरू किए",
       "run_completed": "{status, select, completed_with_errors {{who} ने {target} के बिल पूरे किए: {count, plural, one {# बिल} other {# बिल}} बने, कुछ में दिक्कत} other {{who} ने {target} के बिल पूरे किए: {count, plural, one {# बिल} other {# बिल}} बने}}"
+    },
+    "subscriptions": {
+      "checkout_started": "{who} ने ऑटोपे से ऐप का पेमेंट शुरू किया"
+    },
+    "subscription": {
+      "state_changed": "{status, select, trialing {{who} ने ऐप सब्सक्रिप्शन बदला: फ़्री ट्रायल} active {{who} ने ऐप सब्सक्रिप्शन बदला: पेमेंट हो गया} grace {{who} ने ऐप सब्सक्रिप्शन बदला: अभी पेमेंट करें} read_only {{who} ने ऐप सब्सक्रिप्शन बदला: सिर्फ़ देख सकते हैं} cancelled {{who} ने ऐप सब्सक्रिप्शन बदला: बंद है} other {{who} ने ऐप सब्सक्रिप्शन बदला}}",
+      "notice_sent": "{who} ने ऐप पेमेंट की याद {count, plural, one {# मालिक} other {# मालिकों}} को ईमेल की"
     }
   },
   "generic": "{who} ने बदलाव किया: {entity} {target}",
@@ -431,6 +454,13 @@
       "start_run": "अभी बिल बनाएँ",
       "retry_failed": "दिक्कत वाले फिर से करें",
       "run_completed": "बिल बन गए"
+    },
+    "subscriptions": {
+      "checkout_started": "ऐप का पेमेंट शुरू किया"
+    },
+    "subscription": {
+      "state_changed": "ऐप सब्सक्रिप्शन बदला",
+      "notice_sent": "ऐप पेमेंट की याद ईमेल की"
     }
   },
   "changes": {
@@ -495,6 +525,14 @@
     "sign_in_setup": "लॉग इन किसने बनाया",
     "password": "पासवर्ड",
     "monthly_amount_paise": "हर महीने का किराया",
-    "connection_count": "कनेक्शन"
+    "connection_count": "कनेक्शन",
+    "trial_ends_at": "फ़्री ट्रायल कब खत्म",
+    "current_period_end": "कब तक का पेमेंट हो गया",
+    "grace_ends_at": "कब तक पेमेंट करें",
+    "cancelled_at": "कब बंद हुआ",
+    "razorpay_status": "ऑटोपे की स्थिति",
+    "transitions": "बदलाव",
+    "recipients": "कितने मालिकों को ईमेल",
+    "days_left": "कितने दिन बाकी"
   }
 }

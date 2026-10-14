@@ -25,6 +25,7 @@ export interface AuditTranslate {
 }
 
 const DASH = "—";
+const ISO_INSTANT = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2}(\.\d{1,6})?)?(Z|[+-]\d{2}:\d{2})$/;
 
 /** `1,23,456` (no ₹: the sentence has it, glossary rule). */
 export function rupeeDigits(paise: number): string {
@@ -160,6 +161,10 @@ export function shownValueText(
       return String(shown.value);
     case "text":
       if (isBusinessDate(shown.value)) return formatBusinessDate(shown.value, locale);
+      // An instant (`2026-10-14T10:35:00.000Z`) in IST.
+      if (ISO_INSTANT.test(shown.value) && !Number.isNaN(Date.parse(shown.value))) {
+        return auditTime(t, new Date(shown.value), locale);
+      }
       return shown.value;
   }
 }

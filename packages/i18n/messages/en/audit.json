@@ -52,7 +52,8 @@
     "device": "Phone",
     "area": "Area",
     "operator": "Business",
-    "other": "Other"
+    "other": "Other",
+    "subscription": "App subscription"
   },
   "unknown_target": "(not found)",
   "sentence": {
@@ -136,6 +137,13 @@
       "start_run": "{who} started making the bills for {target}",
       "retry_failed": "{who} tried the bills with problems for {target} again",
       "run_completed": "{status, select, completed_with_errors {{who} finished the bills for {target}: {count, plural, one {# bill} other {# bills}} made, some problems} other {{who} finished the bills for {target}: {count, plural, one {# bill} other {# bills}} made}}"
+    },
+    "subscriptions": {
+      "checkout_started": "{who} started paying for the app with autopay"
+    },
+    "subscription": {
+      "state_changed": "{status, select, trialing {{who} set the app subscription to: Free trial} active {{who} set the app subscription to: Paid} grace {{who} set the app subscription to: Pay now} read_only {{who} set the app subscription to: View only} cancelled {{who} set the app subscription to: Stopped} other {{who} changed the app subscription}}",
+      "notice_sent": "{who} emailed a reminder about the app payment to {count, plural, one {# owner} other {# owners}}"
     }
   },
   "generic": "{who} made a change: {entity} {target}",
@@ -220,6 +228,13 @@
       "start_run": "Make bills now",
       "retry_failed": "Try problems again",
       "run_completed": "Bills made"
+    },
+    "subscriptions": {
+      "checkout_started": "App payment started"
+    },
+    "subscription": {
+      "state_changed": "App subscription changed",
+      "notice_sent": "App payment reminder emailed"
     }
   },
   "changes": {
@@ -284,6 +299,14 @@
     "sign_in_setup": "Sign-in set up by",
     "password": "Password",
     "monthly_amount_paise": "Rent each month",
-    "connection_count": "Connections"
+    "connection_count": "Connections",
+    "trial_ends_at": "Free trial ends",
+    "current_period_end": "Paid till",
+    "grace_ends_at": "Pay by",
+    "cancelled_at": "Stopped on",
+    "razorpay_status": "Autopay status",
+    "transitions": "Changes",
+    "recipients": "Owners emailed",
+    "days_left": "Days left"
   }
 }
