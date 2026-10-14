@@ -119,7 +119,6 @@ test.describe("journey: an operator's first month", () => {
   const tomorrow = addDays(today, 1);
   const oldPeriod = addPeriods(period, -4);
   const month = periodLabel(period, "en", "long");
-  const en = words("en");
   const hi = words("hi");
 
   // Made fresh in every beforeAll (see _support/unique.ts), so a second seed never collides.
@@ -233,12 +232,13 @@ test.describe("journey: an operator's first month", () => {
     return context.newPage();
   }
 
-  const lineArgs = () => ({ headers: { ...apiHeaders(ip), authorization: `Bearer ${linemanToken}` } });
+  const lineArgs = () => ({
+    headers: { ...apiHeaders(ip), authorization: `Bearer ${linemanToken}` },
+  });
 
-  async function phone(request: APIRequestContext, path: string) {
-    const response = await request.get(`${API}${path}`, lineArgs());
-    return response;
-  }
+  /** A GET from the lineman's phone. */
+  const phone = (request: APIRequestContext, path: string) =>
+    request.get(`${API}${path}`, lineArgs());
 
   async function rosterBalances(request: APIRequestContext): Promise<Record<string, number>> {
     const response = await phone(request, "/sync/customers");
@@ -481,7 +481,10 @@ test.describe("journey: an operator's first month", () => {
     await expect(page.getByTestId("register-due")).toHaveText("₹1,050");
 
     // Asha: one bill, both boxes (PRD §15 #3).
-    await page.getByRole("link", { name: /Asha Devi/ }).first().click();
+    await page
+      .getByRole("link", { name: /Asha Devi/ })
+      .first()
+      .click();
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(/^Bill INV-\d{4}-\d{5}$/);
     await expect(page.getByTestId("bill-connection")).toHaveCount(2);
     await expect(page.getByTestId("bill-connection").filter({ hasText: vc.a1 })).toContainText(
@@ -589,8 +592,7 @@ test.describe("journey: an operator's first month", () => {
       collector_id: signedIn.user.id,
       device_id: signedIn.device.id,
     }));
-    const push = () =>
-      request.post(`${API}/payments:batch`, { ...lineArgs(), data: { payments } });
+    const push = () => request.post(`${API}/payments:batch`, { ...lineArgs(), data: { payments } });
     const first = PaymentBatchResponse.parse(await (await push()).json());
     expect(first.results.map((r) => r.outcome)).toEqual(["posted", "posted", "rejected"]);
     expect(first.results[2]?.error?.code).toBe("CUSTOMER_NOT_FOUND");
@@ -627,7 +629,11 @@ test.describe("journey: an operator's first month", () => {
     const day = CollectionDayResponse.parse(
       await (await phone(request, `/collections/${businessDate}`)).json(),
     ).session;
-    expect(day).toMatchObject({ cash_total_paise: 40_000, upi_total_paise: 10_000, payment_count: 2 });
+    expect(day).toMatchObject({
+      cash_total_paise: 40_000,
+      upi_total_paise: 10_000,
+      payment_count: 2,
+    });
 
     // ₹350 handed over for ₹400 of cash: ₹50 short, with the reason.
     const handover = await request.post(`${API}/collections/${businessDate}/handover`, {
@@ -786,7 +792,7 @@ test.describe("journey: an operator's first month", () => {
 
     // Home in Hindi: the same numbers.
     await page.goto("/home");
-    await page.getByRole("button", { name: "हिंदी" }).click();
+    await page.getByRole("button", { name: hi("common.language_hindi") }).click();
     await expect(page.locator("html")).toHaveAttribute("lang", "hi");
     await expect(page.getByTestId("home-cash-today")).toContainText(
       `${hi("home.today.cash")}₹1,200`,
@@ -797,13 +803,13 @@ test.describe("journey: an operator's first month", () => {
     await expectNoSideways(page);
     await page.getByRole("button", { name: "English" }).click();
     await expect(page.locator("html")).toHaveAttribute("lang", "en");
-    expect(en("home.today.cash")).toBe("Cash today");
 
     // Another business's customer, bill, payment and receipt: 404, like a made-up id (#1).
     for (const path of [
       `/customers/${other.customerId}`,
       `/customers/${other.customerId}/history`,
       `/bills/${other.invoiceId}`,
+      `/bills/${other.invoiceId}/print`,
       `/payments/${other.paymentId}`,
       `/payments/${other.paymentId}/receipt`,
     ]) {
@@ -962,11 +968,9 @@ test.describe("journey: an operator's first month", () => {
     // Who changed what: the undo, in words, with the receipt number and Bina's code.
     await page.goto("/settings/audit");
     await expect(
-      page
-        .getByTestId("audit-event")
-        .filter({
-          hasText: `${OWNER_NAME} (Owner) cancelled payment ${binaReceipt} of ₹300 (customer 102)`,
-        }),
+      page.getByTestId("audit-event").filter({
+        hasText: `${OWNER_NAME} (Owner) cancelled payment ${binaReceipt} of ₹300 (customer 102)`,
+      }),
     ).toHaveCount(1);
     await expect(
       page
