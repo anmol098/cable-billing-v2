@@ -165,7 +165,7 @@ emulator / no WhatsApp in this container); the device checks are listed at the e
 **Verification** (JDK 21, Android SDK, Node v24.21.0, pnpm 12.11.2, Postgres 17; no emulator)
 
 - `./gradlew ktlintCheck detekt lint testDevDebugUnitTest assembleDevDebug :detekt-rules:test`: BUILD
-  SUCCESSFUL. App JVM tests 315, 0 failures (35 new). Lint: 0 errors; warnings are the existing
+  SUCCESSFUL. App JVM tests 315, 0 failures (32 new). Lint: 0 errors; warnings are the existing
   `MissingApplicationIcon` and `AppBundleLocaleChanges` (now also pointing at `ReceiptMessages`, same
   per-app-language follow-up as T-067/T-068). The receipt test classes were rerun twice more (`--rerun`)
   and stayed green. A mutation check (sending actions whose payment is still on the phone) failed
