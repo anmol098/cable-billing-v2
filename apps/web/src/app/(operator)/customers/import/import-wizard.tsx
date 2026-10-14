@@ -35,19 +35,23 @@ type Phase = "preview" | "importing" | "done";
 
 const UPLOAD_STEP = 1;
 
+/** One count with its icon and colour; `extra` follows in a quieter colour. */
 function SummaryLine({
   icon,
   tone,
   children,
+  extra,
 }: {
   icon: IconName;
   tone: string;
   children: ReactNode;
+  extra?: ReactNode;
 }) {
   return (
-    <li className="flex items-center gap-3 text-lg">
+    <li className="flex flex-wrap items-center gap-x-3 gap-y-1 text-lg">
       <Icon name={icon} className={`size-6 shrink-0 ${tone}`} />
-      <span>{children}</span>
+      <span className="font-strong">{children}</span>
+      {extra ? <span className="text-text-muted">{extra}</span> : null}
     </li>
   );
 }
@@ -215,11 +219,16 @@ export function ImportWizard({ importStep, otherLanguage, limits }: ImportWizard
           {t("done.title")}
         </h2>
         <ul className="flex flex-col gap-2" aria-live="polite">
-          <SummaryLine icon="success" tone="text-success">
-            {t("summary.created", { count: counts.customers.created })}{" "}
-            {counts.connections > 0
-              ? t("summary.created_connections", { count: counts.connections })
-              : null}
+          <SummaryLine
+            icon="success"
+            tone="text-success"
+            extra={
+              counts.connections > 0
+                ? t("summary.created_connections", { count: counts.connections })
+                : null
+            }
+          >
+            {t("summary.created", { count: counts.customers.created })}
           </SummaryLine>
           {counts.customers.exists > 0 ? (
             <SummaryLine icon="close" tone="text-text-muted">
@@ -385,11 +394,16 @@ export function ImportWizard({ importStep, otherLanguage, limits }: ImportWizard
           content: checked ? (
             <div className="flex flex-col gap-5">
               <ul className="flex flex-col gap-2">
-                <SummaryLine icon="add" tone="text-pending">
-                  {t("summary.ready", { count: ready })}{" "}
-                  {counts.connections > 0
-                    ? t("summary.connections", { count: counts.connections })
-                    : null}
+                <SummaryLine
+                  icon="add"
+                  tone="text-pending"
+                  extra={
+                    counts.connections > 0
+                      ? t("summary.connections", { count: counts.connections })
+                      : null
+                  }
+                >
+                  {t("summary.ready", { count: ready })}
                 </SummaryLine>
                 {counts.customers.exists > 0 ? (
                   <SummaryLine icon="close" tone="text-text-muted">
