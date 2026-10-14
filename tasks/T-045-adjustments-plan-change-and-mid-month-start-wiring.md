@@ -3,10 +3,10 @@ id: T-045
 title: Adjustments, plan change and mid-month start wiring
 phase: 2
 area: core
-status: todo
-owner:
-claimed_at:
-branch:
+status: claimed
+owner: agent-t045
+claimed_at: 2026-10-14T05:19:39.880Z
+branch: task/T-045-adjustments-plan-change-and-mid-month-st
 depends_on: [T-042, T-034, T-023, T-041]
 review: required
 claimable_by: agent
@@ -54,3 +54,7 @@ PLAN §8.3, FR-008, BR-07, RULE-10, D-14, D-18 — see `docs/IMPLEMENTATION_PLAN
 ## Completion notes
 
 _The agent fills this in before opening the PR: what was built, decisions taken, deviations, follow-up tasks created, and how it was verified._
+
+## Board log
+
+- 2026-10-14T05:19:39.880Z claimed by agent-t045
