@@ -2,8 +2,8 @@
 
 | | |
 |---|---|
-| **Date** | 2026-10-13 |
-| **State** | Phase 0 done. **Phases 1–3 in progress:** data, domain, core, auth (web + mobile), billing run, payment posting, the web shell, sign-up, receipt links, the Android search → collect → sync path and printing are merged (see §2). In flight at the time of writing: T-030, T-033, T-062, T-071. |
+| **Date** | 2026-10-14 |
+| **State** | 67 of 91 tasks done. Phases 0–4 are essentially built: billing, payments, statements, reports, import, subscriptions, the admin console, the audit log and the whole Android collect/handover path are merged (see §2). In flight at the time of writing: T-045a, T-082, T-086b, T-088. What's left is mostly blocked on people: accounts (H-01), the legacy dump (H-06) and product decisions (§8). |
 | **Environment** | A cloud container with full network access (Android SDK, Google Maven, Maven Central, Gradle plugin portal all reachable). Setup steps are in §3. |
 
 Read this first, then `CLAUDE.md` and `tasks/README.md`.
@@ -23,7 +23,7 @@ Read this first, then `CLAUDE.md` and `tasks/README.md`.
 | Environments runbook (H-01 walkthrough) | `docs/runbooks/environments.md` |
 | Android build notes | `apps/android/README.md` |
 | CI | `.github/workflows/{web,android,generated-check}.yml`. Required-check names: `Web`, `Web e2e`, `Generated files`, `Android` |
-| Merged PRs so far | Phase 0: #1 T-001 · #2 T-004 · #3 T-002 · #5 T-003 · #6 T-005 · #7 T-011 · #8 T-006 · #9 T-008 · #10 T-010 · #12 T-007 · #13 T-009 · #15 CI fix<br>Phase 1: #16 T-024 · #17 T-020 · #18 T-041 · #19 T-067 · #20 T-051 · #21 T-042 · #22 T-040 · #23 T-021 · #24 test fix · #25 T-020a · #26 T-063 · #27 T-022 · #28 T-025 · #29 handoff<br>Phase 1–3 (continued): #30 T-023 · #31 T-064 · #32 T-046 · #33 T-043 · #34 T-068 · #35 T-026 · #36 T-044 · #37/#39/#41/#46 test fixes · #38 T-036 · #40 T-065 · #42 T-050 · #43 T-029 · #44 T-028 · #45 T-027 · #47 T-052 · #48 T-066 · #49 T-087 · #50 T-090 |
+| Merged PRs so far | Phase 0: #1 T-001 · #2 T-004 · #3 T-002 · #5 T-003 · #6 T-005 · #7 T-011 · #8 T-006 · #9 T-008 · #10 T-010 · #12 T-007 · #13 T-009 · #15 CI fix<br>Phase 1: #16 T-024 · #17 T-020 · #18 T-041 · #19 T-067 · #20 T-051 · #21 T-042 · #22 T-040 · #23 T-021 · #24 test fix · #25 T-020a · #26 T-063 · #27 T-022 · #28 T-025 · #29 handoff<br>Phase 1–3 (continued): #30 T-023 · #31 T-064 · #32 T-046 · #33 T-043 · #34 T-068 · #35 T-026 · #36 T-044 · #37/#39/#41/#46 test fixes · #38 T-036 · #40 T-065 · #42 T-050 · #43 T-029 · #44 T-028 · #45 T-027 · #47 T-052 · #48 T-066 · #49 T-087 · #50 T-090<br>Wave 3: #51 T-062 · #52 T-033 · #53 handoff · #54 T-030 · #55 T-071 · #56 T-061 · #57 T-047 · #58 T-032 · #59 T-034 · #60 T-048 · #61 T-049 · #62 T-070 · #63 T-069 · #64 T-031 · #65 T-085 · #66 T-080 · #67 T-060 · #68 T-045 · #69/#70/#76/#77 test fixes · #71 T-083 · #72 T-035 · #73 T-084 · #74 T-081 · #75 T-086 · #78 T-072 · #79 T-096 · #80 T-087a · #81 T-091 |
 
 **Verified on `feature/mvp`** (Node 24.21.0, pnpm 12.11.2, JDK 21, Postgres 17): `pnpm install --frozen-lockfile`, `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build`, `pnpm generate` (no diff), the tokens / icons / i18n `--check` modes, `node scripts/tasks.mjs check --local`, the Playwright e2e suite, and in `apps/android` `./gradlew ktlintCheck detekt lint testDevDebugUnitTest assembleDevDebug :detekt-rules:test`. CI runs the same on every PR.
 
@@ -34,11 +34,12 @@ Read this first, then `CLAUDE.md` and `tasks/README.md`.
 | Status | Tasks |
 |---|---|
 | **Done (Phase 0)** | T-001 … T-011 |
-| **Done (Phase 1 so far)** | T-020 DB foundation · T-020a production DB role · T-021 tenancy/identity schema · T-022 customers/plans/VC schema · T-023 financial tables + job queue · T-024 domain money/time · T-025 core (context, authz, read-only, audit, logging, isolation harness) · T-026 web auth · T-027 self sign-up + `provisionTenant` · T-028 mobile auth · T-029 web app shell · T-036 seed data |
-| **Done (Phases 2–5 so far)** | T-040 billing calc · T-041 allocation · T-042 plan-change netting · T-043 job queue/crons · T-044 billing run · T-046 payment posting/reversal · T-050 receipt links + public page · T-051 mobile API contract · T-052 nightly invariants · T-063 Android networking/login · T-064 Android Room + roster sync · T-065 Android search/home/customer · T-066 Android collect flow + payment queue + push sync · T-067 Android TTS · T-068 Android printing · T-087 marketing/pricing/legal drafts · T-090 migration staging + profiling tools |
-| **In flight** | T-030 settings: profile + areas · T-033 customers · T-062 collection sessions + Linemen page · T-071 Android settings/diagnostics |
-| **Ready, not started** | T-031 · T-032 · T-035 · T-047 · T-069 · T-070 · T-072 · T-073 (needs H-01 Play Console) · T-080 · T-085 · T-087a · T-091 · T-096 (see `node scripts/tasks.mjs next`) |
-| **Human** | H-01 accounts + secrets · H-02 domain / accent / applicationId · H-03 Hindi review · H-05 device + printer matrix |
+| **Done (Phases 1–5)** | T-020 … T-036 (data, core, auth, sign-up, shell, settings, plans, team, customers, connections, audit, seed) · T-040 … T-052 (billing calc/run/UI, allocation, netting, jobs, adjustments, payments, statements, receipt links, mobile contract, invariants) · T-060 … T-072 (mobile API, handover, the whole Android app incl. durability tests) · T-080 … T-087a (registers, reports, home, import, Razorpay + read-only mode, admin console, public pages, payload) · T-090 · T-091 (draft; column names wait for the dump) · T-096 |
+| **In flight** | T-045a Owner back-dated new connection · T-082 CSV exports · T-086b admin TOTP per session · T-088 e2e journeys |
+| **Ready for an agent** | T-086a sync metrics · T-086c platform-read allow-list audit · T-087b language switch label/font · T-095 load testing (run it on a quiet machine or CI, not a shared container) · T-096a health DB ping + cron check-ins |
+| **Waiting on a product decision** | T-031a apply a plan's new rent to existing connections · T-062a what "flag an unsubmitted handover" should do (see §8) |
+| **Waiting on people** | T-073 (needs H-01 Play Console) · T-092 / T-093 / T-094 migration (need the legacy dump, H-06) |
+| **Human** | H-01 accounts + secrets · H-02 domain / accent / applicationId · H-03 Hindi review · H-04 usability round · H-05 device + printer matrix · H-06 migration sign-off · H-07 finance sign-off · H-08 pilot · H-09 cutover · H-10 GSTIN |
 
 Run `node scripts/tasks.mjs board` for the live view.
 
@@ -51,6 +52,10 @@ Run `node scripts/tasks.mjs board` for the live view.
 - T-090: the tools have never seen the real legacy dump (every legacy column apart from `op_id`, `isReceipt`, `isDeleted` is a guess in `tools/migration/src/config.ts`).
 - T-027 / T-029 / T-087: nobody has looked at `/signup`, `/verify/<token>`, the shell and the public pages at 360 px in Hindi.
 - T-020a: the `cb_app` role SQL and `\password` on Neon, and the pooled endpoint accepting it.
+- T-072: the shared durability suite runs on Robolectric on every PR, but never on a device. `docs/testing/android-field-uat.md` has a ready-to-paste nightly emulator workflow (needs adding to CI) and the field script for H-04/H-05. A device run should also confirm the SQLite journal mode: WAL with `synchronous=NORMAL` could lose the last payments on a power cut.
+- T-087a: pages are 50–120 KiB lighter, but Lighthouse mobile ≥ 90 was not shown (scores swung 20–40 points on the loaded container). Re-measure on a Vercel preview (H-01). The language-switch label and the Devanagari font on English pages are T-087b.
+- T-096: backup and restore were proven only on local Postgres with fake data (1.17 M rows: 18 s backup, 44 s restore + verify). The Neon drill, the bucket, the Sentry alerts (`sentry-alerts.mjs --apply`) and the uptime check need H-01. The nightly jobs only start once `BACKUP_ENABLED` / `RESTORE_DRILL_ENABLED` are set and `backup.yml` is on `main`.
+- T-091: the mapping names every legacy table but only three legacy columns are known; the rest wait for the dump (run the T-090 profiler and query Q0, then §12 of `docs/migration/mapping.md`).
 - T-067 / T-073: set `bundle { language { enableSplit = false } }` before the first Play upload, or Hindi strings can be missing on English-language phones.
 
 ---
@@ -111,22 +116,24 @@ su postgres -c "psql -c \"ALTER USER postgres PASSWORD 'postgres';\" -c 'CREATE 
 | H-01 (accounts and secrets) | **Production builds fail on purpose** until every `[prod]` variable in `apps/web/.env.example` is set (T-011), including live Razorpay keys and a verified email domain. Previews need only `DATABASE_URL` + `BETTER_AUTH_SECRET` at runtime. | Product owner, following `docs/runbooks/environments.md`. |
 | H-02 (domain, accent colour, applicationId) | Android staging/prod API URLs are `*.cablebilling.example` placeholders; no launcher icon or favicon yet; email domain undecided. | Product owner. |
 | Emulator checks (T-008, T-009) | See §2. | A human, or a later emulator CI job. |
+| A shared, overloaded container | With 4–5 agents building at once (load average 20–60 on 4 CPUs), Vitest timeouts and wall-clock checks fail in packages a PR never touched. | Verify with `TURBO_FORCE=1 pnpm test --concurrency=1`; re-run a failing file alone before calling it real; keep at most 4 agents. #76 and #77 raised two budgets that were genuinely too tight. |
 | Occasional network blips in CI | One Android run failed fetching the KSP plugin; a fresh run passed. | Re-run once. A second failure is real. |
 
 ---
 
 ## 5. Recommended next wave
 
-After the in-flight tasks merge, follow `node scripts/tasks.mjs next`. The critical path:
+Follow `node scripts/tasks.mjs next`. What is left for agents is small; the big remaining items need people.
 
-| After | Unblocks |
+| Do | Why |
 |---|---|
-| T-033 customers | T-034 connections, T-048 counter payments, T-049 statement, T-060 mobile roster API, T-084 import |
-| T-062 collections/handover | T-061 mobile payment batch/handover API, T-070 Android Today/handover, T-081 reports |
-| T-060 / T-061 mobile API | the phone talks to the real server (until then Android runs against fakes and fixtures) |
-| T-085 Razorpay + read-only mode | T-086 admin console, the banner states T-029 shows |
+| Merge the in-flight PRs (T-045a, T-082, T-086b, T-088) | T-045a and T-086b are `review: required`: review the diff yourself or with a reviewer agent before merging (T-086's review found a real append-only gap). |
+| T-086c, T-096a, T-087b, T-086a | Small hardening follow-ups from the reviews. |
+| Get answers to §8 | Unblocks T-031a and T-062a, and several defaults already built in. |
+| H-01, then T-073, then T-095 on real infrastructure | Production builds, Play upload, backups, alerts and a meaningful load test all need the accounts. |
+| H-06: the legacy dump | Unblocks finishing T-091 and the whole migration chain T-092 → T-093 → T-094 → H-09 cutover. |
 
-Most of these are `review: required` (money, tenancy, auth). The user's standing instruction in this session was "keep merging": the coordinator verified each PR locally (rebase onto the latest `feature/mvp`, full checks incl. DB tests, Gradle for Android) and merged once CI was green. Ask the user again in a new session.
+The user's standing instruction in this session was "keep merging": the coordinator verified each PR locally (rebase onto the latest `feature/mvp`, full checks incl. DB tests, Gradle for Android), reviewed `review: required` PRs, and merged once CI was green. Ask the user again in a new session.
 
 ---
 
@@ -150,6 +157,13 @@ Most of these are `review: required` (money, tenancy, auth). The user's standing
 16. **A container restart stops Postgres** (`ECONNREFUSED`): `pg_ctlcluster 17 main start`. An API rate limit can also stop every running agent at once; resume each one with a message ("continue where you stopped; check `git status` first") once the limit resets. Their uncommitted work survives in the agent worktrees.
 17. **Flaky tests seen so far, all fixed:** a 50 ms debounce (#24), a ~1% request-id assertion (#37), web/ui timeouts under load (#39, #41), and `PrinterSettingsTest` opening a second DataStore before the first scope finished (#46: `cancelAndJoin`, not `cancel`). Fix the root cause; never skip a test.
 18. **GitHub check summaries lag.** Read the workflow run's jobs (`actions_list` → `list_workflow_jobs`) for the real status. Android CI takes ~12 min and only runs the full build when Android-relevant paths (incl. i18n and icons) change.
+
+19. **Never run `corepack enable`** in this container, even though `CLAUDE.md`'s Commands section mentions it: it replaces the working global `pnpm` with a corepack shim that can't find `bin/pnpm.cjs` and breaks pnpm for every agent at once. Fix: `ln -sfn ../lib/node_modules/pnpm/pnpm pnpm` (and `pnpx`) in `/opt/nvm/versions/node/v24.21.0/bin`. Put the warning in every agent prompt.
+20. **The audit viewer registry (T-035) catches every new audit action.** `packages/core/src/audit-query/actions.test.ts` fails until a new action (including a service's default action name) has an entry in `AUDIT_ACTIONS` and an en/hi sentence + filter label in `audit.json`; a service that always calls `audit.skip` goes in `NEVER_THE_DEFAULT_ACTION`. Tell every agent that adds a service.
+21. **Board commits land on `feature/mvp`** (`board: claim T-xxx`). They move the base under open PRs; that is expected, not someone else's work.
+22. **Removing an agent's worktree means it can't be resumed.** Only remove worktrees of agents that have sent their final report; to follow up on a finished agent's PR, start a new agent on its branch.
+23. **Review `review: required` PRs with a separate reviewer agent** (read-only, adversarial, ranked findings) and send the fixes back as a new agent. On T-086 this found that an ended support grant could be reopened at the database level.
+24. **Acceptance criteria that need a device, real accounts or the dump stay unticked**, with the reason in the completion notes; the task can still be completed and merged. §2 lists every such gap.
 
 **Interfaces delivered so far** (details in each task file's *Completion notes*):
 
@@ -245,4 +259,12 @@ Report back: PR URL, head SHA, interfaces for later agents, deviations, problems
 - *Shell (T-029):* Staff see the read-only banner but not the grace warning (PLAN §11.9 says Owner only) · Owner-only pages: Undo payment, Bill changes, Download data, Team, Subscription, Audit.
 - *Invariants (T-052):* a breach marks the nightly job "failed" so the existing alert fires · `invariant_checks` has no retention yet (Q-06).
 - *Public pages (T-087):* privacy policy and terms are drafts and need legal review (entity, grievance contact, DPDP rights, liability, governing law, refund policy, retention) · `SUPPORT_EMAIL` is now required for production builds (`SUPPORT_PHONE` optional) · confirm "No card needed to start", "UPI Autopay or card", "Bills are made on the 1st".
+**Questions raised in the third wave** (default in brackets)
+- *Platform admin (T-086):* should support access need the Owner's approval, and can the Owner end it? [admin opens it with a reason, 15–120 min, any admin may end it] · should the support view show more (e.g. one customer's account)? [no payments, balances, names or phones] · how to correct a mistyped offline subscription payment (records are append-only, no reversal flow yet), and do they need a GST invoice (H-10)? · switching an operator off/on (PRD §3) and migration batch reports are not built.
+- *Reports (T-081):* should the collections report show linemen only? [includes counter and legacy payments so it reconciles] · should the handover report list a lineman's day with no payments and no handover? [no]
+- *Session-close cron (T-062a):* what "flag an unsubmitted handover" means [proposal: a count on the Owner's Home, no automatic action]. *Plan rent (T-031a):* apply a plan's new rent to all its connections at once?
+- *Backups (T-096):* RPO/RTO targets [point-in-time restore: ~0 loss, back within 1 h; nightly dump: up to 24 h loss, up to 4 h] · may CI hold the private key so the monthly drill runs automatically? [manual drill] · the 12-month legacy archive needs its own bucket (the backup bucket expires after 30 days).
+- *Android (T-072):* add the nightly emulator workflow from `docs/testing/android-field-uat.md`? · a deactivated lineman's held payments still need the office "release" flow (T-066).
+- *Web payload (T-087a):* with a Sentry DSN set, the SDK still downloads after load, so Lighthouse still counts it.
+- *Migration (T-091):* 27 business decisions are listed in `docs/migration/mapping.md` §13 (money unit, rounding tolerance, `isReceipt`, which balance is authoritative, how much history, payment method for legacy receipts, lineman login collisions, owners of the 8 operators …). Also: `migration_batches` / `migration_exceptions` / `legacy_id_map` from PLAN §7.2 don't exist yet (T-092), and `payments.method` has no "not recorded" value.
 - *Migration (T-090):* the real dump is needed for column names, charset, and whether money is in rupees or paise (feeds T-091 and H-06) · the MariaDB tests don't run in CI (no MariaDB service in `web.yml`).
