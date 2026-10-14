@@ -202,6 +202,9 @@ export async function adjustChangeMonth(
 /**
  * The billed months after `changePeriod` (the Owner's back-dated flow): each one is corrected to
  * what the monthly bill would charge with the new history (./effects.ts `laterMonthEffect`).
+ * `months` replaces that list when the caller knows better which months need it (T-045a: a new
+ * connection also corrects months whose run has already been, with or without a bill for the
+ * customer, and a start-on-the-1st month).
  */
 export async function adjustLaterMonths(
   env: ApplyEnv,
@@ -211,13 +214,15 @@ export async function adjustLaterMonths(
     readonly changePeriod: Period;
     readonly eventId: string | null;
     readonly reason: string;
+    readonly months?: readonly Period[];
   },
 ): Promise<{ effects: MonthEffect[]; adjustments: AdjustmentView[] }> {
   const { tx, operatorId } = env;
   const facts = await loadConnectionFacts(tx, operatorId, change.assignmentId);
   if (!facts) throw new Error("back-dated flow: assignment not found in its own transaction");
   const months = [
-    ...(await billedPeriodsOf(tx, operatorId, facts.customerId, change.changePeriod)),
+    ...(change.months ??
+      (await billedPeriodsOf(tx, operatorId, facts.customerId, change.changePeriod))),
   ].sort();
   const records = await rentalRecordsOf(tx, operatorId, facts.id, months);
   const effects: MonthEffect[] = [];

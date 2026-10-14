@@ -141,5 +141,9 @@
     "save": "Save bill change",
     "saved": "Bill change saved.",
     "back": "All bill changes"
+  },
+  "add_backdated": {
+    "headline": "New connection: ₹{amount} a month from {date}.",
+    "stale": "The bills changed while you were looking. Check the new amounts below, then save again."
   }
 }

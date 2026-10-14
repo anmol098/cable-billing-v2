@@ -116,7 +116,9 @@
     "manual.summary_credit",
     "manual.save",
     "manual.saved",
-    "manual.back"
+    "manual.back",
+    "add_backdated.headline",
+    "add_backdated.stale"
   ],
   "connection": {
     "change_plan": "प्लान बदलें",
@@ -260,5 +262,9 @@
     "save": "बिल में बदलाव सेव करें",
     "saved": "बिल में बदलाव सेव हो गया।",
     "back": "सारे बिल में बदलाव"
+  },
+  "add_backdated": {
+    "headline": "नया कनेक्शन: ₹{amount} महीना, {date} से।",
+    "stale": "आप देख रहे थे तभी बिल बदल गए। नीचे नई रकम देखें, फिर से सेव करें।"
   }
 }

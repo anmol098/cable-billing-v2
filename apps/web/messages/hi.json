@@ -1,5 +1,9 @@
 {
   "adjustments": {
+    "add_backdated": {
+      "headline": "नया कनेक्शन: ₹{amount} महीना, {date} से।",
+      "stale": "आप देख रहे थे तभी बिल बदल गए। नीचे नई रकम देखें, फिर से सेव करें।"
+    },
     "backdate": {
       "description": "उस बदलाव के लिए जो पहले बने बिलों में होना चाहिए था। यह सिर्फ़ मालिक कर सकते हैं। हर बिल में बदलाव के साथ आपका कारण लिखा जाएगा।",
       "kind": {
@@ -723,7 +727,7 @@
     },
     "sentence": {
       "adjustments": {
-        "back_dated_change": "{kind, select, plan {{who} ने VC {target} (ग्राहक {customer}) का प्लान पहले की तारीख {date} से बदला} suspend {{who} ने VC {target} (ग्राहक {customer}) को पहले की तारीख {date} से बंद किया} reactivate {{who} ने VC {target} (ग्राहक {customer}) को पहले की तारीख {date} से फिर से चालू किया} disconnect {{who} ने VC {target} (ग्राहक {customer}) को पहले की तारीख {date} से हटाया} other {{who} ने VC {target} (ग्राहक {customer}) को पहले की तारीख {date} से बदला}}",
+        "back_dated_change": "{kind, select, plan {{who} ने VC {target} (ग्राहक {customer}) का प्लान पहले की तारीख {date} से बदला} suspend {{who} ने VC {target} (ग्राहक {customer}) को पहले की तारीख {date} से बंद किया} reactivate {{who} ने VC {target} (ग्राहक {customer}) को पहले की तारीख {date} से फिर से चालू किया} disconnect {{who} ने VC {target} (ग्राहक {customer}) को पहले की तारीख {date} से हटाया} start {{who} ने VC {target} (ग्राहक {customer}) को पहले की तारीख {date} से जोड़ा} other {{who} ने VC {target} (ग्राहक {customer}) को पहले की तारीख {date} से बदला}}",
         "create": "{direction, select, credit {{who} ने ग्राहक {target} को ₹{amount} की छूट दी} other {{who} ने ग्राहक {target} पर ₹{amount} का एक्स्ट्रा चार्ज जोड़ा}}"
       },
       "admin": {

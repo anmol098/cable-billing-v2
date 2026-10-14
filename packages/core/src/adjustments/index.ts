@@ -4,6 +4,8 @@
  * changes list. See ./services.ts (services), ./effects.ts (pure rules), ./apply.ts (hooks and
  * back-dated months) and ./store.ts (rows, ledger, credit).
  */
+
+export * from "./back-dated-add";
 export { type ChangeKind, expectedRentPaise, type MonthEffect } from "./effects";
 export {
   ADJUSTMENT_LIMITS,
