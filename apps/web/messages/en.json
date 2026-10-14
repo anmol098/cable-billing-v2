@@ -1677,6 +1677,139 @@
     },
     "upi": "UPI"
   },
+  "reports": {
+    "all_areas": "All areas",
+    "area": "Area",
+    "as_of": {
+      "end_of_day": "Numbers as of the end of {date}",
+      "help": "Payments and bills that reach the office after this time are not in these numbers.",
+      "now": "Numbers as of {when}"
+    },
+    "bills": {
+      "all_pay_states": "All bills",
+      "bad_range": "Choose up to 12 months, “From” before “To”. Showing this month.",
+      "bill_no": "Bill {number}",
+      "billed": "Billed",
+      "caption": "Bills",
+      "col": {
+        "amount": "Bill amount",
+        "customer": "Customer",
+        "month": "Month",
+        "paid": "Paid",
+        "status": "Paid?"
+      },
+      "count": "{count, plural, =0 {No bills} one {# bill} other {# bills}}",
+      "description": "Bills of the months you choose, how much is paid and how much is still due.",
+      "due": "Still due",
+      "empty": "No bills in these months.",
+      "filters": "Choose bills",
+      "from": "From month",
+      "old_due_bill": "Old due",
+      "paid": "Paid",
+      "pay_state": "Paid?",
+      "to": "To month"
+    },
+    "customers": "{count, plural, =0 {No customers} one {# customer} other {# customers}}",
+    "dues": {
+      "ageing_help": "A bill's due counts from the 1st of its month. Credit pays the oldest bills first.",
+      "ageing_title": "How old is the due",
+      "area_credit": "{amount} credit",
+      "area_due": "{amount} due · {customers}",
+      "bucket": {
+        "d0_30": "0–30 days",
+        "d31_60": "31–60 days",
+        "d61_90": "61–90 days",
+        "d90_plus": "Over 90 days"
+      },
+      "bucket_all": "Any age",
+      "bucket_label": "How old",
+      "by_area_title": "Due by area",
+      "closed": "Closed",
+      "col": {
+        "age": "How old",
+        "area": "Area",
+        "credit": "Credit",
+        "customer": "Customer",
+        "due": "Due",
+        "since": "Unpaid since"
+      },
+      "credit": "Credit",
+      "date": "Day",
+      "date_help": "Leave today to see the numbers now. Pick an older day to see them as they were at the end of that day.",
+      "description": "Who owes money, how much, and since when.",
+      "empty_advance": "No customer has credit here.",
+      "empty_due": "Nobody owes money here.",
+      "filters": "Choose customers",
+      "kind": {
+        "advance": "Customers with credit",
+        "due": "Customers who owe"
+      },
+      "kind_label": "Show",
+      "list_advance": "Customers with credit",
+      "list_due": "Customers who owe",
+      "net": "Due minus credit",
+      "net_help": "This is what all customers owe together. It matches the customers' accounts.",
+      "not_on_bill": "Not on a bill yet",
+      "see_customers": "See these customers",
+      "total_due": "Total due"
+    },
+    "next": "Next",
+    "no_area": "No area",
+    "page": "Page {page}",
+    "pages": "Pages",
+    "payments": {
+      "anyone": "Anyone",
+      "bad_dates": "The “To” day is before the “From” day. Showing this month.",
+      "cancelled_count": "{count, plural, =0 {None cancelled} one {# cancelled, not counted} other {# cancelled, not counted}}",
+      "caption": "Payments",
+      "cash": "Cash",
+      "cash_and_upi": "Cash + UPI",
+      "col": {
+        "amount": "Amount",
+        "customer": "Customer",
+        "status": "Status",
+        "taken_by": "Taken by",
+        "when": "When"
+      },
+      "count": "{count, plural, =0 {No payments} one {# payment} other {# payments}}",
+      "description": "Every payment: who took it, cash or UPI, and when it reached the office.",
+      "empty": "No payments on these days.",
+      "filters": "Choose payments",
+      "from": "From",
+      "method": {
+        "cash": "Cash",
+        "upi": "UPI"
+      },
+      "method_any": "Cash and UPI",
+      "method_label": "Cash or UPI",
+      "nobody": "Not known",
+      "reached_at": "Reached the office {when}",
+      "receipt_no": "Receipt {number}",
+      "source": {
+        "android": "By a lineman",
+        "migration": "From the old app",
+        "web": "At the office"
+      },
+      "status": {
+        "cancelled": "Cancelled",
+        "checked": "Checked",
+        "counted": "Counted",
+        "to_check": "To check"
+      },
+      "status_all": "All",
+      "status_label": "Status",
+      "switched_off": "{name} (switched off)",
+      "taken_at": "Money taken {when}",
+      "taken_by": "Taken by",
+      "to": "To",
+      "to_check_count": "{count, plural, =0 {Nothing to check} one {# to check} other {# to check}}",
+      "upi": "UPI"
+    },
+    "previous": "Previous",
+    "show": "Show",
+    "total": "Total",
+    "totals_label": "Totals"
+  },
   "scaffold": {
     "home": {
       "language": "Language",
