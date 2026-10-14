@@ -197,6 +197,11 @@
         "return": "Cash sent back",
         "submit": "Cash handed over"
       },
+      "imports": {
+        "customers": {
+          "apply": "Customers added from a file"
+        }
+      },
       "mobile_auth": {
         "refresh_reuse_detected": "Phone signed out for safety"
       },
@@ -417,6 +422,11 @@
         "accept": "{who} accepted the cash of {target} for {date}: ₹{amount}",
         "return": "{who} sent back the cash of {target} for {date}: ₹{amount}",
         "submit": "{who} handed over ₹{amount} cash for {date}"
+      },
+      "imports": {
+        "customers": {
+          "apply": "{who} added {count, plural, one {# customer} other {# customers}} from a file"
+        }
       },
       "mobile_auth": {
         "refresh_reuse_detected": "The app signed out phone {target} of {who}: an old sign-in was used again"
@@ -1172,6 +1182,212 @@
       "cash": "Cash today",
       "title": "Today, {date}",
       "upi": "UPI today"
+    }
+  },
+  "import": {
+    "check": {
+      "add": "{count, plural, one {Add # customer} other {Add # customers}}",
+      "adding": "Adding…",
+      "download_csv": "Download as CSV",
+      "download_excel": "Download as Excel",
+      "download_failed": "The file could not be made. Try again.",
+      "problems_hint": "Download them, fix the cells, and upload that file again.",
+      "problems_title": "Lines with problems",
+      "progress": "Added {done} of {total} customers…",
+      "upload_again": "Choose another file"
+    },
+    "done": {
+      "again": "Add another file",
+      "open_customers": "Open customers",
+      "stopped": "The import stopped. Upload the same file again to add the rest: customers already added are skipped.",
+      "title": "Done"
+    },
+    "field": {
+      "address": "Address",
+      "alt_phone": "Other mobile no.",
+      "area": "Area",
+      "code": "Customer code",
+      "line": "Line",
+      "name": "Name",
+      "phone": "Mobile no.",
+      "plan": "Plan",
+      "rent": "Rent",
+      "start_date": "Start day",
+      "vc_number": "VC number"
+    },
+    "file_error": {
+      "duplicate_column": "These columns are there twice: {columns}.",
+      "empty": "No customers found in the file.",
+      "missing_columns": "These columns are missing: {columns}.",
+      "no_file": "Choose the file first.",
+      "no_header": "The column names were not found. Use our form, or put the column names in the first line.",
+      "not_allowed": "You can't do this. Ask the owner.",
+      "old_excel": "This is an old Excel file (.xls). In Excel choose Save As → Excel Workbook (.xlsx).",
+      "read_only": "View only. Customers can't be added until the app subscription is paid.",
+      "too_big": "The file is too big. Keep it under {size} MB, or split it into two files.",
+      "too_many_lines": "The file has more than {rows} lines. Split it into two files.",
+      "unexpected": "Something went wrong. Nothing was added. Try again.",
+      "unreadable": "This file can't be read. Save it as Excel (.xlsx) or CSV and try again."
+    },
+    "get": {
+      "csv": "Download CSV form",
+      "excel": "Download Excel form",
+      "lead": "Download the form, fill in one line for each set-top box, save it, then upload it in the next step.",
+      "limits": "Up to {rows} lines and {size} MB in one file.",
+      "other_csv": "CSV",
+      "other_excel": "Excel",
+      "other_language": "Same form with Hindi column names:",
+      "rule_again": "Customers already in the app are not changed, so uploading the same file again is safe.",
+      "rule_area": "Areas must already be in Settings → Areas.",
+      "rule_date": "Start day like 15/10/2026. Empty means today.",
+      "rule_line": "One line for each set-top box (VC). A customer with 2 boxes: 2 lines with the same customer code.",
+      "rule_needed": "Customer code and Name are needed. Other columns can be empty.",
+      "rule_plan": "For each box write the VC number and the plan name, or the rent in rupees.",
+      "rules_title": "How to fill it"
+    },
+    "intro": "Add many customers at once from an Excel or CSV file.",
+    "problem": {
+      "alt_phone": {
+        "invalid": "Other mobile no. is not a phone number."
+      },
+      "any": {
+        "differs": "{field} is different on line {line} of the same customer. Write it once, on the first line.",
+        "invalid": "{field} is not right.",
+        "required": "{field} is empty.",
+        "too_long": "{field} is too long."
+      },
+      "area": {
+        "hidden": "Area \"{area}\" is hidden. Show it again in Settings → Areas.",
+        "not_found": "There is no area \"{area}\". Add it in Settings → Areas, or leave it empty."
+      },
+      "code": {
+        "required": "Customer code is empty. Every customer needs one.",
+        "too_long": "Customer code is too long."
+      },
+      "line": {
+        "not_saved": "This customer could not be added. Upload the file again to try again.",
+        "same_customer": "Not added: line {lines} of the same customer has a problem.",
+        "too_many_boxes": "A customer can have at most 10 connections (VC)."
+      },
+      "name": {
+        "name_differs": "Line {line} has this customer code with another name. A different customer needs a different code.",
+        "required": "Name is empty. Write it on the customer's first line."
+      },
+      "phone": {
+        "invalid": "Mobile no. is not a phone number."
+      },
+      "plan": {
+        "not_found": "There is no plan \"{plan}\". Check the name in Settings → Plans, or write the rent instead.",
+        "plan_or_rent": "Write the plan name or the rent for this box.",
+        "retired": "Plan \"{plan}\" is hidden. Show it again in Settings → Plans, or write another plan or the rent."
+      },
+      "rent": {
+        "decimal": "Rent: write whole rupees, without paise.",
+        "invalid": "Rent: write a number of rupees, like 450.",
+        "negative": "Rent can't be less than 0.",
+        "rent_differs": "The plan's rent is {amount}. Leave the rent empty, or leave the plan empty to use your own rent.",
+        "too_large": "Rent is too big. Check the number."
+      },
+      "start_date": {
+        "billed_period": "Bills for that month are already made. Use a later start day.",
+        "in_future": "Start day can't be after tomorrow.",
+        "invalid": "Start day: write the day like 15/10/2026.",
+        "too_old": "Start day: check the year."
+      },
+      "vc_number": {
+        "box_needed": "Plan, rent or start day is written but the VC number is empty.",
+        "in_use": "This VC is with customer {code}.",
+        "in_use_other": "This VC is with another customer.",
+        "in_use_until": "This VC is with customer {code}. It can start here from {from}.",
+        "invalid": "VC number: write only the letters and numbers printed on the card.",
+        "repeated": "This VC number is also on line {line}.",
+        "retired": "This VC is out of service."
+      }
+    },
+    "problem_file": {
+      "file_name": "customers-problems",
+      "line": "Line",
+      "problem": "Problem",
+      "sheet": "Problems"
+    },
+    "progress": "Step {current} of {total}",
+    "status": {
+      "created": "Added",
+      "exists": "Already in app",
+      "problem": "Problem",
+      "ready": "Ready"
+    },
+    "step": {
+      "check": "Check and add",
+      "get": "Get the form",
+      "upload": "Upload the file"
+    },
+    "summary": {
+      "connections": "{count, plural, one {with # connection (VC)} other {with # connections (VC)}}",
+      "created": "{count, plural, one {# customer added} other {# customers added}}",
+      "created_connections": "{count, plural, one {with # connection (VC)} other {with # connections (VC)}}",
+      "exists": "{count, plural, one {# already in the app: not changed} other {# already in the app: not changed}}",
+      "problem": "{count, plural, one {# customer has a problem: not added} other {# customers have a problem: not added}}",
+      "ready": "{count, plural, one {# customer ready to add} other {# customers ready to add}}"
+    },
+    "table": {
+      "box_plan": "{vc} · {plan}",
+      "box_rent": "{vc} · ₹{amount}",
+      "box_vc": "{vc}",
+      "caption": "Lines of the file",
+      "col_box": "VC and rent",
+      "col_customer": "Customer",
+      "col_fix": "What to fix",
+      "col_line": "Line",
+      "col_status": "Status",
+      "filter_all": "All lines",
+      "filter_exists": "Already in the app",
+      "filter_problem": "Problems",
+      "filter_ready": "Ready",
+      "line": "Line {line}",
+      "no_box": "No connection",
+      "nothing": "No lines here.",
+      "show": "Show",
+      "show_more": "Show more",
+      "showing": "Showing {shown} of {total} lines"
+    },
+    "template": {
+      "columns": {
+        "address": "Address",
+        "alt_phone": "Other mobile no.",
+        "area": "Area",
+        "code": "Customer code",
+        "name": "Name",
+        "phone": "Mobile no.",
+        "plan": "Plan",
+        "rent": "Rent (₹ per month)",
+        "start_date": "Start day",
+        "vc_number": "VC number"
+      },
+      "file_name": "customers-form",
+      "help": {
+        "again": "Customers already in the app (same customer code) are not changed. Uploading the same file again is safe.",
+        "area": "Area: the name as it is in Settings → Areas.",
+        "date": "Start day: like 15/10/2026. Empty means today.",
+        "example": "Example: 101 | Ramesh Kumar | 9876543210 | | Gali 4 | Ward 5 | 000123456789 | Basic | | 01/10/2026",
+        "line": "One line for each set-top box (VC). A customer with 2 boxes = 2 lines with the same customer code.",
+        "needed": "Customer code and Name are needed. Write the name, mobile, address and area on the customer's first line.",
+        "phone": "Mobile no.: the 10 digits. Other columns can be empty.",
+        "plan": "For each box: the VC number, and the Plan name as it is in Plans or the Rent in whole rupees.",
+        "title": "How to fill the Customers sheet"
+      },
+      "help_sheet": "How to fill",
+      "sheet": "Customers"
+    },
+    "upload": {
+      "check": "Check the file",
+      "checking": "Checking…",
+      "chosen": "{name} · {size} KB",
+      "label": "The filled form (.xlsx or .csv)"
+    },
+    "warning": {
+      "not_utf8": "Hindi letters may be lost in this file. In Excel choose Save As → CSV UTF-8, or upload the .xlsx file.",
+      "unused_columns": "These columns were not used: {columns}."
     }
   },
   "job_alerts": {

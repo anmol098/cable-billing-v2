@@ -232,7 +232,9 @@
     "field.direction",
     "field.kind",
     "field.credit_applied_paise",
-    "field.total_paise"
+    "field.total_paise",
+    "sentence.imports.customers.apply",
+    "action.imports.customers.apply"
   ],
   "description": "आपके बिज़नेस में हर बदलाव: किसने किया और कब। यह पेज सिर्फ़ आप (मालिक) देख सकते हैं।",
   "filters": {
@@ -384,6 +386,11 @@
     "subscription": {
       "state_changed": "{status, select, trialing {{who} ने ऐप सब्सक्रिप्शन बदला: फ़्री ट्रायल} active {{who} ने ऐप सब्सक्रिप्शन बदला: पेमेंट हो गया} grace {{who} ने ऐप सब्सक्रिप्शन बदला: अभी पेमेंट करें} read_only {{who} ने ऐप सब्सक्रिप्शन बदला: सिर्फ़ देख सकते हैं} cancelled {{who} ने ऐप सब्सक्रिप्शन बदला: बंद है} other {{who} ने ऐप सब्सक्रिप्शन बदला}}",
       "notice_sent": "{who} ने ऐप पेमेंट की याद {count, plural, one {# मालिक} other {# मालिकों}} को ईमेल की"
+    },
+    "imports": {
+      "customers": {
+        "apply": "{who} ने फ़ाइल से {count, plural, one {# ग्राहक} other {# ग्राहक}} जोड़े"
+      }
     }
   },
   "generic": "{who} ने बदलाव किया: {entity} {target}",
@@ -479,6 +486,11 @@
     "subscription": {
       "state_changed": "ऐप सब्सक्रिप्शन बदला",
       "notice_sent": "ऐप पेमेंट की याद ईमेल की"
+    },
+    "imports": {
+      "customers": {
+        "apply": "फ़ाइल से ग्राहक जोड़े"
+      }
     }
   },
   "changes": {

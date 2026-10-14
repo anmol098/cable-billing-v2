@@ -119,6 +119,7 @@ const NEVER_THE_DEFAULT_ACTION: Readonly<Record<string, string>> = {
   "subscriptions.overview": "a read that always calls audit.skip('no_change')",
   "subscriptions.record_checkout": "always records `subscriptions.checkout_started`",
   "adjustments.create_manual": "records `adjustments.create` (through `insertAdjustment`)",
+  "imports.customers.check": "the preview: always calls audit.skip('no_change')",
 };
 
 async function writtenActions(): Promise<Map<string, string>> {

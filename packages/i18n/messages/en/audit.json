@@ -149,6 +149,11 @@
     "subscription": {
       "state_changed": "{status, select, trialing {{who} set the app subscription to: Free trial} active {{who} set the app subscription to: Paid} grace {{who} set the app subscription to: Pay now} read_only {{who} set the app subscription to: View only} cancelled {{who} set the app subscription to: Stopped} other {{who} changed the app subscription}}",
       "notice_sent": "{who} emailed a reminder about the app payment to {count, plural, one {# owner} other {# owners}}"
+    },
+    "imports": {
+      "customers": {
+        "apply": "{who} added {count, plural, one {# customer} other {# customers}} from a file"
+      }
     }
   },
   "generic": "{who} made a change: {entity} {target}",
@@ -244,6 +249,11 @@
     "subscription": {
       "state_changed": "App subscription changed",
       "notice_sent": "App payment reminder emailed"
+    },
+    "imports": {
+      "customers": {
+        "apply": "Customers added from a file"
+      }
     }
   },
   "changes": {

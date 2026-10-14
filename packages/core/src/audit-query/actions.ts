@@ -185,6 +185,10 @@ export const AUDIT_ACTIONS = {
   // Customers (T-033)
   "customers.create": {},
   "customers.create_with_connections": {},
+  // Customer import (T-084): one event per import step, with counts only
+  "imports.customers.apply": {
+    details: ({ after }) => ({ count: count(field(after, "created")) }),
+  },
   "customers.update": {
     details: ({ after }) => ({ fields: changedFields({ before: null, after }) }),
   },
