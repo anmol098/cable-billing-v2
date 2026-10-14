@@ -3,10 +3,10 @@ id: T-045a
 title: Owner back-dated new connection (start dated into a billed month)
 phase: 2
 area: core
-status: todo
-owner:
-claimed_at:
-branch:
+status: claimed
+owner: agent-t045a
+claimed_at: 2026-10-14T14:00:30.496Z
+branch: task/T-045a-owner-back-dated-new-connection-start-da
 depends_on: [T-045]
 review: required
 claimable_by: agent
@@ -61,3 +61,7 @@ PLAN §8.3, D-18, T-034 / T-045 completion notes — see `docs/IMPLEMENTATION_PL
 ## Completion notes
 
 _The agent fills this in before opening the PR._
+
+## Board log
+
+- 2026-10-14T14:00:30.496Z claimed by agent-t045a
