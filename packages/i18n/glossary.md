@@ -250,6 +250,22 @@ the office has the payment.
 | Unpaid since | … से बाकी | The oldest month that is still not fully paid | `semantic.due` (red text) | Overdue since, Ageing |
 | Own amount | अपनी रकम | A connection's monthly rent typed by hand instead of a plan | — | Custom rental, Override |
 
+## Team words (web Settings → Staff and linemen)
+
+| English | हिंदी | Means | Icon / colour | Not this |
+|---|---|---|---|---|
+| Add lineman / Add staff | लाइनमैन जोड़ें / स्टाफ़ जोड़ें | Owner creates a sign-in for a person | plus | Create user, Invite member |
+| User name | यूज़र नेम | What they type to sign in (usually the mobile number) | — | Login ID, Username |
+| Make one for me | मेरे लिए बना दें | Fill in a random 6-digit password | lock | Generate, Auto-generate |
+| New password | नया पासवर्ड | Owner sets a new password; their phone/website signs out | lock | Reset credentials |
+| Share sign-in on WhatsApp | लॉग इन WhatsApp पर शेयर करें | Opens WhatsApp with the app link and user name (never the password) | message-circle | Send login, Invite |
+| Switch off / Switch on | बंद करें / चालू करें | Stop / allow a person to sign in; nothing is deleted | user-x / user-check | Deactivate, Disable, Delete |
+| Active | चालू | The person can sign in | circle-check, `semantic.success` | Enabled |
+| Signed in / Signed out (a phone) | लॉग इन है / लॉग आउट है | Whether the phone still holds a working sign-in | circle-check / log-out | Session active, Revoked |
+| Sign out this phone | इस फ़ोन से लॉग आउट करें | Owner ends a lost phone's sign-in; payments on it stay on it | log-out | Revoke device, Remote wipe |
+| Has not set a password yet | अभी पासवर्ड नहीं बनाया | Staff invited by email who have not used the link | clock, `semantic.pending` | Pending invite |
+| Email them a link | उन्हें ईमेल पर लिंक भेजें | Staff set their own password from an email | mail | Send invite |
+
 ## Words we never show users
 
 Invoice, Ledger, Allocation, Adjustment, Reversal, Tenant, Sync / Synced / Pending sync,

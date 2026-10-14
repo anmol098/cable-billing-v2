@@ -52,6 +52,7 @@ const EXPECTED: ReadonlyArray<
   ["reports.view", Y, Y, N, "read", N],
   ["reports.own_day.view", Y, Y, Y, "read", N],
   ["exports.csv", Y, N, N, "read", Y],
+  ["team.view", Y, N, N, "read", N], // T-032: the Team page list, viewable in read-only mode
   ["team.manage", Y, N, N, "write", Y],
   ["subscription.manage", Y, N, N, "write", Y],
   ["business_profile.manage", Y, N, N, "write", Y],
