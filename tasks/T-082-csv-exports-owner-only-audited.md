@@ -3,10 +3,10 @@ id: T-082
 title: CSV exports (Owner only, audited)
 phase: 4
 area: web
-status: todo
-owner:
-claimed_at:
-branch:
+status: claimed
+owner: agent-t082
+claimed_at: 2026-10-14T13:27:14.299Z
+branch: task/T-082-csv-exports-owner-only-audited
 depends_on: [T-080, T-081]
 review: self
 claimable_by: agent
@@ -50,3 +50,7 @@ FR-029, RULE-22 — see `docs/IMPLEMENTATION_PLAN.md`, `docs/PRD.md`, `docs/BRD.
 ## Completion notes
 
 _The agent fills this in before opening the PR: what was built, decisions taken, deviations, follow-up tasks created, and how it was verified._
+
+## Board log
+
+- 2026-10-14T13:27:14.299Z claimed by agent-t082
