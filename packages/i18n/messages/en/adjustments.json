@@ -71,12 +71,12 @@
     "reason": "Write why (at least 3 letters).",
     "stop_reason": "Choose why it was stopped.",
     "customer": "Choose the customer.",
-    "direction": "Choose extra charge or take money off.",
+    "direction": "Choose extra charge or discount.",
     "manual_amount": "Write an amount (₹1 to ₹1,00,000).",
     "id_reused": "This form was already saved. Open the list to check."
   },
   "list": {
-    "description": "Extra charges and money taken off after bills were made. Each one has a reason.",
+    "description": "Extra charges and discounts after bills were made. Each one has a reason.",
     "new": "New bill change",
     "filters": "Filters",
     "state": "Show",
@@ -121,7 +121,7 @@
   },
   "manual": {
     "title": "New bill change",
-    "description": "Add an extra charge or take money off a customer's bills. Only the owner can do this.",
+    "description": "Add an extra charge or give a discount on a customer's bills. Only the owner can do this.",
     "customer": "Customer",
     "customer_placeholder": "Name, phone, code or VC number",
     "searching": "Searching…",
@@ -131,7 +131,7 @@
     "direction": "What kind of change?",
     "debit": "Extra charge",
     "debit_hint": "Added to the next bill",
-    "credit": "Take money off",
+    "credit": "Discount",
     "credit_hint": "Taken off what the customer owes now",
     "amount": "Amount (₹)",
     "reason": "Why?",

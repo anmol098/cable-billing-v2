@@ -404,6 +404,19 @@ that it opened another app (RULE-19). `HonestReceiptWordsTest` checks every `mob
 | Customers with credit | जिनका एडवांस है | Customers who paid more than their bills | `semantic.credit` | Advance customers, Negative balance |
 | Total (totals row) | कुल | The sum of every row that matches the filters, not only this page | — | Grand total, Subtotal |
 
+## Bill change words (web, T-045)
+
+| English | हिंदी | Means | Icon / colour | Not this |
+|---|---|---|---|---|
+| Change plan | प्लान बदलें | Give a connection a new plan or own amount from a day | tv | Upgrade/downgrade, Modify subscription |
+| Change from an earlier day | पहले की तारीख से बदलें | Owner's change dated into a month whose bills are made; makes a bill change for each month | pencil | Back-date, Retroactive change |
+| What happens to the bills | बिलों पर क्या असर होगा | The effect, month by month, shown before saving | — | Preview, Impact |
+| ₹50 extra (will be added to the next bill) | ₹50 ज़्यादा (अगले बिल में जुड़ेगा) | A bill change that adds to what is owed | `semantic.due` (red text) | Debit, Debit note |
+| ₹50 less / Taken off | ₹50 कम / घटा दिया | What a discount (or a plan change down) does: money taken off what is owed | `semantic.credit` (green text) | Credit note, Refund |
+| Extra charge / Discount | एक्स्ट्रा चार्ज / छूट | The two kinds of the Owner's own bill change (same words as the account history) | plus / undo | Debit / Credit |
+| Next bill (waiting) | अगला बिल | An extra charge not yet on a bill | clock, `semantic.pending` | Pending, Unbilled |
+| Why? | क्यों? | The reason the Owner writes for a bill change | — | Remarks, Justification |
+
 ## Words we never show users
 
 Invoice, Ledger, Allocation, Adjustment, Reversal, Tenant, Sync / Synced / Pending sync,
