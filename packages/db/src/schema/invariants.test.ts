@@ -52,10 +52,18 @@ describeDb("invariant_checks", () => {
       tx.select().from(invariantChecks).where(eq(invariantChecks.id, mine.id)),
     );
     expect(seenByB).toEqual([]);
+    // T-086: the platform role reads the status and counts (admin console), never the samples.
     const seenByPlatform = await t.current.db.withPlatform((tx) =>
-      tx.select().from(invariantChecks).where(eq(invariantChecks.id, mine.id)),
+      tx
+        .select({ id: invariantChecks.id, status: invariantChecks.status })
+        .from(invariantChecks)
+        .where(eq(invariantChecks.id, mine.id)),
     );
-    expect(seenByPlatform).toEqual([]);
+    expect(seenByPlatform).toEqual([{ id: mine.id, status: "ok" }]);
+    const samples = await t.current.db
+      .withPlatform((tx) => tx.select({ samples: invariantChecks.samples }).from(invariantChecks))
+      .catch((e: unknown) => e);
+    expect(sqlStateOf(samples)).toBe(RLS_VIOLATION);
     const error = await t.current.db
       .withTenant(b.operatorId, (tx) => tx.insert(invariantChecks).values(row(a.operatorId)))
       .catch((e: unknown) => e);

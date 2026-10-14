@@ -144,11 +144,339 @@
       "title": "प्लान बदलें · VC {vc}"
     }
   },
+  "admin": {
+    "audit": {
+      "caption": "एडमिन लॉग",
+      "col": {
+        "about": "किसके बारे में",
+        "action": "क्या",
+        "details": "जानकारी",
+        "when": "कब",
+        "who": "किसने"
+      },
+      "description": "एडमिन ने क्या किया, और ऑपरेटर का डेटा कब देखा। ऑपरेटरों के अपने लॉग यहाँ नहीं दिखते।",
+      "empty": "अभी कुछ नहीं।",
+      "hide_views": "पेज देखना छिपाएँ",
+      "show_views": "पेज देखना भी दिखाएँ",
+      "title": "एडमिन लॉग"
+    },
+    "common": {
+      "more": "और पुराने दिखाएँ",
+      "never": "कभी नहीं",
+      "next_page": "अगला पेज",
+      "none": "—",
+      "not_measured": "अभी नापा नहीं जाता",
+      "pages": "पेज",
+      "previous_page": "पिछला पेज",
+      "system": "ऐप",
+      "working": "हो रहा है…"
+    },
+    "create": {
+      "error": {
+        "email_taken": "इस ईमेल का खाता पहले से है।",
+        "generic": "कुछ गड़बड़ हुई। कुछ सेव नहीं हुआ। फिर से कोशिश करें।",
+        "login_taken": "यह मोबाइल नंबर पहले से साइन इन के लिए लगा है।",
+        "operator_id_in_use": "यह फ़ॉर्म दूसरे ऑपरेटर के लिए लग चुका है। फिर से खोलें।",
+        "validation": "निशान वाले खाने देखें।"
+      },
+      "explain": "मालिक को पासवर्ड बनाने का ईमेल जाएगा। फ़्री ट्रायल आज से शुरू।",
+      "field": {
+        "business_name": "बिज़नेस का नाम",
+        "business_phone": "बिज़नेस का फ़ोन (ज़रूरी नहीं)",
+        "language": "मालिक की भाषा",
+        "owner_email": "मालिक का ईमेल",
+        "owner_mobile": "मालिक का मोबाइल नंबर",
+        "owner_name": "मालिक का नाम"
+      },
+      "language": {
+        "en": "अंग्रेज़ी",
+        "hi": "हिंदी"
+      },
+      "submit": "ऑपरेटर जोड़ें",
+      "title": "ऑपरेटर जोड़ें"
+    },
+    "job_status": {
+      "failed": "नहीं हुआ",
+      "queued": "इंतज़ार में",
+      "running": "चल रहा है",
+      "succeeded": "हो गया"
+    },
+    "jobs": {
+      "all": "सभी काम",
+      "caption": "काम",
+      "col": {
+        "action": "करें",
+        "status": "स्थिति",
+        "tries": "कोशिशें",
+        "type": "काम",
+        "when": "कब"
+      },
+      "description": "सभी ऑपरेटरों का पीछे चलने वाला काम: बिल रन, जाँच, याद दिलाना।",
+      "done": {
+        "retried": "यह काम कुछ मिनट में फिर चलेगा।"
+      },
+      "empty": "कोई काम नहीं।",
+      "error": {
+        "already_queued": "यह काम पहले से फिर चलने के इंतज़ार में है।",
+        "generic": "कुछ गड़बड़ हुई। फिर से कोशिश करें।",
+        "not_failed": "सिर्फ़ न हुए काम फिर से हो सकते हैं।",
+        "not_found": "काम नहीं मिला।"
+      },
+      "platform_job": "सभी ऑपरेटर",
+      "queue": "अभी के काम",
+      "retry": "फिर से करें",
+      "runs_none": "इस महीने अभी कोई बिल रन नहीं।",
+      "runs_title": "{month} के बिल रन",
+      "show": "दिखाएँ",
+      "status_filter": "दिखाएँ",
+      "title": "काम"
+    },
+    "nav": {
+      "audit": "एडमिन लॉग",
+      "jobs": "काम",
+      "label": "एडमिन मेन्यू",
+      "overview": "सारांश",
+      "razorpay": "Razorpay लॉग",
+      "sign_out": "साइन आउट",
+      "tenants": "ऑपरेटर"
+    },
+    "operator_status": {
+      "active": "चालू",
+      "suspended": "बंद किया"
+    },
+    "overview": {
+      "billing": {
+        "billed": "ग्राहकों के बिल बने",
+        "exception_rate": "दिक्कतें",
+        "failed": "ग्राहक जिनमें दिक्कत",
+        "reasons": "दिक्कत की वजह",
+        "success_rate": "बिल बने",
+        "title": "{month} के बिल"
+      },
+      "description": "सभी ऑपरेटरों का जोड़। यहाँ किसी ऑपरेटर के ग्राहक या पैसे नहीं दिखते।",
+      "field": {
+        "discrepancy_rate": "कैश जमा में फ़र्क ({count, number} में से)",
+        "duplicates": "दोहरे पेमेंट रोके",
+        "pdf_shared": "PDF शेयर किया",
+        "printed": "रसीदें प्रिंट हुईं",
+        "sms_opened": "SMS खोला",
+        "sync_success": "फ़ोन के पेमेंट पहली बार में सेव",
+        "title": "फ़ील्ड का काम (पिछले 30 दिन)",
+        "whatsapp_opened": "WhatsApp खोला"
+      },
+      "health": {
+        "books_problems": "हिसाब में दिक्कत वाले ऑपरेटर ({count, number} जाँचे)",
+        "failed_jobs": "काम नहीं हुए (7 दिन)",
+        "migration_exceptions": "पुराने डेटा की जाँच वाली लाइनें",
+        "title": "सेहत",
+        "waiting_jobs": "काम इंतज़ार में"
+      },
+      "people": {
+        "linemen": "लाइनमैन चालू (7 दिन)",
+        "web": "ऑफ़िस के लोग चालू (7 दिन)"
+      },
+      "tenants": {
+        "active": "पिछले 7 दिन में ऐप चलाया",
+        "title": "ऑपरेटर",
+        "total": "ऑपरेटर"
+      },
+      "title": "सारांश"
+    },
+    "payment_method": {
+      "bank_transfer": "बैंक ट्रांसफ़र",
+      "cash": "नकद",
+      "cheque": "चेक",
+      "upi": "UPI"
+    },
+    "razorpay": {
+      "all": "सभी",
+      "applied": "काम में लिया",
+      "caption": "Razorpay मैसेज",
+      "col": {
+        "event": "मैसेज",
+        "operator": "ऑपरेटर",
+        "received": "मिला",
+        "result": "नतीजा"
+      },
+      "description": "सब्सक्रिप्शन के बारे में Razorpay के मैसेज। मैसेज के अंदर की बातें नहीं दिखतीं।",
+      "empty": "कोई मैसेज नहीं।",
+      "error": "काम में नहीं लिया",
+      "filter": "दिखाएँ",
+      "not_processed": "अभी काम में नहीं लिया",
+      "problems": "दिक्कतें",
+      "title": "Razorpay लॉग",
+      "unmatched": "कोई ऑपरेटर नहीं मिला"
+    },
+    "role": {
+      "lineman": "लाइनमैन",
+      "owner": "मालिक",
+      "staff": "स्टाफ़"
+    },
+    "run_status": {
+      "completed": "हो गया",
+      "completed_with_errors": "हो गया, कुछ दिक्कतें",
+      "failed": "नहीं हुआ",
+      "pending": "इंतज़ार में",
+      "running": "बिल बन रहे हैं",
+      "skipped": "छोड़ा (सिर्फ़ देखना)"
+    },
+    "sub_status": {
+      "active": "पैसे दिए",
+      "cancelled": "बंद",
+      "grace": "अभी पैसे दें",
+      "none": "सब्सक्रिप्शन नहीं",
+      "read_only": "सिर्फ़ देखना",
+      "trialing": "फ़्री ट्रायल"
+    },
+    "support": {
+      "areas": "इलाक़े",
+      "back": "ऑपरेटर पर वापस",
+      "banner": "सपोर्ट एक्सेस {time} तक खुला है। वजह: {reason}। मालिक देख सकते हैं कि आपने देखा।",
+      "jobs": "जो काम नहीं हुए",
+      "last_web": "आख़िरी बार {time}",
+      "no_access": "अभी इस ऑपरेटर का सपोर्ट एक्सेस आपके पास नहीं है। ऑपरेटर के पेज से वजह लिखकर खोलें। यह 2 घंटे चलता है।",
+      "no_failed_jobs": "सभी काम हुए।",
+      "phones": "{count, plural, =0 {कोई फ़ोन साइन इन नहीं} one {# फ़ोन साइन इन} other {# फ़ोन साइन इन}}",
+      "plans": "किराया प्लान",
+      "runs": "बिल रन और दिक्कतें",
+      "setup": "सेटअप",
+      "team": "टीम",
+      "title": "सपोर्ट व्यू",
+      "title_for": "सपोर्ट व्यू: {name}"
+    },
+    "tenant": {
+      "books": {
+        "breach": "हिसाब जाँच {time}: {count, plural, one {# दिक्कत} other {# दिक्कतें}} मिलीं।",
+        "never": "हिसाब अभी जाँचा नहीं गया।",
+        "ok": "हिसाब जाँच {time}: सब ठीक।"
+      },
+      "business_phone": "बिज़नेस का फ़ोन",
+      "counts": {
+        "active_customers": "चालू ग्राहक",
+        "inactive_customers": "बंद ग्राहक",
+        "linemen": "लाइनमैन",
+        "staff": "स्टाफ़",
+        "title": "आकार"
+      },
+      "description": "सब्सक्रिप्शन, गिनती और सपोर्ट। ग्राहक या पेमेंट का डेटा नहीं।",
+      "done": {
+        "already_provisioned": "यह ऑपरेटर पहले से जुड़ा है।",
+        "created": "ऑपरेटर जुड़ गया। मालिक को पासवर्ड बनाने का ईमेल गया।",
+        "extend_no_change": "कुछ नहीं बदला: उस दिन या बाद तक पहले से पैसे दिए हैं।",
+        "extended": "सब्सक्रिप्शन बढ़ गया।",
+        "payment_already": "यह पेमेंट पहले से सेव है।",
+        "payment_recorded": "पेमेंट सेव हुआ और सब्सक्रिप्शन बढ़ा।",
+        "support_ended": "सपोर्ट एक्सेस बंद हुआ।"
+      },
+      "error": {
+        "amount": "रक़म पूरे रुपयों में लिखें।",
+        "conflict": "नहीं हुआ: बीच में बदल गया, या पहले ही ख़त्म हो चुका है।",
+        "generic": "कुछ गड़बड़ हुई। फिर से कोशिश करें।",
+        "not_found": "ऑपरेटर नहीं मिला।",
+        "validation": "जो लिखा है उसे देखें।"
+      },
+      "extend": {
+        "last_day": "पैसे दिए तक (आख़िरी दिन)",
+        "reason": "क्यों?",
+        "submit": "बढ़ाएँ",
+        "title": "सब्सक्रिप्शन बढ़ाएँ"
+      },
+      "failed_jobs": "{count, plural, one {# काम नहीं हुआ} other {# काम नहीं हुए}}",
+      "last_activity": "आख़िरी बार",
+      "operator_status": "खाता",
+      "owners": {
+        "disabled": "बंद किया",
+        "title": "मालिक"
+      },
+      "payment": {
+        "amount": "मिली रक़म (₹)",
+        "explain": "सब्सक्रिप्शन पैसे दिए समय (या ट्रायल, या आज) के ख़त्म होने से आगे बढ़ेगा।",
+        "method": "कैसे दिया",
+        "months": "कितने महीने का",
+        "months_option": "{count, plural, one {# महीना} other {# महीने}}",
+        "note": "नोट (ज़रूरी नहीं)",
+        "paid_till": "{date} तक पैसे दिए",
+        "received_on": "पैसे मिले",
+        "reference": "रेफ़रेंस (UTR, चेक नंबर)",
+        "submit": "पेमेंट सेव करें",
+        "title": "Razorpay के बाहर मिला पेमेंट लिखें"
+      },
+      "runs": {
+        "counts": "{billed, number} के बिल बने, {failed, number} में दिक्कत",
+        "none": "अभी कोई बिल रन नहीं।",
+        "title": "बिल रन"
+      },
+      "since": "जुड़े",
+      "subscription": {
+        "autopay": "Razorpay स्थिति",
+        "grace_last_day": "पैसे देने की आख़िरी तारीख़",
+        "paid_last_day": "पैसे दिए तक",
+        "title": "सब्सक्रिप्शन",
+        "trial_last_day": "फ़्री ट्रायल तक"
+      },
+      "support": {
+        "end": "सपोर्ट एक्सेस बंद करें",
+        "explain": "इस ऑपरेटर की मदद के लिए आप 2 घंटे तक उनके कुछ रिकॉर्ड देख सकते हैं। वजह लिखें। मालिक इसे अपने ऑडिट लॉग में देखेंगे।",
+        "history_line": "{name}: {from} से {until} तक",
+        "open": "2 घंटे के लिए सपोर्ट एक्सेस खोलें",
+        "open_until": "आपका सपोर्ट एक्सेस {time} तक खुला है।",
+        "reason": "एक्सेस क्यों चाहिए?",
+        "reason_hint": "कम से कम 10 अक्षर। मालिक इसे पढ़ेंगे।",
+        "title": "सपोर्ट एक्सेस",
+        "view": "सपोर्ट व्यू खोलें"
+      },
+      "timeline": {
+        "none": "अभी कोई एडमिन काम नहीं।",
+        "title": "एडमिन के काम"
+      },
+      "title": "ऑपरेटर"
+    },
+    "tenants": {
+      "add": "ऑपरेटर जोड़ें",
+      "all": "सभी",
+      "caption": "ऑपरेटर",
+      "col": {
+        "activity": "आख़िरी बार",
+        "customers": "ग्राहक",
+        "linemen": "लाइनमैन",
+        "name": "बिज़नेस",
+        "subscription": "सब्सक्रिप्शन"
+      },
+      "description": "ऐप चलाने वाले सभी केबल बिज़नेस। सिर्फ़ गिनती।",
+      "empty": "कोई ऑपरेटर नहीं मिला।",
+      "find": "खोजें",
+      "search": "बिज़नेस का नाम",
+      "since": "{date} से",
+      "status_filter": "सब्सक्रिप्शन",
+      "title": "ऑपरेटर"
+    },
+    "title": "केबल बिलिंग एडमिन",
+    "user_status": {
+      "active": "साइन इन कर सकते हैं",
+      "disabled": "बंद किया"
+    }
+  },
   "audit": {
     "action": {
       "adjustments": {
         "back_dated_change": "पहले की तारीख से बदलाव",
         "create": "एक्स्ट्रा चार्ज या छूट"
+      },
+      "admin": {
+        "audit_viewed": "एडमिन लॉग देखा",
+        "billing_runs_viewed": "बिल रन देखे",
+        "job_retried": "काम फिर से चलाया",
+        "jobs_viewed": "काम देखे",
+        "metrics_viewed": "जोड़ देखा",
+        "offline_payment_recorded": "बाहर का पेमेंट सेव",
+        "razorpay_events_viewed": "Razorpay लॉग देखा",
+        "subscription_extended": "सब्सक्रिप्शन बढ़ाया",
+        "support_access_ended": "सपोर्ट एक्सेस बंद",
+        "support_access_granted": "सपोर्ट एक्सेस खोला",
+        "support_data_viewed": "सपोर्ट में रिकॉर्ड देखे",
+        "tenant_created": "बिज़नेस जोड़ा",
+        "tenant_viewed": "बिज़नेस सारांश देखा",
+        "tenants_listed": "बिज़नेस लिस्ट देखी"
       },
       "areas": {
         "archive": "एरिया छिपाया",
@@ -228,10 +556,16 @@
       },
       "subscription": {
         "notice_sent": "ऐप पेमेंट की याद ईमेल की",
+        "offline_payment_recorded": "ऐप पेमेंट सेव (Razorpay के बाहर)",
         "state_changed": "ऐप सब्सक्रिप्शन बदला"
       },
       "subscriptions": {
         "checkout_started": "ऐप का पेमेंट शुरू किया"
+      },
+      "support": {
+        "access_ended": "सपोर्ट एक्सेस बंद",
+        "access_granted": "सपोर्ट एक्सेस खोला",
+        "data_viewed": "सपोर्ट में रिकॉर्ड देखे"
       },
       "team": {
         "add_lineman": "लाइनमैन जोड़ा",
@@ -376,6 +710,22 @@
         "back_dated_change": "{kind, select, plan {{who} ने VC {target} (ग्राहक {customer}) का प्लान पहले की तारीख {date} से बदला} suspend {{who} ने VC {target} (ग्राहक {customer}) को पहले की तारीख {date} से बंद किया} reactivate {{who} ने VC {target} (ग्राहक {customer}) को पहले की तारीख {date} से फिर से चालू किया} disconnect {{who} ने VC {target} (ग्राहक {customer}) को पहले की तारीख {date} से हटाया} other {{who} ने VC {target} (ग्राहक {customer}) को पहले की तारीख {date} से बदला}}",
         "create": "{direction, select, credit {{who} ने ग्राहक {target} को ₹{amount} की छूट दी} other {{who} ने ग्राहक {target} पर ₹{amount} का एक्स्ट्रा चार्ज जोड़ा}}"
       },
+      "admin": {
+        "audit_viewed": "{who} ने एडमिन लॉग देखा",
+        "billing_runs_viewed": "{who} ने सभी बिज़नेस के बिल रन देखे",
+        "job_retried": "{who} ने न हुआ काम फिर से चलाया",
+        "jobs_viewed": "{who} ने पीछे चलने वाले काम देखे",
+        "metrics_viewed": "{who} ने सभी बिज़नेस का जोड़ देखा",
+        "offline_payment_recorded": "{who} ने Razorpay के बाहर मिला ऐप पेमेंट सेव किया",
+        "razorpay_events_viewed": "{who} ने Razorpay लॉग देखा",
+        "subscription_extended": "{who} ने बिज़नेस का ऐप सब्सक्रिप्शन बढ़ाया",
+        "support_access_ended": "{who} ने बिज़नेस का सपोर्ट एक्सेस बंद किया",
+        "support_access_granted": "{who} ने बिज़नेस का सपोर्ट एक्सेस खोला",
+        "support_data_viewed": "{who} ने सपोर्ट एक्सेस में बिज़नेस के रिकॉर्ड देखे",
+        "tenant_created": "{who} ने बिज़नेस जोड़ा",
+        "tenant_viewed": "{who} ने बिज़नेस का सारांश देखा",
+        "tenants_listed": "{who} ने बिज़नेस की लिस्ट देखी"
+      },
       "areas": {
         "archive": "{who} ने एरिया {target} छिपाया",
         "create": "{who} ने एरिया {target} जोड़ा",
@@ -454,10 +804,16 @@
       },
       "subscription": {
         "notice_sent": "{who} ने ऐप पेमेंट की याद {count, plural, one {# मालिक} other {# मालिकों}} को ईमेल की",
+        "offline_payment_recorded": "{who} ने Razorpay के बाहर मिला {count, plural, one {# महीने} other {# महीनों}} का {amount} का ऐप पेमेंट सेव किया",
         "state_changed": "{status, select, trialing {{who} ने ऐप सब्सक्रिप्शन बदला: फ़्री ट्रायल} active {{who} ने ऐप सब्सक्रिप्शन बदला: पेमेंट हो गया} grace {{who} ने ऐप सब्सक्रिप्शन बदला: अभी पेमेंट करें} read_only {{who} ने ऐप सब्सक्रिप्शन बदला: सिर्फ़ देख सकते हैं} cancelled {{who} ने ऐप सब्सक्रिप्शन बदला: बंद है} other {{who} ने ऐप सब्सक्रिप्शन बदला}}"
       },
       "subscriptions": {
         "checkout_started": "{who} ने ऑटोपे से ऐप का पेमेंट शुरू किया"
+      },
+      "support": {
+        "access_ended": "{who} ने आपके रिकॉर्ड का सपोर्ट एक्सेस बंद किया",
+        "access_granted": "{who} ने आपके रिकॉर्ड का सपोर्ट एक्सेस 2 घंटे तक के लिए खोला",
+        "data_viewed": "{who} ने सपोर्ट एक्सेस में आपके रिकॉर्ड देखे"
       },
       "team": {
         "add_lineman": "{who} ने लाइनमैन {target} जोड़ा",

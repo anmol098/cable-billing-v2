@@ -275,6 +275,32 @@ export const AUDIT_ACTIONS = {
   },
   "billing.start_run": { details: billingRun },
   "billing.retry_failed": { details: billingRun },
+  // Platform admin console (T-086). `support.*` and `subscription.offline_payment_recorded` are
+  // written to the tenant's own log (the Owner reads them here); `admin.*` are platform events
+  // (operator_id NULL), never in a tenant's log, listed so every written action has words.
+  "support.access_granted": {},
+  "support.data_viewed": {},
+  "support.access_ended": {},
+  "subscription.offline_payment_recorded": {
+    details: ({ after }) => ({
+      amount: paise(field(after, "amount_paise")),
+      count: count(field(after, "months")),
+    }),
+  },
+  "admin.tenants_listed": {},
+  "admin.tenant_viewed": {},
+  "admin.tenant_created": {},
+  "admin.subscription_extended": {},
+  "admin.offline_payment_recorded": {},
+  "admin.support_access_granted": {},
+  "admin.support_access_ended": {},
+  "admin.support_data_viewed": {},
+  "admin.jobs_viewed": {},
+  "admin.job_retried": {},
+  "admin.billing_runs_viewed": {},
+  "admin.razorpay_events_viewed": {},
+  "admin.audit_viewed": {},
+  "admin.metrics_viewed": {},
 } as const satisfies Record<string, AuditActionSpec>;
 
 export type KnownAuditAction = keyof typeof AUDIT_ACTIONS;

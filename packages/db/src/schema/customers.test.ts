@@ -158,8 +158,11 @@ describeDb("customers", () => {
     await expect(insertCustomer(b, { operatorId: a.operatorId })).rejects.toSatisfy(
       failsWith(RLS_VIOLATION),
     );
-    const none = await t.current.db.withPlatform((tx) => tx.select().from(customers));
-    expect(none).toEqual([]);
+    // T-086: the platform role may read only operator_id and status (column grant), never a
+    // customer's details: SELECT * is refused (42501, insufficient privilege).
+    await expect(t.current.db.withPlatform((tx) => tx.select().from(customers))).rejects.toSatisfy(
+      failsWith(RLS_VIOLATION),
+    );
   });
 
   it("composite FK: a customer can't point at another tenant's area", async () => {

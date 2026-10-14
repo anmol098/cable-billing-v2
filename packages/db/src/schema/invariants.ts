@@ -11,8 +11,8 @@
  * - `samples`: up to a fixed number of violating rows per code, **ids and paise amounts only**
  *   (no names, phone numbers or free text), for whoever investigates.
  *
- * Tenant table (standard tenant policy, no platform policy: a platform admin view, T-086, adds a
- * reviewed `app_platform` SELECT policy if it needs one). **Append-only** (custom migration): a
+ * Tenant table (standard tenant policy). T-086 (`./platform-admin.ts`) lets `app_platform` read the
+ * status and counts for the admin console, never `samples`. **Append-only** (custom migration): a
  * check result is evidence of the state of the books at that time and is never edited or deleted.
  */
 import { sql } from "drizzle-orm";

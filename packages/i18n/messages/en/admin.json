@@ -1,0 +1,312 @@
+{
+  "title": "Cable Billing admin",
+  "nav": {
+    "label": "Admin menu",
+    "overview": "Overview",
+    "tenants": "Operators",
+    "jobs": "Jobs",
+    "razorpay": "Razorpay log",
+    "audit": "Admin log",
+    "sign_out": "Sign out"
+  },
+  "common": {
+    "none": "—",
+    "never": "Never",
+    "not_measured": "Not measured yet",
+    "next_page": "Next page",
+    "previous_page": "Previous page",
+    "pages": "Pages",
+    "more": "Show older",
+    "working": "Working…",
+    "system": "The app"
+  },
+  "sub_status": {
+    "trialing": "Free trial",
+    "active": "Paid",
+    "grace": "Pay now",
+    "read_only": "View only",
+    "cancelled": "Stopped",
+    "none": "No subscription"
+  },
+  "operator_status": {
+    "active": "Working",
+    "suspended": "Switched off"
+  },
+  "run_status": {
+    "pending": "Waiting",
+    "running": "Making bills",
+    "completed": "Done",
+    "completed_with_errors": "Done, with problems",
+    "failed": "Failed",
+    "skipped": "Skipped (view only)"
+  },
+  "job_status": {
+    "queued": "Waiting",
+    "running": "Running",
+    "succeeded": "Done",
+    "failed": "Failed"
+  },
+  "payment_method": {
+    "bank_transfer": "Bank transfer",
+    "upi": "UPI",
+    "cash": "Cash",
+    "cheque": "Cheque"
+  },
+  "role": {
+    "owner": "Owner",
+    "staff": "Staff",
+    "lineman": "Lineman"
+  },
+  "user_status": {
+    "active": "Can sign in",
+    "disabled": "Switched off"
+  },
+  "overview": {
+    "title": "Overview",
+    "description": "Totals for all operators. No operator's customers or money are shown here.",
+    "tenants": {
+      "title": "Operators",
+      "total": "Operators",
+      "active": "Used the app in the last 7 days"
+    },
+    "people": {
+      "web": "Office people active (7 days)",
+      "linemen": "Linemen active (7 days)"
+    },
+    "billing": {
+      "title": "Bills for {month}",
+      "success_rate": "Bills made",
+      "exception_rate": "Problems",
+      "billed": "Customers billed",
+      "failed": "Customers with a problem",
+      "reasons": "Problems by reason"
+    },
+    "field": {
+      "title": "Field work (last 30 days)",
+      "printed": "Receipts printed",
+      "whatsapp_opened": "WhatsApp opened",
+      "sms_opened": "SMS opened",
+      "pdf_shared": "PDF shared",
+      "discrepancy_rate": "Cash handovers with a difference (of {count, number} accepted)",
+      "sync_success": "Phone payments saved on first try",
+      "duplicates": "Double payments stopped"
+    },
+    "health": {
+      "title": "Health",
+      "failed_jobs": "Jobs failed (7 days)",
+      "waiting_jobs": "Jobs waiting",
+      "books_problems": "Operators with a books problem (of {count, number} checked)",
+      "migration_exceptions": "Old data rows to check"
+    }
+  },
+  "tenants": {
+    "title": "Operators",
+    "description": "Every cable business using the app. Counts only.",
+    "add": "Add operator",
+    "search": "Business name",
+    "status_filter": "Subscription",
+    "all": "All",
+    "find": "Find",
+    "caption": "Operators",
+    "empty": "No operator found.",
+    "since": "Since {date}",
+    "col": {
+      "name": "Business",
+      "subscription": "Subscription",
+      "customers": "Customers",
+      "linemen": "Linemen",
+      "activity": "Last used"
+    }
+  },
+  "create": {
+    "title": "Add operator",
+    "explain": "The owner gets an email to set a password. The free trial starts today.",
+    "submit": "Add operator",
+    "field": {
+      "business_name": "Business name",
+      "business_phone": "Business phone (optional)",
+      "owner_name": "Owner's name",
+      "owner_email": "Owner's email",
+      "owner_mobile": "Owner's mobile number",
+      "language": "Owner's language"
+    },
+    "language": {
+      "hi": "Hindi",
+      "en": "English"
+    },
+    "error": {
+      "validation": "Please check the marked fields.",
+      "email_taken": "This email already has an account.",
+      "login_taken": "This mobile number is already used to sign in.",
+      "operator_id_in_use": "This form was already used for another operator. Open it again.",
+      "generic": "Something went wrong. Nothing was saved. Please try again."
+    }
+  },
+  "tenant": {
+    "title": "Operator",
+    "description": "Subscription, counts and support. No customer or payment data.",
+    "operator_status": "Account",
+    "since": "Joined",
+    "last_activity": "Last used",
+    "business_phone": "Business phone",
+    "done": {
+      "created": "Operator added. The owner got an email to set a password.",
+      "already_provisioned": "This operator was already added.",
+      "extended": "Subscription extended.",
+      "extend_no_change": "Nothing changed: it was already paid till that day or later.",
+      "payment_recorded": "Payment saved and subscription extended.",
+      "payment_already": "This payment was already saved.",
+      "support_ended": "Support access ended."
+    },
+    "error": {
+      "validation": "Please check what you typed.",
+      "not_found": "Operator not found.",
+      "conflict": "Not done: it changed meanwhile, or it is already over.",
+      "amount": "Type the amount in whole rupees.",
+      "generic": "Something went wrong. Please try again."
+    },
+    "subscription": {
+      "title": "Subscription",
+      "trial_last_day": "Free trial till",
+      "paid_last_day": "Paid till",
+      "grace_last_day": "Must pay by",
+      "autopay": "Razorpay status"
+    },
+    "counts": {
+      "title": "Size",
+      "active_customers": "Active customers",
+      "inactive_customers": "Stopped customers",
+      "staff": "Staff",
+      "linemen": "Linemen"
+    },
+    "owners": {
+      "title": "Owner",
+      "disabled": "Switched off"
+    },
+    "support": {
+      "title": "Support access",
+      "explain": "To help this operator you can look at a few of their records for 2 hours. Say why. The owner sees this in their audit log.",
+      "open_until": "Your support access is open till {time}.",
+      "view": "Open support view",
+      "end": "End support access",
+      "reason": "Why do you need access?",
+      "reason_hint": "At least 10 letters. The owner will read this.",
+      "open": "Open support access for 2 hours",
+      "history_line": "{name}: {from} to {until}"
+    },
+    "extend": {
+      "title": "Extend subscription",
+      "last_day": "Paid till (last day)",
+      "reason": "Why?",
+      "submit": "Extend"
+    },
+    "payment": {
+      "title": "Record a payment made outside Razorpay",
+      "amount": "Amount received (₹)",
+      "months": "Pays for",
+      "months_option": "{count, plural, one {# month} other {# months}}",
+      "method": "Paid by",
+      "received_on": "Money received on",
+      "reference": "Reference (UTR, cheque no.)",
+      "note": "Note (optional)",
+      "explain": "The subscription is extended from the end of the paid time (or the trial, or today).",
+      "submit": "Save payment",
+      "paid_till": "paid till {date}"
+    },
+    "runs": {
+      "title": "Bill runs",
+      "none": "No bill runs yet.",
+      "counts": "{billed, number} billed, {failed, number} with a problem"
+    },
+    "books": {
+      "ok": "Books check {time}: all good.",
+      "breach": "Books check {time}: {count, plural, one {# problem} other {# problems}} found.",
+      "never": "Books not checked yet."
+    },
+    "failed_jobs": "{count, plural, one {# failed job} other {# failed jobs}}",
+    "timeline": {
+      "title": "Admin actions",
+      "none": "No admin actions yet."
+    }
+  },
+  "support": {
+    "title": "Support view",
+    "title_for": "Support view: {name}",
+    "back": "Back to operator",
+    "no_access": "You don't have support access to this operator now. Open it from the operator's page, with a reason. It lasts 2 hours.",
+    "banner": "Support access open till {time}. Reason: {reason}. The owner can see that you looked.",
+    "team": "Team",
+    "phones": "{count, plural, =0 {No phone signed in} one {# phone signed in} other {# phones signed in}}",
+    "last_web": "Last used {time}",
+    "setup": "Setup",
+    "areas": "Areas",
+    "plans": "Rental plans",
+    "runs": "Bill runs and problems",
+    "jobs": "Failed jobs",
+    "no_failed_jobs": "No failed jobs."
+  },
+  "jobs": {
+    "title": "Jobs",
+    "description": "Background work for all operators: bill runs, checks, reminders.",
+    "queue": "Jobs now",
+    "status_filter": "Show",
+    "all": "All jobs",
+    "show": "Show",
+    "caption": "Jobs",
+    "empty": "No jobs.",
+    "platform_job": "All operators",
+    "retry": "Try again",
+    "runs_title": "Bill runs for {month}",
+    "runs_none": "No bill runs for this month yet.",
+    "col": {
+      "type": "Job",
+      "status": "Status",
+      "tries": "Tries",
+      "when": "When",
+      "action": "Action"
+    },
+    "done": {
+      "retried": "The job will run again in a few minutes."
+    },
+    "error": {
+      "already_queued": "This job is already waiting to run again.",
+      "not_failed": "Only failed jobs can be tried again.",
+      "not_found": "Job not found.",
+      "generic": "Something went wrong. Please try again."
+    }
+  },
+  "razorpay": {
+    "title": "Razorpay log",
+    "description": "Messages from Razorpay about subscriptions. The message contents are not shown.",
+    "filter": "Show",
+    "all": "All",
+    "problems": "Problems",
+    "caption": "Razorpay messages",
+    "empty": "No messages.",
+    "unmatched": "No operator matched",
+    "error": "Not used",
+    "applied": "Used",
+    "not_processed": "Not used yet",
+    "col": {
+      "event": "Message",
+      "operator": "Operator",
+      "received": "Received",
+      "result": "Result"
+    }
+  },
+  "audit": {
+    "title": "Admin log",
+    "description": "What admins did, and every look at operator data. Operators' own logs are not shown here.",
+    "show_views": "Also show page views",
+    "hide_views": "Hide page views",
+    "caption": "Admin log",
+    "empty": "Nothing yet.",
+    "col": {
+      "when": "When",
+      "who": "Who",
+      "action": "What",
+      "about": "About",
+      "details": "Details"
+    }
+  }
+}
