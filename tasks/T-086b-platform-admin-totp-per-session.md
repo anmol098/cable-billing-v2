@@ -3,10 +3,10 @@ id: T-086b
 title: Platform admin sessions must each pass TOTP (revoke other sessions on enrolment)
 phase: 4
 area: core
-status: todo
-owner:
-claimed_at:
-branch:
+status: claimed
+owner: agent-t086b
+claimed_at: 2026-10-14T14:14:33.779Z
+branch: task/T-086b-platform-admin-sessions-must-each-pass-t
 depends_on: [T-086]
 review: required
 claimable_by: agent
@@ -75,3 +75,4 @@ PLAN §9.2, §12.4; T-026 and T-086 completion notes ("Known gap").
 _The agent fills this in before opening the PR._
 
 ## Board log
+- 2026-10-14T14:14:33.782Z claimed by agent-t086b
