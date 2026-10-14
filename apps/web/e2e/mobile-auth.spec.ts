@@ -5,7 +5,7 @@
  * Needs `DATABASE_URL` (migrated) and `BETTER_AUTH_SECRET` for the test runner and the server (the
  * CI "Web e2e" job sets them). Seeds its own operator and users with random names.
  */
-import { randomBytes, randomUUID } from "node:crypto";
+import { randomUUID } from "node:crypto";
 import {
   AppConfigResponse,
   ErrorResponse,
@@ -31,6 +31,7 @@ import {
   uuidv7,
 } from "@cb/db";
 import { type APIRequestContext, type APIResponse, expect, test } from "@playwright/test";
+import { newSeedId } from "./_support/unique";
 
 const DATABASE_URL = process.env.DATABASE_URL;
 const PASSWORD = "e2e lineman 4321";
@@ -40,11 +41,12 @@ test.describe("mobile auth API", () => {
   test.skip(!DATABASE_URL, "needs DATABASE_URL (a migrated database) and BETTER_AUTH_SECRET");
   test.describe.configure({ mode: "serial" });
 
-  const run = randomBytes(4).toString("hex");
+  // Made fresh in every beforeAll (see _support/unique.ts), so a second seed never collides.
+  let run = "";
   const login = (who: string) => `e2e-mobile-${who}-${run}`;
   // Own address for the in-memory per-IP limits (the server trusts x-real-ip outside Vercel).
-  const ip = `203.0.113.${(Number.parseInt(run.slice(0, 2), 16) % 200) + 20}`;
-  const headers = { "x-app-version-code": "5", "x-real-ip": ip };
+  let ip = "";
+  let headers: Record<string, string> = {};
   let db: DbClient;
   let operatorId: string;
   let ownerId = "";
@@ -75,6 +77,9 @@ test.describe("mobile auth API", () => {
   }
 
   test.beforeAll(async () => {
+    run = newSeedId();
+    ip = `203.0.113.${(Number.parseInt(run.slice(0, 2), 16) % 200) + 20}`;
+    headers = { "x-app-version-code": "5", "x-real-ip": ip };
     db = createDb({ connectionString: DATABASE_URL ?? "", max: 2 });
     operatorId = uuidv7();
     const hash = await hashPassword(PASSWORD);

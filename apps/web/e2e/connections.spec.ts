@@ -8,7 +8,6 @@
  * Needs `DATABASE_URL` (migrated) and `BETTER_AUTH_SECRET`, like `customers.spec.ts`. Each run seeds
  * its own operators with random names. Dates are today's IST date (the server's real clock).
  */
-import { randomBytes } from "node:crypto";
 import { hashPassword } from "@cb/core";
 import {
   accounts,
@@ -31,6 +30,7 @@ import {
   periodOf,
 } from "@cb/domain";
 import { expect, type Page, test } from "@playwright/test";
+import { newSeedId } from "./_support/unique";
 
 const DATABASE_URL = process.env.DATABASE_URL;
 const PASSWORD = "e2e connections password 4321";
@@ -40,13 +40,14 @@ const DESKTOP = { width: 1280, height: 800 };
 test.describe("connections", () => {
   test.skip(!DATABASE_URL, "needs DATABASE_URL (a migrated database) and BETTER_AUTH_SECRET");
 
-  const run = randomBytes(4).toString("hex");
+  // Made fresh in every beforeAll (see _support/unique.ts), so a second seed never collides.
+  let run = "";
   const login = (who: string) => `e2e-conn-${who}-${run}`;
   let db: DbClient;
-  const ids = { asha: uuidv7(), otherTenantCustomer: uuidv7() };
-  // A number unique to this run (the same VC at another operator is a different VC anyway).
-  const VC = `77${run.replace(/[a-f]/g, "1").slice(0, 6)} 1122`;
-  const VC_TYPED_AGAIN = VC.replace(/ /g, "-");
+  let ids: { asha: string; otherTenantCustomer: string };
+  // A number unique to this seed (the same VC at another operator is a different VC anyway).
+  let VC = "";
+  let VC_TYPED_AGAIN = "";
 
   async function seedTenant(
     name: string,
@@ -89,6 +90,10 @@ test.describe("connections", () => {
   }
 
   test.beforeAll(async () => {
+    run = newSeedId();
+    ids = { asha: uuidv7(), otherTenantCustomer: uuidv7() };
+    VC = `77${run.replace(/[a-f]/g, "1").slice(0, 6)} 1122`;
+    VC_TYPED_AGAIN = VC.replace(/ /g, "-");
     db = createDb({ connectionString: DATABASE_URL ?? "", max: 2 });
     await seedTenant(
       "Ganga Cable",

@@ -7,7 +7,6 @@
  * Needs `DATABASE_URL` (migrated) and `BETTER_AUTH_SECRET`, like `auth.spec.ts`. Each run seeds
  * its own operators with random names.
  */
-import { randomBytes } from "node:crypto";
 import { hashPassword } from "@cb/core";
 import {
   accounts,
@@ -24,6 +23,7 @@ import {
   vcAssignments,
 } from "@cb/db";
 import { expect, type Page, test } from "@playwright/test";
+import { newSeedId } from "./_support/unique";
 
 const DATABASE_URL = process.env.DATABASE_URL;
 const PASSWORD = "e2e customers password 4321";
@@ -33,16 +33,18 @@ const DESKTOP = { width: 1280, height: 800 };
 test.describe("customers", () => {
   test.skip(!DATABASE_URL, "needs DATABASE_URL (a migrated database) and BETTER_AUTH_SECRET");
 
-  const run = randomBytes(4).toString("hex");
+  // Made fresh in every beforeAll (see _support/unique.ts), so a second seed never collides.
+  let run = "";
   const login = (who: string) => `e2e-cust-${who}-${run}`;
   let db: DbClient;
-  const ids = {
+  const newIds = () => ({
     ramesh: uuidv7(),
     sunita: uuidv7(),
     closed: uuidv7(),
     karan: uuidv7(),
     otherTenantCustomer: uuidv7(),
-  };
+  });
+  let ids: ReturnType<typeof newIds>;
   const VC = "5550 1234 9876";
 
   async function seedTenant(
@@ -86,6 +88,8 @@ test.describe("customers", () => {
   }
 
   test.beforeAll(async () => {
+    run = newSeedId();
+    ids = newIds();
     db = createDb({ connectionString: DATABASE_URL ?? "", max: 2 });
     await seedTenant(
       "Shiv Cable",

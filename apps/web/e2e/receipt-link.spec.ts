@@ -31,6 +31,7 @@ import {
   uuidv7,
 } from "@cb/db";
 import { expect, test } from "@playwright/test";
+import { newSeedId } from "./_support/unique";
 
 const DATABASE_URL = process.env.DATABASE_URL;
 const UNKNOWN = randomBytes(32).toString("base64url");
@@ -61,7 +62,8 @@ test.describe("receipt preview with a database", () => {
   // One seed (beforeAll) for the whole group, in one worker.
   test.describe.configure({ mode: "serial" });
 
-  const run = randomBytes(8).toString("hex");
+  // Made fresh in every beforeAll (see _support/unique.ts), so a second seed never collides.
+  let run = "";
   let db: DbClient;
   let runtime: ServiceRuntime;
   let owner: TenantContext;
@@ -87,6 +89,7 @@ test.describe("receipt preview with a database", () => {
   }
 
   test.beforeAll(async () => {
+    run = newSeedId(8);
     db = createDb({ connectionString: DATABASE_URL ?? "", max: 2 });
     runtime = createServiceRuntime({ db, logger: silentLogger });
     const operatorId = uuidv7();

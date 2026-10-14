@@ -10,7 +10,7 @@
  *
  * Needs `DATABASE_URL` (migrated) and `BETTER_AUTH_SECRET`, like `mobile-auth.spec.ts`.
  */
-import { randomBytes, randomUUID } from "node:crypto";
+import { randomUUID } from "node:crypto";
 import {
   CollectionDayResponse,
   ErrorResponse,
@@ -34,6 +34,7 @@ import {
 } from "@cb/db";
 import { businessDateOf } from "@cb/domain";
 import { type APIRequestContext, expect, test } from "@playwright/test";
+import { newSeedId } from "./_support/unique";
 
 const DATABASE_URL = process.env.DATABASE_URL;
 const PASSWORD = "e2e collect 6161";
@@ -43,10 +44,10 @@ test.describe("mobile collect API", () => {
   test.skip(!DATABASE_URL, "needs DATABASE_URL (a migrated database) and BETTER_AUTH_SECRET");
   test.describe.configure({ mode: "serial" });
 
-  const run = randomBytes(4).toString("hex");
-  const login = `e2e-collect-${run}`;
-  const ip = `203.0.113.${(Number.parseInt(run.slice(0, 2), 16) % 200) + 30}`;
-  const headers = { "x-app-version-code": "5", "x-real-ip": ip };
+  // Made fresh in every beforeAll (see _support/unique.ts), so a second seed never collides.
+  let run = "";
+  let login = "";
+  let headers: Record<string, string> = {};
   let db: DbClient;
   let operatorId: string;
   let customerId: string;
@@ -71,6 +72,10 @@ test.describe("mobile collect API", () => {
   }
 
   test.beforeAll(async () => {
+    run = newSeedId();
+    login = `e2e-collect-${run}`;
+    const ip = `203.0.113.${(Number.parseInt(run.slice(0, 2), 16) % 200) + 30}`;
+    headers = { "x-app-version-code": "5", "x-real-ip": ip };
     db = createDb({ connectionString: DATABASE_URL ?? "", max: 2 });
     operatorId = uuidv7();
     customerId = uuidv7();

@@ -7,7 +7,6 @@
  *
  * Needs `DATABASE_URL` (migrated) and `BETTER_AUTH_SECRET`, like `shell.spec.ts`.
  */
-import { randomBytes } from "node:crypto";
 import {
   createServiceRuntime,
   hashPassword,
@@ -33,6 +32,7 @@ import {
 } from "@cb/db";
 import { businessDateOf } from "@cb/domain";
 import { expect, type Page, test } from "@playwright/test";
+import { newSeedId } from "./_support/unique";
 
 const DATABASE_URL = process.env.DATABASE_URL;
 const PASSWORD = "e2e linemen password 4321";
@@ -41,16 +41,17 @@ test.describe("linemen: day cards and handover review", () => {
   test.describe.configure({ mode: "serial" });
   test.skip(!DATABASE_URL, "needs DATABASE_URL (a migrated database) and BETTER_AUTH_SECRET");
 
-  const run = randomBytes(4).toString("hex");
-  const ownerLogin = `e2e-linemen-owner-${run}`;
+  // Made fresh in every beforeAll (see _support/unique.ts), so a second seed never collides.
+  let run = "";
+  let ownerLogin = "";
   let db: DbClient;
   let operatorId: string;
-  const linemen: Record<"ravi" | "suresh", { id: string; ctx?: TenantContext }> = {
-    ravi: { id: uuidv7() },
-    suresh: { id: uuidv7() },
-  };
+  let linemen: Record<"ravi" | "suresh", { id: string; ctx?: TenantContext }>;
 
   test.beforeAll(async () => {
+    run = newSeedId();
+    ownerLogin = `e2e-linemen-owner-${run}`;
+    linemen = { ravi: { id: uuidv7() }, suresh: { id: uuidv7() } };
     db = createDb({ connectionString: DATABASE_URL ?? "", max: 2 });
     const runtime = createServiceRuntime({ db, logger: silentLogger });
     operatorId = uuidv7();

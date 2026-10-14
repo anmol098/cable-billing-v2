@@ -8,11 +8,12 @@
  *
  * Needs `DATABASE_URL` (migrated) and `BETTER_AUTH_SECRET`, like `shell.spec.ts`.
  */
-import { randomBytes, randomUUID } from "node:crypto";
+import { randomUUID } from "node:crypto";
 import { ErrorResponse, LoginResponse } from "@cb/contracts";
 import { hashPassword } from "@cb/core";
 import { accounts, createDb, type DbClient, operators, subscriptions, users, uuidv7 } from "@cb/db";
 import { type APIRequestContext, expect, type Page, test } from "@playwright/test";
+import { mobileFromSeed, newSeedId } from "./_support/unique";
 
 const DATABASE_URL = process.env.DATABASE_URL;
 const OWNER_PASSWORD = "e2e team owner 4321";
@@ -24,22 +25,25 @@ test.describe("team: staff and linemen", () => {
   test.describe.configure({ mode: "serial" });
   test.skip(!DATABASE_URL, "needs DATABASE_URL (a migrated database) and BETTER_AUTH_SECRET");
 
-  const run = randomBytes(4).toString("hex");
-  const business = `Team Cable ${run}`;
+  // Made fresh in every beforeAll (see _support/unique.ts), so a second seed never collides.
+  let run = "";
   const login = (who: string) => `e2e-team-${who}-${run}`;
-  // A fresh mobile per run: sign-in names are unique across every business.
-  const mobile = `9${String(Number.parseInt(run, 16) % 1_000_000_000).padStart(9, "0")}`;
-  const ip = `203.0.113.${(Number.parseInt(run.slice(0, 2), 16) % 200) + 30}`;
-  const apiHeaders = { "x-app-version-code": "5", "x-real-ip": ip };
+  // A fresh mobile per seed: sign-in names are unique across every business.
+  let mobile = "";
+  let apiHeaders: Record<string, string> = {};
   let db: DbClient;
   let operatorId: string;
 
   test.beforeAll(async () => {
+    run = newSeedId();
+    mobile = mobileFromSeed(run);
+    const ip = `203.0.113.${(Number.parseInt(run.slice(0, 2), 16) % 200) + 30}`;
+    apiHeaders = { "x-app-version-code": "5", "x-real-ip": ip };
     db = createDb({ connectionString: DATABASE_URL ?? "", max: 2 });
     operatorId = uuidv7();
     const hash = await hashPassword(OWNER_PASSWORD);
     await db.withTenant(operatorId, async (tx) => {
-      await tx.insert(operators).values({ id: operatorId, name: business });
+      await tx.insert(operators).values({ id: operatorId, name: `Team Cable ${run}` });
       await tx.insert(subscriptions).values({
         operatorId,
         status: "active",

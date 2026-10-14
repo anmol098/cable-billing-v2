@@ -6,7 +6,6 @@
  * Needs `DATABASE_URL` (migrated) and `BETTER_AUTH_SECRET`, like `auth.spec.ts`. Each run seeds
  * its own operators and users with random names.
  */
-import { randomBytes } from "node:crypto";
 import { hashPassword } from "@cb/core";
 import {
   accounts,
@@ -23,6 +22,7 @@ import { expect, type Page, test } from "@playwright/test";
 import en from "../messages/en.json" with { type: "json" };
 import hi from "../messages/hi.json" with { type: "json" };
 import { allRoutes, isDynamicPath, NAV } from "../src/lib/nav";
+import { newSeedId } from "./_support/unique";
 
 const DATABASE_URL = process.env.DATABASE_URL;
 const PASSWORD = "e2e shell password 4321";
@@ -31,14 +31,17 @@ const DESKTOP = { width: 1280, height: 800 };
 const SOME_ID = "0190a3b2-0000-7000-8000-000000000001";
 const SECTION_NAMES = NAV.map((section) => en.shell.routes[section.id]);
 
-/** A real customer of the "Active" tenant: built customer pages answer 404 for made-up ids (T-033). */
-const CUSTOMER_ID = uuidv7();
+/**
+ * A real customer of the "Active" tenant: built customer pages answer 404 for made-up ids (T-033).
+ * Its id is made in each beforeAll, with the rest of the seed (see _support/unique.ts).
+ */
+let customerId = "";
 const CUSTOMER_NAME = "E2E Shell Customer";
 
 /** The URL to open for a route (other dynamic segments get a made-up id: placeholders ignore it). */
 const urlOf = (path: string) =>
   path.startsWith("/customers/[id]")
-    ? path.replace("[id]", CUSTOMER_ID)
+    ? path.replace("[id]", customerId)
     : path.replace("[id]", SOME_ID);
 
 /** Customer profile tabs that are built (their title is the customer's name, T-033 / T-034 / T-048 / T-049). */
@@ -57,7 +60,8 @@ const titleOf = (id: keyof typeof en.shell.routes) =>
 test.describe("operator shell", () => {
   test.skip(!DATABASE_URL, "needs DATABASE_URL (a migrated database) and BETTER_AUTH_SECRET");
 
-  const run = randomBytes(4).toString("hex");
+  // Made fresh in every beforeAll (see _support/unique.ts), so a second seed never collides.
+  let run = "";
   const login = (who: string) => `e2e-shell-${who}-${run}`;
   const business = (name: string) => `${name} Cable ${run}`;
   let db: DbClient;
@@ -100,12 +104,14 @@ test.describe("operator shell", () => {
       if (name === "Active") {
         await tx
           .insert(customers)
-          .values({ id: CUSTOMER_ID, operatorId, customerCode: "1", name: CUSTOMER_NAME });
+          .values({ id: customerId, operatorId, customerCode: "1", name: CUSTOMER_NAME });
       }
     });
   }
 
   test.beforeAll(async () => {
+    run = newSeedId();
+    customerId = uuidv7();
     db = createDb({ connectionString: DATABASE_URL ?? "", max: 2 });
     await seedTenant("Active", "active", [
       ["owner", "owner"],
