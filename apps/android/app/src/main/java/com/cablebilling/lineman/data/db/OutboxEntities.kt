@@ -56,11 +56,17 @@ data class CollectionDayEntity(
     val status: String,
     /** The server's `handover` object as JSON, or null. */
     @ColumnInfo(name = "handover_json") val handoverJson: String?,
-    /** Server clock of that answer (epoch ms). */
+    /**
+     * Server clock of that answer (epoch ms). T-070: `0` = no answer from the server yet (a row made only
+     * to hold a handover saved offline; its totals are zeros, not the office's numbers).
+     */
     @ColumnInfo(name = "server_time") val serverTime: Long,
     /** Phone clock when it was stored (epoch ms). */
     @ColumnInfo(name = "cached_at") val cachedAt: Long,
-    /** A `HandoverRequest` (JSON) saved offline and not yet accepted by the server, or null. */
+    /**
+     * A handover saved on the phone and not yet accepted by the server, or null. T-070 stores its
+     * `QueuedHandover` JSON here (the frozen `HandoverRequest` + attempts, or "refused" for good).
+     */
     @ColumnInfo(name = "queued_handover_json") val queuedHandoverJson: String? = null,
 )
 

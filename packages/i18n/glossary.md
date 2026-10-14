@@ -235,6 +235,26 @@ the office has the payment.
 | Cancelled (a payment) | रद्द | A payment the owner undid; not in the totals | `semantic.danger` | Reversed, Void |
 | Switched off (a lineman) | बंद | A deactivated lineman's account | — | Disabled, Inactive |
 
+## Today and cash handover words (lineman app, T-070)
+
+The office's words for a handover (Cash expected, Waiting for check, Accepted, Sent back, ₹50 short /
+extra, Cash matches, Not handed over) are the ones in the web table above; the phone uses the same.
+
+| English | हिंदी | Means | Icon / colour | Not this |
+|---|---|---|---|---|
+| Today | आज | The lineman's India-time day: cash and UPI on separate tiles, never one total | calendar-days | Daily summary, Session |
+| At the office | ऑफिस में | The office's own numbers for the day (payments it has) | circle-check, `semantic.success` | Server total, Synced |
+| Only on the phone | सिर्फ़ फ़ोन में | Payments of the day the office does not have yet | clock, `semantic.pending` | Unsynced, Pending |
+| Counted on this phone | इस फ़ोन में गिना | Totals made from the phone's payments when the office has not answered | clock, `semantic.pending` | Local totals, Offline data |
+| How much cash are you giving? | कितना कैश दे रहे हैं? | The handover's number-pad question | handshake | Enter amount, Deposit amount |
+| Why is it different? | फ़र्क क्यों है? | The reason question when the cash differs | — | Discrepancy reason |
+| Less cash / More cash | कैश कम है / कैश ज़्यादा है | Reason tiles for short / extra cash | circle-minus / circle-plus | Shortage, Excess |
+| Payments on phone | पेमेंट फ़ोन में हैं | Reason tile: some payments have not reached the office yet | clock | Pending sync |
+| Other reason | कुछ और | Reason tile: anything else (say it in the note) | pencil | Miscellaneous |
+| Note (not needed) | नोट (ज़रूरी नहीं) | Optional words with the handover (the keyboard's mic works) | — | Remarks, Comments |
+| Hand over again | फिर से कैश दें | A new handover after "Sent back" (or to correct one) | handshake | Resubmit |
+| Check again | फिर से देखें | Ask the office again whether it checked the handover | arrow-right | Refresh, Reload |
+
 ## Customer words (web)
 
 | English | हिंदी | Means | Icon / colour | Not this |

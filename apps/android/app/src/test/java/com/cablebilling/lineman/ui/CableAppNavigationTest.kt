@@ -32,6 +32,8 @@ class CableAppNavigationTest {
                     searchHome = { _, _ -> PlaceholderScreen(title = "search", testTag = "screen_search") },
                     customerScreen = { _, _, _ -> PlaceholderScreen(title = "customer", testTag = "screen_customer") },
                     waitingScreen = { PlaceholderScreen(title = "waiting", testTag = "screen_waiting") },
+                    // T-070: the real Today screen needs Hilt.
+                    todayScreen = { PlaceholderScreen(title = "today", testTag = "screen_today") },
                 )
             }
         }

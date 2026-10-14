@@ -138,6 +138,31 @@ Generated, never edited by hand: `core/designsystem/.../generated/Tokens.kt` (`p
 - `feature/waiting`: the Waiting tab: problems first (Call office), payments on the phone, another
   lineman's held payments (flagged, Call office), last push status in honest words, "Try now".
 
+## Today and cash handover (T-070)
+
+- `feature/today`: `TodayScreen` (the Today tab) + `TodayViewModel`, and the handover flow `HandoverScreen` +
+  `HandoverViewModel` (`HandoverRoute(businessDate)` on the Today tab's stack: Amount → Reason (only if the
+  cash differs) → Confirm → back to Today). `CableApp(todayScreen = …, handoverScreen = …)` for tests.
+- **Totals** (`summarizeDay`, pure): the signed-in lineman's India-time day (`payments.business_date`),
+  `MethodTotals` keeps cash and UPI apart and has no "both" total. With an office answer from this app run
+  (`GET /collections/{date}`, with its payment list) the day = office totals + this phone's payments it does
+  not list (on the phone, refused, sent after the answer); cancelled payments count nowhere. Without one
+  the day is the phone's own count, labelled "counted on this phone"; stored office totals are shown apart.
+  Another lineman's held payments and other days never count.
+- **Handover**: the pad is pre-filled with all cash of the day (`HandoverPlan`, frozen when the flow
+  opens). A different amount needs a reason tile (by sign: short/extra, payments on phone, other) and an
+  optional note. Matching the phone's count while cash is still on the phone sends `pending_sync` (the
+  office's total is lower). `TodayRepository.queueHandover` commits the request in
+  `collection_day.queued_handover_json` (`QueuedHandover`, frozen body, `submission_id` made when Confirm
+  opens) before anything says "saved"; `HandoverSyncScheduler` / `HandoverSyncWorker` (unique work
+  `handover-sync`, network constraint, backoff, no limit) push the lineman's payments first
+  (`PaymentsFirst`) and then send it. 200 or a day showing that submission → cleared ("Sent to office");
+  offline / 429 / 5xx / unreadable → waits; 409 HANDOVER_ALREADY_ACCEPTED, 409 ID_REUSED, 400 VALIDATION →
+  refused for good (never resent; hand over again or call the office).
+- **Status**: `HandoverView` — not handed over, saved on phone (sending), refused, sent to office + waiting
+  for check, sent back (office note, hand over again), accepted (final, no button). Today asks the office
+  on every show and on "Check again".
+
 ## Settings, diagnostics and crash reporting (T-071)
 
 - `feature/settings`: `SettingsRoute` opened by the small gear (`SettingsButton`) at the end of the search

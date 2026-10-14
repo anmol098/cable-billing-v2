@@ -40,6 +40,8 @@ import com.cablebilling.lineman.feature.printer.PrinterSetupRoute
 import com.cablebilling.lineman.feature.search.SearchScreen
 import com.cablebilling.lineman.feature.settings.Settings
 import com.cablebilling.lineman.feature.settings.SettingsRoute
+import com.cablebilling.lineman.feature.today.HandoverRoute
+import com.cablebilling.lineman.feature.today.HandoverScreen
 import com.cablebilling.lineman.feature.today.TodayScreen
 import com.cablebilling.lineman.feature.waiting.WaitingScreen
 import com.cablebilling.lineman.ui.navigation.CollectRoute
@@ -63,6 +65,13 @@ typealias CollectSlot =
 /** The Done screen of a saved payment (T-066): printer setup, and Done back to the search home. */
 typealias CollectDoneSlot =
     @Composable (paymentId: String, onPrinterSetup: () -> Unit, onFinish: () -> Unit) -> Unit
+
+/** The Today tab (T-070): today's cash / UPI totals; "Hand over cash" opens the handover flow for that day. */
+typealias TodaySlot = @Composable (onHandOver: (businessDate: String) -> Unit) -> Unit
+
+/** The cash handover flow (T-070): `onDone` once it is saved on the phone (back to Today), `onBack` leaves it. */
+typealias HandoverSlot =
+    @Composable (businessDate: String, onDone: () -> Unit, onBack: () -> Unit) -> Unit
 
 /** The Waiting tab (T-066). */
 typealias WaitingSlot = @Composable () -> Unit
@@ -93,6 +102,8 @@ fun CableApp(
         CollectDoneScreen(paymentId, onPrinterSetup, onFinish)
     },
     waitingScreen: WaitingSlot = { WaitingScreen() },
+    todayScreen: TodaySlot = { onHandOver -> TodayScreen(onHandOver) },
+    handoverScreen: HandoverSlot = { businessDate, onDone, onBack -> HandoverScreen(businessDate, onDone, onBack) },
     settingsScreen: SettingsSlot = { onPrinterSetup, onOpenWaiting, onBack ->
         Settings(onBack = onBack, onPrinterSetup = onPrinterSetup, onOpenWaiting = onOpenWaiting)
     },
@@ -143,7 +154,21 @@ fun CableApp(
                     dropUnlessResumed { navController.popBackStack(SearchRoute, inclusive = false) },
                 )
             }
-            composable<TodayRoute> { TodayScreen() }
+            // T-070: Today → Hand over cash (number pad → reason → confirm) → back to Today.
+            composable<TodayRoute> {
+                todayScreen(
+                    dropUnlessResumedWith { businessDate ->
+                        navController.navigate(HandoverRoute(businessDate))
+                    },
+                )
+            }
+            composable<HandoverRoute> { entry ->
+                handoverScreen(
+                    entry.toRoute<HandoverRoute>().businessDate,
+                    { navController.popBackStack(TodayRoute, inclusive = false) },
+                    dropUnlessResumed { navController.popBackStack() },
+                )
+            }
             composable<WaitingRoute> { waitingScreen() }
             // Printer setup (T-068): opened from settings (T-071) and the receipt screen (T-069).
             composable<PrinterSetupRoute> { PrinterSetup(onBack = { navController.popBackStack() }) }
@@ -201,7 +226,11 @@ private val TopLevelDestination.subScreens: List<KClass<*>>
                 listOf(CustomerRoute::class, CollectRoute::class, CollectDoneRoute::class, SettingsRoute::class)
             }
 
-            TopLevelDestination.Today, TopLevelDestination.Waiting -> {
+            TopLevelDestination.Today -> {
+                listOf(HandoverRoute::class)
+            }
+
+            TopLevelDestination.Waiting -> {
                 emptyList()
             }
         }

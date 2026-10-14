@@ -55,4 +55,11 @@ interface CollectionDayDao {
         collectorId: String,
         businessDate: String,
     ): Flow<CollectionDayEntity?>
+
+    /** T-070: [collectorId]'s days with a handover saved on the phone (sent or refused later), oldest day first. */
+    @Query(
+        "SELECT * FROM collection_day WHERE collector_id = :collectorId AND queued_handover_json IS NOT NULL " +
+            "ORDER BY business_date",
+    )
+    suspend fun withQueuedHandover(collectorId: String): List<CollectionDayEntity>
 }

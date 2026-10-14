@@ -277,6 +277,67 @@
     <string name="mobile_shell_nav_search">खोजें</string>
     <string name="mobile_shell_nav_today">आज</string>
     <string name="mobile_shell_nav_waiting">इंतज़ार में</string>
+    <string name="mobile_today_at_office">ऑफिस में</string>
+    <!-- %1$s = time -->
+    <string name="mobile_today_at_office_at">ऑफिस में (%1$s)</string>
+    <string name="mobile_today_cancelled">रद्द</string>
+    <string name="mobile_today_handover_again">फिर से कैश दें</string>
+    <string name="mobile_today_handover_already_accepted">ऑफिस ने आज का कैश पहले ही मंज़ूर कर दिया है।</string>
+    <string name="mobile_today_handover_amount_title">कितना कैश दे रहे हैं?</string>
+    <string name="mobile_today_handover_confirm_title">देखें और दें</string>
+    <string name="mobile_today_handover_not_saved">सेव नहीं हुआ। फिर से करें।</string>
+    <string name="mobile_today_handover_note">नोट (ज़रूरी नहीं)</string>
+    <!-- %1$s = office, %2$s = phone -->
+    <string name="mobile_today_handover_office_and_phone">%1$s ऑफिस में + %2$s फ़ोन में</string>
+    <string name="mobile_today_handover_phone_only">इस फ़ोन में गिना (इंटरनेट नहीं है)</string>
+    <string name="mobile_today_handover_reason_extra">कैश ज़्यादा है</string>
+    <string name="mobile_today_handover_reason_other">कुछ और</string>
+    <string name="mobile_today_handover_reason_pending_sync">पेमेंट फ़ोन में हैं</string>
+    <string name="mobile_today_handover_reason_short">कैश कम है</string>
+    <string name="mobile_today_handover_reason_title">फ़र्क क्यों है?</string>
+    <string name="mobile_today_handover_saving">सेव हो रहा है…</string>
+    <string name="mobile_today_handover_signed_out">सेव नहीं हुआ। फिर से लॉग इन करें।</string>
+    <!-- %1$s = amount -->
+    <string name="mobile_today_handover_voice">%1$s कैश ऑफिस को</string>
+    <string name="mobile_today_list_title">आज के पेमेंट</string>
+    <string name="mobile_today_nothing_yet">आज अभी कोई पेमेंट नहीं</string>
+    <!-- %1$d = count -->
+    <plurals name="mobile_today_on_phone">
+        <item quantity="one">%1$d पेमेंट सिर्फ़ फ़ोन में है। अभी ऑफिस नहीं पहुँचा।</item>
+        <item quantity="other">%1$d पेमेंट सिर्फ़ फ़ोन में हैं। अभी ऑफिस नहीं पहुँचे।</item>
+    </plurals>
+    <string name="mobile_today_phone_only">इस फ़ोन में गिना। ऑफिस का हिसाब अभी नहीं आया।</string>
+    <!-- %1$d = count -->
+    <plurals name="mobile_today_problem">
+        <item quantity="one">%1$d पेमेंट में दिक्कत है। ऑफिस को फ़ोन करें।</item>
+        <item quantity="other">%1$d पेमेंट में दिक्कत है। ऑफिस को फ़ोन करें।</item>
+    </plurals>
+    <string name="mobile_today_status_accepted">मंज़ूर</string>
+    <string name="mobile_today_status_check_again">फिर से देखें</string>
+    <!-- %1$s = amount -->
+    <string name="mobile_today_status_expected">कितना कैश होना चाहिए %1$s</string>
+    <!-- %1$s = amount -->
+    <string name="mobile_today_status_extra">%1$s ज़्यादा</string>
+    <string name="mobile_today_status_matches">कैश पूरा है</string>
+    <string name="mobile_today_status_not_yet">कैश नहीं दिया</string>
+    <!-- %1$s = note -->
+    <string name="mobile_today_status_office_note">ऑफिस ने कहा: %1$s</string>
+    <string name="mobile_today_status_on_phone">फ़ोन में सेव। इंटरनेट आने पर अपने-आप ऑफिस जाएगा।</string>
+    <string name="mobile_today_status_refused_accepted">नहीं गया। ऑफिस ने आज का कैश पहले ही मंज़ूर कर दिया था।</string>
+    <string name="mobile_today_status_refused_other">नहीं गया। ऑफिस को फ़ोन करें।</string>
+    <string name="mobile_today_status_refused_total">नहीं गया। ऑफिस का कैश का हिसाब अलग है। फिर से कैश दें।</string>
+    <string name="mobile_today_status_sending">ऑफिस भेज रहे हैं…</string>
+    <string name="mobile_today_status_sent">ऑफिस पहुँच गया</string>
+    <string name="mobile_today_status_sent_back">वापस भेजा</string>
+    <!-- %1$s = amount -->
+    <string name="mobile_today_status_short">%1$s कम</string>
+    <string name="mobile_today_status_try_now">अभी भेजें</string>
+    <string name="mobile_today_status_waiting_check">जाँच बाकी</string>
+    <!-- %1$s = amount -->
+    <string name="mobile_today_status_you_gave">आपने दिया %1$s</string>
+    <string name="mobile_today_title">आज</string>
+    <!-- %1$s = cash, %2$s = upi -->
+    <string name="mobile_today_voice_totals">आज %1$s नकद, %2$s UPI</string>
     <!-- %1$s = amount, %2$s = name -->
     <string name="mobile_voice_cash_from">%2$s से %1$s नकद</string>
     <!-- %1$s = name, %2$s = amount -->
