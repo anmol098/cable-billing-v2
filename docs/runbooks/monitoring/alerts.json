@@ -1,0 +1,105 @@
+{
+  "$comment": "Alerts as code (T-096, PLAN §17). Read by sentry-alerts.mjs (dry-run by default; --apply needs H-01's Sentry org) and checked by alerts.test.mjs (every event and tag named here must exist in the code, every runbook link must resolve). Explained in docs/runbooks/monitoring.md.",
+  "sentry": {
+    "project": "cable-billing-web",
+    "environment": "production"
+  },
+  "issueAlerts": [
+    {
+      "id": "billing-run-failed",
+      "name": "[P1] Bill run job failed",
+      "severity": "P1",
+      "why": "A tenant's monthly bill run (billing.run job) failed after its retries. Customers of that operator have no bill for the month until it is retried.",
+      "when": { "message": "job.failed", "tags": { "job_type": "billing.run" }, "everyEvent": true },
+      "runbook": "billing-run-failure.md#1-a-bill-run-job-failed"
+    },
+    {
+      "id": "invariant-breach",
+      "name": "[P1] Books check failed (invariant breach)",
+      "severity": "P1",
+      "why": "The nightly invariants.check job found books that do not add up, or could not check a tenant (job.failed with job_type invariants.check).",
+      "when": { "message": "job.failed", "tags": { "job_type": "invariants.check" }, "everyEvent": true },
+      "runbook": "invariant-breach.md#what-to-do"
+    },
+    {
+      "id": "job-failed-any",
+      "name": "[P2] Background job failed",
+      "severity": "P2",
+      "why": "Any other background job (subscription, session close, imports, …) failed after its retries.",
+      "when": {
+        "message": "job.failed",
+        "tagsNot": { "job_type": ["billing.run", "invariants.check"] },
+        "everyEvent": true
+      },
+      "runbook": "billing-run-failure.md#3-another-background-job-failed"
+    },
+    {
+      "id": "cron-failed",
+      "name": "[P1] Cron route crashed",
+      "severity": "P1",
+      "why": "A Vercel cron route threw (cronRoute captures with tag cron=<name>): e.g. the bill scheduler could not queue runs, or job-worker could not start.",
+      "when": { "tags": { "cron": "*" }, "everyEvent": true },
+      "runbook": "billing-run-failure.md#2-a-cron-route-crashed"
+    },
+    {
+      "id": "sync-errors-spike",
+      "name": "[P1] Payment sync errors spike",
+      "severity": "P1",
+      "why": "The phones' payment upload (/payments:batch) hit more than 10 server errors in an hour. Payments stay safe on the phones, but they are not reaching the office.",
+      "when": { "tags": { "endpoint": "postPaymentBatch" }, "moreThan": 10, "interval": "1h" },
+      "runbook": "stuck-sync.md#1-server-side-errors-alert-payment-sync-errors-spike"
+    },
+    {
+      "id": "razorpay-webhook-failed",
+      "name": "[P2] Razorpay webhook failed",
+      "severity": "P2",
+      "why": "A signed Razorpay webhook threw while being applied (500; Razorpay retries it). Subscriptions may show the wrong state until it succeeds or the daily reconcile runs.",
+      "when": { "tags": { "webhook": "razorpay" }, "everyEvent": true },
+      "runbook": "razorpay-webhooks.md#a-webhook-failed"
+    },
+    {
+      "id": "unsafe-db-role",
+      "name": "[P1] App connected with an unsafe database role",
+      "severity": "P1",
+      "why": "The runtime DATABASE_URL logs in as the owner or another role that can bypass RLS (checkRuntimeRole at boot).",
+      "when": { "message": "Unsafe database runtime role", "everyEvent": true },
+      "runbook": "environments.md#412-runtime-database-role-cb_app-staging-and-production-after-the-first-migration"
+    },
+    {
+      "id": "new-issue",
+      "name": "[P3] New error in production",
+      "severity": "P3",
+      "why": "Any new kind of error, or an old one that came back. Look at it on the next working day unless it repeats.",
+      "when": { "firstSeenOrRegression": true },
+      "runbook": "monitoring.md#4-triage-a-sentry-alert"
+    }
+  ],
+  "cronMonitors": [
+    {
+      "id": "nightly-backup",
+      "slug": "nightly-backup",
+      "name": "[P1] Nightly backup missed or failed",
+      "severity": "P1",
+      "why": "The backup workflow did not check in by 21:00 UTC, or reported an error. backup.yml checks in through the secret BACKUP_SENTRY_CRON_URL.",
+      "schedule": "0 20 * * *",
+      "checkinMarginMinutes": 60,
+      "maxRuntimeMinutes": 60,
+      "workflow": ".github/workflows/backup.yml",
+      "runbook": "backup-and-restore.md#7-when-the-backup-alert-fires"
+    }
+  ],
+  "uptimeChecks": [
+    {
+      "id": "health",
+      "name": "[P1] Site down (/api/health)",
+      "severity": "P1",
+      "why": "The production app does not answer /api/health with 200 (503 = degraded; a timeout = down).",
+      "path": "/api/health",
+      "route": "apps/web/src/app/api/health/route.ts",
+      "intervalSeconds": 60,
+      "timeoutSeconds": 10,
+      "failuresBeforeAlert": 3,
+      "runbook": "monitoring.md#5-site-down"
+    }
+  ]
+}

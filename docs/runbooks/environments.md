@@ -261,8 +261,9 @@ account. Use a shared company email (not a personal one) as the owner where you 
 
 Create an object-storage bucket for the nightly encrypted `pg_dump` (for example S3 `ap-southeast-1`
 or Cloudflare R2), with a 30-day lifecycle rule, versioning on, no public access, and an access key that
-can only write to that bucket. The workflow and its secret names are defined by T-096; store the keys in
-the GitHub environment `production`.
+can only write to that bucket. The workflow (`.github/workflows/backup.yml`), the encryption keys and
+every secret name are in [backup-and-restore.md §6](backup-and-restore.md#6-setting-it-up-h-01):
+the keys go to two dedicated GitHub environments, `backup` (nightly, no reviewer) and `restore-drill`.
 
 ### 4.10 GitHub environments and secrets
 
@@ -272,9 +273,11 @@ reviewer = the product owner). Secrets:
 | Environment | Secret | Used by |
 |---|---|---|
 | `staging` | `DATABASE_URL_UNPOOLED` (non-prod `staging` branch, owner role, direct) | migrations workflow |
-| `production` | `DATABASE_URL_UNPOOLED` (prod `main`, owner role, direct) | migrations workflow, backups (T-096) |
+| `production` | `DATABASE_URL_UNPOOLED` (prod `main`, owner role, direct) | migrations workflow |
 | repository | `VERCEL_AUTOMATION_BYPASS_SECRET` | Playwright against previews (T-010/T-088) |
-| `production` | backup bucket keys, Play service account, keystore | T-096, T-073 (names set there) |
+| `production` | Play service account, keystore | T-073 (names set there) |
+| `backup` | `BACKUP_DATABASE_URL` (the same prod owner direct URL), bucket writer key, `BACKUP_SENTRY_CRON_URL` | nightly backup (backup-and-restore.md §6) |
+| `restore-drill` | `BACKUP_AGE_IDENTITY` (age private key), bucket reader key | monthly restore drill (backup-and-restore.md §5.1) |
 
 CI itself needs no app secrets: `pnpm build` passes with an empty environment, and integration tests use
 the Postgres service container (T-010).
@@ -537,7 +540,8 @@ General rules:
 | `RAZORPAY_WEBHOOK_SECRET` | Generate a new value; change it in Razorpay → Webhooks and in Vercel together → redeploy | Webhooks in between fail signature checks; Razorpay retries them, and the daily reconciliation catches anything missed. |
 | `SENTRY_AUTH_TOKEN` | Create a new org token → update Vercel → revoke the old one | Only source-map uploads are affected. |
 | `SENTRY_DSN` | Sentry → Client Keys → new key → update both DSN variables → redeploy → disable the old key | DSNs are not secret but can be abused for spam; rotate if that happens. |
-| Play / keystore / backup keys | See T-073 / T-096 runbooks | — |
+| Play / keystore | See T-073 | — |
+| Backup encryption key, bucket keys, `BACKUP_DATABASE_URL` | [backup-and-restore.md §8](backup-and-restore.md#8-rotating-the-backup-keys) | No missed backup if done in order |
 
 ---
 

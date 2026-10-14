@@ -1,0 +1,280 @@
+# Backups and restore drills (PLAN §17, PRD §15 #14, T-096). Runbook: docs/runbooks/backup-and-restore.md
+#
+# Jobs:
+#   self-test      Every PR that touches the backup scripts, this file, migrations or the invariants
+#                  check (and on demand): a Postgres 17 service, migrated + seeded (`small`), then
+#                  docs/runbooks/backup/self-test.sh proves backup → encrypt → restore → verify, and that
+#                  a damaged file, a wrong key, a non-empty target and broken books all fail. Also runs
+#                  the monitoring config tests (docs/runbooks/monitoring). Uses no secrets.
+#   backup         Nightly at 20:00 UTC (01:30 IST: after the 00:15 billing scheduler and 00:30
+#                  session-close, before the 02:30 invariants check) and on demand. pg_dump of
+#                  production → age-encrypted → object storage (30-day lifecycle on the bucket).
+#                  Runs only when the repository variable BACKUP_ENABLED is "true" (set it after H-01).
+#   restore-drill  Monthly on the 8th at 02:00 UTC (07:30 IST; never near the 1st, when bills run) and on
+#                  demand: restores the newest (or a chosen) backup into a throwaway Postgres 17 service
+#                  container and verifies it (counts, money totals, migrations, T-052 invariants). The
+#                  report goes to the job summary and an artifact, to copy into docs/runbooks/restore-log.md.
+#                  Runs only when the repository variable RESTORE_DRILL_ENABLED is "true".
+#
+# Secrets and variables (none exist until H-01; names and setup: docs/runbooks/backup-and-restore.md §6):
+#   environment `backup`         secrets BACKUP_DATABASE_URL, BACKUP_S3_ACCESS_KEY_ID,
+#                                BACKUP_S3_SECRET_ACCESS_KEY, BACKUP_SENTRY_CRON_URL (optional);
+#                                variables BACKUP_S3_URI, BACKUP_S3_REGION, BACKUP_S3_ENDPOINT (optional),
+#                                BACKUP_AGE_RECIPIENTS (age PUBLIC keys)
+#   environment `restore-drill`  secrets BACKUP_AGE_IDENTITY (age PRIVATE key), BACKUP_S3_ACCESS_KEY_ID,
+#                                BACKUP_S3_SECRET_ACCESS_KEY (read-only key); variables BACKUP_S3_URI,
+#                                BACKUP_S3_REGION, BACKUP_S3_ENDPOINT (optional)
+# Scheduled runs only happen on the default branch (main), so the nightly backup starts once this file
+# reaches main. Third-party actions are pinned to full commit SHAs (same pins as web.yml).
+name: Backup
+
+on:
+  schedule:
+    - cron: "0 20 * * *" # backup, 01:30 IST daily
+    - cron: "0 2 8 * *" # restore drill, 07:30 IST on the 8th
+  pull_request:
+    branches: [main, "feature/**"]
+    paths:
+      - .github/workflows/backup.yml
+      - docs/runbooks/backup/**
+      - docs/runbooks/monitoring/**
+      - packages/db/migrations/**
+      - packages/core/src/invariants/**
+  workflow_dispatch:
+    inputs:
+      task:
+        description: What to run
+        type: choice
+        options: [self-test, backup, restore-drill]
+        default: self-test
+      backup_file:
+        description: "restore-drill only: s3:// URL of the .tar.age to restore (empty = newest)"
+        type: string
+        required: false
+
+permissions:
+  contents: read
+
+concurrency:
+  # One backup-workflow run per ref and task at a time; never cancel a running backup or drill.
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event.schedule || inputs.task || 'pr' }}
+  cancel-in-progress: false
+
+env:
+  TURBO_TELEMETRY_DISABLED: "1"
+  NEXT_TELEMETRY_DISABLED: "1"
+
+jobs:
+  self-test:
+    name: Backup self-test
+    if: github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && inputs.task == 'self-test')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: cable_billing
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d cable_billing"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      # CI-only throwaway credentials of the service container.
+      DATABASE_URL: postgres://postgres:postgres@localhost:5432/cable_billing
+    steps:
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install the Postgres 17 client and age
+        run: bash docs/runbooks/backup/install-tools.sh
+
+      - name: Set up pnpm (version from package.json packageManager)
+        uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+        with:
+          cache: true
+
+      - name: Set up Node (version from .nvmrc)
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Monitoring config tests
+        run: node --test docs/runbooks/monitoring/alerts.test.mjs
+
+      - name: Migrate and seed the source database (fake data)
+        run: pnpm db:seed --migrate --scale small
+
+      - name: Backup → restore → verify, and the failure cases
+        env:
+          ADMIN_DATABASE_URL: postgres://postgres:postgres@localhost:5432/postgres
+          SOURCE_DB: cable_billing
+        run: bash docs/runbooks/backup/self-test.sh
+
+  backup:
+    name: Nightly backup
+    if: >-
+      vars.BACKUP_ENABLED == 'true' &&
+      ((github.event_name == 'schedule' && github.event.schedule == '0 20 * * *') ||
+       (github.event_name == 'workflow_dispatch' && inputs.task == 'backup'))
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    environment: backup
+    env:
+      # A step's `if:` can't read secrets; this flag says whether the Sentry cron monitor is set up.
+      HAS_SENTRY_CRON: ${{ secrets.BACKUP_SENTRY_CRON_URL != '' }}
+    steps:
+      - name: Check out the backup scripts
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          sparse-checkout: docs/runbooks/backup
+
+      - name: Sentry cron check-in (in progress)
+        if: env.HAS_SENTRY_CRON == 'true'
+        env:
+          BACKUP_SENTRY_CRON_URL: ${{ secrets.BACKUP_SENTRY_CRON_URL }}
+        run: curl -fsS -m 10 --retry 3 -o /dev/null "${BACKUP_SENTRY_CRON_URL}?status=in_progress" || true
+
+      - name: Install the Postgres 17 client and age
+        run: bash docs/runbooks/backup/install-tools.sh
+
+      - name: Check the configuration
+        env:
+          BACKUP_DATABASE_URL: ${{ secrets.BACKUP_DATABASE_URL }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.BACKUP_S3_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.BACKUP_S3_SECRET_ACCESS_KEY }}
+          BACKUP_S3_URI: ${{ vars.BACKUP_S3_URI }}
+          BACKUP_AGE_RECIPIENTS: ${{ vars.BACKUP_AGE_RECIPIENTS }}
+        run: |
+          missing=()
+          for name in BACKUP_DATABASE_URL AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY BACKUP_S3_URI BACKUP_AGE_RECIPIENTS; do
+            [ -n "${!name}" ] || missing+=("$name")
+          done
+          if [ "${#missing[@]}" -gt 0 ]; then
+            echo "::error::Backup is enabled but not configured: ${missing[*]} (docs/runbooks/backup-and-restore.md §6)"
+            exit 1
+          fi
+
+      - name: Back up
+        env:
+          DATABASE_URL: ${{ secrets.BACKUP_DATABASE_URL }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.BACKUP_S3_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.BACKUP_S3_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ vars.BACKUP_S3_REGION || 'auto' }}
+          AWS_ENDPOINT_URL: ${{ vars.BACKUP_S3_ENDPOINT }}
+          BACKUP_DEST: ${{ vars.BACKUP_S3_URI }}
+          BACKUP_AGE_RECIPIENTS: ${{ vars.BACKUP_AGE_RECIPIENTS }}
+          BACKUP_ENV_NAME: production
+          BACKUP_GIT_SHA: ${{ github.sha }}
+          BACKUP_WORKDIR: ${{ runner.temp }}/backup
+        run: |
+          # An empty AWS_ENDPOINT_URL would break the AWS CLI; only R2 / other S3-compatible stores set it.
+          [ -n "$AWS_ENDPOINT_URL" ] || unset AWS_ENDPOINT_URL
+          bash docs/runbooks/backup/backup.sh
+
+      - name: Sentry cron check-in (ok)
+        if: success() && env.HAS_SENTRY_CRON == 'true'
+        env:
+          BACKUP_SENTRY_CRON_URL: ${{ secrets.BACKUP_SENTRY_CRON_URL }}
+        run: curl -fsS -m 10 --retry 3 -o /dev/null "${BACKUP_SENTRY_CRON_URL}?status=ok"
+
+      - name: Sentry cron check-in (error)
+        if: failure() && env.HAS_SENTRY_CRON == 'true'
+        env:
+          BACKUP_SENTRY_CRON_URL: ${{ secrets.BACKUP_SENTRY_CRON_URL }}
+        run: curl -fsS -m 10 --retry 3 -o /dev/null "${BACKUP_SENTRY_CRON_URL}?status=error" || true
+
+  restore-drill:
+    name: Restore drill
+    if: >-
+      vars.RESTORE_DRILL_ENABLED == 'true' &&
+      ((github.event_name == 'schedule' && github.event.schedule == '0 2 8 * *') ||
+       (github.event_name == 'workflow_dispatch' && inputs.task == 'restore-drill'))
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    environment: restore-drill
+    services:
+      postgres:
+        # The scratch target: lives only as long as this job. Same major version as Neon (17).
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: restore_drill
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d restore_drill"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install the Postgres 17 client and age
+        run: bash docs/runbooks/backup/install-tools.sh
+
+      - name: Set up pnpm (version from package.json packageManager)
+        uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+        with:
+          cache: true
+
+      - name: Set up Node (version from .nvmrc)
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Restore and verify
+        env:
+          TARGET_DATABASE_URL: postgres://postgres:postgres@localhost:5432/restore_drill
+          BACKUP_AGE_IDENTITY: ${{ secrets.BACKUP_AGE_IDENTITY }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.BACKUP_S3_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.BACKUP_S3_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ vars.BACKUP_S3_REGION || 'auto' }}
+          AWS_ENDPOINT_URL: ${{ vars.BACKUP_S3_ENDPOINT }}
+          BACKUP_DEST: ${{ vars.BACKUP_S3_URI }}
+          BACKUP_ENV_NAME: production
+          BACKUP_FILE: ${{ inputs.backup_file }}
+          RESTORE_WORKDIR: ${{ runner.temp }}/restore
+          RESTORE_REPORT: ${{ runner.temp }}/restore-report.md
+        run: |
+          [ -n "$AWS_ENDPOINT_URL" ] || unset AWS_ENDPOINT_URL
+          [ -n "$BACKUP_FILE" ] || unset BACKUP_FILE
+          if [ -z "$BACKUP_AGE_IDENTITY" ] || [ -z "$BACKUP_DEST" ]; then
+            echo "::error::Restore drill is enabled but not configured (docs/runbooks/backup-and-restore.md §6)"
+            exit 1
+          fi
+          mkdir -p "$RUNNER_TEMP/keys"
+          ( umask 077; printf '%s\n' "$BACKUP_AGE_IDENTITY" > "$RUNNER_TEMP/keys/identity.txt" )
+          export BACKUP_AGE_IDENTITY_FILE="$RUNNER_TEMP/keys/identity.txt"
+          unset BACKUP_AGE_IDENTITY
+          status=0
+          bash docs/runbooks/backup/restore-drill.sh || status=$?
+          rm -f "$BACKUP_AGE_IDENTITY_FILE"
+          exit "$status"
+
+      - name: Keep the drill report (no personal data; copy it into docs/runbooks/restore-log.md)
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: restore-drill-report
+          path: ${{ runner.temp }}/restore-report.md
+          retention-days: 90
+          if-no-files-found: ignore
