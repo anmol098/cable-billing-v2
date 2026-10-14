@@ -2409,6 +2409,49 @@
       "help": "Payments and bills that reach the office after this time are not in these numbers.",
       "now": "Numbers as of {when}"
     },
+    "billing_runs": {
+      "any_outcome": "Any result",
+      "bill_no": "Bill {number}",
+      "caption": "Customers in this bill run",
+      "col": {
+        "bill": "Bill",
+        "customer": "Customer",
+        "outcome": "Result",
+        "why": "Why"
+      },
+      "description": "Each month's bills: who got a bill, who had nothing to bill, and who had a problem.",
+      "empty": "No customers in this list.",
+      "filters": "Choose month",
+      "month": "Month",
+      "no_runs": "No bills made yet",
+      "outcome": {
+        "already_exists": "Already had a bill",
+        "created": "New bill",
+        "failed": "Problem",
+        "skipped": "Nothing to bill"
+      },
+      "outcome_label": "Result",
+      "started": "Started {when}",
+      "totals": {
+        "already": "Already had a bill",
+        "created": "New bills",
+        "created_note": "Total ₹{amount}",
+        "customers": "Customers checked",
+        "failed": "Problems",
+        "skipped": "Nothing to bill"
+      },
+      "trigger": {
+        "catch_up": "Made by itself later",
+        "cron": "Made by itself on the 1st",
+        "manual": "Made by {name}"
+      },
+      "why": {
+        "already_exists": "The bill was made before this run.",
+        "created": "Bill made in this run.",
+        "nothing_to_bill": "No connection was on on the 1st.",
+        "skipped": "Nothing to bill."
+      }
+    },
     "bills": {
       "all_pay_states": "All bills",
       "bad_range": "Choose up to 12 months, “From” before “To”. Showing this month.",
@@ -2433,7 +2476,67 @@
       "pay_state": "Paid?",
       "to": "To month"
     },
+    "collections": {
+      "by_day": "Day by day",
+      "by_day_help": "Open a row to see that day's payments.",
+      "by_person": "Who took how much",
+      "cancelled": "{count, plural, one {# cancelled (₹{amount}), not counted} other {# cancelled (₹{amount}), not counted}}",
+      "cash": "Cash",
+      "col": {
+        "cash": "Cash",
+        "payments": "Payments",
+        "upi": "UPI",
+        "who_day": "Who and day"
+      },
+      "count": "{count, plural, =0 {No payments} one {# payment} other {# payments}}",
+      "days": "{count, plural, one {# day} other {# days}}",
+      "description": "Cash and UPI each person took, day by day. Cash and UPI are never added together.",
+      "empty": "No payments on these days.",
+      "filters": "Choose days and person",
+      "old_app": "From the old app",
+      "payments": "Payments",
+      "people": "{count, plural, =0 {Nobody} one {# person} other {# people}}",
+      "role": {
+        "lineman": "Lineman",
+        "owner": "Owner",
+        "staff": "Staff"
+      },
+      "upi": "UPI",
+      "upi_note": "UPI is not cash: it is already in your account.",
+      "who": "Who"
+    },
+    "connections": {
+      "active_customers": "{count, plural, =0 {No customers} one {# customer} other {# customers}}",
+      "all": "All connections",
+      "any_plan": "Any plan",
+      "any_status": "Any status",
+      "caption": "Connections",
+      "col": {
+        "customer": "Customer",
+        "rent": "Monthly rent",
+        "status": "Status",
+        "vc": "VC number"
+      },
+      "count": "{count, plural, =0 {No connections} one {# connection} other {# connections}}",
+      "date": "Day",
+      "date_help": "The status on this day. A stop or removal counts from the next day.",
+      "description": "Which connections are on, stopped or removed on a day, and their monthly rent.",
+      "empty": "No connections here.",
+      "filters": "Choose connections",
+      "on_day": "Connections on {date}",
+      "plan": "Plan",
+      "rent_total": "Monthly rent of active connections",
+      "retired_plan": "{name} (old plan)",
+      "since": "From {date}",
+      "status": "Status"
+    },
     "customers": "{count, plural, =0 {No customers} one {# customer} other {# customers}}",
+    "days": {
+      "bad_today": "Choose up to 31 days, “From” before “To”, not after today. Showing today.",
+      "bad_week": "Choose up to 31 days, “From” before “To”, not after today. Showing the last 7 days.",
+      "from": "From day",
+      "to": "To day"
+    },
     "dues": {
       "ageing_help": "A bill's due counts from the 1st of its month. Credit pays the oldest bills first.",
       "ageing_title": "How old is the due",
@@ -2478,6 +2581,46 @@
       "of_total": "of {amount} due",
       "see_customers": "See these customers",
       "total_due": "Total due"
+    },
+    "handover": {
+      "all_linemen": "All linemen",
+      "any_difference": "Any",
+      "any_status": "Any status",
+      "caption": "Linemen's days",
+      "col": {
+        "day": "Lineman and day",
+        "difference": "Difference",
+        "expected": "Cash expected",
+        "handed": "Cash handed over",
+        "status": "Status"
+      },
+      "description": "Did each lineman hand over the cash expected? Day by day, with what happened.",
+      "difference": "Difference",
+      "empty": "No cash to hand over on these days.",
+      "expected_then": "₹{amount} expected at handover",
+      "filters": "Choose days and lineman",
+      "history_at": "{when}: {text}",
+      "history_summary": "{count, plural, one {What happened (# step)} other {What happened (# steps)}}",
+      "lineman": "Lineman",
+      "lineman_note": "Lineman's note: {note}",
+      "not_handed": "Not handed over yet",
+      "office_note": "Office note: {note}",
+      "status": "Status",
+      "totals": {
+        "difference": "Difference",
+        "difference_note": "{count, plural, =0 {Every handover matches} one {# day with a difference} other {# days with a difference}}",
+        "expected": "Cash expected",
+        "expected_note": "UPI ₹{amount} is not cash",
+        "extra": "₹{amount} extra",
+        "handed": "Cash handed over",
+        "handed_note": "{count, plural, =0 {No handover} one {# day handed over} other {# days handed over}}",
+        "matches": "Cash matches",
+        "not_handed": "Not handed over yet",
+        "not_handed_note": "{count, plural, =0 {No day waiting for cash} one {# day} other {# days}}",
+        "short": "₹{amount} short",
+        "status_line": "Waiting for check: {submitted} · Sent back: {returned} · Accepted: {accepted} · Not handed over: {open}"
+      },
+      "upi_apart": "UPI ₹{amount}: not part of the cash"
     },
     "next": "Next",
     "no_area": "No area",

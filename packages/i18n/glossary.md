@@ -404,6 +404,20 @@ that it opened another app (RULE-19). `HonestReceiptWordsTest` checks every `mob
 | Customers with credit | जिनका एडवांस है | Customers who paid more than their bills | `semantic.credit` | Advance customers, Negative balance |
 | Total (totals row) | कुल | The sum of every row that matches the filters, not only this page | — | Grand total, Subtotal |
 
+## Operations report words (web Reports, T-081)
+
+| English | हिंदी | Means | Icon / colour | Not this |
+|---|---|---|---|---|
+| Daily collection | रोज़ का कलेक्शन | Cash and UPI each person took, per IST day; cash and UPI are always two columns, never added | banknote `semantic.cash` / qr-code `semantic.upi` | Collection summary, Daily MIS |
+| Who took how much | किसने कितना लिया | One line per person over the chosen days | — | Collector-wise summary |
+| From the old app | पुराने ऐप से | Payments brought over from the old system, with no person on them | — | Migrated, Legacy |
+| Cash expected / Cash handed over / ₹50 short | कितना कैश होना चाहिए / कितना कैश दिया / ₹50 कम | Same words as the Linemen page (see "Cash handover words") | banknote / handshake / `semantic.danger` | Variance, Discrepancy report |
+| What happened (n steps) | क्या हुआ (n बार) | Every handover, send-back and acceptance of a lineman's day, with who and when | — | Audit trail, Status history |
+| Connections on {day} | {day} को कनेक्शन | The status of each connection during that day; a stop or removal counts from the next day | — | Snapshot, Effective-dated view |
+| Monthly rent of active connections | चालू कनेक्शन का महीने का किराया | What the month's bills charge for the connections that are on | — | MRR, Rental revenue |
+| New bill / Already had a bill / Nothing to bill / Problem | नया बिल / बिल पहले से था / बिल बनाने को कुछ नहीं / दिक्कत | What the month's bill run did for one customer | receipt (green) / check-circle (green) / pause (amber) / alert-triangle (red) | Created / Duplicate / Skipped / Failed |
+| Made by itself on the 1st / Made by {name} | 1 तारीख को अपने आप बने / {name} ने बनाए | How a month's bills were started | — | Cron, Manual trigger |
+
 ## Bill change words (web, T-045)
 
 | English | हिंदी | Means | Icon / colour | Not this |
