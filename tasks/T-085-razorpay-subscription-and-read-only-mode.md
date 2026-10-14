@@ -3,10 +3,10 @@ id: T-085
 title: Razorpay subscription and read-only mode
 phase: 4
 area: core
-status: todo
-owner:
-claimed_at:
-branch:
+status: claimed
+owner: agent-t085
+claimed_at: 2026-10-14T04:25:41.531Z
+branch: task/T-085-razorpay-subscription-and-read-only-mode
 depends_on: [T-025, T-043, T-029]
 review: required
 claimable_by: agent
@@ -59,3 +59,7 @@ PLAN §13, FR-025, D-12, D-13, D-20, D-22, D-25 — see `docs/IMPLEMENTATION_PLA
 ## Completion notes
 
 _The agent fills this in before opening the PR: what was built, decisions taken, deviations, follow-up tasks created, and how it was verified._
+
+## Board log
+
+- 2026-10-14T04:25:41.533Z claimed by agent-t085
