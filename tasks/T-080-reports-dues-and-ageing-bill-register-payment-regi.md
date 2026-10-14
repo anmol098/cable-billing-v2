@@ -3,10 +3,10 @@ id: T-080
 title: Reports: dues and ageing, bill register, payment register
 phase: 4
 area: web
-status: todo
-owner:
-claimed_at:
-branch:
+status: claimed
+owner: agent-t080
+claimed_at: 2026-10-14T04:25:46.155Z
+branch: task/T-080-reports-dues-and-ageing-bill-register-pa
 depends_on: [T-044, T-046, T-029]
 review: self
 claimable_by: agent
@@ -54,3 +54,7 @@ FR-023, BRD §12 — see `docs/IMPLEMENTATION_PLAN.md`, `docs/PRD.md`, `docs/BRD
 ## Completion notes
 
 _The agent fills this in before opening the PR: what was built, decisions taken, deviations, follow-up tasks created, and how it was verified._
+
+## Board log
+
+- 2026-10-14T04:25:46.155Z claimed by agent-t080
