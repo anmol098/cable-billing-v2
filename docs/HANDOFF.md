@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Date** | 2026-10-14 |
-| **State** | 66 of 91 tasks done. Phases 0–4 are essentially built: billing, payments, statements, reports, import, subscriptions, the admin console, the audit log and the whole Android collect/handover path are merged (see §2). In flight at the time of writing: T-045a, T-082, T-086b, T-088 (and T-091 waiting for CI). What's left is mostly blocked on people: accounts (H-01), the legacy dump (H-06) and product decisions (§8). |
+| **State** | 67 of 91 tasks done. Phases 0–4 are essentially built: billing, payments, statements, reports, import, subscriptions, the admin console, the audit log and the whole Android collect/handover path are merged (see §2). In flight at the time of writing: T-045a, T-082, T-086b, T-088. What's left is mostly blocked on people: accounts (H-01), the legacy dump (H-06) and product decisions (§8). |
 | **Environment** | A cloud container with full network access (Android SDK, Google Maven, Maven Central, Gradle plugin portal all reachable). Setup steps are in §3. |
 
 Read this first, then `CLAUDE.md` and `tasks/README.md`.
@@ -23,7 +23,7 @@ Read this first, then `CLAUDE.md` and `tasks/README.md`.
 | Environments runbook (H-01 walkthrough) | `docs/runbooks/environments.md` |
 | Android build notes | `apps/android/README.md` |
 | CI | `.github/workflows/{web,android,generated-check}.yml`. Required-check names: `Web`, `Web e2e`, `Generated files`, `Android` |
-| Merged PRs so far | Phase 0: #1 T-001 · #2 T-004 · #3 T-002 · #5 T-003 · #6 T-005 · #7 T-011 · #8 T-006 · #9 T-008 · #10 T-010 · #12 T-007 · #13 T-009 · #15 CI fix<br>Phase 1: #16 T-024 · #17 T-020 · #18 T-041 · #19 T-067 · #20 T-051 · #21 T-042 · #22 T-040 · #23 T-021 · #24 test fix · #25 T-020a · #26 T-063 · #27 T-022 · #28 T-025 · #29 handoff<br>Phase 1–3 (continued): #30 T-023 · #31 T-064 · #32 T-046 · #33 T-043 · #34 T-068 · #35 T-026 · #36 T-044 · #37/#39/#41/#46 test fixes · #38 T-036 · #40 T-065 · #42 T-050 · #43 T-029 · #44 T-028 · #45 T-027 · #47 T-052 · #48 T-066 · #49 T-087 · #50 T-090<br>Wave 3: #51 T-062 · #52 T-033 · #53 handoff · #54 T-030 · #55 T-071 · #56 T-061 · #57 T-047 · #58 T-032 · #59 T-034 · #60 T-048 · #61 T-049 · #62 T-070 · #63 T-069 · #64 T-031 · #65 T-085 · #66 T-080 · #67 T-060 · #68 T-045 · #69/#70/#76/#77 test fixes · #71 T-083 · #72 T-035 · #73 T-084 · #74 T-081 · #75 T-086 · #78 T-072 · #79 T-096 · #80 T-087a |
+| Merged PRs so far | Phase 0: #1 T-001 · #2 T-004 · #3 T-002 · #5 T-003 · #6 T-005 · #7 T-011 · #8 T-006 · #9 T-008 · #10 T-010 · #12 T-007 · #13 T-009 · #15 CI fix<br>Phase 1: #16 T-024 · #17 T-020 · #18 T-041 · #19 T-067 · #20 T-051 · #21 T-042 · #22 T-040 · #23 T-021 · #24 test fix · #25 T-020a · #26 T-063 · #27 T-022 · #28 T-025 · #29 handoff<br>Phase 1–3 (continued): #30 T-023 · #31 T-064 · #32 T-046 · #33 T-043 · #34 T-068 · #35 T-026 · #36 T-044 · #37/#39/#41/#46 test fixes · #38 T-036 · #40 T-065 · #42 T-050 · #43 T-029 · #44 T-028 · #45 T-027 · #47 T-052 · #48 T-066 · #49 T-087 · #50 T-090<br>Wave 3: #51 T-062 · #52 T-033 · #53 handoff · #54 T-030 · #55 T-071 · #56 T-061 · #57 T-047 · #58 T-032 · #59 T-034 · #60 T-048 · #61 T-049 · #62 T-070 · #63 T-069 · #64 T-031 · #65 T-085 · #66 T-080 · #67 T-060 · #68 T-045 · #69/#70/#76/#77 test fixes · #71 T-083 · #72 T-035 · #73 T-084 · #74 T-081 · #75 T-086 · #78 T-072 · #79 T-096 · #80 T-087a · #81 T-091 |
 
 **Verified on `feature/mvp`** (Node 24.21.0, pnpm 12.11.2, JDK 21, Postgres 17): `pnpm install --frozen-lockfile`, `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build`, `pnpm generate` (no diff), the tokens / icons / i18n `--check` modes, `node scripts/tasks.mjs check --local`, the Playwright e2e suite, and in `apps/android` `./gradlew ktlintCheck detekt lint testDevDebugUnitTest assembleDevDebug :detekt-rules:test`. CI runs the same on every PR.
 
@@ -34,8 +34,8 @@ Read this first, then `CLAUDE.md` and `tasks/README.md`.
 | Status | Tasks |
 |---|---|
 | **Done (Phase 0)** | T-001 … T-011 |
-| **Done (Phases 1–5)** | T-020 … T-036 (data, core, auth, sign-up, shell, settings, plans, team, customers, connections, audit, seed) · T-040 … T-052 (billing calc/run/UI, allocation, netting, jobs, adjustments, payments, statements, receipt links, mobile contract, invariants) · T-060 … T-072 (mobile API, handover, the whole Android app incl. durability tests) · T-080 … T-087a (registers, reports, home, import, Razorpay + read-only mode, admin console, public pages, payload) · T-090 · T-096 |
-| **In flight** | T-045a Owner back-dated new connection · T-082 CSV exports · T-086b admin TOTP per session · T-088 e2e journeys · T-091 migration mapping (PR #81, waiting for CI) |
+| **Done (Phases 1–5)** | T-020 … T-036 (data, core, auth, sign-up, shell, settings, plans, team, customers, connections, audit, seed) · T-040 … T-052 (billing calc/run/UI, allocation, netting, jobs, adjustments, payments, statements, receipt links, mobile contract, invariants) · T-060 … T-072 (mobile API, handover, the whole Android app incl. durability tests) · T-080 … T-087a (registers, reports, home, import, Razorpay + read-only mode, admin console, public pages, payload) · T-090 · T-091 (draft; column names wait for the dump) · T-096 |
+| **In flight** | T-045a Owner back-dated new connection · T-082 CSV exports · T-086b admin TOTP per session · T-088 e2e journeys |
 | **Ready for an agent** | T-086a sync metrics · T-086c platform-read allow-list audit · T-087b language switch label/font · T-095 load testing (run it on a quiet machine or CI, not a shared container) · T-096a health DB ping + cron check-ins |
 | **Waiting on a product decision** | T-031a apply a plan's new rent to existing connections · T-062a what "flag an unsubmitted handover" should do (see §8) |
 | **Waiting on people** | T-073 (needs H-01 Play Console) · T-092 / T-093 / T-094 migration (need the legacy dump, H-06) |
@@ -127,7 +127,7 @@ Follow `node scripts/tasks.mjs next`. What is left for agents is small; the big 
 
 | Do | Why |
 |---|---|
-| Merge the in-flight PRs (T-045a, T-082, T-086b, T-088, T-091) | T-045a and T-086b are `review: required`: review the diff yourself or with a reviewer agent before merging (T-086's review found a real append-only gap). |
+| Merge the in-flight PRs (T-045a, T-082, T-086b, T-088) | T-045a and T-086b are `review: required`: review the diff yourself or with a reviewer agent before merging (T-086's review found a real append-only gap). |
 | T-086c, T-096a, T-087b, T-086a | Small hardening follow-ups from the reviews. |
 | Get answers to §8 | Unblocks T-031a and T-062a, and several defaults already built in. |
 | H-01, then T-073, then T-095 on real infrastructure | Production builds, Play upload, backups, alerts and a meaningful load test all need the accounts. |
