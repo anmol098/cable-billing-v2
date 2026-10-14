@@ -7,7 +7,7 @@
  * decides the state: the server verifies Razorpay's signature and reads Razorpay's API.
  */
 import { type BusinessDate, type DisplayLocale, formatBusinessDate } from "@cb/domain";
-import { Button } from "@cb/ui";
+import { Button, useToast } from "@cb/ui";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
@@ -85,6 +85,14 @@ export function PayButton({
   const router = useRouter();
   const [busy, setBusy] = useState<"opening" | "checking" | null>(null);
   const [message, setMessage] = useState<Message>(null);
+  const { toast } = useToast();
+  /** Success goes to a toast: it outlives this button (the page hides it once autopay is on). */
+  const show = (next: Message) => {
+    if (next?.tone === "success") {
+      toast({ variant: "success", title: next.text });
+      setMessage(null);
+    } else setMessage(next);
+  };
   const day = (date: string | null) =>
     date ? formatBusinessDate(date as BusinessDate, locale) : "";
 
@@ -110,12 +118,9 @@ export function PayButton({
       });
       if (result.kind === "error") setMessage(failure(result.reason));
       else if (result.kind === "paid") {
-        setMessage({ tone: "success", text: t("result.paid", { date: day(result.paidTill) }) });
+        show({ tone: "success", text: t("result.paid", { date: day(result.paidTill) }) });
       } else if (result.kind === "autopay_set") {
-        setMessage({
-          tone: "success",
-          text: t("autopay.on_first", { date: day(result.firstChargeOn) }),
-        });
+        show({ tone: "success", text: t("autopay.on_first", { date: day(result.firstChargeOn) }) });
       } else setMessage({ tone: "pending", text: t("result.waiting") });
       router.refresh();
     } catch {
@@ -136,7 +141,7 @@ export function PayButton({
         return;
       }
       if (started.kind === "autopay_on") {
-        setMessage({ tone: "success", text: t("result.autopay_on") });
+        show({ tone: "success", text: t("result.autopay_on") });
         setBusy(null);
         router.refresh();
         return;

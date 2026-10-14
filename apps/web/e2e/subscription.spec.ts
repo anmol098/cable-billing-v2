@@ -44,7 +44,9 @@ const hmac = (text: string, secret: string) =>
 test.describe("app subscription", () => {
   test.skip(!DATABASE_URL || !MOCK, "needs DATABASE_URL and the Razorpay mock (playwright.config)");
 
-  const run = randomBytes(4).toString("hex");
+  // New names on every beforeAll: Playwright re-runs it when a worker comes back to this file
+  // after running another file's tests, so a describe-level value would seed the same logins twice.
+  let run = "";
   const login = (who: string) => `e2e-sub-${who}-${run}`;
   let db: DbClient;
   const tenants: Record<string, string> = {};
@@ -91,6 +93,7 @@ test.describe("app subscription", () => {
   }
 
   test.beforeAll(async () => {
+    run = randomBytes(4).toString("hex");
     db = createDb({ connectionString: DATABASE_URL ?? "", max: 2 });
     await seedTenant("paying", "read_only", ["owner", "staff"]);
     await seedTenant("phone", "read_only", ["owner"]);
@@ -163,7 +166,7 @@ test.describe("app subscription", () => {
     await page.goto("/settings/subscription");
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("App subscription");
     await expect(page.getByText("You can look and collect money. Pay to make bills")).toBeVisible();
-    await expect(page.getByText("₹472 a month")).toBeVisible();
+    await expect(page.getByText("₹472 a month", { exact: true })).toBeVisible();
     await expect(page.getByText("₹400 + ₹72 GST (18%)")).toBeVisible();
 
     const subscriptionId = await openCheckout(page);
@@ -186,7 +189,7 @@ test.describe("app subscription", () => {
     expect((await statusOf("paying"))?.status).toBe("read_only");
 
     await payAndConfirm(page, subscriptionId);
-    await expect(page.getByText(/Thank you\. Paid till/)).toBeVisible();
+    await expect(page.getByText(/Thank you\. Paid till/).first()).toBeVisible();
     expect((await statusOf("paying"))?.status).toBe("active");
     await page.reload();
     await expect(page.locator("[data-subscription-status]")).toHaveAttribute(
@@ -212,7 +215,7 @@ test.describe("app subscription", () => {
     expect(overflow).toBeLessThanOrEqual(0);
     const subscriptionId = await openCheckout(page);
     await payAndConfirm(page, subscriptionId);
-    await expect(page.getByText(/Thank you\. Paid till/)).toBeVisible();
+    await expect(page.getByText(/Thank you\. Paid till/).first()).toBeVisible();
     expect((await statusOf("phone"))?.status).toBe("active");
   });
 

@@ -231,9 +231,16 @@ account. Use a shared company email (not a personal one) as the owner where you 
    - Subscriptions → **Plans → Create plan**: monthly, every 1 month, amount **₹472** (₹400 + 18% GST,
      D-22), name "Cable Billing monthly". Copy `plan_…` → `RAZORPAY_PLAN_ID`.
    - Account & Settings → **Webhooks → Add**: URL `<staging APP_BASE_URL>/api/webhooks/razorpay`, secret =
-     a value from `openssl rand -hex 32` → `RAZORPAY_WEBHOOK_SECRET`; events `subscription.activated`,
-     `subscription.charged`, `subscription.pending`, `subscription.halted`, `subscription.cancelled`,
-     `payment.failed` (PLAN §13). Previews have changing URLs, so webhooks go to staging only.
+     a value from `openssl rand -hex 32` → `RAZORPAY_WEBHOOK_SECRET`; events `subscription.authenticated`,
+     `subscription.activated`, `subscription.charged`, `subscription.pending`, `subscription.halted`,
+     `subscription.cancelled`, `subscription.completed`, `payment.failed` (PLAN §13, T-085). Previews have
+     changing URLs, so webhooks go to staging only.
+   - Check (T-085): sign in to staging as an Owner → Settings → App subscription shows "Pay ₹472 a
+     month"; pay with Razorpay's test UPI id `success@razorpay` (or a test card). Razorpay → Webhooks →
+     the delivery log shows 200 for each event, and the page then says "Paid till …". A 401 there means
+     the webhook secret in Razorpay and `RAZORPAY_WEBHOOK_SECRET` differ. If the button says "Online
+     payment is not set up right", the plan's amount/period is not ₹472 every 1 month (checkout refuses
+     to start; the log line is `subscription.plan_mismatch`).
 4. In **Live mode** (after activation), repeat: live keys (`rzp_live_…`), a live plan (new `plan_…` id),
    a live webhook to `<production APP_BASE_URL>/api/webhooks/razorpay` with its own secret. These four go
    to Production only.
@@ -491,6 +498,10 @@ by `@cb/core`; failed jobs email the active platform admins and the tenant's own
 `invariants` queues the `invariants.check` job (T-052): a breach in any tenant's books fails that job
 with `last_error = permanent: invariant_breach` (so the admins get the job-failure email); the tenants and
 rows are in the `invariant_checks` table and the `invariants.breach` log lines (ids and counts only).
+`subscription-states` (T-085) moves subscriptions by date (trialing → grace → read_only; active → grace
+or cancelled), asks Razorpay about tenants near their renewal or not yet active (a missed webhook), and
+emails the Owner the reminders that are due (trial T-7 / T-1, grace start, grace T-7 / T-1) once each.
+Without Razorpay keys it still applies the dates (logged `subscription_states.razorpay_not_configured`).
 
 **Auth:** when `CRON_SECRET` is set in the project, Vercel sends `Authorization: Bearer <CRON_SECRET>` with
 every cron call. Each cron route must compare it (constant-time) with `CRON_SECRET` and return 401 when

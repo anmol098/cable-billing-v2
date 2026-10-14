@@ -4,6 +4,7 @@
  * errors; autopay already on), and the shell's trial-ending banner.
  */
 import { MONTHLY_PLAN, type SubscriptionView, subscriptionViewOf } from "@cb/core";
+import { ToastProvider } from "@cb/ui";
 import { act, fireEvent, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { bannerFor, SubscriptionBanner } from "@/components/shell/subscription-banner";
@@ -48,14 +49,16 @@ const neverConfirm = vi.fn(async (): Promise<ConfirmCheckoutState> => ({ kind: "
 function page(v: SubscriptionView, options: { locale?: "en" | "hi"; ready?: boolean } = {}) {
   const locale = options.locale ?? "en";
   return renderWithIntl(
-    <SubscriptionPage
-      title="App subscription"
-      view={v}
-      locale={locale}
-      paymentReady={options.ready ?? true}
-      start={neverStart}
-      confirm={neverConfirm}
-    />,
+    <ToastProvider closeLabel="Close" label="Notifications">
+      <SubscriptionPage
+        title="App subscription"
+        view={v}
+        locale={locale}
+        paymentReady={options.ready ?? true}
+        start={neverStart}
+        confirm={neverConfirm}
+      />
+    </ToastProvider>,
     locale,
   );
 }
@@ -183,7 +186,11 @@ describe("Pay button (Razorpay Checkout, faked)", () => {
     start: () => Promise<StartCheckoutState>,
     confirm: (r: unknown) => Promise<ConfirmCheckoutState>,
   ) {
-    renderWithIntl(<PayButton totalText="₹472" locale="en" start={start} confirm={confirm} />);
+    renderWithIntl(
+      <ToastProvider closeLabel="Close" label="Notifications">
+        <PayButton totalText="₹472" locale="en" start={start} confirm={confirm} />
+      </ToastProvider>,
+    );
     return screen.getByRole("button", { name: "Pay ₹472 a month" });
   }
 
