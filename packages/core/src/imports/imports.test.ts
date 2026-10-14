@@ -7,12 +7,19 @@
 import { areas, assignmentEvents, auditEvents, customers, vcAssets, vcAssignments } from "@cb/db";
 import { describeDb, useTestDatabase } from "@cb/db/testing";
 import { err } from "@cb/domain";
-import { and, asc, eq } from "drizzle-orm";
+import { and, asc, eq, sql } from "drizzle-orm";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { createAuditRecorder } from "../audit/audit";
 import { connectionHooks } from "../connections/hooks";
-import { addConnection } from "../connections/services";
+import { AddConnectionInput } from "../connections/inputs";
+import { addConnection, addConnectionInTx } from "../connections/services";
 import { addPlan, type ConnectionSetup, ist, setupTenant } from "../connections/test-support";
-import { createCustomer, updateCustomer } from "../customers/customers";
+import {
+  CreateCustomerInput,
+  createCustomer,
+  createCustomerInTx,
+  updateCustomer,
+} from "../customers/customers";
 import { serviceError } from "../errors/errors";
 import { changedTables, databaseFingerprint } from "../testing/fingerprint";
 import { setSubscriptionStatus } from "../testing/fixtures";
@@ -64,6 +71,24 @@ describeDb("customer import services", () => {
     const result = await promise;
     if (!result.ok) throw new Error(`expected ok, got ${JSON.stringify(result.error)}`);
     return result.value;
+  }
+
+  /**
+   * Waits until some transaction is queued for a lock: on the table `on`, or (`"row"`) on another
+   * transaction's uncommitted row.
+   */
+  async function waitUntilWaiting(on: string) {
+    for (let attempt = 0; attempt < 1000; attempt++) {
+      const { rows } = await t.current.admin.query<{ n: number }>(
+        `SELECT count(*)::int AS n FROM pg_locks l LEFT JOIN pg_class c ON c.oid = l.relation
+          WHERE NOT l.granted
+            AND (CASE WHEN $1 = 'row' THEN l.locktype = 'transactionid' ELSE c.relname = $1 END)`,
+        [on],
+      );
+      if ((rows[0]?.n ?? 0) > 0) return;
+      await new Promise((resolve) => setTimeout(resolve, 10));
+    }
+    throw new Error(`nobody waited on ${on}`);
   }
 
   const customerRows = (s: ConnectionSetup) =>
@@ -351,6 +376,70 @@ describeDb("customer import services", () => {
     expect(a.counts.customers.exists + b.counts.customers.exists).toBe(2);
     expect((await customerRows(s)).map((r) => r.customerCode)).toEqual(["101", "102"]);
   }, 60_000);
+
+  // The two moments the other import of the same file can commit, made exact: this import
+  // waits on a lock the other import's transaction holds, until that one has saved customer 101
+  // (with its first box) and committed. READ COMMITTED: each lookup sees what was committed when
+  // it started.
+  // - While this one checks the file (it waits on a table it reads): an earlier lookup missed
+  //   customer 101, a later one may see it. Its VC was "in use (by 101)" here once (a rare
+  //   failure of the test above); the codes are now looked up last, so 101 is found.
+  // - While this one saves (it waits on the other's not yet committed customer 101): the
+  //   customer code is taken, so 101 is skipped.
+  it.each([
+    { waitsOn: "areas", lock: true },
+    { waitsOn: "plans", lock: true },
+    { waitsOn: "vc_assets", lock: true },
+    { waitsOn: "row", lock: false },
+  ])(
+    "a customer the other import adds meanwhile is already added (this one waits on $waitsOn)",
+    async ({ waitsOn, lock }) => {
+      const { s } = await setup();
+      let applying: ReturnType<typeof apply> | undefined;
+      await s.tx(async (tx) => {
+        if (lock) {
+          await tx.execute(sql.raw(`LOCK TABLE ${waitsOn} IN ACCESS EXCLUSIVE MODE`));
+          applying = apply(s, GOOD);
+          await waitUntilWaiting(waitsOn);
+        }
+        const audit = createAuditRecorder(tx, s.owner, "customers.create");
+        const customer = await createCustomerInTx(
+          tx,
+          s.owner,
+          CreateCustomerInput.parse({ customerCode: "101", name: "Ramesh Kumar" }),
+          NOW,
+          audit,
+        );
+        if (!customer.ok) throw new Error(JSON.stringify(customer.error));
+        const connection = await addConnectionInTx(
+          tx,
+          { ctx: s.owner, now: NOW, audit, log: s.rt(NOW).logger },
+          AddConnectionInput.parse({
+            customerId: customer.value.customer.id,
+            vcNumber: "0001-2345",
+            rentalPaise: 30_000,
+            startDate: "2026-10-01",
+          }),
+        );
+        if (!connection.ok) throw new Error(JSON.stringify(connection.error));
+        if (!lock) {
+          applying = apply(s, GOOD);
+          await waitUntilWaiting(waitsOn);
+        }
+      });
+      if (!applying) throw new Error("import not started");
+      const result = await ok(applying);
+      const lines = byLine(result);
+      expect([2, 3, 4].map((n) => [lines.get(n)?.status, lines.get(n)?.problems])).toEqual([
+        ["exists", []],
+        ["exists", []],
+        ["created", []],
+      ]);
+      expect(result.counts.customers).toEqual({ ready: 0, created: 1, exists: 1, problem: 0 });
+      expect((await customerRows(s)).map((r) => r.customerCode)).toEqual(["101", "102"]);
+    },
+    30_000,
+  );
 
   it("matches names only inside the tenant (areas, plans, codes, VCs of another business)", async () => {
     const { s } = await setup();

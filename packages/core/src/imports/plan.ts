@@ -301,12 +301,17 @@ export async function planImport(
 
   const codeKeys = groups.map((group) => group.codeKey).filter((key) => key !== "");
   const vcKeys = [...new Set([...drafts.values()].flat().map((draft) => draft.vcKey))];
-  const [existing, areaMap, planMap, vcMap] = [
-    await existingCustomers(tx, operatorId, codeKeys),
-    await areasByName(tx, operatorId),
-    await plansByName(tx, operatorId),
-    await vcsByNumber(tx, operatorId, vcKeys),
-  ];
+  // The customer codes are looked up LAST. Each lookup is its own statement, and in READ
+  // COMMITTED each statement sees what was committed when it started, so an import of the same
+  // file that commits between two lookups is seen by the later ones only. Looked up first, the
+  // codes could miss a customer whose VC a later lookup then found in use (by that same
+  // customer): the line became a "VC in use" problem instead of "already added". Looked up last,
+  // they see everything the earlier lookups saw (a later statement's snapshot includes every
+  // commit an earlier one included), so such a customer is always found and skipped.
+  const vcMap = await vcsByNumber(tx, operatorId, vcKeys);
+  const areaMap = await areasByName(tx, operatorId);
+  const planMap = await plansByName(tx, operatorId);
+  const existing = await existingCustomers(tx, operatorId, codeKeys);
 
   const result: CustomerPlan[] = [];
   for (const group of groups) {
