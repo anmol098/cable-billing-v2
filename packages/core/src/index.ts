@@ -116,6 +116,8 @@ export * from "./payments";
 export * from "./plans";
 export * from "./receipts/actions";
 export * from "./receipts/links";
+export * from "./reports/dues";
+export * from "./reports/registers";
 export * from "./statements";
 export * from "./subscriptions";
 export * from "./team";

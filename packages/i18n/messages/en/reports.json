@@ -1,0 +1,110 @@
+{
+  "as_of": {
+    "now": "Numbers as of {when}",
+    "end_of_day": "Numbers as of the end of {date}",
+    "help": "Payments and bills that reach the office after this time are not in these numbers."
+  },
+  "total": "Total",
+  "totals_label": "Totals",
+  "show": "Show",
+  "all_areas": "All areas",
+  "area": "Area",
+  "no_area": "No area",
+  "customers": "{count, plural, =0 {No customers} one {# customer} other {# customers}}",
+  "page": "Page {page}",
+  "pages": "Pages",
+  "previous": "Previous",
+  "next": "Next",
+  "dues": {
+    "description": "Who owes money, how much, and since when.",
+    "filters": "Choose customers",
+    "date": "Day",
+    "date_help": "Leave today to see the numbers now. Pick an older day to see them as they were at the end of that day.",
+    "kind_label": "Show",
+    "kind": {
+      "due": "Customers who owe",
+      "advance": "Customers with credit"
+    },
+    "bucket_label": "How old",
+    "bucket_all": "Any age",
+    "bucket": {
+      "d0_30": "0–30 days",
+      "d31_60": "31–60 days",
+      "d61_90": "61–90 days",
+      "d90_plus": "Over 90 days"
+    },
+    "total_due": "Total due",
+    "credit": "Credit",
+    "net": "Due minus credit",
+    "net_help": "This is what all customers owe together. It matches the customers' accounts.",
+    "ageing_title": "How old is the due",
+    "ageing_help": "A bill's due counts from the 1st of its month. Credit pays the oldest bills first.",
+    "see_customers": "See these customers",
+    "by_area_title": "Due by area",
+    "area_due": "{amount} due · {customers}",
+    "area_credit": "{amount} credit",
+    "list_due": "Customers who owe",
+    "list_advance": "Customers with credit",
+    "col": {
+      "customer": "Customer",
+      "due": "Due",
+      "since": "Unpaid since",
+      "age": "How old",
+      "credit": "Credit",
+      "area": "Area",
+      "due_in": "Due: {age}"
+    },
+    "not_on_bill": "Not on a bill yet",
+    "closed": "Closed",
+    "empty_due": "Nobody owes money here.",
+    "empty_advance": "No customer has credit here.",
+    "of_total": "of {amount} due"
+  },
+  "bills": {
+    "description": "Bills of the months you choose, how much is paid and how much is still due.",
+    "filters": "Choose bills",
+    "from": "From month",
+    "to": "To month",
+    "pay_state": "Paid?",
+    "all_pay_states": "All bills",
+    "bad_range": "Choose up to 12 months, “From” before “To”. Showing this month.",
+    "count": "{count, plural, =0 {No bills} one {# bill} other {# bills}}",
+    "billed": "Billed",
+    "paid": "Paid",
+    "due": "Still due",
+    "caption": "Bills",
+    "col": {
+      "customer": "Customer",
+      "month": "Month",
+      "amount": "Bill amount",
+      "paid": "Paid",
+      "status": "Paid?"
+    },
+    "bill_no": "Bill {number}",
+    "old_due_bill": "Old due",
+    "empty": "No bills in these months."
+  },
+  "payments": {
+    "description": "Every payment: who took it, cash or UPI, and when it reached the office.",
+    "filters": "Choose payments",
+    "bad_dates": "The “To” day is before the “From” day. Showing this month.",
+    "count": "{count, plural, =0 {No payments} one {# payment} other {# payments}}",
+    "cash": "Cash",
+    "upi": "UPI",
+    "cash_and_upi": "Cash + UPI",
+    "cancelled_count": "{count, plural, =0 {None cancelled} one {# cancelled, not counted} other {# cancelled, not counted}}",
+    "to_check_count": "{count, plural, =0 {Nothing to check} one {# to check} other {# to check}}",
+    "caption": "Payments",
+    "col": {
+      "customer": "Customer",
+      "amount": "Amount",
+      "taken_by": "Taken by",
+      "when": "When",
+      "status": "Status"
+    },
+    "taken_at": "Money taken {when}",
+    "reached_at": "Reached the office {when}",
+    "nobody": "Not known",
+    "empty": "No payments on these days."
+  }
+}

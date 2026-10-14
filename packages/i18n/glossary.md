@@ -393,6 +393,17 @@ that it opened another app (RULE-19). `HonestReceiptWordsTest` checks every `mob
 | Paid till 13 Dec | 13 दिस तक का पेमेंट हो गया | The last day this month's fee covers (IST) | — | Valid until, Expiry |
 | Payment was not finished | पेमेंट पूरा नहीं हुआ | Checkout was closed before paying (never "failed") | clock, `semantic.pending` | Payment failed, Declined |
 
+## Report words (web Reports pages)
+
+| English | हिंदी | Means | Icon / colour | Not this |
+|---|---|---|---|---|
+| Numbers as of {time} / as of the end of {day} | {time} तक के आँकड़े / {day} का दिन खत्म होने तक के आँकड़े | The moment a report's numbers are from; later payments and bills are not in them | calendar | Snapshot, Report date, Generated at |
+| Due list | बाकी की लिस्ट | Who owes money, how much and since when | chart-column | Outstanding report, Receivables, Ageing report |
+| How old (0–30 days / 31–60 days / 61–90 days / Over 90 days) | कितना पुराना (0–30 दिन / … / 90 दिन से ज़्यादा) | Days since the 1st of the bill's month; credit pays the oldest bills first | clock (amber) up to 60 days, alert-triangle (red) after | Ageing bucket, Overdue, DPD |
+| Due minus credit | बाकी में से एडवांस घटाकर | What all customers owe together (= their accounts) | `semantic.due` / `semantic.credit` | Net receivable, Ledger balance |
+| Customers with credit | जिनका एडवांस है | Customers who paid more than their bills | `semantic.credit` | Advance customers, Negative balance |
+| Total (totals row) | कुल | The sum of every row that matches the filters, not only this page | — | Grand total, Subtotal |
+
 ## Words we never show users
 
 Invoice, Ledger, Allocation, Adjustment, Reversal, Tenant, Sync / Synced / Pending sync,
