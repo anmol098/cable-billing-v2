@@ -9,7 +9,6 @@
  *
  * Needs `DATABASE_URL` (migrated) and `BETTER_AUTH_SECRET`, like `shell.spec.ts`.
  */
-import { randomBytes } from "node:crypto";
 import {
   billingRunJob,
   createJobRegistry,
@@ -39,6 +38,7 @@ import {
 } from "@cb/db";
 import { periodLabel, periodOfInstant } from "@cb/domain";
 import { expect, type Page, test } from "@playwright/test";
+import { newSeedId } from "./_support/unique";
 
 const DATABASE_URL = process.env.DATABASE_URL;
 const PASSWORD = "e2e statement password 4321";
@@ -47,13 +47,14 @@ test.describe("customer bills and history", () => {
   test.describe.configure({ mode: "serial" });
   test.skip(!DATABASE_URL, "needs DATABASE_URL (a migrated database) and BETTER_AUTH_SECRET");
 
-  const run = randomBytes(4).toString("hex");
-  const ownerLogin = `e2e-stmt-owner-${run}`;
-  const staffLogin = `e2e-stmt-staff-${run}`;
+  // Made fresh in every beforeAll (see _support/unique.ts), so a second seed never collides.
+  let run = "";
+  let ownerLogin = "";
+  let staffLogin = "";
   const period = periodOfInstant(new Date());
   const month = periodLabel(period, "en", "long");
-  const customerId = uuidv7();
-  const otherCustomerId = uuidv7();
+  let customerId = "";
+  let otherCustomerId = "";
   let db: DbClient;
   let operatorId: string;
 
@@ -93,6 +94,11 @@ test.describe("customer bills and history", () => {
 
   test.beforeAll(async () => {
     test.setTimeout(120_000);
+    run = newSeedId();
+    ownerLogin = `e2e-stmt-owner-${run}`;
+    staffLogin = `e2e-stmt-staff-${run}`;
+    customerId = uuidv7();
+    otherCustomerId = uuidv7();
     db = createDb({ connectionString: DATABASE_URL ?? "", max: 2 });
     operatorId = uuidv7();
     const people = await seedOperator(operatorId, "Statement Cable", [

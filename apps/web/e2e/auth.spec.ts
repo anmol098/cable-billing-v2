@@ -18,6 +18,7 @@ import {
   verifications,
 } from "@cb/db";
 import { expect, type Page, test } from "@playwright/test";
+import { newSeedId } from "./_support/unique";
 
 const DATABASE_URL = process.env.DATABASE_URL;
 const PASSWORD = "e2e password 4321";
@@ -26,13 +27,15 @@ const RATE_LIMIT_ATTEMPTS = 10; // AUTH_RATE_LIMITS.signInPerAccount.limit
 test.describe("sign-in", () => {
   test.skip(!DATABASE_URL, "needs DATABASE_URL (a migrated database) and BETTER_AUTH_SECRET");
 
-  const run = randomBytes(4).toString("hex");
+  // Made fresh in every beforeAll (see _support/unique.ts), so a second seed never collides.
+  let run = "";
   const login = (who: string) => `e2e-${who}-${run}`;
   const email = (who: string) => `e2e-${who}-${run}@cable.test`;
   const ids: Record<string, string> = {};
   let db: DbClient;
 
   test.beforeAll(async () => {
+    run = newSeedId();
     db = createDb({ connectionString: DATABASE_URL ?? "", max: 2 });
     const operatorId = uuidv7();
     const hash = await hashPassword(PASSWORD);
@@ -170,6 +173,9 @@ test.describe("sign-in", () => {
     for (let i = 0; i < RATE_LIMIT_ATTEMPTS; i += 1) {
       await signIn(page, "limited", `wrong ${i}`);
       await expect(formAlert(page)).toHaveText("Wrong user name or password.");
+      // Every answer shows the same words, so also wait for the form's reset (it clears the
+      // password) before typing the next try; typing earlier gets wiped by that reset.
+      await expect(page.getByLabel("Password", { exact: true })).toHaveValue("");
     }
     await signIn(page, "limited", PASSWORD);
     await expect(formAlert(page)).toContainText("Too many tries");
