@@ -14,13 +14,16 @@
  * `cronRoute` checks `Authorization: Bearer <CRON_SECRET>` (503 when the secret is unset, 401 on a
  * wrong header), creates the database client on first use, logs `cron.started` / `cron.finished`
  * (JSON lines, also added as Sentry breadcrumbs), and on an exception logs `cron.failed`, sends it
- * to Sentry and answers 500. Nothing here reads the environment at import time.
+ * to Sentry and answers 500. Crons listed in `CRON_MONITORS` (`./monitor`) also check in with a
+ * Sentry cron monitor when `SENTRY_DSN` is set (T-096a). Nothing here reads the environment at
+ * import time.
  */
 import { createLogger, errorLogFields, jsonLineSink, type Logger, requestIdFrom } from "@cb/core";
 import { createDb, type DbClient } from "@cb/db";
 import * as Sentry from "@sentry/nextjs";
 import { requireServerEnv, serverEnv } from "@/env";
 import { checkCronAuthorization, cronAuthResponse } from "./auth";
+import { type CheckInSink, defaultCheckIns, startCronMonitor } from "./monitor";
 
 /** JSON-line logs that also become Sentry breadcrumbs (records are PII-free by construction). */
 export function createCronLogger(): Logger {
@@ -57,13 +60,29 @@ export interface CronRunArgs {
 
 export type CronResult = Record<string, unknown> | Response;
 
-/** `name`: snake_case, used in logs and Sentry tags. */
+export interface CronRouteOptions {
+  /** Default: `CRON_SECRET`. */
+  readonly secret?: () => string | undefined;
+  /**
+   * Where Sentry cron check-ins go (T-096a). Default: Sentry when `SENTRY_DSN` is set, else none.
+   * Only crons listed in `CRON_MONITORS` (`./monitor`) check in.
+   */
+  readonly checkIns?: () => CheckInSink | undefined;
+}
+
+/**
+ * `name`: snake_case, used in logs and Sentry tags, and the key of its cron monitor in
+ * `CRON_MONITORS`. A monitored cron checks in `in_progress` after the secret check (an
+ * unauthenticated call never checks in), then `ok` for a 2xx answer, `error` for anything else
+ * (an exception's 500, a stub's 501).
+ */
 export function cronRoute(
   name: string,
   run: (args: CronRunArgs) => Promise<CronResult>,
-  options: { readonly secret?: () => string | undefined } = {},
+  options: CronRouteOptions = {},
 ): (request: Request) => Promise<Response> {
   const secret = options.secret ?? (() => serverEnv.CRON_SECRET);
+  const checkIns = options.checkIns ?? defaultCheckIns;
   return async (request) => {
     const auth = checkCronAuthorization(request.headers.get("authorization"), secret());
     const requestId = requestIdFrom(request.headers.get("x-vercel-id"));
@@ -75,20 +94,29 @@ export function cronRoute(
     }
     const started = Date.now();
     log.info("cron.started", {});
+    const monitor = startCronMonitor(name, checkIns(), log);
+    let response: Response;
+    let failed = false;
     try {
       const result = await run({ request, requestId, log, db: cronDb });
       log.info("cron.finished", { duration_ms: Date.now() - started });
-      if (result instanceof Response) return result;
-      return Response.json(result, { headers: { "Cache-Control": "no-store" } });
+      response =
+        result instanceof Response
+          ? result
+          : Response.json(result, { headers: { "Cache-Control": "no-store" } });
     } catch (error) {
+      failed = true;
       log.error("cron.failed", { duration_ms: Date.now() - started, ...errorLogFields(error) });
       Sentry.captureException(error, { tags: { cron: name }, extra: { request_id: requestId } });
-      await Sentry.flush(2_000);
-      return Response.json(
+      response = Response.json(
         { error: "INTERNAL", requestId },
         { status: 500, headers: { "Cache-Control": "no-store" } },
       );
     }
+    // Flushes the exception too when monitored; otherwise flush it here as before.
+    await monitor.finish(response.ok ? "ok" : "error");
+    if (failed && !monitor.monitored) await Sentry.flush(2_000);
+    return response;
   };
 }
 

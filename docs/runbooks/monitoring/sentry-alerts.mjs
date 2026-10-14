@@ -7,6 +7,11 @@
  *   node docs/runbooks/monitoring/sentry-alerts.mjs --apply    # create or update, by name / slug
  *   node docs/runbooks/monitoring/sentry-alerts.mjs --cron-url # print the backup check-in URL
  *
+ * Cron monitors: `nightly-backup` checks in from backup.yml through its URL (--cron-url); the
+ * `cron-*` monitors are the Vercel crons, which check in through the server SDK when SENTRY_DSN is
+ * set (apps/web/src/app/api/cron/_lib/monitor.ts, T-096a). Their check-ins carry only the slug, so
+ * the monitors must exist: run --apply before (or right after) the first production deploy.
+ *
  * --apply needs SENTRY_AUTH_TOKEN (org token or a user token with alerts:write, project:read,
  * org:read), SENTRY_ORG, and optionally SENTRY_PROJECT (default from alerts.json) and SENTRY_API
  * (default https://sentry.io; EU orgs: https://de.sentry.io). --cron-url needs SENTRY_DSN.
@@ -105,7 +110,9 @@ export function cronMonitorPayload(monitor, project) {
       timezone: "UTC",
       checkin_margin: monitor.checkinMarginMinutes,
       max_runtime: monitor.maxRuntimeMinutes,
-      failure_issue_threshold: 1,
+      // Consecutive missed/failed check-ins before Sentry opens an issue (job-worker: 3, a blip of
+      // one 2-minute run is not worth waking anyone).
+      failure_issue_threshold: monitor.failureIssueThreshold ?? 1,
       recovery_threshold: 1,
     },
   };
@@ -187,7 +194,8 @@ async function main(argv) {
   const config = loadAlerts();
   if (argv.includes("--cron-url")) {
     if (!process.env.SENTRY_DSN) throw new Error("set SENTRY_DSN (Sentry → project → Client Keys)");
-    for (const monitor of config.cronMonitors) {
+    // Only the GitHub workflow needs a URL; the Vercel crons check in through the SDK (SENTRY_DSN).
+    for (const monitor of config.cronMonitors.filter((m) => m.workflow)) {
       console.log(`${monitor.slug}: ${cronCheckInUrl(process.env.SENTRY_DSN, monitor.slug)}`);
     }
     return;

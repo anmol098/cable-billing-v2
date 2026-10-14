@@ -1,4 +1,4 @@
-// Tests for the alerts-as-code (T-096). Run: node --test docs/runbooks/monitoring/alerts.test.mjs
+// Tests for the alerts-as-code (T-096, T-096a). Run: node --test docs/runbooks/monitoring/alerts.test.mjs
 // (CI: the "Backup self-test" job in .github/workflows/backup.yml).
 //
 // The point is drift: an alert that filters on an event or tag the code no longer emits, or links a
@@ -141,7 +141,10 @@ describe("alerts match what the code emits", () => {
 
   it("monitors the backup on the workflow's own schedule", () => {
     const workflow = readFileSync(join(repo, ".github/workflows/backup.yml"), "utf8");
-    for (const monitor of config.cronMonitors) {
+    const workflowMonitors = config.cronMonitors.filter((m) => m.workflow);
+    assert.ok(workflowMonitors.length > 0, "the nightly backup is monitored");
+    for (const monitor of workflowMonitors) {
+      assert.equal(monitor.workflow, ".github/workflows/backup.yml", monitor.slug);
       assert.ok(workflow.includes(`cron: "${monitor.schedule}"`), `${monitor.slug}: schedule in backup.yml`);
       assert.ok(
         workflow.includes(`github.event.schedule == '${monitor.schedule}'`),
@@ -149,6 +152,47 @@ describe("alerts match what the code emits", () => {
       );
       assert.ok(workflow.includes("BACKUP_SENTRY_CRON_URL"), "backup.yml checks in");
       assert.ok(monitor.maxRuntimeMinutes >= 60, "max runtime covers the job's timeout");
+    }
+  });
+
+  // T-096a: the Vercel crons check in through the SDK (apps/web/src/app/api/cron/_lib/monitor.ts).
+  const vercel = JSON.parse(readFileSync(join(repo, "apps/web/vercel.json"), "utf8"));
+  const monitorSource = readFileSync(join(repo, "apps/web/src/app/api/cron/_lib/monitor.ts"), "utf8");
+  /** `CRON_MONITORS` in monitor.ts: cronRoute name → slug. */
+  const codeMonitors = (() => {
+    const block = /export const CRON_MONITORS[^{]*\{([^}]*)\}/.exec(monitorSource);
+    assert.ok(block, "monitor.ts defines CRON_MONITORS");
+    return Object.fromEntries([...block[1].matchAll(/(\w+): "([^"]+)"/g)].map(([, name, slug]) => [name, slug]));
+  })();
+  const vercelMonitors = config.cronMonitors.filter((m) => !m.workflow);
+
+  it("monitors each Vercel cron on vercel.json's own schedule", () => {
+    assert.ok(vercelMonitors.length > 0, "the Vercel crons are monitored");
+    for (const monitor of vercelMonitors) {
+      assert.equal(monitor.id, monitor.slug, `${monitor.slug}: id is the slug`);
+      const cron = vercel.crons.find((c) => c.path === monitor.path);
+      assert.ok(cron, `${monitor.slug}: ${monitor.path} is a cron in vercel.json`);
+      assert.equal(monitor.schedule, cron.schedule, `${monitor.slug}: schedule equals vercel.json's`);
+      assert.ok(monitor.checkinMarginMinutes >= 1, `${monitor.slug}: Sentry's minimum margin is 1 minute`);
+      assert.ok(Number.isInteger(monitor.failureIssueThreshold) && monitor.failureIssueThreshold >= 1);
+    }
+  });
+
+  it("monitors exactly the crons that check in, under the same slug", () => {
+    const configured = Object.fromEntries(vercelMonitors.map((m) => [m.cron, m.slug]));
+    assert.deepEqual(configured, codeMonitors);
+  });
+
+  it("names a route that is that cron, with a max runtime above its maxDuration", () => {
+    for (const monitor of vercelMonitors) {
+      const route = readFileSync(join(repo, "apps/web/src/app", monitor.path, "route.ts"), "utf8");
+      assert.ok(route.includes(`cronRoute("${monitor.cron}"`), `${monitor.path} is cronRoute("${monitor.cron}")`);
+      const maxDuration = Number(/export const maxDuration = (\d+)/.exec(route)?.[1]);
+      assert.ok(maxDuration > 0, `${monitor.path}: maxDuration`);
+      assert.ok(
+        monitor.maxRuntimeMinutes * 60 > maxDuration,
+        `${monitor.slug}: max runtime (${monitor.maxRuntimeMinutes} min) is above maxDuration (${maxDuration} s)`,
+      );
     }
   });
 });
@@ -213,6 +257,22 @@ describe("Sentry payloads", () => {
       failure_issue_threshold: 1,
       recovery_threshold: 1,
     });
+    const worker = config.cronMonitors.find((m) => m.slug === "cron-job-worker");
+    assert.deepEqual(cronMonitorPayload(worker, "cable-billing-web"), {
+      project: "cable-billing-web",
+      name: "[P1] Job worker cron stopped or failing",
+      slug: "cron-job-worker",
+      type: "cron_job",
+      config: {
+        schedule_type: "crontab",
+        schedule: "*/2 * * * *",
+        timezone: "UTC",
+        checkin_margin: 2,
+        max_runtime: 6,
+        failure_issue_threshold: 3,
+        recovery_threshold: 1,
+      },
+    });
   });
 
   it("derives the check-in URL from a DSN", () => {
@@ -244,6 +304,7 @@ describe("Sentry payloads", () => {
     assert.ok(lines.includes('updated issue alert "[P1] Bill run job failed"'));
     assert.ok(lines.includes('created issue alert "[P1] Payment sync errors spike"'));
     assert.ok(lines.includes("created cron monitor nightly-backup"));
+    assert.ok(lines.includes("created cron monitor cron-job-worker"));
     assert.ok(calls.some((c) => c.method === "PUT" && c.path === "/api/0/projects/acme/cable-billing-web/rules/7/"));
     assert.ok(calls.some((c) => c.method === "POST" && c.path === "/api/0/organizations/acme/monitors/"));
     assert.ok(calls.every((c) => c.auth === "Bearer t0ken"));
