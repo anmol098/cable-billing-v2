@@ -25,7 +25,7 @@ import {
   type AgeingBucket,
   type BucketAmounts,
 } from "./ageing";
-import { resolveAsOf } from "./as-of";
+import { REPORT_MAX_PAGE_SIZE, resolveAsOf } from "./as-of";
 import {
   DUES_LIST_KINDS,
   type DuesAreaTotals,
@@ -46,6 +46,8 @@ export const DuesReportInput = z.object({
   /** The list (kind `due`): only customers with some due in this bucket. */
   bucket: z.enum(AGEING_BUCKETS).optional(),
   page: z.int().min(1).max(10_000).default(1),
+  /** Rows per page (T-082: an export reads bigger pages). */
+  pageSize: z.int().min(1).max(REPORT_MAX_PAGE_SIZE).default(DUES_PAGE_SIZE),
 });
 
 export type DuesReportCommand = z.output<typeof DuesReportInput>;
@@ -253,7 +255,7 @@ export const duesReport = defineService({
         FROM per_customer pc
        WHERE ${filter}`);
 
-    const pageSize = DUES_PAGE_SIZE;
+    const pageSize = input.pageSize;
     const order =
       input.kind === "advance"
         ? sql`pc.advance DESC, c.customer_code, c.id`

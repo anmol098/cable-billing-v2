@@ -58,6 +58,7 @@ export const AUDIT_ENTITY_TYPES = [
   "area",
   "operator",
   "subscription",
+  "export",
 ] as const;
 export type AuditEntityType = (typeof AUDIT_ENTITY_TYPES)[number];
 
@@ -259,6 +260,10 @@ export const AUDIT_ACTIONS = {
   },
   "subscription.notice_sent": {
     details: ({ after }) => ({ count: count(field(after, "recipients")) }),
+  },
+  // CSV exports (T-082): what was downloaded (`report`), never the rows
+  "exports.download": {
+    details: ({ after }) => ({ report: code(field(after, "report")) }),
   },
   // Bills (T-043, T-044)
   "billing.run_scheduled": { details: billingRun },

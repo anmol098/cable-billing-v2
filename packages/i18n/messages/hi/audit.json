@@ -270,7 +270,21 @@
     "sentence.admin.metrics_viewed",
     "action.admin.metrics_viewed",
     "sentence.subscription.offline_payment_recorded",
-    "action.subscription.offline_payment_recorded"
+    "action.subscription.offline_payment_recorded",
+    "entity.export",
+    "sentence.exports.download",
+    "action.exports.download",
+    "field.report",
+    "field.from",
+    "field.to",
+    "field.as_of_date",
+    "field.bucket",
+    "field.pay_state",
+    "field.searched",
+    "field.outcome",
+    "field.difference",
+    "field.plan",
+    "field.date"
   ],
   "description": "आपके बिज़नेस में हर बदलाव: किसने किया और कब। यह पेज सिर्फ़ आप (मालिक) देख सकते हैं।",
   "filters": {
@@ -327,7 +341,8 @@
     "area": "एरिया",
     "operator": "बिज़नेस",
     "other": "दूसरा",
-    "subscription": "ऐप सब्सक्रिप्शन"
+    "subscription": "ऐप सब्सक्रिप्शन",
+    "export": "डाउनलोड"
   },
   "unknown_target": "(नहीं मिला)",
   "sentence": {
@@ -449,6 +464,9 @@
       "customers": {
         "apply": "{who} ने फ़ाइल से {count, plural, one {# ग्राहक} other {# ग्राहक}} जोड़े"
       }
+    },
+    "exports": {
+      "download": "{who} ने {report, select, customers {ग्राहकों की लिस्ट} bills {बिलों की लिस्ट} payments {पेमेंट की लिस्ट} dues {बाकी की लिस्ट} collections {रोज़ का कलेक्शन} handover {कैश जमा की लिस्ट} connections {कनेक्शन की लिस्ट} billing_runs {बिल बनने की रिपोर्ट} other {डेटा}} फ़ाइल में डाउनलोड की"
     }
   },
   "generic": "{who} ने बदलाव किया: {entity} {target}",
@@ -571,6 +589,9 @@
       "customers": {
         "apply": "फ़ाइल से ग्राहक जोड़े"
       }
+    },
+    "exports": {
+      "download": "डेटा डाउनलोड किया"
     }
   },
   "changes": {
@@ -647,6 +668,17 @@
     "direction": "एक्स्ट्रा चार्ज या छूट",
     "kind": "क्या बदला",
     "credit_applied_paise": "एडवांस इस्तेमाल हुआ",
-    "total_paise": "कुल"
+    "total_paise": "कुल",
+    "report": "क्या",
+    "from": "कब से",
+    "to": "कब तक",
+    "as_of_date": "किस दिन तक",
+    "bucket": "कितना पुराना",
+    "pay_state": "पैसे मिले?",
+    "searched": "खोजा",
+    "outcome": "नतीजा",
+    "difference": "कम या ज़्यादा",
+    "plan": "प्लान",
+    "date": "दिन"
   }
 }

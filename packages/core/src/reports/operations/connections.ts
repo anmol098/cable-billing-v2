@@ -38,7 +38,7 @@ import { z } from "zod";
 import { businessDateInput, idInput } from "../../collections/inputs";
 import { defineService } from "../../context/service";
 import { notFound, serviceError } from "../../errors/errors";
-import { resolveAsOf } from "../dues/as-of";
+import { REPORT_MAX_PAGE_SIZE, resolveAsOf } from "../dues/as-of";
 import type { ConnectionReportRow, ConnectionsReport } from "./types";
 
 /** Connections per page. */
@@ -55,6 +55,8 @@ export const ConnectionsReportInput = z.object({
   /** A plan id, or `own` for connections with their own amount. */
   plan: z.union([z.literal(OWN_AMOUNT), idInput]).optional(),
   page: z.int().min(1).max(10_000).default(1),
+  /** Rows per page (T-082: an export reads bigger pages). */
+  pageSize: z.int().min(1).max(REPORT_MAX_PAGE_SIZE).default(CONNECTIONS_PAGE_SIZE),
 });
 
 export type ConnectionsReportCommand = z.output<typeof ConnectionsReportInput>;
@@ -201,7 +203,7 @@ export const connectionsReport = defineService({
           FROM m`)
     ).rows;
 
-    const pageSize = CONNECTIONS_PAGE_SIZE;
+    const pageSize = input.pageSize;
     const listed = await tx.execute<ConnectionDbRow>(sql`
       WITH ${cte}
       SELECT m.id, m.customer_id, m.customer_code, m.customer_name, m.area_id,

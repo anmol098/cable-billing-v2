@@ -25,7 +25,7 @@ import { z } from "zod";
 import { businessDateInput, idInput } from "../../collections/inputs";
 import { defineService } from "../../context/service";
 import { notFound } from "../../errors/errors";
-import { resolveAsOf } from "../dues/as-of";
+import { REPORT_MAX_PAGE_SIZE, resolveAsOf } from "../dues/as-of";
 import { resolveDayRange } from "./range";
 import type {
   CollectionAmounts,
@@ -46,6 +46,8 @@ export const CollectionsReportInput = z.object({
   /** Who took the money (a user of this business). */
   collectorId: idInput.optional(),
   page: z.int().min(1).max(10_000).default(1),
+  /** Rows per page (T-082: an export reads bigger pages). */
+  pageSize: z.int().min(1).max(REPORT_MAX_PAGE_SIZE).default(COLLECTIONS_PAGE_SIZE),
 });
 
 export type CollectionsReportCommand = z.output<typeof CollectionsReportInput>;
@@ -166,7 +168,7 @@ export const collectionsReport = defineService({
     byCollector.sort(byName);
     days.sort((a, b) => b.businessDate.localeCompare(a.businessDate) || byName(a, b));
 
-    const pageSize = COLLECTIONS_PAGE_SIZE;
+    const pageSize = input.pageSize;
     const zero = toPaise(0);
     const totals = totalsRow
       ? { ...amounts(totalsRow), people: Number(totalsRow.people) }

@@ -33,7 +33,7 @@ import { businessDateInput, idInput } from "../../collections/inputs";
 import type { HandoverEventView } from "../../collections/types";
 import { defineService } from "../../context/service";
 import { notFound } from "../../errors/errors";
-import { resolveAsOf } from "../dues/as-of";
+import { REPORT_MAX_PAGE_SIZE, resolveAsOf } from "../dues/as-of";
 import { resolveDayRange } from "./range";
 import type { HandoverReport, HandoverReportRow, ReportPerson } from "./types";
 
@@ -55,6 +55,8 @@ export const HandoverReportInput = z.object({
   /** Only handovers with less (`short`) or more (`extra`) cash than expected. */
   difference: z.enum(HANDOVER_DIFFERENCES).optional(),
   page: z.int().min(1).max(10_000).default(1),
+  /** Rows per page (T-082: an export reads bigger pages). */
+  pageSize: z.int().min(1).max(REPORT_MAX_PAGE_SIZE).default(HANDOVER_PAGE_SIZE),
 });
 
 export type HandoverReportCommand = z.output<typeof HandoverReportInput>;
@@ -212,7 +214,7 @@ export const handoverReport = defineService({
          WHERE ${where}`)
     ).rows;
 
-    const pageSize = HANDOVER_PAGE_SIZE;
+    const pageSize = input.pageSize;
     const listed = await tx.execute<SessionDbRow>(sql`
       SELECT s.id, s.collector_id, u.name, u.status AS user_status,
              s.business_date::text AS business_date, s.status,
