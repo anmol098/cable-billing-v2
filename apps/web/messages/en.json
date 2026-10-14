@@ -1760,7 +1760,6 @@
     "page": "Page {page}",
     "pages": "Pages",
     "payments": {
-      "anyone": "Anyone",
       "bad_dates": "The “To” day is before the “From” day. Showing this month.",
       "cancelled_count": "{count, plural, =0 {None cancelled} one {# cancelled, not counted} other {# cancelled, not counted}}",
       "caption": "Payments",
@@ -1777,33 +1776,9 @@
       "description": "Every payment: who took it, cash or UPI, and when it reached the office.",
       "empty": "No payments on these days.",
       "filters": "Choose payments",
-      "from": "From",
-      "method": {
-        "cash": "Cash",
-        "upi": "UPI"
-      },
-      "method_any": "Cash and UPI",
-      "method_label": "Cash or UPI",
       "nobody": "Not known",
       "reached_at": "Reached the office {when}",
-      "receipt_no": "Receipt {number}",
-      "source": {
-        "android": "By a lineman",
-        "migration": "From the old app",
-        "web": "At the office"
-      },
-      "status": {
-        "cancelled": "Cancelled",
-        "checked": "Checked",
-        "counted": "Counted",
-        "to_check": "To check"
-      },
-      "status_all": "All",
-      "status_label": "Status",
-      "switched_off": "{name} (switched off)",
       "taken_at": "Money taken {when}",
-      "taken_by": "Taken by",
-      "to": "To",
       "to_check_count": "{count, plural, =0 {Nothing to check} one {# to check} other {# to check}}",
       "upi": "UPI"
     },

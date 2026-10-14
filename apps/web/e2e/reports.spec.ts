@@ -48,7 +48,7 @@ import { type Browser, expect, type Page, test } from "@playwright/test";
 const DATABASE_URL = process.env.DATABASE_URL;
 const PASSWORD = "e2e reports password 4321";
 
-test.describe("reports: dues and ageing, bill register", () => {
+test.describe("reports: dues and ageing, bill register, payment register", () => {
   test.describe.configure({ mode: "serial" });
   test.skip(!DATABASE_URL, "needs DATABASE_URL (a migrated database) and BETTER_AUTH_SECRET");
 
@@ -319,6 +319,32 @@ test.describe("reports: dues and ageing, bill register", () => {
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(/^Bill /);
   });
 
+  test("the Owner reads the payment register, filters it and opens a payment", async ({ page }) => {
+    test.setTimeout(90_000);
+    await signIn(page, ownerLogin);
+    await page.goto("/reports");
+    await page.getByRole("link", { name: "Payments report" }).click();
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Payments report");
+    await expect(page.getByTestId("as-of")).toContainText("Numbers as of");
+    await expect(page.getByTestId("payments-totals-count")).toContainText("2 payments");
+    await expect(page.getByTestId("payments-totals-cash")).toContainText("₹1,000");
+    await expect(page.getByTestId("payments-totals-upi")).toContainText("₹200");
+    await expect(page.getByTestId("payments-totals-all")).toContainText("₹1,200");
+    const table = page.getByRole("table", { name: "Payments" });
+    await expect(table.getByRole("row")).toHaveCount(3);
+    await expect(table).toContainText("E2E Owner");
+    await expect(table).toContainText("At the office");
+    await expect(table).toContainText("Money taken");
+
+    await page.getByRole("combobox", { name: /^Cash or UPI/ }).selectOption("upi");
+    await page.getByRole("button", { name: "Show" }).click();
+    await expect(page).toHaveURL(/method=upi/);
+    await expect(page.getByTestId("payments-totals-count")).toContainText("1 payment");
+    await expect(page.getByTestId("payments-totals-all")).toContainText("₹200");
+    await page.getByRole("table", { name: "Payments" }).getByRole("link").first().click();
+    await expect(page).toHaveURL(/\/payments\/[0-9a-f-]{36}$/);
+  });
+
   test("Staff can open the reports; they fit a phone", async ({ browser }) => {
     test.setTimeout(90_000);
     const staff = await signedIn(browser, staffLogin);
@@ -326,6 +352,7 @@ test.describe("reports: dues and ageing, bill register", () => {
     for (const [path, title] of [
       ["/reports/dues", "Due list"],
       [`/reports/bills?from=${oldPeriod}&to=${period}`, "Bills report"],
+      ["/reports/payments", "Payments report"],
     ] as const) {
       await staff.goto(path);
       await expect(staff.getByRole("heading", { level: 1 })).toHaveText(title);
@@ -333,8 +360,10 @@ test.describe("reports: dues and ageing, bill register", () => {
         () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
       );
       expect(overflow, path).toBeLessThanOrEqual(0);
+      if (path.startsWith("/reports/bills")) {
+        await expect(staff.getByTestId("bills-totals-due")).toContainText("₹800");
+      }
     }
-    await expect(staff.getByTestId("bills-totals-due")).toContainText("₹800");
     await staff.context().close();
   });
 });

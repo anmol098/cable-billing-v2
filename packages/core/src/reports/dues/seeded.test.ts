@@ -10,6 +10,7 @@ import { type DbClient, users } from "@cb/db";
 import { seedDatabase } from "@cb/db/seed";
 import { describeDb, useTestDatabase } from "@cb/db/testing";
 import {
+  addDays,
   addPeriods,
   businessDate,
   businessDateOf,
@@ -22,6 +23,7 @@ import { beforeAll, expect, it } from "vitest";
 import type { ServiceRuntime } from "../../context/runtime";
 import { newRequestId } from "../../context/runtime";
 import { resolveTenantContext, type TenantContext } from "../../context/tenant-context";
+import { listPayments } from "../../payment-register";
 import { testRuntime } from "../../testing/fixtures";
 import { billRegisterReport } from "../registers/bills";
 import { spreadDue } from "./ageing";
@@ -192,6 +194,43 @@ describeDb("money reports on the T-036 seed", () => {
         expect(outstanding - Number(credit.rows[0]?.credit)).toBe(ledger);
         const dues = await duesReport.call(rt, tenant.owner, {});
         expect(dues.ok && dues.value.totals.netPaise).toBe(ledger);
+      }
+    },
+    TIMEOUT,
+  );
+
+  it(
+    "the payment register's counted cash + UPI equal the ledger, month by month and per method",
+    async () => {
+      for (const tenant of tenants) {
+        for (let back = 0; back < 13; back += 1) {
+          const month = addPeriods(periodOf(businessDate(AS_OF)), -back);
+          const to = addDays(addPeriods(month, 1), -1);
+          for (const method of [undefined, "cash", "upi"] as const) {
+            const result = await listPayments.call(rt, tenant.owner, {
+              from: month,
+              to,
+              ...(method ? { method } : {}),
+            });
+            if (!result.ok) throw new Error(result.error.code);
+            const ledger = await t.current.admin.query<{ total: string }>(
+              `SELECT coalesce(-sum(l.amount_paise), 0)::text AS total
+                 FROM ledger_entries l
+                 LEFT JOIN payment_reversals r
+                   ON r.operator_id = l.operator_id AND r.id = l.payment_reversal_id
+                 JOIN payments p ON p.operator_id = l.operator_id
+                  AND p.id = coalesce(l.payment_id, r.payment_id)
+                WHERE l.operator_id = $1 AND l.type IN ('payment', 'payment_reversal')
+                  AND p.business_date BETWEEN $2 AND $3
+                  AND ($4::payment_method IS NULL OR p.method = $4::payment_method)`,
+              [tenant.operatorId, month, to, method ?? null],
+            );
+            const { cashPaise, upiPaise } = result.value.totals;
+            expect(cashPaise + upiPaise, `${month} ${method ?? "all"}`).toBe(
+              Number(ledger.rows[0]?.total),
+            );
+          }
+        }
       }
     },
     TIMEOUT,

@@ -1760,7 +1760,6 @@
     "page": "पेज {page}",
     "pages": "पेज",
     "payments": {
-      "anyone": "कोई भी",
       "bad_dates": "“तक” वाला दिन “से” वाले दिन से पहले है। इस महीने के पेमेंट दिखा रहे हैं।",
       "cancelled_count": "{count, plural, =0 {कोई रद्द नहीं} one {# रद्द, गिना नहीं} other {# रद्द, गिने नहीं}}",
       "caption": "पेमेंट",
@@ -1777,33 +1776,9 @@
       "description": "हर पेमेंट: किसने लिया, नकद या UPI, और ऑफिस कब पहुँचा।",
       "empty": "इन दिनों में कोई पेमेंट नहीं।",
       "filters": "पेमेंट चुनें",
-      "from": "किस दिन से",
-      "method": {
-        "cash": "नकद",
-        "upi": "UPI"
-      },
-      "method_any": "नकद और UPI",
-      "method_label": "नकद या UPI",
       "nobody": "पता नहीं",
       "reached_at": "ऑफिस पहुँचा {when}",
-      "receipt_no": "रसीद {number}",
-      "source": {
-        "android": "लाइनमैन ने",
-        "migration": "पुराने ऐप से",
-        "web": "ऑफिस में"
-      },
-      "status": {
-        "cancelled": "रद्द",
-        "checked": "जाँच हो गई",
-        "counted": "गिना गया",
-        "to_check": "जाँचना है"
-      },
-      "status_all": "सारे",
-      "status_label": "हालत",
-      "switched_off": "{name} (बंद)",
       "taken_at": "पैसे लिए {when}",
-      "taken_by": "किसने लिया",
-      "to": "किस दिन तक",
       "to_check_count": "{count, plural, =0 {कुछ जाँचना नहीं} one {# जाँचना है} other {# जाँचने हैं}}",
       "upi": "UPI"
     },
