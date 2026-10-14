@@ -24,8 +24,11 @@ type AuditListInput = Parameters<typeof listAuditEvents.call>[2];
 
 const EVENTS = 100_000;
 const NOISE = 20_000;
-/** Generous: a page takes a few milliseconds locally (see the completion notes). */
-const PAGE_BUDGET_MS = 750;
+/**
+ * Generous on purpose: Postgres needs < 1 ms per page (see the plans), but a whole service call on a
+ * busy shared runner took up to ~300 ms while other packages tested in parallel.
+ */
+const PAGE_BUDGET_MS = 1_500;
 
 function report(line: string) {
   process.stdout.write(`[audit-perf] ${line}\n`);
