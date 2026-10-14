@@ -39,6 +39,7 @@ import { isExpectedError, type ServiceError, toServiceError } from "../errors/er
 import type { Logger } from "../logging/logger";
 import type { ImportField } from "./columns";
 import type { ImportLine } from "./file";
+import { IMPORT_LIMITS } from "./limits";
 import { type CustomerPlan, type ImportPlan, planImport, type ReadyCustomer } from "./plan";
 import { hasConnection, type LineProblem, type LineProblemCode, type LineProblems } from "./rules";
 import {
@@ -49,6 +50,7 @@ import {
   type ImportCustomerRef,
   type ImportLineResult,
   type ImportLineStatus,
+  type ImportPreview,
 } from "./types";
 
 function emptyCounts(): Record<ImportLineStatus, number> {
@@ -242,10 +244,39 @@ export const checkCustomerImport = defineService({
       status: customer.status,
       customer: customer.status === "exists" ? customer.existing : null,
     }));
-    const value: ImportCheckResult = { today, lines, counts };
+    const value: ImportPreview = { today, lines, counts, steps: importSteps(lines) };
     return ok(value);
   },
 });
+
+/**
+ * Splits the ready lines into import steps: whole customers (all lines of one `group`) per
+ * step, at most `max` lines (a customer has at most 11 lines, so it always fits).
+ */
+export function importSteps(
+  lines: readonly ImportLineResult[],
+  max: number = IMPORT_LIMITS.applyBatchLines,
+): number[][] {
+  const groups = new Map<number, number[]>();
+  for (const line of lines) {
+    if (line.status !== "ready") continue;
+    const list = groups.get(line.group) ?? [];
+    list.push(line.line);
+    groups.set(line.group, list);
+  }
+  const steps: number[][] = [];
+  let current: number[] = [];
+  for (const group of [...groups.keys()].sort((a, b) => a - b)) {
+    const groupLines = groups.get(group) ?? [];
+    if (current.length > 0 && current.length + groupLines.length > max) {
+      steps.push(current);
+      current = [];
+    }
+    current.push(...groupLines);
+  }
+  if (current.length > 0) steps.push(current);
+  return steps;
+}
 
 /**
  * One import step: checks the lines again (the data may have changed since the preview) and saves

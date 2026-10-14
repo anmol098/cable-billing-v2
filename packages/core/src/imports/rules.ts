@@ -15,7 +15,7 @@ import {
 } from "@cb/domain";
 import type { z } from "zod";
 import { ConnectionFields } from "../connections/inputs";
-import { startDateProblem } from "../connections/rules";
+import { CONNECTION_LIMITS, startDateProblem } from "../connections/rules";
 import { CreateCustomerInput } from "../customers/customers";
 import type { ImportField } from "./columns";
 import type { ImportLine } from "./file";
@@ -177,6 +177,9 @@ function sameText(a: string, b: string): boolean {
   const key = (value: string) => value.normalize("NFKC").toLowerCase().replace(/\s+/g, " ").trim();
   return key(a) === key(b);
 }
+
+/** Boxes per customer (the "Add customer" service's limit). */
+const MAX_BOXES = CONNECTION_LIMITS.connectionsPerCustomer;
 
 const CUSTOMER_FIELDS = ["name", "phone", "altPhone", "address", "area"] as const;
 const CONNECTION_FIELDS = ["vcNumber", "plan", "rent", "startDate"] as const;
@@ -362,7 +365,11 @@ export function checkGroups(groups: readonly CustomerGroup[], problems: LineProb
     }
     const boxes = group.lines.filter(hasConnection);
     boxes.forEach((line, index) => {
-      if (index >= 10) problems.add(line.line, { field: "line", code: "too_many_boxes" });
+      if (index >= MAX_BOXES) problems.add(line.line, { field: "line", code: "too_many_boxes" });
+    });
+    // At most one line per box plus one for the details, so a customer always fits in one step.
+    group.lines.forEach((line, index) => {
+      if (index > MAX_BOXES) problems.add(line.line, { field: "line", code: "too_many_boxes" });
     });
     // A customer line without a box next to box lines of the same customer is fine (it carries
     // the details); a code that appears twice without any box is the same customer twice.

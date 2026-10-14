@@ -91,4 +91,12 @@ export interface ImportCheckResult {
   readonly counts: ImportCounts;
 }
 
+export interface ImportPreview extends ImportCheckResult {
+  /**
+   * How to send the ready lines to `imports.customers.apply`: line numbers per step, whole
+   * customers only, at most `IMPORT_LIMITS.applyBatchLines` lines each.
+   */
+  readonly steps: readonly (readonly number[])[];
+}
+
 export type ImportApplyResult = ImportCheckResult;

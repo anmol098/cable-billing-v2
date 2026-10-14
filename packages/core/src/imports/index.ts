@@ -25,7 +25,12 @@ export {
   parseImportDate,
   parseImportRent,
 } from "./rules";
-export { applyCustomerImport, checkCustomerImport, problemFromServiceError } from "./services";
+export {
+  applyCustomerImport,
+  checkCustomerImport,
+  importSteps,
+  problemFromServiceError,
+} from "./services";
 export {
   buildImportTemplate,
   buildProblemFile,
@@ -44,4 +49,5 @@ export {
   type ImportCustomerRef,
   type ImportLineResult,
   type ImportLineStatus,
+  type ImportPreview,
 } from "./types";
