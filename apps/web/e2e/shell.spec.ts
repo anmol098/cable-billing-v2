@@ -41,8 +41,12 @@ const urlOf = (path: string) =>
     ? path.replace("[id]", CUSTOMER_ID)
     : path.replace("[id]", SOME_ID);
 
-/** Customer profile tabs that are built (their title is the customer's name, T-033 / T-034). */
-const BUILT_PROFILE_TABS = new Set<string>(["customer_summary", "customer_connections"]);
+/** Customer profile tabs that are built (their title is the customer's name, T-033 / T-034 / T-048). */
+const BUILT_PROFILE_TABS = new Set<string>([
+  "customer_summary",
+  "customer_connections",
+  "customer_payments",
+]);
 
 /** The page title of a route: its menu word, or the customer's name on a built profile tab. */
 const titleOf = (id: keyof typeof en.shell.routes) =>
