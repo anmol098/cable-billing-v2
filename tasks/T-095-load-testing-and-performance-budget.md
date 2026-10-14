@@ -3,10 +3,10 @@ id: T-095
 title: Load testing and performance budget
 phase: 5
 area: qa
-status: todo
-owner:
-claimed_at:
-branch:
+status: claimed
+owner: agent-t095
+claimed_at: 2026-10-14T21:55:13.801Z
+branch: task/T-095-load-testing-and-performance-budget
 depends_on: [T-036, T-060, T-080]
 review: self
 claimable_by: agent
@@ -45,3 +45,7 @@ PRD §11 (Performance, Scale) — see `docs/IMPLEMENTATION_PLAN.md`, `docs/PRD.m
 ## Completion notes
 
 _The agent fills this in before opening the PR: what was built, decisions taken, deviations, follow-up tasks created, and how it was verified._
+
+## Board log
+
+- 2026-10-14T21:55:13.801Z claimed by agent-t095
