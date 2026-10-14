@@ -25,7 +25,7 @@ export const THEME_COLORS = [
   "credit",
 ] as const;
 export const THEME_TEXT_SIZES = ["sm", "base", "lg", "xl", "2xl", "amount"] as const;
-export const THEME_FONTS = ["sans", "numeric"] as const;
+export const THEME_FONTS = ["sans", "numeric", "system"] as const;
 export const THEME_FONT_WEIGHTS = ["regular", "strong"] as const;
 export const THEME_RADII = ["none", "sm", "md", "lg", "full"] as const;
 export const THEME_SIZES = ["touch-min", "primary-button", "icon", "icon-large"] as const;

@@ -34,6 +34,7 @@ object Tokens {
         val SansFamilies = listOf("Inter", "Noto Sans Devanagari", "system-ui", "sans-serif")
         val NumericFamilies = listOf("Inter", "system-ui")
         val NumericFeatureSettings = "'tnum'"
+        val SystemFamilies = listOf("system-ui", "sans-serif")
     }
 
     object Weight {

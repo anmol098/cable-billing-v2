@@ -40,6 +40,7 @@
   --font-sans: Inter, "Noto Sans Devanagari", system-ui, sans-serif;
   --font-numeric: Inter, system-ui;
   --font-numeric--font-feature-settings: "tnum";
+  --font-system: system-ui, sans-serif;
   --font-weight-regular: 400;
   --font-weight-strong: 600;
 

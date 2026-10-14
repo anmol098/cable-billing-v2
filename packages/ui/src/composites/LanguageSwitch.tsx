@@ -7,7 +7,10 @@ export type LanguageSwitchOption = {
   value: string;
   /** The short form shown, in its own script: `EN`, `हिं`. */
   short: string;
-  /** The full name in its own script (`English`, `हिंदी`): the button's accessible name. */
+  /**
+   * The full name in its own script (`English`, `हिंदी`). The button's accessible name is the short
+   * form followed by this (`EN, English`), so it contains the visible text (WCAG 2.5.3).
+   */
   name: string;
 };
 
@@ -30,6 +33,11 @@ export type LanguageSwitchProps = Omit<ComponentProps<"form">, "action" | "child
 /**
  * EN | हिं: the language switch, one tap away on every screen (PLAN §2.2 rule 10). Each language
  * is written in its own script. Presentational: the app passes its locale action.
+ *
+ * The current language's button uses the page font (`font-sans`). The other languages' buttons use
+ * the device's own font (`font-system`): their script may have no web face loaded on this page, and
+ * one short word should not download a whole face (on an English page, "हिं" alone would fetch the
+ * ≈120 KB Noto Sans Devanagari file).
  */
 export function LanguageSwitch({
   options,
@@ -59,11 +67,12 @@ export function LanguageSwitch({
             name={name}
             value={option.value}
             lang={option.value}
-            aria-label={option.name}
+            aria-label={`${option.short}, ${option.name}`}
             aria-pressed={selected}
             className={cn(
               "inline-flex min-h-touch-min min-w-touch-min cursor-pointer items-center justify-center px-3",
-              "font-sans font-strong text-base",
+              selected ? "font-sans" : "font-system",
+              "font-strong text-base",
               index > 0 && "border-l-hairline border-border",
               index === 0 && "rounded-l-md",
               index === options.length - 1 && "rounded-r-md",

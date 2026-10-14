@@ -82,8 +82,8 @@ describe("LanguageSwitch", () => {
     render(<LanguageSwitch options={LANGUAGES} value="hi" label="भाषा" action={vi.fn()} />);
     const form = screen.getByRole("form", { name: "भाषा" });
     expect(form).toHaveTextContent("ENहिं");
-    const english = screen.getByRole("button", { name: "English" });
-    const hindi = screen.getByRole("button", { name: "हिंदी" });
+    const english = screen.getByRole("button", { name: "EN, English" });
+    const hindi = screen.getByRole("button", { name: "हिं, हिंदी" });
     expect(english).toHaveAttribute("aria-pressed", "false");
     expect(hindi).toHaveAttribute("aria-pressed", "true");
     expect(hindi).toHaveAttribute("lang", "hi");
@@ -91,10 +91,41 @@ describe("LanguageSwitch", () => {
     expect(await axeViolations()).toEqual([]);
   });
 
+  it("names each button with its visible short form first (WCAG 2.5.3 label in name)", () => {
+    for (const value of ["en", "hi"]) {
+      const { unmount } = render(
+        <LanguageSwitch options={LANGUAGES} value={value} label="Language" action={vi.fn()} />,
+      );
+      // Exact names: the visible text, then the full name. Substring queries ("हिंदी") still work.
+      expect(screen.getByRole("button", { name: "EN, English" })).toHaveTextContent(/^EN$/);
+      expect(screen.getByRole("button", { name: "हिं, हिंदी" })).toHaveTextContent(/^हिं$/);
+      for (const button of screen.getAllByRole("button")) {
+        const visible = button.textContent ?? "";
+        expect(button.getAttribute("aria-label")?.startsWith(`${visible}, `)).toBe(true);
+      }
+      unmount();
+    }
+  });
+
+  it("draws only the current language in the page font; the others in the device font", () => {
+    const { rerender } = render(
+      <LanguageSwitch options={LANGUAGES} value="en" label="Language" action={vi.fn()} />,
+    );
+    // An English page: "हिं" must not pull the Devanagari web face (font-sans lists it).
+    expect(screen.getByRole("button", { name: /English/ })).toHaveClass("font-sans");
+    expect(screen.getByRole("button", { name: /English/ })).not.toHaveClass("font-system");
+    expect(screen.getByRole("button", { name: /हिंदी/ })).toHaveClass("font-system", "font-strong");
+    expect(screen.getByRole("button", { name: /हिंदी/ })).not.toHaveClass("font-sans");
+
+    rerender(<LanguageSwitch options={LANGUAGES} value="hi" label="भाषा" action={vi.fn()} />);
+    expect(screen.getByRole("button", { name: /हिंदी/ })).toHaveClass("font-sans", "font-strong");
+    expect(screen.getByRole("button", { name: /English/ })).toHaveClass("font-system");
+  });
+
   it("submits the chosen locale to the action (the app's setLocale)", async () => {
     const action = vi.fn();
     render(<LanguageSwitch options={LANGUAGES} value="en" label="Language" action={action} />);
-    await userEvent.setup().click(screen.getByRole("button", { name: "हिंदी" }));
+    await userEvent.setup().click(screen.getByRole("button", { name: "हिं, हिंदी" }));
     await vi.waitFor(() => expect(action).toHaveBeenCalledOnce());
     const formData = action.mock.calls[0]?.[0] as FormData;
     expect(formData.get("locale")).toBe("hi");
