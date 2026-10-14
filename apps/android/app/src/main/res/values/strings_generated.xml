@@ -277,6 +277,67 @@
     <string name="mobile_shell_nav_search">Search</string>
     <string name="mobile_shell_nav_today">Today</string>
     <string name="mobile_shell_nav_waiting">Waiting</string>
+    <string name="mobile_today_at_office">At the office</string>
+    <!-- %1$s = time -->
+    <string name="mobile_today_at_office_at">At the office (%1$s)</string>
+    <string name="mobile_today_cancelled">Cancelled</string>
+    <string name="mobile_today_handover_again">Hand over again</string>
+    <string name="mobile_today_handover_already_accepted">The office already accepted today\'s cash.</string>
+    <string name="mobile_today_handover_amount_title">How much cash are you giving?</string>
+    <string name="mobile_today_handover_confirm_title">Check and give</string>
+    <string name="mobile_today_handover_not_saved">Not saved. Try again.</string>
+    <string name="mobile_today_handover_note">Note (not needed)</string>
+    <!-- %1$s = office, %2$s = phone -->
+    <string name="mobile_today_handover_office_and_phone">%1$s at the office + %2$s on the phone</string>
+    <string name="mobile_today_handover_phone_only">Counted on this phone (no internet)</string>
+    <string name="mobile_today_handover_reason_extra">More cash</string>
+    <string name="mobile_today_handover_reason_other">Other reason</string>
+    <string name="mobile_today_handover_reason_pending_sync">Payments on phone</string>
+    <string name="mobile_today_handover_reason_short">Less cash</string>
+    <string name="mobile_today_handover_reason_title">Why is it different?</string>
+    <string name="mobile_today_handover_saving">Saving…</string>
+    <string name="mobile_today_handover_signed_out">Not saved. Sign in again.</string>
+    <!-- %1$s = amount -->
+    <string name="mobile_today_handover_voice">%1$s cash to the office</string>
+    <string name="mobile_today_list_title">Today\'s payments</string>
+    <string name="mobile_today_nothing_yet">No payments today yet</string>
+    <!-- %1$d = count -->
+    <plurals name="mobile_today_on_phone">
+        <item quantity="one">%1$d payment is only on the phone. Not at the office yet.</item>
+        <item quantity="other">%1$d payments are only on the phone. Not at the office yet.</item>
+    </plurals>
+    <string name="mobile_today_phone_only">Counted on this phone. The office\'s numbers are not here yet.</string>
+    <!-- %1$d = count -->
+    <plurals name="mobile_today_problem">
+        <item quantity="one">%1$d payment has a problem. Call the office.</item>
+        <item quantity="other">%1$d payments have a problem. Call the office.</item>
+    </plurals>
+    <string name="mobile_today_status_accepted">Accepted</string>
+    <string name="mobile_today_status_check_again">Check again</string>
+    <!-- %1$s = amount -->
+    <string name="mobile_today_status_expected">Cash expected %1$s</string>
+    <!-- %1$s = amount -->
+    <string name="mobile_today_status_extra">%1$s extra</string>
+    <string name="mobile_today_status_matches">Cash matches</string>
+    <string name="mobile_today_status_not_yet">Cash not handed over</string>
+    <!-- %1$s = note -->
+    <string name="mobile_today_status_office_note">Office says: %1$s</string>
+    <string name="mobile_today_status_on_phone">Saved on phone. It goes to the office by itself when there is internet.</string>
+    <string name="mobile_today_status_refused_accepted">Not sent. The office had already accepted today\'s cash.</string>
+    <string name="mobile_today_status_refused_other">Not sent. Call the office.</string>
+    <string name="mobile_today_status_refused_total">Not sent. The office\'s cash total is different. Hand over again.</string>
+    <string name="mobile_today_status_sending">Sending to the office…</string>
+    <string name="mobile_today_status_sent">Sent to office</string>
+    <string name="mobile_today_status_sent_back">Sent back</string>
+    <!-- %1$s = amount -->
+    <string name="mobile_today_status_short">%1$s short</string>
+    <string name="mobile_today_status_try_now">Try now</string>
+    <string name="mobile_today_status_waiting_check">Waiting for check</string>
+    <!-- %1$s = amount -->
+    <string name="mobile_today_status_you_gave">You gave %1$s</string>
+    <string name="mobile_today_title">Today</string>
+    <!-- %1$s = cash, %2$s = upi -->
+    <string name="mobile_today_voice_totals">Today %1$s cash, %2$s UPI</string>
     <!-- %1$s = amount, %2$s = name -->
     <string name="mobile_voice_cash_from">%1$s cash from %2$s</string>
     <!-- %1$s = name, %2$s = amount -->

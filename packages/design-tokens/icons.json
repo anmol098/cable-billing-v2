@@ -51,5 +51,7 @@
   "retry": "refresh-cw",
   "pause": "circle-pause",
   "resume": "circle-play",
-  "disconnect": "unplug"
+  "disconnect": "unplug",
+  "short": "circle-minus",
+  "extra": "circle-plus"
 }

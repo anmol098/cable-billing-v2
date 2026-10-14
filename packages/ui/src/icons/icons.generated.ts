@@ -341,6 +341,17 @@ export const ICON_NODES = {
     ["path", { d: "M10.5 16.5 13 14" }],
     ["path", { d: "m12 6 6 6 2.3-2.3a2.4 2.4 0 0 0 0-3.4l-2.6-2.6a2.4 2.4 0 0 0-3.4 0Z" }],
   ],
+  // Lucide "circle-minus"
+  "short": [
+    ["circle", { cx: "12", cy: "12", r: "10" }],
+    ["path", { d: "M8 12h8" }],
+  ],
+  // Lucide "circle-plus"
+  "extra": [
+    ["circle", { cx: "12", cy: "12", r: "10" }],
+    ["path", { d: "M8 12h8" }],
+    ["path", { d: "M12 8v8" }],
+  ],
 } as const;
 
 /** A semantic icon name from icons.json. */
