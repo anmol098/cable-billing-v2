@@ -171,8 +171,11 @@ describe("ShellHeader", () => {
       />,
     );
     expect(screen.getByText("Sharma Cable Network")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "English" })).toHaveAttribute("aria-pressed", "true");
-    expect(screen.getByRole("button", { name: "हिंदी" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "EN, English" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    expect(screen.getByRole("button", { name: "हिं, हिंदी" })).toBeInTheDocument();
     const account = screen.getByRole("button", { name: "Account" });
     fireEvent.click(account);
     expect(screen.getByText("Ramesh Sharma")).toBeInTheDocument();

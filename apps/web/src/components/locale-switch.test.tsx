@@ -7,8 +7,8 @@ describe("LocaleSwitch", () => {
   it("names each language in its own script and marks the current one", () => {
     renderWithIntl(<LocaleSwitch current="en" action={vi.fn()} />);
 
-    const english = screen.getByRole("button", { name: "English" });
-    const hindi = screen.getByRole("button", { name: "हिंदी" });
+    const english = screen.getByRole("button", { name: "EN, English" });
+    const hindi = screen.getByRole("button", { name: "हिं, हिंदी" });
     expect(english).toHaveAttribute("aria-pressed", "true");
     expect(hindi).toHaveAttribute("aria-pressed", "false");
     expect(hindi).toHaveAttribute("lang", "hi");
@@ -19,14 +19,17 @@ describe("LocaleSwitch", () => {
     renderWithIntl(<LocaleSwitch current="hi" action={vi.fn()} />, "hi");
 
     expect(screen.getByRole("form", { name: "भाषा" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "हिंदी" })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("button", { name: "हिं, हिंदी" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
   });
 
   it("submits the chosen locale to the action", async () => {
     const action = vi.fn();
     renderWithIntl(<LocaleSwitch current="en" action={action} />);
 
-    fireEvent.click(screen.getByRole("button", { name: "हिंदी" }));
+    fireEvent.click(screen.getByRole("button", { name: "हिं, हिंदी" }));
 
     await vi.waitFor(() => expect(action).toHaveBeenCalledOnce());
     const formData = action.mock.calls[0]?.[0] as FormData;

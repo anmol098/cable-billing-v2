@@ -43,7 +43,7 @@ pnpm generate                                       # every generator in the rep
 | Group | Web output | Android output |
 |---|---|---|
 | `color.*`, `semantic.*` | `--color-<name>` → `bg-bg`, `text-cash`, `border-border` | `Tokens.Color.<Name>` (Compose `Color`) |
-| `font.family.*` | `--font-<name>` → `font-sans`, `font-numeric` (with tabular figures) | `Tokens.Font.<Name>Families`, `<Name>FeatureSettings` |
+| `font.family.*` | `--font-<name>` → `font-sans`, `font-numeric` (with tabular figures), `font-system` (the device's own font, no web face: for a word in a script the page has not loaded, such as the language switch's other language) | `Tokens.Font.<Name>Families`, `<Name>FeatureSettings` |
 | `font.weight.*` | `--font-weight-<name>` → `font-regular`, `font-strong` | `Tokens.Weight.<Name>` (`FontWeight`) |
 | `type.web` / `type.android` | `--text-<step>` in rem → `text-base`, `text-amount` | `Tokens.Type.<Step>` in sp (`2xl` → `Xxl`) |
 | `radius.*` | `--radius-<name>` in rem → `rounded-md` | `Tokens.Radius.<Name>` in dp |

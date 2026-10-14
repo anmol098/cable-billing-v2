@@ -90,7 +90,10 @@ describe("MarketingFrame", () => {
       ["Terms of use", "/terms"],
       ["Contact us", "/contact"],
     ]);
-    expect(screen.getByRole("button", { name: "हिंदी" })).toHaveAttribute("aria-pressed", "false");
+    expect(screen.getByRole("button", { name: "हिं, हिंदी" })).toHaveAttribute(
+      "aria-pressed",
+      "false",
+    );
   });
 
   it("says Open app when a session cookie is present (still /login, which forwards)", () => {
@@ -101,7 +104,10 @@ describe("MarketingFrame", () => {
       "hi",
     );
     expect(linkTo("ऐप खोलें")).toHaveAttribute("href", "/login");
-    expect(screen.getByRole("button", { name: "हिंदी" })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("button", { name: "हिं, हिंदी" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
   });
 });
 

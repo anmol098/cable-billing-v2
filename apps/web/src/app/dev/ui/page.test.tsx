@@ -76,7 +76,7 @@ describe("Showcase", () => {
     expect(screen.getByRole("combobox", { name: search })).toBeInTheDocument();
     // The language switch shows EN | हिं and marks the current language.
     const current = screen.getByRole("button", {
-      name: locale === "hi" ? "हिंदी" : "English",
+      name: locale === "hi" ? "हिं, हिंदी" : "EN, English",
     });
     expect(current).toHaveAttribute("aria-pressed", "true");
     // No raw message keys leaked (a missing key renders as its path).
