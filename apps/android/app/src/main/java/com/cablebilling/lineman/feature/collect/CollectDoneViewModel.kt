@@ -9,8 +9,10 @@ import com.cablebilling.lineman.data.auth.SessionState
 import com.cablebilling.lineman.data.auth.SessionStore
 import com.cablebilling.lineman.data.db.PaymentEntity
 import com.cablebilling.lineman.data.db.PaymentState
+import com.cablebilling.lineman.data.network.generated.ReceiptActionType
 import com.cablebilling.lineman.data.payments.PaymentReceipts
 import com.cablebilling.lineman.data.payments.PaymentRepository
+import com.cablebilling.lineman.data.receipts.ReceiptActionRecorder
 import com.cablebilling.lineman.printing.PrintProblem
 import com.cablebilling.lineman.printing.PrintResult
 import com.cablebilling.lineman.printing.ReceiptPrinter
@@ -106,6 +108,8 @@ class CollectDoneViewModel
         private val printer: ReceiptPrinter,
         private val voiceLines: VoiceLines,
         private val json: Json,
+        // T-069: printed / print_failed go to the receipt-action outbox (never touches the payment).
+        private val receiptActions: ReceiptActionRecorder = ReceiptActionRecorder.None,
     ) : ViewModel() {
         private val printState = MutableStateFlow<Pair<PrintState, VoiceLine?>>(PrintState.Idle to null)
 
@@ -144,6 +148,17 @@ class CollectDoneViewModel
                     } else {
                         printer.print(PaymentReceipts.model(payment, session, json))
                     }
+                if (payment != null) {
+                    val action =
+                        if (result ==
+                            PrintResult.Printed
+                        ) {
+                            ReceiptActionType.PRINTED
+                        } else {
+                            ReceiptActionType.PRINT_FAILED
+                        }
+                    receiptActions.record(payment.id, action)
+                }
                 printState.value =
                     when (result) {
                         PrintResult.Printed -> {

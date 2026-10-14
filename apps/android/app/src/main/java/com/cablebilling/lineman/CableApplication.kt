@@ -3,6 +3,7 @@ package com.cablebilling.lineman
 import android.app.Application
 import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.Configuration
+import com.cablebilling.lineman.data.receipts.ReceiptSyncScheduler
 import com.cablebilling.lineman.data.sync.PaymentSyncScheduler
 import com.cablebilling.lineman.data.sync.RosterSyncScheduler
 import com.cablebilling.lineman.diagnostics.AppInfo
@@ -24,6 +25,9 @@ class CableApplication :
 
     @Inject
     lateinit var paymentSync: PaymentSyncScheduler
+
+    @Inject
+    lateinit var receiptSync: ReceiptSyncScheduler
 
     @Inject
     lateinit var diagnostics: DiagnosticsRecorder
@@ -48,5 +52,6 @@ class CableApplication :
         AppLanguage.applyDefaultAtAppStart()
         rosterSync.start() // T-064: roster pull on sign-in, app open and every 30 min.
         paymentSync.start() // T-066: push payments saved on the phone on sign-in and app open.
+        receiptSync.start() // T-069: receipt actions, phone changes and queued links after payments sync.
     }
 }

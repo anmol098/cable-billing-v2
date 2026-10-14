@@ -36,6 +36,27 @@ interface ReceiptActionDao {
 
     @Query("SELECT * FROM receipt_actions_outbox WHERE payment_id = :paymentId ORDER BY at, id")
     fun observeForPayment(paymentId: String): Flow<List<ReceiptActionOutboxEntity>>
+
+    /**
+     * T-069: the oldest [limit] pending actions the server can take now: their payment is at the
+     * office (else it answers retry_later) and was taken by [collectorId] (the signed-in lineman).
+     */
+    @Query(
+        "SELECT o.* FROM receipt_actions_outbox o JOIN payments p ON p.id = o.payment_id " +
+            "WHERE o.state = 'PENDING' AND p.state = 'SENT_TO_OFFICE' AND p.collector_id = :collectorId " +
+            "ORDER BY o.at, o.id LIMIT :limit",
+    )
+    suspend fun oldestSendable(
+        collectorId: String,
+        limit: Int,
+    ): List<ReceiptActionOutboxEntity>
+
+    /** T-069: how many actions are still pending (any payment). */
+    @Query("SELECT COUNT(*) FROM receipt_actions_outbox WHERE state = 'PENDING'")
+    suspend fun countPending(): Int
+
+    @Query("SELECT * FROM receipt_actions_outbox WHERE id = :id")
+    suspend fun get(id: String): ReceiptActionOutboxEntity?
 }
 
 /** The server's view of the lineman's day (T-070). */

@@ -31,12 +31,17 @@ import com.cablebilling.lineman.R
 import com.cablebilling.lineman.feature.collect.CollectDoneRoute
 import com.cablebilling.lineman.feature.collect.CollectDoneScreen
 import com.cablebilling.lineman.feature.collect.CollectScreen
+import com.cablebilling.lineman.feature.collect.ReceiptShareActions
 import com.cablebilling.lineman.feature.collect.navigateToCollectDone
 import com.cablebilling.lineman.feature.customer.CustomerRoute
 import com.cablebilling.lineman.feature.customer.CustomerScreen
 import com.cablebilling.lineman.feature.customer.navigateToCustomer
 import com.cablebilling.lineman.feature.printer.PrinterSetup
 import com.cablebilling.lineman.feature.printer.PrinterSetupRoute
+import com.cablebilling.lineman.feature.receipt.ReceiptShareRoute
+import com.cablebilling.lineman.feature.receipt.ShareChannel
+import com.cablebilling.lineman.feature.receipt.navigateToReceiptShare
+import com.cablebilling.lineman.feature.receipt.receiptShareScreen
 import com.cablebilling.lineman.feature.search.SearchScreen
 import com.cablebilling.lineman.feature.settings.Settings
 import com.cablebilling.lineman.feature.settings.SettingsRoute
@@ -99,7 +104,19 @@ fun CableApp(
     customerScreen: CustomerSlot = { customerId, onCollect, onBack -> CustomerScreen(customerId, onCollect, onBack) },
     collectScreen: CollectSlot = { customerId, onSaved, onBack -> CollectScreen(customerId, onSaved, onBack) },
     collectDone: CollectDoneSlot = { paymentId, onPrinterSetup, onFinish ->
-        CollectDoneScreen(paymentId, onPrinterSetup, onFinish)
+        // T-069: the WhatsApp and SMS tiles open the receipt share screen.
+        val shareActions =
+            ReceiptShareActions(
+                onWhatsApp =
+                    dropUnlessResumed {
+                        navController.navigateToReceiptShare(
+                            paymentId,
+                            ShareChannel.WhatsApp,
+                        )
+                    },
+                onSms = dropUnlessResumed { navController.navigateToReceiptShare(paymentId, ShareChannel.Sms) },
+            )
+        CollectDoneScreen(paymentId, onPrinterSetup, onFinish, shareActions = shareActions)
     },
     waitingScreen: WaitingSlot = { WaitingScreen() },
     todayScreen: TodaySlot = { onHandOver -> TodayScreen(onHandOver) },
@@ -172,6 +189,8 @@ fun CableApp(
             composable<WaitingRoute> { waitingScreen() }
             // Printer setup (T-068): opened from settings (T-071) and the receipt screen (T-069).
             composable<PrinterSetupRoute> { PrinterSetup(onBack = { navController.popBackStack() }) }
+            // Receipt by WhatsApp / SMS (T-069), above the Done screen.
+            receiptShareScreen(navController)
             // Settings (T-071), above the search home on the Search tab.
             composable<SettingsRoute> {
                 settingsScreen(
@@ -223,7 +242,13 @@ private val TopLevelDestination.subScreens: List<KClass<*>>
     get() =
         when (this) {
             TopLevelDestination.Search -> {
-                listOf(CustomerRoute::class, CollectRoute::class, CollectDoneRoute::class, SettingsRoute::class)
+                listOf(
+                    CustomerRoute::class,
+                    CollectRoute::class,
+                    CollectDoneRoute::class,
+                    SettingsRoute::class,
+                    ReceiptShareRoute::class,
+                )
             }
 
             TopLevelDestination.Today -> {

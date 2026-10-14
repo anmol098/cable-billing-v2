@@ -1196,6 +1196,48 @@
       "title": "टेस्ट प्रिंट"
     }
   },
+  "mobile_receipt": {
+    "link": {
+      "after_sync": "इंटरनेट आने पर लिंक तैयार होगा।",
+      "getting": "रसीद का लिंक बन रहा है…",
+      "ready": "रसीद का लिंक तैयार है",
+      "unavailable": "रसीद का लिंक नहीं बनेगा: ऑफिस ने यह पेमेंट नहीं लिया। PDF चलेगा।"
+    },
+    "message": {
+      "text": "{operator}: रसीद {number}। {customer} से {amount} मिले। रसीद देखें: {link}"
+    },
+    "payment_safe": "पेमेंट सेव है। बस रसीद नहीं खुली।",
+    "pdf": {
+      "failed": "PDF नहीं बना। फिर से करें।",
+      "making": "PDF बन रहा है…",
+      "share": "PDF शेयर करें",
+      "shared": "PDF शेयर किया"
+    },
+    "phone": {
+      "change": "नंबर बदलें",
+      "delete": "मिटाएँ",
+      "invalid": "10 अंक, 6, 7, 8 या 9 से शुरू",
+      "label": "ग्राहक का मोबाइल नंबर",
+      "missing": "फ़ोन में मोबाइल नंबर नहीं है। नंबर लिखें।",
+      "question": "क्या यह ग्राहक का नंबर है?",
+      "queued": "नया नंबर फ़ोन में सेव है। इंटरनेट आने पर ऑफिस को अपने आप मिलेगा।",
+      "type": "ग्राहक का मोबाइल नंबर लिखें",
+      "use": "यह नंबर लें",
+      "yes": "हाँ, यही नंबर"
+    },
+    "sms": {
+      "missing": "इस फ़ोन में SMS ऐप नहीं है।",
+      "open": "SMS खोलें"
+    },
+    "title": {
+      "sms": "SMS से रसीद",
+      "whatsapp": "WhatsApp पर रसीद"
+    },
+    "whatsapp": {
+      "missing": "इस फ़ोन में WhatsApp नहीं है। SMS या PDF शेयर करें।",
+      "open": "WhatsApp खोलें"
+    }
+  },
   "mobile_search": {
     "customer_call": "फ़ोन करें",
     "customer_connections": "{count, plural, one {# कनेक्शन} other {# कनेक्शन}}",

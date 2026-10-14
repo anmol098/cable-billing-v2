@@ -1196,6 +1196,48 @@
       "title": "Test print"
     }
   },
+  "mobile_receipt": {
+    "link": {
+      "after_sync": "The link will be ready when there is internet.",
+      "getting": "Getting the receipt link…",
+      "ready": "Receipt link is ready",
+      "unavailable": "No receipt link: the office did not take this payment. PDF still works."
+    },
+    "message": {
+      "text": "{operator}: Receipt {number}. {amount} received from {customer}. See the receipt: {link}"
+    },
+    "payment_safe": "The payment is saved. Only the receipt did not open.",
+    "pdf": {
+      "failed": "Could not make the PDF. Try again.",
+      "making": "Making the PDF…",
+      "share": "Share PDF",
+      "shared": "PDF shared"
+    },
+    "phone": {
+      "change": "Change number",
+      "delete": "Delete",
+      "invalid": "10 digits, starting with 6, 7, 8 or 9",
+      "label": "Customer's mobile number",
+      "missing": "No mobile number on the phone. Type it.",
+      "question": "Is this the customer's number?",
+      "queued": "New number saved on phone. The office gets it by itself when there is internet.",
+      "type": "Type the customer's mobile number",
+      "use": "Use this number",
+      "yes": "Yes, this number"
+    },
+    "sms": {
+      "missing": "No SMS app on this phone.",
+      "open": "Open SMS"
+    },
+    "title": {
+      "sms": "Receipt by SMS",
+      "whatsapp": "Receipt on WhatsApp"
+    },
+    "whatsapp": {
+      "missing": "WhatsApp is not on this phone. Use SMS or Share PDF.",
+      "open": "Open WhatsApp"
+    }
+  },
   "mobile_search": {
     "customer_call": "Call",
     "customer_connections": "{count, plural, one {# connection} other {# connections}}",
