@@ -3,10 +3,10 @@ id: T-096a
 title: Health DB ping and Sentry check-ins for the crons
 phase: 5
 area: web
-status: todo
-owner:
-claimed_at:
-branch:
+status: claimed
+owner: agent-t096a
+claimed_at: 2026-10-14T20:07:30.560Z
+branch: task/T-096a-health-db-ping-and-sentry-check-ins-for
 depends_on: [T-096]
 review: self
 claimable_by: agent
@@ -62,3 +62,7 @@ PLAN §17 (observability), PRD §11, T-096 completion notes, `docs/runbooks/moni
 ## Completion notes
 
 _The agent fills this in before opening the PR._
+
+## Board log
+
+- 2026-10-14T20:07:30.566Z claimed by agent-t096a
