@@ -42,7 +42,12 @@ describeDb("money reports on the T-036 seed", () => {
 
   beforeAll(async () => {
     const db: DbClient = t.current.db;
-    await seedDatabase(db, { scale: "small", seed: 7, asOf: AS_OF, verifyPerOperator: 5 });
+    await seedDatabase(db, {
+      scale: "small",
+      seed: 7,
+      asOf: businessDate(AS_OF),
+      verifyPerOperator: 5,
+    });
     rt = testRuntime(db, { now: () => NOW });
     const operators = await t.current.admin.query<{ id: string }>(
       "SELECT id FROM operators ORDER BY id",

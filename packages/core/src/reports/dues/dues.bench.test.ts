@@ -14,6 +14,7 @@
 import { users } from "@cb/db";
 import { seedDatabase } from "@cb/db/seed";
 import { describeDb, useTestDatabase } from "@cb/db/testing";
+import { businessDate } from "@cb/domain";
 import { and, eq } from "drizzle-orm";
 import { beforeAll, describe, expect, it } from "vitest";
 import { newRequestId, type ServiceRuntime } from "../../context/runtime";
@@ -38,7 +39,7 @@ describeBench("money reports on the legacy-size seed", () => {
     const seeded = await seedDatabase(t.current.db, {
       scale: "legacy",
       seed: 1,
-      asOf: "2026-10-13",
+      asOf: businessDate("2026-10-13"),
       verifyPerOperator: 5,
     });
     await t.current.admin.query("ANALYZE");
