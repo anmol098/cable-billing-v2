@@ -9,11 +9,16 @@ import { reasonField } from "../inputs";
 
 /**
  * `connections.add`'s input plus the Owner's reason, which is stored on every adjustment the add
- * makes (PLAN §8.3 "explicit adjustment with a reason").
+ * makes (PLAN §8.3 "explicit adjustment with a reason"), and the total the Owner was shown
+ * (`adjustments.preview_add`'s `totalPaise`): when the bills changed in between (a run started),
+ * the add is refused with CONFLICT `preview_stale` instead of charging something else.
  */
 export const BackDatedAddConnectionInput = z.intersection(
   AddConnectionInput,
-  z.object({ reason: reasonField() }),
+  z.object({
+    reason: reasonField(),
+    expectedTotalPaise: z.number().int().min(0).max(Number.MAX_SAFE_INTEGER),
+  }),
 );
 export type BackDatedAddConnectionCommand = z.output<typeof BackDatedAddConnectionInput>;
 

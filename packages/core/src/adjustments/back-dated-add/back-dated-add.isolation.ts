@@ -1,7 +1,12 @@
 /**
  * Tenant isolation cases for the Owner's back-dated new connection (T-045a, PLAN §9.1, §16). Run
  * by src/testing/isolation.test.ts: as tenant A with tenant B's ids every call is NOT_FOUND with
- * nothing written anywhere; with A's own ids it works.
+ * nothing written anywhere; with A's own ids it gets past the lookups.
+ *
+ * Limit: the harness gives a case the victim's seed for the attack, so "A's own customer with B's
+ * plan" can't be expressed here; the "with its plan" cases stop at the customer lookup (as
+ * T-034's "add a VC on another tenant's plan" does). ./scenarios.test.ts covers it directly: A's
+ * Owner with A's customer and B's plan id → NOT_FOUND for the add and the preview, nothing written.
  */
 import { customers, plans, uuidv7 } from "@cb/db";
 import { businessDateOf } from "@cb/domain";
@@ -46,7 +51,11 @@ export const backDatedAddConnectionIsolation = defineIsolationCases(backDatedAdd
         rentalPaise: 25_000,
         startDate: today(),
         reason: "Isolation attempt",
+        expectedTotalPaise: 0,
       }),
+      // The attacker's own customer has no billed month: the add is refused as not back-dated
+      // (VALIDATION), after the customer lookup that this case proves.
+      control: "not_not_found",
     },
     {
       name: "a back-dated connection on another tenant's customer with its plan",
@@ -56,7 +65,11 @@ export const backDatedAddConnectionIsolation = defineIsolationCases(backDatedAdd
         planId: seed.planId,
         startDate: today(),
         reason: "Isolation attempt",
+        expectedTotalPaise: 0,
       }),
+      // The attacker's own customer has no billed month: the add is refused as not back-dated
+      // (VALIDATION), after the customer lookup that this case proves.
+      control: "not_not_found",
     },
   ],
 });

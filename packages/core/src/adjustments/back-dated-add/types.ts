@@ -13,17 +13,21 @@ export interface AddConnectionPreview {
   /** The monthly rent the connection would have (the plan's amount, or the own amount). */
   readonly rentalPaise: Paise;
   /**
-   * The start day is in a month that is already billed for the customer while a later month is
-   * billed too (PLAN §8.3): only the Owner may add it, through `adjustments.back_dated_add`, with
-   * a reason. Staff get CONFLICT `billed_period` from `connections.add`.
+   * The add must correct months whose bills are made or whose billing run has been (./months.ts;
+   * PLAN §8.3): only the Owner may do it, through `adjustments.back_dated_add`, with a reason.
+   * Staff get CONFLICT `billed_period` from `connections.add` when the start reaches before the
+   * customer's latest billed month.
    */
   readonly backDated: boolean;
-  /** The customer's latest billed month (null: never billed). */
+  /**
+   * The latest month whose bills are made for the customer or whose run has been (null: none):
+   * "Bills up to {month} are already made".
+   */
   readonly latestBilledPeriod: Period | null;
   readonly policy: MidMonthStartPolicy;
   /**
-   * The start month (D-18 policy, `change_month`) and every billed month after it (its full rent,
-   * `later_month`), oldest first.
+   * The start month (`change_month`: the D-18 policy, or its full rent for a start on the 1st of a
+   * covered month) and every covered month after it (its full rent, `later_month`), oldest first.
    */
   readonly months: readonly MonthEffectView[];
   /** Σ of the adjustments the add would make (always ≥ 0: a start only adds rent). */
