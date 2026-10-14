@@ -196,7 +196,8 @@
     "field.channel",
     "field.count",
     "field.expires_at",
-    "field.sign_in_setup"
+    "field.sign_in_setup",
+    "field.password"
   ],
   "description": "आपके बिज़नेस में हर बदलाव: किसने किया और कब। यह पेज सिर्फ़ आप (मालिक) देख सकते हैं।",
   "filters": {
@@ -467,6 +468,7 @@
     "channel": "कहाँ",
     "count": "कितने",
     "expires_at": "कब तक चलेगा",
-    "sign_in_setup": "लॉग इन किसने बनाया"
+    "sign_in_setup": "लॉग इन किसने बनाया",
+    "password": "पासवर्ड"
   }
 }

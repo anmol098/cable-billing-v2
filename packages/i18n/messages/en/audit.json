@@ -268,6 +268,7 @@
     "channel": "Where",
     "count": "How many",
     "expires_at": "Works until",
-    "sign_in_setup": "Sign-in set up by"
+    "sign_in_setup": "Sign-in set up by",
+    "password": "Password"
   }
 }
