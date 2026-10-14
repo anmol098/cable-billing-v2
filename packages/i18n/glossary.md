@@ -429,6 +429,20 @@ that it opened another app (RULE-19). `HonestReceiptWordsTest` checks every `mob
 | Free trial: {n} days left | फ़्री ट्रायल: {n} दिन बाकी | Days until the free trial ends (Owner only) | credit-card, `semantic.pending` | Trial expiry, Subscription status |
 | Scan this with the lineman's phone | लाइनमैन के फ़ोन से यह QR स्कैन करें | The QR code that opens the app on Google Play | qr-code | Download APK, Install link |
 
+## Who changed what words (web Settings → Who changed what, T-035)
+
+| English | हिंदी | Means | Icon / colour | Not this |
+|---|---|---|---|---|
+| Who changed what | किसने क्या बदला | The Owner's page listing every change, newest first | rotate-ccw-clock | Audit log, Activity log, ऑडिट |
+| {name} ({role}) changed … | {name} ({role}) ने … बदला | One change as a sentence: who, then what | — | Event, Entry, Record |
+| The app (by itself) | ऐप ने खुद | A change the app made on its own (monthly bills, clean-ups) | — | System, Job, Cron |
+| See what changed | क्या बदला, देखें | Open the before/after details of one change | arrow-right | Diff, Details, Payload |
+| Before / After | पहले / बाद में | The value before and after the change | — | Old value / New value |
+| Hidden | छिपा हुआ | A secret (a password) the page never shows | eye-off, grey | Redacted, Masked, *** |
+| Older changes / Back to the newest | पुराने बदलाव / सबसे नए पर वापस | Move through the list, 50 changes at a time | arrow-right / arrow-left | Next page, Load more |
+
+Phone numbers in the details show only the last four digits (`XXXXXX3210`), as on the receipt page.
+
 ## Words we never show users
 
 Invoice, Ledger, Allocation, Adjustment, Reversal, Tenant, Sync / Synced / Pending sync,

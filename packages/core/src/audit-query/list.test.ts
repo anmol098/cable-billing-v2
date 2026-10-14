@@ -5,7 +5,7 @@
  * thing), keyset pages that never repeat or skip an event while new events arrive, and the
  * viewer's own redaction of rows a writer did not redact.
  */
-import { areas, auditEvents, customers, type Tx, uuidv7 } from "@cb/db";
+import { areas, auditEvents, customers, plans, type Tx, uuidv7 } from "@cb/db";
 import { describeDb, useTestDatabase } from "@cb/db/testing";
 import { expect, it } from "vitest";
 import { writeAuditEvent } from "../audit/audit";
@@ -149,6 +149,7 @@ describeDb("audit viewer (T-035)", () => {
     const s = await setup();
     const customerId = uuidv7();
     const areaId = uuidv7();
+    const planId = uuidv7();
     const { payment, receipt } = await tenantTx(s, async (tx) => {
       await tx.insert(customers).values({
         id: customerId,
@@ -159,6 +160,12 @@ describeDb("audit viewer (T-035)", () => {
       await tx
         .insert(areas)
         .values({ id: areaId, operatorId: s.tenant.operatorId, name: "Gandhi Nagar" });
+      await tx.insert(plans).values({
+        id: planId,
+        operatorId: s.tenant.operatorId,
+        name: "Gold 300",
+        monthlyAmountPaise: 30_000,
+      });
       const posted = await postPaymentInTx(
         tx,
         {
@@ -200,8 +207,20 @@ describeDb("audit viewer (T-035)", () => {
       entityType: "receipt_link",
       entityId: uuidv7(), // purged since
     });
+    await eventAt(s, "2026-10-13T06:00:05Z", {
+      action: "plans.update",
+      entityType: "plan",
+      entityId: planId,
+      before: { monthly_amount_paise: 25_000 },
+      after: { monthly_amount_paise: 30_000, connection_count: 4 },
+    });
 
-    const [gone, purged, deactivated, area, posted] = (await list(s)).events as AuditEventView[];
+    const [plan, gone, purged, deactivated, area, posted] = (await list(s))
+      .events as AuditEventView[];
+    expect(plan).toMatchObject({
+      target: { kind: "text", value: "Gold 300" },
+      details: { fields: { kind: "fields", value: ["monthly_amount_paise"] } },
+    });
     expect(posted).toMatchObject({
       target: { kind: "text", value: receipt.receiptNumber },
       details: {

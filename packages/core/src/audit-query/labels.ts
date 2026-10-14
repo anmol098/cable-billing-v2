@@ -14,6 +14,7 @@ import {
   customers,
   devices,
   payments,
+  plans,
   receiptLinks,
   receipts,
   type Tx,
@@ -54,6 +55,13 @@ const LOOKUPS: Readonly<Record<string, Lookup>> = {
       .select({ id: users.id, name: users.name })
       .from(users)
       .where(and(eq(users.operatorId, op), inArray(users.id, ids)));
+    return new Map(rows.map((r) => [r.id, { target: text(r.name) }]));
+  },
+  async plan(tx, op, ids) {
+    const rows = await tx
+      .select({ id: plans.id, name: plans.name })
+      .from(plans)
+      .where(and(eq(plans.operatorId, op), inArray(plans.id, ids)));
     return new Map(rows.map((r) => [r.id, { target: text(r.name) }]));
   },
   async area(tx, op, ids) {

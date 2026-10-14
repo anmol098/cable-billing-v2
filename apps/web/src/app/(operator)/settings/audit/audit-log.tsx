@@ -32,6 +32,7 @@ import {
 const ENTITY_ICON: Readonly<Record<string, IconName>> = {
   customer: "customer",
   vc_assignment: "plan",
+  plan: "plan",
   payment: "cash",
   receipt: "bill",
   receipt_link: "share",
@@ -47,6 +48,7 @@ const ENTITY_ICON: Readonly<Record<string, IconName>> = {
 const WHAT_OPTIONS = [
   "customer",
   "vc_assignment",
+  "plan",
   "payment",
   "receipt",
   "collection_session",

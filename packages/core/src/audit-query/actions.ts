@@ -46,6 +46,7 @@ export interface AuditActionSpec {
 export const AUDIT_ENTITY_TYPES = [
   "customer",
   "vc_assignment",
+  "plan",
   "payment",
   "receipt",
   "receipt_link",
@@ -161,6 +162,18 @@ export const AUDIT_ACTIONS = {
   "areas.rename": { details: ({ before }) => ({ from: text(field(before, "name")) }) },
   "areas.archive": {},
   "areas.restore": {},
+  // Plans (T-031)
+  "plans.create": {},
+  "plans.update": {
+    details: ({ before, after }) => {
+      const fields = changedFields({ before, after });
+      const shown =
+        fields?.kind === "fields" ? fields.value.filter((f) => f !== "connection_count") : [];
+      return { fields: shown.length > 0 ? { kind: "fields", value: shown } : undefined };
+    },
+  },
+  "plans.retire": {},
+  "plans.restore": {},
   // Team (T-032)
   "team.add_lineman": {},
   "team.add_staff": {},

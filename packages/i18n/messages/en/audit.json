@@ -42,6 +42,7 @@
   "entity": {
     "customer": "Customer",
     "vc_assignment": "Connection",
+    "plan": "Plan",
     "payment": "Payment",
     "receipt": "Receipt",
     "receipt_link": "Receipt link",
@@ -81,6 +82,12 @@
       "rename": "{who} renamed area {from} to {target}",
       "archive": "{who} hid area {target}",
       "restore": "{who} showed area {target} again"
+    },
+    "plans": {
+      "create": "{who} added plan {target}",
+      "update": "{who} changed plan {target}: {fields}",
+      "retire": "{who} hid plan {target}",
+      "restore": "{who} showed plan {target} again"
     },
     "team": {
       "add_lineman": "{who} added lineman {target}",
@@ -159,6 +166,12 @@
       "rename": "Area renamed",
       "archive": "Area hidden",
       "restore": "Area shown again"
+    },
+    "plans": {
+      "create": "Plan added",
+      "update": "Plan changed",
+      "retire": "Plan hidden",
+      "restore": "Plan shown again"
     },
     "team": {
       "add_lineman": "Lineman added",
@@ -269,6 +282,8 @@
     "count": "How many",
     "expires_at": "Works until",
     "sign_in_setup": "Sign-in set up by",
-    "password": "Password"
+    "password": "Password",
+    "monthly_amount_paise": "Rent each month",
+    "connection_count": "Connections"
   }
 }

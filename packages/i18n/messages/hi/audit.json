@@ -34,6 +34,7 @@
     "role.platform_admin",
     "entity.customer",
     "entity.vc_assignment",
+    "entity.plan",
     "entity.payment",
     "entity.receipt",
     "entity.receipt_link",
@@ -60,6 +61,10 @@
     "sentence.areas.rename",
     "sentence.areas.archive",
     "sentence.areas.restore",
+    "sentence.plans.create",
+    "sentence.plans.update",
+    "sentence.plans.retire",
+    "sentence.plans.restore",
     "sentence.team.add_lineman",
     "sentence.team.add_staff",
     "sentence.team.reset_password",
@@ -108,6 +113,10 @@
     "action.areas.rename",
     "action.areas.archive",
     "action.areas.restore",
+    "action.plans.create",
+    "action.plans.update",
+    "action.plans.retire",
+    "action.plans.restore",
     "action.team.add_lineman",
     "action.team.add_staff",
     "action.team.reset_password",
@@ -197,7 +206,9 @@
     "field.count",
     "field.expires_at",
     "field.sign_in_setup",
-    "field.password"
+    "field.password",
+    "field.monthly_amount_paise",
+    "field.connection_count"
   ],
   "description": "आपके बिज़नेस में हर बदलाव: किसने किया और कब। यह पेज सिर्फ़ आप (मालिक) देख सकते हैं।",
   "filters": {
@@ -242,6 +253,7 @@
   "entity": {
     "customer": "ग्राहक",
     "vc_assignment": "कनेक्शन",
+    "plan": "प्लान",
     "payment": "पेमेंट",
     "receipt": "रसीद",
     "receipt_link": "रसीद का लिंक",
@@ -281,6 +293,12 @@
       "rename": "{who} ने एरिया {from} का नाम बदलकर {target} किया",
       "archive": "{who} ने एरिया {target} छिपाया",
       "restore": "{who} ने एरिया {target} फिर से दिखाया"
+    },
+    "plans": {
+      "create": "{who} ने प्लान {target} जोड़ा",
+      "update": "{who} ने प्लान {target} बदला: {fields}",
+      "retire": "{who} ने प्लान {target} छिपाया",
+      "restore": "{who} ने प्लान {target} फिर से दिखाया"
     },
     "team": {
       "add_lineman": "{who} ने लाइनमैन {target} जोड़ा",
@@ -359,6 +377,12 @@
       "rename": "एरिया का नाम बदला",
       "archive": "एरिया छिपाया",
       "restore": "एरिया फिर से दिखाया"
+    },
+    "plans": {
+      "create": "प्लान जोड़ा",
+      "update": "प्लान बदला",
+      "retire": "प्लान छिपाया",
+      "restore": "प्लान फिर से दिखाया"
     },
     "team": {
       "add_lineman": "लाइनमैन जोड़ा",
@@ -469,6 +493,8 @@
     "count": "कितने",
     "expires_at": "कब तक चलेगा",
     "sign_in_setup": "लॉग इन किसने बनाया",
-    "password": "पासवर्ड"
+    "password": "पासवर्ड",
+    "monthly_amount_paise": "हर महीने का किराया",
+    "connection_count": "कनेक्शन"
   }
 }
