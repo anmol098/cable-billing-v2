@@ -44,7 +44,7 @@ export interface DuesTotals {
   readonly advanceCustomers: number;
   readonly advancePaise: Paise;
   readonly netPaise: Paise;
-  /** Customers per oldest bucket (owing customers only). */
+  /** Customers with some due in each bucket (the list a bucket filter shows). */
   readonly customersByBucket: Readonly<Record<AgeingBucket, number>>;
 }
 

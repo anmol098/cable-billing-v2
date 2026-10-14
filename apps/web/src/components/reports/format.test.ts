@@ -102,8 +102,6 @@ describe("asOfText", () => {
       endOfDay: true,
     };
     expect(asOfText(past, "en", reportsT())).toBe("Numbers as of the end of 31 Oct 2026");
-    expect(asOfText(past, "hi", reportsT("hi"))).toBe(
-      "31 अक्टू 2026 का दिन खत्म होने तक के आँकड़े",
-    );
+    expect(asOfText(past, "hi", reportsT("hi"))).toBe("31 अक्टू 2026 का दिन खत्म होने तक के आँकड़े");
   });
 });

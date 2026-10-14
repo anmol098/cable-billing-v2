@@ -51,12 +51,14 @@
       "since": "Unpaid since",
       "age": "How old",
       "credit": "Credit",
-      "area": "Area"
+      "area": "Area",
+      "due_in": "Due: {age}"
     },
     "not_on_bill": "Not on a bill yet",
     "closed": "Closed",
     "empty_due": "Nobody owes money here.",
-    "empty_advance": "No customer has credit here."
+    "empty_advance": "No customer has credit here.",
+    "of_total": "of {amount} due"
   },
   "bills": {
     "description": "Bills of the months you choose, how much is paid and how much is still due.",

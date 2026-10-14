@@ -43,7 +43,7 @@ export const DuesReportInput = z.object({
   areaId: idInput.optional(),
   /** The list: customers who owe (default) or who have an advance. */
   kind: z.enum(DUES_LIST_KINDS).default("due"),
-  /** The list (kind `due`): only customers whose oldest due is in this bucket. */
+  /** The list (kind `due`): only customers with some due in this bucket. */
   bucket: z.enum(AGEING_BUCKETS).optional(),
   page: z.int().min(1).max(10_000).default(1),
 });
@@ -128,7 +128,8 @@ export function duesCte(input: {
 function listFilter(input: DuesReportCommand): SQL {
   if (input.kind === "advance") return sql`pc.advance > 0`;
   if (input.bucket === undefined) return sql`pc.due > 0`;
-  return sql`pc.due > 0 AND pc.oldest_bucket = ${AGEING_BUCKETS.indexOf(input.bucket)}::int`;
+  const column = sql.raw(`pc.b${AGEING_BUCKETS.indexOf(input.bucket)}`);
+  return sql`pc.due > 0 AND ${column} > 0`;
 }
 
 const totalsColumns = sql`
@@ -141,10 +142,10 @@ const totalsColumns = sql`
   (count(*) FILTER (WHERE pc.advance > 0))::int AS advance_customers,
   coalesce(sum(pc.advance), 0)::text AS advance,
   coalesce(sum(pc.net), 0)::text AS net,
-  (count(*) FILTER (WHERE pc.due > 0 AND pc.oldest_bucket = 0))::int AS c0,
-  (count(*) FILTER (WHERE pc.due > 0 AND pc.oldest_bucket = 1))::int AS c1,
-  (count(*) FILTER (WHERE pc.due > 0 AND pc.oldest_bucket = 2))::int AS c2,
-  (count(*) FILTER (WHERE pc.due > 0 AND pc.oldest_bucket = 3))::int AS c3`;
+  (count(*) FILTER (WHERE pc.b0 > 0))::int AS c0,
+  (count(*) FILTER (WHERE pc.b1 > 0))::int AS c1,
+  (count(*) FILTER (WHERE pc.b2 > 0))::int AS c2,
+  (count(*) FILTER (WHERE pc.b3 > 0))::int AS c3`;
 
 interface TotalsRow extends Record<string, unknown> {
   due_customers: number;

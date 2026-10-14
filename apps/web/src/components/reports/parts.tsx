@@ -215,12 +215,15 @@ export function DuesList({
   t,
   locale,
   empty,
+  bucket,
 }: {
   rows: readonly DuesRow[];
   kind: "due" | "advance";
   t: Translate;
   locale: DisplayLocale;
   empty: string;
+  /** A bucket filter: the Due column shows the due of that age (what the bucket card adds up). */
+  bucket?: Bucket | undefined;
 }) {
   const customer: DataTableColumn<DuesRow> = {
     id: "customer",
@@ -243,9 +246,21 @@ export function DuesList({
           customer,
           {
             id: "due",
-            header: t("dues.col.due"),
+            header: bucket
+              ? t("dues.col.due_in", { age: t(`dues.bucket.${bucket}`) })
+              : t("dues.col.due"),
             align: "end",
-            cell: (row) => <Amount paise={row.duePaise} tone="due" />,
+            cell: (row) =>
+              bucket ? (
+                <span className="flex flex-col items-end">
+                  <Amount paise={row.buckets[bucket]} tone="due" />
+                  <span className="text-sm text-text-muted">
+                    {t("dues.of_total", { amount: `₹${rupees(row.duePaise)}` })}
+                  </span>
+                </span>
+              ) : (
+                <Amount paise={row.duePaise} tone="due" />
+              ),
           },
           {
             id: "since",

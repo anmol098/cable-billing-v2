@@ -140,6 +140,13 @@ describe("DuesList", () => {
     expect(rows[2]).toHaveTextContent("ZoyaZ-9 · Closed₹50Not on a bill yet0–30 days");
   });
 
+  it("with an age filter, shows the due of that age (what the age card adds up)", () => {
+    render(<DuesList rows={[duesRow()]} kind="due" t={t} locale="en" empty="x" bucket="d61_90" />);
+    const rows = within(screen.getByRole("table")).getAllByRole("row");
+    expect(rows[0]).toHaveTextContent("Due: 61–90 days");
+    expect(rows[1]).toHaveTextContent("₹300of ₹1,000 due");
+  });
+
   it("shows credit customers, in Hindi too, and an empty sentence", () => {
     const { rerender } = render(
       <DuesList

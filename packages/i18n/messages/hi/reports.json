@@ -104,7 +104,9 @@
     "payments.taken_at",
     "payments.reached_at",
     "payments.nobody",
-    "payments.empty"
+    "payments.empty",
+    "dues.col.due_in",
+    "dues.of_total"
   ],
   "as_of": {
     "now": "{when} तक के आँकड़े",
@@ -158,12 +160,14 @@
       "since": "कब से बाकी",
       "age": "कितना पुराना",
       "credit": "एडवांस",
-      "area": "एरिया"
+      "area": "एरिया",
+      "due_in": "बाकी: {age}"
     },
     "not_on_bill": "अभी बिल में नहीं",
     "closed": "बंद",
     "empty_due": "यहाँ किसी पर बाकी नहीं है।",
-    "empty_advance": "यहाँ किसी ग्राहक का एडवांस नहीं है।"
+    "empty_advance": "यहाँ किसी ग्राहक का एडवांस नहीं है।",
+    "of_total": "कुल {amount} बाकी में से"
   },
   "bills": {
     "description": "चुने हुए महीनों के बिल, कितने भरे और कितना बाकी है।",

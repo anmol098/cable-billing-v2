@@ -1731,6 +1731,7 @@
         "credit": "Credit",
         "customer": "Customer",
         "due": "Due",
+        "due_in": "Due: {age}",
         "since": "Unpaid since"
       },
       "credit": "Credit",
@@ -1750,6 +1751,7 @@
       "net": "Due minus credit",
       "net_help": "This is what all customers owe together. It matches the customers' accounts.",
       "not_on_bill": "Not on a bill yet",
+      "of_total": "of {amount} due",
       "see_customers": "See these customers",
       "total_due": "Total due"
     },

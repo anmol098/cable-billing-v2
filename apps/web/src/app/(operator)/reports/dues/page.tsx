@@ -201,6 +201,7 @@ export default async function DuesReportPage({
           t={t}
           locale={displayLocale}
           empty={kind === "due" ? t("dues.empty_due") : t("dues.empty_advance")}
+          bucket={bucket}
         />
         <TotalsRow
           label={t("total")}
@@ -210,8 +211,16 @@ export default async function DuesReportPage({
             kind === "due"
               ? {
                   id: "amount",
-                  label: t("dues.col.due"),
-                  value: <Amount paise={listTotals.duePaise} tone="due" size="xl" />,
+                  label: bucket
+                    ? t("dues.col.due_in", { age: t(`dues.bucket.${bucket}`) })
+                    : t("dues.col.due"),
+                  value: (
+                    <Amount
+                      paise={bucket ? listTotals.buckets[bucket] : listTotals.duePaise}
+                      tone="due"
+                      size="xl"
+                    />
+                  ),
                 }
               : {
                   id: "amount",

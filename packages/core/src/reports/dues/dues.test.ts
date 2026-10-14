@@ -168,7 +168,7 @@ describeDb("reports.dues", () => {
         advanceCustomers: 1,
         advancePaise: 160_000,
         netPaise: 245_000,
-        customersByBucket: { d0_30: 0, d31_60: 0, d61_90: 2, d90_plus: 3 },
+        customersByBucket: { d0_30: 0, d31_60: 4, d61_90: 4, d90_plus: 3 },
       });
       const byCode = new Map(now.rows.map((row) => [row.customerCode, row]));
       expect(byCode.get("A-1")).toMatchObject({
@@ -269,6 +269,16 @@ describeDb("reports.dues", () => {
       expect(old.listTotals.dueCustomers).toBe(3);
       // The page's totals of the whole report don't change with the list's filters.
       expect(old.totals).toEqual(report.totals);
+      // A bucket's card (amount, customers) = the list it opens (rows, totals row).
+      for (const bucket of ["d31_60", "d61_90", "d90_plus"] as const) {
+        const list = await dues({ bucket });
+        expect(list.rows.length).toBe(report.totals.customersByBucket[bucket]);
+        expect(list.listTotals.dueCustomers).toBe(report.totals.customersByBucket[bucket]);
+        expect(list.listTotals.buckets[bucket]).toBe(report.totals.buckets[bucket]);
+        expect(list.rows.every((row) => row.buckets[bucket] > 0)).toBe(true);
+      }
+      const month2 = await dues({ bucket: "d31_60" });
+      expect(month2.rows.map((row) => row.customerCode)).toEqual(["A-1", "C-3", "F-5", "B-2"]);
       const none = await dues({ bucket: "d0_30" });
       expect(none.rows).toEqual([]);
       expect(none.listTotals.duePaise).toBe(0);
