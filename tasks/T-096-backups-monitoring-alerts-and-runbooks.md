@@ -3,10 +3,10 @@ id: T-096
 title: Backups, monitoring alerts and runbooks
 phase: 5
 area: infra
-status: todo
-owner:
-claimed_at:
-branch:
+status: claimed
+owner: agent-t096
+claimed_at: 2026-10-14T12:34:57.733Z
+branch: task/T-096-backups-monitoring-alerts-and-runbooks
 depends_on: [T-011, T-043]
 review: self
 claimable_by: agent
@@ -50,3 +50,7 @@ PLAN §17, PRD §15 #14, BRD §15 (Operational readiness) — see `docs/IMPLEMEN
 ## Completion notes
 
 _The agent fills this in before opening the PR: what was built, decisions taken, deviations, follow-up tasks created, and how it was verified._
+
+## Board log
+
+- 2026-10-14T12:34:57.733Z claimed by agent-t096
