@@ -773,7 +773,7 @@ describeDb("web authentication (Better Auth)", () => {
       );
     });
 
-    it("T-086b: tenant users are unaffected (password sessions keep working)", async () => {
+    it("T-086b: tenant users' password sessions keep working (nothing reads the mark for them)", async () => {
       const browser = newBrowser();
       await service.signIn({
         login: await loginOf(tenant.users.staff),
@@ -786,6 +786,110 @@ describeDb("web authentication (Better Auth)", () => {
       });
       const ctx = await service.tenantContext({ db: t.current.db }, browser.headers());
       expect(ctx.ok).toBe(true);
+    });
+
+    it("T-086b: an owner who turns on TOTP is signed out on their other devices, in their tenant's log", async () => {
+      const owner = await createUser(t.current, { operatorId: tenant.operatorId, role: "owner" });
+      await setPassword(owner.userId);
+      const login = await loginOf(owner.userId);
+      const office = newBrowser();
+      const home = newBrowser();
+      for (const browser of [office, home]) {
+        await service.signIn({ login, password: PASSWORD, headers: browser.headers() });
+      }
+      const homeSession = await service.getSession(home.headers());
+      expect(homeSession).toMatchObject({ role: "owner", twoFactorVerified: false });
+
+      const enrolment = await service.startTwoFactorEnrolment({
+        password: PASSWORD,
+        headers: office.headers(),
+      });
+      if (!enrolment.ok) throw new Error(enrolment.error.code);
+      expect(
+        await service.confirmTwoFactorEnrolment({
+          code: totp(enrolment.value.secret),
+          headers: office.headers(),
+        }),
+      ).toEqual({
+        ok: true,
+        value: { userId: owner.userId, role: "owner", otherSessionsEnded: 1 },
+      });
+      // The other browser is signed out; the enrolling one carries the mark and works as before.
+      expect(await service.getSession(home.headers())).toBeNull();
+      expect(await sessionRows(owner.userId)).toHaveLength(1);
+      expect(await service.getSession(office.headers())).toMatchObject({
+        role: "owner",
+        twoFactorEnabled: true,
+        twoFactorVerified: true,
+      });
+      expect((await service.tenantContext({ db: t.current.db }, office.headers())).ok).toBe(true);
+
+      // In the tenant's own audit log (the Owner sees it in Settings → audit), with the count.
+      const audit = await auditRows(owner.userId);
+      expect(audit.map((r) => r.action)).toEqual([
+        "auth.signed_in",
+        "auth.signed_in",
+        "auth.other_sessions_ended",
+        "auth.two_factor_enabled",
+      ]);
+      expect(audit[2]).toMatchObject({
+        operator_id: tenant.operatorId,
+        actor_role: "owner",
+        after: { sessions: 1, reason: "two_factor_enabled" },
+      });
+
+      // A code typed in a browser that is already signed in is not a new sign-in (Better Auth
+      // checks it against the existing session and makes none): refused, nothing audited.
+      expect(
+        await service.verifyTwoFactor({
+          code: totp(enrolment.value.secret),
+          headers: office.headers(),
+        }),
+      ).toEqual({ ok: false, error: { code: "TWO_FACTOR_EXPIRED" } });
+      expect(await auditRows(owner.userId)).toHaveLength(4);
+      expect(await sessionRows(owner.userId)).toHaveLength(1);
+    });
+
+    it("T-086b: when enrolment doesn't re-issue this browser's session, every session ends and nothing claims 2-step is on", async () => {
+      const admin4 = await createUser(t.current, { operatorId: null });
+      await setPassword(admin4.userId);
+      const login = await loginOf(admin4.userId);
+      const a = newBrowser();
+      const b = newBrowser();
+      for (const browser of [a, b]) {
+        await service.signIn({ login, password: PASSWORD, headers: browser.headers() });
+      }
+      const enrolment = await service.startTwoFactorEnrolment({
+        password: PASSWORD,
+        headers: a.headers(),
+      });
+      if (!enrolment.ok) throw new Error(enrolment.error.code);
+      // An inconsistent state: the TOTP row says verified, the user's flag is still off. Better
+      // Auth then accepts the code without turning TOTP on or re-issuing the session.
+      await t.current.admin.query("UPDATE two_factors SET verified = true WHERE user_id = $1", [
+        admin4.userId,
+      ]);
+      expect(
+        await service.confirmTwoFactorEnrolment({
+          code: totp(enrolment.value.secret),
+          headers: a.headers(),
+        }),
+      ).toEqual({ ok: false, error: { code: "SIGN_IN_AGAIN" } });
+      expect(await sessionRows(admin4.userId)).toEqual([]);
+      expect(await service.getSession(a.headers())).toBeNull();
+      expect(await service.getSession(b.headers())).toBeNull();
+      expect((await auditRows(admin4.userId)).map((r) => r.action)).toEqual([
+        "auth.signed_in",
+        "auth.signed_in",
+      ]);
+      expect(logs.records).toContainEqual(
+        expect.objectContaining({
+          event: "auth.two_factor_enrolment_incomplete",
+          user_id: admin4.userId,
+          reason: "no_verified_session",
+          sessions: 2,
+        }),
+      );
     });
   });
 

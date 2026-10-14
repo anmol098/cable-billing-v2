@@ -872,6 +872,7 @@
       "rate_limited": "Too many tries. Try again in {minutes, plural, one {# minute} other {# minutes}}.",
       "required": "Fill this in.",
       "role_not_allowed": "This login is for the phone app. Linemen sign in on the phone, not here.",
+      "sign_in_again": "2-step sign-in did not turn on. Sign in again and try once more.",
       "title": "Could not sign in",
       "two_factor_expired": "This took too long. Sign in again.",
       "unexpected": "Something went wrong. Try again."

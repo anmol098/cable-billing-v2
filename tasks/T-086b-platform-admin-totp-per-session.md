@@ -50,7 +50,12 @@ another browser) passes the gate once enrolment is done. The T-086 completion no
 - [x] A password-only admin session made before enrolment is refused at `/admin` after enrolment
       completes in another session (and is in fact gone).
 - [x] A session that passed the TOTP challenge at sign-in, or enrolled in it, gets in.
-- [x] Tenant users are unaffected.
+- [x] Tenant users: no new gate. What changes for them (decided in review: good practice):
+      - their sessions carry the mark when they pass TOTP;
+      - turning on TOTP (owner or staff) ends their other sessions, logged as
+        `auth.other_sessions_ended` in their tenant's audit log;
+      - nothing else reads the mark for them.
+      Their password sessions keep working as before.
 
 ## Tests required
 
@@ -102,8 +107,37 @@ PLAN §9.2, §12.4; T-026 and T-086 completion notes ("Known gap").
 | `apps/web/src/app/admin/_lib/context.ts` | passes `session.sessionId`; both new refusals fall through to `/login?next=…` (the unverified session was already deleted by `getSession`, so `/login` shows the form, no loop). |
 | `packages/core/src/auth/audit-events.ts`, `audit-query/actions.ts`, `packages/i18n/messages/{en,hi}/audit.json` | New action `auth.other_sessions_ended` (count detail) with `sentence.*` and `action.*` words; Hindi in `_review`. Generated `apps/web/messages/*.json`. |
 
-The 8-hour admin cap and `two_factor_required` are unchanged. Tenant users: their sessions get the
-marker too when they pass TOTP, but nothing reads it for them.
+The 8-hour admin cap and `two_factor_required` are unchanged.
+
+**What changes for tenant users** (owners and staff; the service supports TOTP for them, but the UI
+only routes admins to it). The review decided to keep this:
+
+1. Their sessions carry the mark when they pass TOTP.
+2. Turning on TOTP ends their **other** sessions, like an admin's. This is recorded as
+   `auth.other_sessions_ended` in **their tenant's** audit log. The Owner sees "Suresh (Owner)
+   turned on 2-step sign-in, so 1 other device was signed out" (the Hindi sentence is in `_review`).
+3. Nothing else reads the mark for them: no tenant gate checks it, and their password sessions
+   keep working.
+
+**Review fixes**
+
+- `verifyTwoFactor` now reports a sign-in only when Better Auth created a new TOTP-checked session.
+  In Better Auth's existing-session branch (a session cookie, no 2FA challenge), `valid()` returns
+  the old token and creates nothing. That now returns `TWO_FACTOR_EXPIRED` ("sign in again"), and
+  no `auth.signed_in` is written.
+- The fail-closed branch of `confirmTwoFactorEnrolment` now applies when Better Auth re-issued no
+  session for this browser, or the user's flag is still off. One example is a `two_factors` row
+  that is already `verified` while the user's flag is off. In that branch it:
+  - ends every session of the user, this one included;
+  - writes **no** audit event (no "turned on" claim);
+  - logs `auth.two_factor_enrolment_incomplete` at error level;
+  - returns a new code, `SIGN_IN_AGAIN`. The web words are `auth.error.sign_in_again`, in en and
+    hi (Hindi in `_review`).
+
+  `auth.two_factor_enabled` and `auth.other_sessions_ended` are only written when the user's flag
+  is on and the session was re-issued. This also means an admin stuck in that state can't enrol
+  again until the `two_factors` row is fixed by hand. That is a pre-existing Better Auth state
+  (`enableTwoFactor` refuses `TOTP_ALREADY_ENABLED`), and the error log names the user.
 
 **Decisions**
 
@@ -111,8 +145,15 @@ marker too when they pass TOTP, but nothing reads it for them.
   can claim TOTP; it also survives Better Auth's re-issues and shows up in queries.
 - Marking keyed on the endpoint path, not on our service methods, because the enrolment re-issue's
   token isn't returned by `verifyTOTP` (above). Backup-code (`/two-factor/verify-backup-code`) and
-  OTP sign-ins are not marked: neither is reachable (no HTTP endpoints; no service method). If a
-  later task adds backup-code sign-in, add its path to the hook.
+  OTP sign-ins are not marked: neither is reachable (no HTTP endpoints; no service method).
+  **Later tasks:** two flows create sessions through other paths, and their sessions will be
+  unmarked until their path is added to the hook in `auth.ts` (`TOTP_VERIFY_PATH`), with care:
+  - a backup-code sign-in (`/two-factor/verify-backup-code`);
+  - `changePassword({ revokeOtherSessions })`, which re-issues the session from
+    `/change-password`.
+
+  Until then they **fail closed**: an admin session made through them is ended by `getSession`
+  and refused by `resolveAdminContext`.
 - Three layers, each tested on its own: revoke on enrolment (immediate), `getSession` revokes a
   stale unverified admin session (covers a missed revocation, e.g. a race or a crash between
   Better Auth's re-issue and our delete), and `resolveAdminContext` checks the session row.
@@ -129,13 +170,28 @@ marker too when they pass TOTP, but nothing reads it for them.
   `admin/support.test.ts` (principal built from real sessions + new T-086b case),
   `apps/web/e2e/admin.spec.ts` (second admin + two-browser case).
 - T-026/T-035 (done): `audit-events.ts`, `audit-query/actions.ts`, `audit.json` (new action words),
-  `auth.test.ts` (expectations + new cases).
+  `auth.test.ts` (expectations + new cases); review fixes:
+  - `(auth)/login/_components/form-state.ts` (`SIGN_IN_AGAIN` → `sign_in_again`);
+  - `auth.json` en/hi (`error.sign_in_again`);
+  - `(operator)/settings/audit/audit.test.tsx` (the Owner's sentence, en and hi).
 
 **Open questions (product owner)**
 
 - Step-up TOTP for sensitive admin actions stays out of scope (as the task says).
 - Should an admin be able to see and end their own other sessions from the console? Today
   "sign out everywhere" ends all of them, and enrolment ends the others automatically.
+
+**Out of scope, found in review (follow-up T-086d, created in this PR)**
+
+- **Self-enrolment trusts first use.** Whoever has the password of a platform admin who has not
+  enrolled yet can enrol **their own** authenticator first.
+- **Some failed codes don't count toward the lockout.** In Better Auth's existing-session branch
+  of `verifyTOTP` (used by `confirmTwoFactorEnrolment`), wrong codes are not counted toward its
+  account lockout (`failedVerificationCount`). Only our per-IP limit (30 / 15 min) applies there.
+- T-086d proposes:
+  - enrolling platform admins at creation, through a one-time setup link (no self-enrolment on
+    first sign-in);
+  - counting every wrong code per user.
 
 **Verification** (Node v24.21.0, pnpm 12.11.2, local PostgreSQL 17; rebased on `feature/mvp` 5452f5d)
 
