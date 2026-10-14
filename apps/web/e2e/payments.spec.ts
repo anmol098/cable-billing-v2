@@ -188,7 +188,9 @@ test.describe("payments: counter, register, undo", () => {
     expect(pdf.headers()["content-disposition"]).toMatch(/^inline;/);
     expect((await pdf.body()).subarray(0, 5).toString()).toBe("%PDF-");
     await page.getByRole("button", { name: "Copy receipt link" }).click();
-    await expect(page.getByText("Link copied. Paste it in WhatsApp or SMS.")).toBeVisible();
+    await expect(
+      page.getByText("Link copied. Paste it in WhatsApp or SMS.", { exact: true }),
+    ).toBeVisible();
     const link = await page.getByTestId("receipt-link").inputValue();
     expect(link).toMatch(/\/r\/[A-Za-z0-9_-]{43}$/);
     await expect(page.locator("body")).not.toContainText(/\bsent\b|delivered/i);
@@ -202,7 +204,10 @@ test.describe("payments: counter, register, undo", () => {
     await expect(page.getByTestId("total-count")).toHaveText("1 payment");
     const row = page.getByRole("link", { name: "Asha Devi" });
     await expect(row).toBeVisible();
-    await expect(page.getByText(`Receipt ${receiptNumber}`)).toBeVisible();
+    // The list renders as a table on wide screens and as cards on narrow ones (one is hidden).
+    await expect(
+      page.getByText(`Receipt ${receiptNumber}`).filter({ visible: true }),
+    ).toBeVisible();
 
     // The customer's Payments tab shows it too.
     await page.goto(`/customers/${customerId}/payments`);
@@ -304,7 +309,11 @@ test.describe("payments: counter, register, undo", () => {
     );
     await page.goto("/payments/review");
     await expect(page.getByText("Nothing to check. All payments look fine.")).toBeVisible();
-    for (const path of ["/payments", "/payments/review", `/customers/${closedCustomerId}/payments`]) {
+    for (const path of [
+      "/payments",
+      "/payments/review",
+      `/customers/${closedCustomerId}/payments`,
+    ]) {
       await page.goto(path);
       const sideways = await page.evaluate(
         () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
