@@ -103,7 +103,7 @@ FR-030, PLAN §12.2, D-15 — see `docs/IMPLEMENTATION_PLAN.md`, `docs/PRD.md`, 
 **Deviations / files outside the owned paths**
 
 - `packages/core/src/index.ts` (one export line), `packages/core/package.json` (+`fflate` 0.8.3, already in the lockfile), `packages/i18n/glossary.md` (new section), generated `apps/web/messages/*.json`, new `apps/web/e2e/import.spec.ts`.
-- Plans (T-031) are not done yet: plan names are matched directly against the T-022 `plans` table (active plans, `lower(btrim(name))` like its unique index).
+- Plan names are matched directly against the `plans` table (T-022/T-031): an active plan wins over hidden (retired) ones with the same name, as T-031's unique index allows; a name that only a hidden plan has is refused with "Show it again in Settings → Plans".
 - The core tests reuse `connections/test-support.ts` (T-034) read-only.
 
 **Verification** (Node v24.21.0, pnpm 12.11.2, local PostgreSQL 17)

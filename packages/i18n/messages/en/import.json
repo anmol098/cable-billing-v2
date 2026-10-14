@@ -141,8 +141,8 @@
     },
     "plan": {
       "plan_or_rent": "Write the plan name or the rent for this box.",
-      "not_found": "There is no plan \"{plan}\". Check the name in Plans, or write the rent instead.",
-      "retired": "Plan \"{plan}\" is no longer used. Write another plan or the rent."
+      "not_found": "There is no plan \"{plan}\". Check the name in Settings → Plans, or write the rent instead.",
+      "retired": "Plan \"{plan}\" is hidden. Show it again in Settings → Plans, or write another plan or the rent."
     },
     "rent": {
       "rent_differs": "The plan's rent is {amount}. Leave the rent empty, or leave the plan empty to use your own rent.",
