@@ -3,10 +3,10 @@ id: T-083
 title: Home dashboard and setup checklist
 phase: 4
 area: web
-status: todo
-owner:
-claimed_at:
-branch:
+status: claimed
+owner: agent-t083
+claimed_at: 2026-10-14T05:47:07.708Z
+branch: task/T-083-home-dashboard-and-setup-checklist
 depends_on: [T-044, T-046, T-062]
 review: self
 claimable_by: agent
@@ -51,3 +51,7 @@ PLAN §12.1 (Home), PLAN §12.3, BRD §12 (Operator dashboard) — see `docs/IMP
 ## Completion notes
 
 _The agent fills this in before opening the PR: what was built, decisions taken, deviations, follow-up tasks created, and how it was verified._
+
+## Board log
+
+- 2026-10-14T05:47:07.708Z claimed by agent-t083
