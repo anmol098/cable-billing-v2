@@ -113,6 +113,20 @@
       "when": 1791965933322,
       "tag": "0015_audit_events_action_idx",
       "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1791978965316,
+      "tag": "0016_platform_admin",
+      "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1791978971787,
+      "tag": "0017_platform_admin_grants",
+      "breakpoints": true
     }
   ]
 }

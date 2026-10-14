@@ -279,6 +279,17 @@ describe("audit action sentences (T-035)", () => {
         after: { amount_paise: 5000, method: "cash" },
       }),
     ).toEqual({ amount: { kind: "paise", value: 5000 }, method: { kind: "code", value: "cash" } });
+    // Support access: the minutes it runs, never the reason (free text).
+    expect(
+      auditDetails("support.access_granted", {
+        before: null,
+        after: {
+          reason: "Owner called: bills look wrong",
+          minutes: 30,
+          expires_at: "2026-11-01T10:30:00.000Z",
+        },
+      }),
+    ).toEqual({ count: { kind: "count", value: 30 } });
     // Free text never becomes a select code; unknown actions give nothing.
     expect(
       auditDetails("customers.set_status", { before: null, after: { status: "Call 98765" } }),

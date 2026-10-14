@@ -16,6 +16,7 @@ export * from "./jobs";
 export * from "./ledger";
 export * from "./payments";
 export * from "./plans";
+export * from "./platform-admin";
 export * from "./receipts";
 export * from "./roster";
 export * from "./subscriptions";

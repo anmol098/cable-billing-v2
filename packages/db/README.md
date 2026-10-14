@@ -54,7 +54,12 @@ claim jobs, record webhook events. It may read/write a table only if that table 
 `app_platform` (e.g. `operators` for listing tenants, added by the task that owns the table and
 reviewed) or is a global table allow-listed without RLS. It can't see tenant rows. To work on a
 tenant's data, list tenant ids in `withPlatform`, then call `withTenant` per tenant (PLAN §9.1).
-Platform admin "support access" is a separate, audited path (not built yet).
+Platform admin "support access" (T-086) is a separate, audited path: the admin opens a time-boxed
+grant (`support_access_grants`, reason required, at most 2 hours by CHECK) in the **tenant's**
+transaction together with a tenant audit event, and the support view then reads in `withTenant`
+only while that grant is live (checked inside the same transaction on every request). Ending a
+grant early is final (a trigger refuses clearing or moving `ended_at`/`ended_by`). See
+`src/schema/platform-admin.ts` and the T-086 completion notes.
 
 Platform policies that exist (T-021, each one reviewed):
 
@@ -69,6 +74,23 @@ Platform policies that exist (T-021, each one reviewed):
 | `audit_events` | SELECT, INSERT where `operator_id IS NULL` | platform-level events only, never a tenant's |
 | `jobs` (T-023) | SELECT, INSERT, UPDATE (no DELETE) | the job worker enqueues and claims every tenant's jobs (`FOR UPDATE SKIP LOCKED`), then works in `withTenant` |
 | `receipt_links` (T-023) | SELECT | the public receipt page finds a link by token hash before the tenant is known; counting and revoking happen in `withTenant` |
+| `support_access_grants` (T-086) | SELECT | the admin console lists who has support access where; grants are written and ended in the tenant's transaction |
+| `subscription_offline_payments` (T-086) | SELECT | the admin console lists offline fee payments; written in the tenant's transaction with the subscription change |
+| `customers` (T-086) | SELECT of `operator_id`, `status` **only** | customer counts per tenant (admin console) |
+| `billing_runs` (T-086) | SELECT of ids, period, trigger, status, skip reason, counts, times (**no** `total_charges_paise`, `actor_id`) | job monitor, billing success rate (PRD §16) |
+| `billing_run_items` (T-086) | SELECT of `operator_id`, `run_id`, `outcome`, `reason` **only** | billing exception rate by reason (PRD §16) |
+| `invariant_checks` (T-086) | SELECT of everything but `samples` | nightly books-check status per tenant |
+| `receipt_actions` (T-086) | SELECT of `operator_id`, `action`, `at` **only** | receipt action usage (PRD §16) |
+| `collection_sessions` (T-086) | SELECT of `operator_id`, `status`, `business_date`, `discrepancy_reason` **only** | reconciliation discrepancy rate (PRD §16) |
+
+**Column-limited platform reads (T-086).** For the six tenant tables marked "only" above, a
+`USING (true)` SELECT policy lets `app_platform` see the rows, and a custom migration revokes the
+table-wide SELECT the default privileges gave it and grants SELECT on the listed columns
+(`PLATFORM_READ_COLUMNS` / `platformReadGrantsSql()` in `src/schema/platform-admin.ts`). So
+`SELECT *`, names, phones, amounts, notes and per-customer ids are refused by the database
+(`42501 permission denied`) on the platform path, whatever the application code does. A test
+compares the catalog with `PLATFORM_READ_COLUMNS`. Adding a column to that list is a reviewed
+decision, like adding a policy.
 
 ## API
 

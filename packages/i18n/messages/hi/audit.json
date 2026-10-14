@@ -234,7 +234,43 @@
     "field.credit_applied_paise",
     "field.total_paise",
     "sentence.imports.customers.apply",
-    "action.imports.customers.apply"
+    "action.imports.customers.apply",
+    "sentence.support.access_granted",
+    "action.support.access_granted",
+    "sentence.support.data_viewed",
+    "action.support.data_viewed",
+    "sentence.support.access_ended",
+    "action.support.access_ended",
+    "sentence.admin.tenants_listed",
+    "action.admin.tenants_listed",
+    "sentence.admin.tenant_viewed",
+    "action.admin.tenant_viewed",
+    "sentence.admin.tenant_created",
+    "action.admin.tenant_created",
+    "sentence.admin.subscription_extended",
+    "action.admin.subscription_extended",
+    "sentence.admin.offline_payment_recorded",
+    "action.admin.offline_payment_recorded",
+    "sentence.admin.support_access_granted",
+    "action.admin.support_access_granted",
+    "sentence.admin.support_access_ended",
+    "action.admin.support_access_ended",
+    "sentence.admin.support_data_viewed",
+    "action.admin.support_data_viewed",
+    "sentence.admin.jobs_viewed",
+    "action.admin.jobs_viewed",
+    "sentence.admin.job_retried",
+    "action.admin.job_retried",
+    "sentence.admin.billing_runs_viewed",
+    "action.admin.billing_runs_viewed",
+    "sentence.admin.razorpay_events_viewed",
+    "action.admin.razorpay_events_viewed",
+    "sentence.admin.audit_viewed",
+    "action.admin.audit_viewed",
+    "sentence.admin.metrics_viewed",
+    "action.admin.metrics_viewed",
+    "sentence.subscription.offline_payment_recorded",
+    "action.subscription.offline_payment_recorded"
   ],
   "description": "आपके बिज़नेस में हर बदलाव: किसने किया और कब। यह पेज सिर्फ़ आप (मालिक) देख सकते हैं।",
   "filters": {
@@ -385,7 +421,29 @@
     },
     "subscription": {
       "state_changed": "{status, select, trialing {{who} ने ऐप सब्सक्रिप्शन बदला: फ़्री ट्रायल} active {{who} ने ऐप सब्सक्रिप्शन बदला: पेमेंट हो गया} grace {{who} ने ऐप सब्सक्रिप्शन बदला: अभी पेमेंट करें} read_only {{who} ने ऐप सब्सक्रिप्शन बदला: सिर्फ़ देख सकते हैं} cancelled {{who} ने ऐप सब्सक्रिप्शन बदला: बंद है} other {{who} ने ऐप सब्सक्रिप्शन बदला}}",
-      "notice_sent": "{who} ने ऐप पेमेंट की याद {count, plural, one {# मालिक} other {# मालिकों}} को ईमेल की"
+      "notice_sent": "{who} ने ऐप पेमेंट की याद {count, plural, one {# मालिक} other {# मालिकों}} को ईमेल की",
+      "offline_payment_recorded": "{who} ने Razorpay के बाहर मिला {count, plural, one {# महीने} other {# महीनों}} का {amount} का ऐप पेमेंट सेव किया"
+    },
+    "support": {
+      "access_granted": "{count, plural, =0 {{who} ने आपके रिकॉर्ड का सपोर्ट एक्सेस खोला} one {{who} ने आपके रिकॉर्ड का सपोर्ट एक्सेस # मिनट के लिए खोला} other {{who} ने आपके रिकॉर्ड का सपोर्ट एक्सेस # मिनट के लिए खोला}}",
+      "data_viewed": "{who} ने सपोर्ट एक्सेस में आपके रिकॉर्ड देखे",
+      "access_ended": "{who} ने आपके रिकॉर्ड का सपोर्ट एक्सेस बंद किया"
+    },
+    "admin": {
+      "tenants_listed": "{who} ने बिज़नेस की लिस्ट देखी",
+      "tenant_viewed": "{who} ने बिज़नेस का सारांश देखा",
+      "tenant_created": "{who} ने बिज़नेस जोड़ा",
+      "subscription_extended": "{who} ने बिज़नेस का ऐप सब्सक्रिप्शन बढ़ाया",
+      "offline_payment_recorded": "{who} ने Razorpay के बाहर मिला ऐप पेमेंट सेव किया",
+      "support_access_granted": "{who} ने बिज़नेस का सपोर्ट एक्सेस खोला",
+      "support_access_ended": "{who} ने बिज़नेस का सपोर्ट एक्सेस बंद किया",
+      "support_data_viewed": "{who} ने सपोर्ट एक्सेस में बिज़नेस के रिकॉर्ड देखे",
+      "jobs_viewed": "{who} ने पीछे चलने वाले काम देखे",
+      "job_retried": "{who} ने न हुआ काम फिर से चलाया",
+      "billing_runs_viewed": "{who} ने सभी बिज़नेस के बिल रन देखे",
+      "razorpay_events_viewed": "{who} ने Razorpay लॉग देखा",
+      "audit_viewed": "{who} ने एडमिन लॉग देखा",
+      "metrics_viewed": "{who} ने सभी बिज़नेस का जोड़ देखा"
     },
     "imports": {
       "customers": {
@@ -485,7 +543,29 @@
     },
     "subscription": {
       "state_changed": "ऐप सब्सक्रिप्शन बदला",
-      "notice_sent": "ऐप पेमेंट की याद ईमेल की"
+      "notice_sent": "ऐप पेमेंट की याद ईमेल की",
+      "offline_payment_recorded": "ऐप पेमेंट सेव (Razorpay के बाहर)"
+    },
+    "support": {
+      "access_granted": "सपोर्ट एक्सेस खोला",
+      "data_viewed": "सपोर्ट में रिकॉर्ड देखे",
+      "access_ended": "सपोर्ट एक्सेस बंद"
+    },
+    "admin": {
+      "tenants_listed": "बिज़नेस लिस्ट देखी",
+      "tenant_viewed": "बिज़नेस सारांश देखा",
+      "tenant_created": "बिज़नेस जोड़ा",
+      "subscription_extended": "सब्सक्रिप्शन बढ़ाया",
+      "offline_payment_recorded": "बाहर का पेमेंट सेव",
+      "support_access_granted": "सपोर्ट एक्सेस खोला",
+      "support_access_ended": "सपोर्ट एक्सेस बंद",
+      "support_data_viewed": "सपोर्ट में रिकॉर्ड देखे",
+      "jobs_viewed": "काम देखे",
+      "job_retried": "काम फिर से चलाया",
+      "billing_runs_viewed": "बिल रन देखे",
+      "razorpay_events_viewed": "Razorpay लॉग देखा",
+      "audit_viewed": "एडमिन लॉग देखा",
+      "metrics_viewed": "जोड़ देखा"
     },
     "imports": {
       "customers": {

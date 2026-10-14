@@ -471,6 +471,19 @@ Phone numbers in the details show only the last four digits (`XXXXXX3210`), as o
 | Lines with problems (file) | दिक्कत वाली लाइनें | The file of lines not added, with the reason, to fix and upload again | download | Error report, Exception log |
 | Column | कॉलम | A column of the file ("Customer code", "VC number") | — | Field, Header |
 
+## Admin console words (web /admin, T-086, platform staff only)
+
+| English | हिंदी | Means | Icon / colour | Not this |
+|---|---|---|---|---|
+| Operator | ऑपरेटर | One cable business using the app (one tenant) | business | Tenant, Account, Client |
+| Support access | सपोर्ट एक्सेस | A time-boxed (15 minutes to 2 hours), reason-given look at a few of an operator's records; the owner sees it in their audit log | search | Impersonate, Log in as |
+| Support view | सपोर्ट व्यू | The read-only page shown during support access | search | Shadow mode |
+| Extend subscription | सब्सक्रिप्शन बढ़ाएँ | Give paid access till a day, by hand | subscription | Comp, Override |
+| Payment made outside Razorpay | Razorpay के बाहर मिला पेमेंट | Our fee paid by bank transfer, UPI to us, cash or cheque | cash | Manual payment, Offline txn |
+| Try again | फिर से करें | Run a failed background job once more | retry | Requeue, Replay |
+| Admin log | एडमिन लॉग | Every admin action and every look at operator data | audit | Platform audit trail |
+| Not measured yet | अभी नापा नहीं जाता | A PRD §16 number with no data source yet | — | 0, N/A |
+
 ## Words we never show users
 
 Invoice, Ledger, Allocation, Adjustment, Reversal, Tenant, Sync / Synced / Pending sync,

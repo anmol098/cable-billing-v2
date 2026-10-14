@@ -148,7 +148,29 @@
     },
     "subscription": {
       "state_changed": "{status, select, trialing {{who} set the app subscription to: Free trial} active {{who} set the app subscription to: Paid} grace {{who} set the app subscription to: Pay now} read_only {{who} set the app subscription to: View only} cancelled {{who} set the app subscription to: Stopped} other {{who} changed the app subscription}}",
-      "notice_sent": "{who} emailed a reminder about the app payment to {count, plural, one {# owner} other {# owners}}"
+      "notice_sent": "{who} emailed a reminder about the app payment to {count, plural, one {# owner} other {# owners}}",
+      "offline_payment_recorded": "{who} saved an app payment of {amount} for {count, plural, one {# month} other {# months}}, made outside Razorpay"
+    },
+    "support": {
+      "access_granted": "{count, plural, =0 {{who} opened support access to your records} one {{who} opened support access to your records for # minute} other {{who} opened support access to your records for # minutes}}",
+      "data_viewed": "{who} looked at your records during support access",
+      "access_ended": "{who} ended support access to your records"
+    },
+    "admin": {
+      "tenants_listed": "{who} looked at the list of businesses",
+      "tenant_viewed": "{who} looked at a business's summary",
+      "tenant_created": "{who} added a business",
+      "subscription_extended": "{who} extended a business's app subscription",
+      "offline_payment_recorded": "{who} saved an app payment made outside Razorpay",
+      "support_access_granted": "{who} opened support access to a business",
+      "support_access_ended": "{who} ended support access to a business",
+      "support_data_viewed": "{who} looked at a business's records during support access",
+      "jobs_viewed": "{who} looked at the background jobs",
+      "job_retried": "{who} ran a failed background job again",
+      "billing_runs_viewed": "{who} looked at the bill runs of all businesses",
+      "razorpay_events_viewed": "{who} looked at the Razorpay log",
+      "audit_viewed": "{who} looked at the admin log",
+      "metrics_viewed": "{who} looked at the totals of all businesses"
     },
     "imports": {
       "customers": {
@@ -248,7 +270,29 @@
     },
     "subscription": {
       "state_changed": "App subscription changed",
-      "notice_sent": "App payment reminder emailed"
+      "notice_sent": "App payment reminder emailed",
+      "offline_payment_recorded": "App payment saved (outside Razorpay)"
+    },
+    "support": {
+      "access_granted": "Support access opened",
+      "data_viewed": "Records seen by support",
+      "access_ended": "Support access ended"
+    },
+    "admin": {
+      "tenants_listed": "Business list seen",
+      "tenant_viewed": "Business summary seen",
+      "tenant_created": "Business added",
+      "subscription_extended": "Subscription extended",
+      "offline_payment_recorded": "Outside payment saved",
+      "support_access_granted": "Support access opened",
+      "support_access_ended": "Support access ended",
+      "support_data_viewed": "Records seen by support",
+      "jobs_viewed": "Jobs seen",
+      "job_retried": "Job tried again",
+      "billing_runs_viewed": "Bill runs seen",
+      "razorpay_events_viewed": "Razorpay log seen",
+      "audit_viewed": "Admin log seen",
+      "metrics_viewed": "Totals seen"
     },
     "imports": {
       "customers": {
