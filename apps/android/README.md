@@ -206,6 +206,23 @@ Generated, never edited by hand: `core/designsystem/.../generated/Tokens.kt` (`p
   extras and tags and drop the request, server name, device name and all user fields but Sentry's random
   install id. Never started under Robolectric.
 
+## Durability and migration suite (T-072)
+
+- `app/src/androidTest/shared/java/…/durability/`: field stories against the production classes, wired by
+  hand on their own files (`Phone` = storage + an app "process" that `kill()` / `start()` replace;
+  `FakeOffice` = `POST /payments:batch` with the server's idempotency, airplane mode, lost answers, 503s,
+  a switched-off lineman; `PushWork` = WorkManager's test driver as the network). Process death after Save,
+  reboots, an airplane-mode day, duplicate retries, two linemen on one phone, a lost Keystore key, Room
+  migrations from every exported schema (`MigrationSeeds` needs a seed per version) and no destructive
+  fallback. This folder is compiled into **both** test source sets (`app/build.gradle.kts`): it runs on
+  Robolectric in `testDevDebugUnitTest` and on a device with `./gradlew connectedDevDebugAndroidTest`
+  (runner: `DurabilityTestRunner`, plain `Application`). Code there may use only what both classpaths have
+  (no contract fixture files, no `src/test` helpers) and test names without spaces (DEX on API 26).
+- `app/src/test/java/…/durability/`: Robolectric-only stories that need the contract fixtures (a full
+  offline day with roster, receipt actions and the handover).
+- Field UAT script for humans (real kills, reboots, power cuts, printers, WhatsApp, battery savers) and the
+  proposed nightly emulator job: `docs/testing/android-field-uat.md`.
+
 ## Design-system components
 
 `core/designsystem/.../component/` holds the low-literacy kit (BigButton, MethodButton, NumberPad,
