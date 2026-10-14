@@ -147,6 +147,12 @@ export const sessions = pgTable(
     expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
     ipAddress: text("ip_address"),
     userAgent: text("user_agent"),
+    /**
+     * When **this** session passed the TOTP check (sign-in 2FA step or enrolment), or NULL for a
+     * password-only session (T-086b). Set by T-026's session-create hook, never copied from an
+     * older session. A platform admin's session needs it (`resolveAdminContext`).
+     */
+    twoFactorVerifiedAt: timestamp("two_factor_verified_at", { withTimezone: true }),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },

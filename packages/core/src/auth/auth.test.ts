@@ -17,6 +17,8 @@ import type { BetterAuthPlugin } from "better-auth";
 import { createAuthMiddleware } from "better-auth/api";
 import { eq } from "drizzle-orm";
 import { beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { resolveAdminContext } from "../admin/context";
+import { newRequestId } from "../context/runtime";
 import { captureLogs, type SeededTenant, seedTenant } from "../testing";
 import { createAuthService, type PasswordResetEmail } from "./auth";
 import { hashPassword } from "./password";
@@ -572,10 +574,11 @@ describeDb("web authentication (Better Auth)", () => {
       });
       expect(confirmed).toEqual({
         ok: true,
-        value: { userId: admin.userId, role: "platform_admin" },
+        value: { userId: admin.userId, role: "platform_admin", otherSessionsEnded: 0 },
       });
       expect(await service.getSession(browser.headers())).toMatchObject({
         twoFactorEnabled: true,
+        twoFactorVerified: true,
         twoFactorEnrolmentRequired: false,
       });
       await service.signOut({ headers: browser.headers() });
@@ -615,6 +618,7 @@ describeDb("web authentication (Better Auth)", () => {
       });
       const adminSession = await service.getSession(again.headers());
       expect(adminSession?.role).toBe("platform_admin");
+      expect(adminSession?.twoFactorVerified).toBe(true);
       const lifetime =
         (adminSession?.expiresAt.getTime() ?? 0) - (adminSession?.createdAt.getTime() ?? 0);
       expect(lifetime).toBeLessThanOrEqual(cap);
@@ -635,6 +639,153 @@ describeDb("web authentication (Better Auth)", () => {
       ]);
       expect(new Set(actions.map((r) => r.operator_id))).toEqual(new Set([null]));
       expect(actions.at(-1)?.after).toEqual({ method: "password_totp" });
+    });
+
+    it("T-086b: enrolling ends the other sessions; only a session that passed TOTP is an admin's", async () => {
+      const admin2 = await createUser(t.current, { operatorId: null });
+      await setPassword(admin2.userId);
+      const login = await loginOf(admin2.userId);
+      const signIn = (browser: Browser) =>
+        service.signIn({ login, password: PASSWORD, headers: browser.headers() });
+      const adminContext = (sessionId: string) =>
+        resolveAdminContext(
+          { db: t.current.db },
+          { userId: admin2.userId, sessionId, requestId: newRequestId() },
+        );
+
+      // Two browsers sign in with the password alone, before TOTP is on.
+      const laptop = newBrowser();
+      const phone = newBrowser();
+      expect((await signIn(laptop)).ok).toBe(true);
+      expect((await signIn(phone)).ok).toBe(true);
+      const stale = await service.getSession(laptop.headers());
+      expect(stale).toMatchObject({ twoFactorVerified: false, twoFactorEnrolmentRequired: true });
+      if (!stale) return;
+      expect(await adminContext(stale.sessionId)).toMatchObject({
+        ok: false,
+        error: { code: "FORBIDDEN", details: { reason: "two_factor_required" } },
+      });
+
+      // The phone enrols: its session is re-issued as TOTP-verified, the laptop's is ended.
+      const enrolment = await service.startTwoFactorEnrolment({
+        password: PASSWORD,
+        headers: phone.headers(),
+      });
+      if (!enrolment.ok) throw new Error(enrolment.error.code);
+      const confirmed = await service.confirmTwoFactorEnrolment({
+        code: totp(enrolment.value.secret),
+        headers: phone.headers(),
+      });
+      expect(confirmed).toEqual({
+        ok: true,
+        value: { userId: admin2.userId, role: "platform_admin", otherSessionsEnded: 1 },
+      });
+      const rows = await t.current.admin.query<{ id: string; verified: Date | null }>(
+        "SELECT id, two_factor_verified_at AS verified FROM sessions WHERE user_id = $1",
+        [admin2.userId],
+      );
+      expect(rows.rows).toHaveLength(1);
+      expect(rows.rows[0]?.verified).toBeInstanceOf(Date);
+
+      // The laptop's password-only session is gone and refused, at both gates.
+      expect(rows.rows.map((r) => r.id)).not.toContain(stale.sessionId);
+      expect(await service.getSession(laptop.headers())).toBeNull();
+      expect(await adminContext(stale.sessionId)).toMatchObject({
+        ok: false,
+        error: { code: "UNAUTHENTICATED", details: { reason: "no_session" } },
+      });
+      // Enrolling again from it is refused too.
+      expect(
+        await service.confirmTwoFactorEnrolment({
+          code: totp(enrolment.value.secret),
+          headers: laptop.headers(),
+        }),
+      ).toEqual({ ok: false, error: { code: "UNAUTHENTICATED" } });
+
+      // The enrolled session gets in.
+      const enrolled = await service.getSession(phone.headers());
+      expect(enrolled).toMatchObject({ twoFactorEnabled: true, twoFactorVerified: true });
+      expect((await adminContext(enrolled?.sessionId ?? "")).ok).toBe(true);
+
+      // The laptop signs in again: password, then the code → that session gets in too.
+      expect(await signIn(laptop)).toEqual({ ok: true, value: { status: "two_factor_required" } });
+      expect(
+        (
+          await service.verifyTwoFactor({
+            code: totp(enrolment.value.secret),
+            headers: laptop.headers(),
+          })
+        ).ok,
+      ).toBe(true);
+      const fresh = await service.getSession(laptop.headers());
+      expect(fresh).toMatchObject({ twoFactorVerified: true });
+      expect((await adminContext(fresh?.sessionId ?? "")).ok).toBe(true);
+      // ... and enrolling is not offered again (already on).
+      expect(
+        await service.confirmTwoFactorEnrolment({
+          code: totp(enrolment.value.secret),
+          headers: laptop.headers(),
+        }),
+      ).toEqual({ ok: false, error: { code: "INVALID_CODE" } });
+      expect(await sessionRows(admin2.userId)).toHaveLength(2);
+
+      // Audit: a platform event with the count (no PII).
+      const audit = await auditRows(admin2.userId);
+      expect(audit.map((r) => r.action)).toEqual([
+        "auth.signed_in",
+        "auth.signed_in",
+        "auth.other_sessions_ended",
+        "auth.two_factor_enabled",
+        "auth.signed_in",
+      ]);
+      expect(audit[2]).toMatchObject({
+        operator_id: null,
+        actor_role: "platform_admin",
+        after: { sessions: 1, reason: "two_factor_enabled" },
+      });
+    });
+
+    it("T-086b: a password-only admin session that outlives enrolment is ended on its next request", async () => {
+      // Belt and braces: if the enrolment step's revocation ever missed a session (a race, a
+      // failure after Better Auth turned TOTP on), getSession still refuses it.
+      const admin3 = await createUser(t.current, { operatorId: null });
+      await setPassword(admin3.userId);
+      const browser = newBrowser();
+      await service.signIn({
+        login: await loginOf(admin3.userId),
+        password: PASSWORD,
+        headers: browser.headers(),
+      });
+      expect(await service.getSession(browser.headers())).toMatchObject({
+        twoFactorVerified: false,
+      });
+      await t.current.admin.query("UPDATE users SET two_factor_enabled = true WHERE id = $1", [
+        admin3.userId,
+      ]);
+      expect(await service.getSession(browser.headers())).toBeNull();
+      expect(await sessionRows(admin3.userId)).toEqual([]);
+      expect(logs.records).toContainEqual(
+        expect.objectContaining({
+          event: "auth.session_revoked",
+          user_id: admin3.userId,
+          reason: "two_factor_not_verified_in_session",
+        }),
+      );
+    });
+
+    it("T-086b: tenant users are unaffected (password sessions keep working)", async () => {
+      const browser = newBrowser();
+      await service.signIn({
+        login: await loginOf(tenant.users.staff),
+        password: PASSWORD,
+        headers: browser.headers(),
+      });
+      expect(await service.getSession(browser.headers())).toMatchObject({
+        role: "staff",
+        twoFactorVerified: false,
+      });
+      const ctx = await service.tenantContext({ db: t.current.db }, browser.headers());
+      expect(ctx.ok).toBe(true);
     });
   });
 

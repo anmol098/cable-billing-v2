@@ -99,6 +99,7 @@ function session(overrides: Partial<WebSession>): WebSession {
     operatorId: null,
     language: "en",
     twoFactorEnabled: true,
+    twoFactorVerified: true,
     twoFactorEnrolmentRequired: false,
     createdAt: new Date(),
     expiresAt: new Date(Date.now() + 3_600_000),
@@ -160,7 +161,21 @@ describe("getAdminContext()", () => {
     expect(await gate()).toBe(ctx);
     expect(resolveAdminContext).toHaveBeenLastCalledWith(
       expect.anything(),
-      expect.objectContaining({ userId: ctx.userId, twoFactorEnabled: true }),
+      expect.objectContaining({ userId: ctx.userId, sessionId: "s1" }),
     );
+  });
+
+  it("a session that never passed TOTP itself (T-086b) → sign in again", async () => {
+    state.session = session({});
+    state.resolve = {
+      ok: false,
+      error: { code: "FORBIDDEN", details: { reason: "session_not_two_factor_verified" } },
+    };
+    expect(await gate()).toEqual({ redirect: "/login?next=%2Fadmin%2Fjobs" });
+    state.resolve = {
+      ok: false,
+      error: { code: "UNAUTHENTICATED", details: { reason: "no_session" } },
+    };
+    expect(await gate()).toEqual({ redirect: "/login?next=%2Fadmin%2Fjobs" });
   });
 });

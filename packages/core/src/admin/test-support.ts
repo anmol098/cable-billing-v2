@@ -1,4 +1,6 @@
 /** Test helpers for the admin services (Vitest only). */
+import { randomBytes } from "node:crypto";
+import { sessions, uuidv7 } from "@cb/db";
 import { createUser, type TestDatabase } from "@cb/db/testing";
 import type { ServiceRuntime } from "../context/runtime";
 import { newRequestId } from "../context/runtime";
@@ -21,14 +23,36 @@ export async function seedPlatformAdmin(
   return admin.userId;
 }
 
-/** A real AdminContext (through `resolveAdminContext`); throws if refused. */
+/**
+ * A web session row for `userId` (8 hours), as Better Auth would store it. `totp: false` makes a
+ * password-only session (T-086b); by default it passed TOTP. Returns the session id.
+ */
+export async function seedWebSession(
+  runtime: Pick<ServiceRuntime, "db">,
+  userId: string,
+  options: { totp?: boolean; expiresAt?: Date } = {},
+): Promise<string> {
+  const id = uuidv7();
+  await runtime.db.withPlatform((tx) =>
+    tx.insert(sessions).values({
+      id,
+      userId,
+      token: randomBytes(24).toString("base64url"),
+      expiresAt: options.expiresAt ?? new Date(Date.now() + 8 * 3_600_000),
+      twoFactorVerifiedAt: options.totp === false ? null : new Date(),
+    }),
+  );
+  return id;
+}
+
+/** A real AdminContext (through `resolveAdminContext`, over a TOTP-verified session). */
 export async function adminContextFor(
   runtime: Pick<ServiceRuntime, "db">,
   userId: string,
 ): Promise<AdminContext> {
   const result = await resolveAdminContext(runtime, {
     userId,
-    twoFactorEnabled: true,
+    sessionId: await seedWebSession(runtime, userId),
     requestId: newRequestId(),
   });
   if (!result.ok) throw new Error(`adminContextFor: ${result.error.code}`);

@@ -55,6 +55,7 @@
     "sentence.auth.password_reset_requested",
     "sentence.auth.password_reset_completed",
     "sentence.auth.two_factor_enabled",
+    "sentence.auth.other_sessions_ended",
     "sentence.mobile_auth.refresh_reuse_detected",
     "sentence.devices.revoke",
     "sentence.tenant.provisioned",
@@ -112,6 +113,7 @@
     "action.auth.password_reset_requested",
     "action.auth.password_reset_completed",
     "action.auth.two_factor_enabled",
+    "action.auth.other_sessions_ended",
     "action.mobile_auth.refresh_reuse_detected",
     "action.devices.revoke",
     "action.tenant.provisioned",
@@ -353,7 +355,8 @@
       "signed_out_everywhere": "{who} ने सभी डिवाइस से लॉग आउट किया",
       "password_reset_requested": "{who} ने नया पासवर्ड बनाने का लिंक माँगा",
       "password_reset_completed": "{who} ने ईमेल के लिंक से नया पासवर्ड बनाया",
-      "two_factor_enabled": "{who} ने 2-स्टेप लॉग इन चालू किया"
+      "two_factor_enabled": "{who} ने 2-स्टेप लॉग इन चालू किया",
+      "other_sessions_ended": "{who} ने 2-स्टेप लॉग इन चालू किया, इसलिए {count, plural, one {# दूसरे डिवाइस} other {# दूसरे डिवाइस}} से लॉग आउट हुआ"
     },
     "mobile_auth": {
       "refresh_reuse_detected": "ऐप ने {who} का फ़ोन {target} लॉग आउट किया: पुराना लॉग इन फिर से इस्तेमाल हुआ"
@@ -478,7 +481,8 @@
       "signed_out_everywhere": "सभी डिवाइस से लॉग आउट",
       "password_reset_requested": "नया पासवर्ड माँगा",
       "password_reset_completed": "नया पासवर्ड बनाया",
-      "two_factor_enabled": "2-स्टेप लॉग इन चालू किया"
+      "two_factor_enabled": "2-स्टेप लॉग इन चालू किया",
+      "other_sessions_ended": "दूसरे डिवाइस से लॉग आउट"
     },
     "mobile_auth": {
       "refresh_reuse_detected": "सुरक्षा के लिए फ़ोन लॉग आउट"
