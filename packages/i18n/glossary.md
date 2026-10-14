@@ -300,6 +300,23 @@ the office has the payment.
 | Old connections | पुराने कनेक्शन | Removed connections, kept with their old bills and payments | — | History, Archived |
 | What happened | क्या हुआ | A connection's list of starts, stops, rent changes and removal | — | Timeline, Audit trail, Events |
 
+## Payment words (web counter and payments list)
+
+| English | हिंदी | Means | Icon / colour | Not this |
+|---|---|---|---|---|
+| Take payment | पैसे लें | The office takes money at the counter | banknote | Record payment, Receive payment |
+| Who is paying? | कौन पैसे दे रहा है? | The counter's first step: find the customer | person | Select customer |
+| Counted | गिना गया | A payment that counts (not cancelled) | check-circle, `semantic.success` | Posted, Valid |
+| To check / Payments to check | जाँचना है / जाँचने वाले पेमेंट | A payment that came in with something odd; the money is saved, the office looks at it | alert-triangle, `semantic.pending` | Needs review, Flagged, Exception |
+| Mark as checked / Checked | जाँच हो गई | The office has looked at a payment to check | circle-check, `semantic.success` | Resolve, Approve |
+| Taken by | किसने लिया | The person who took the money | — | Collector, Agent |
+| Money taken / Reached the office | पैसे कब लिए / ऑफिस कब पहुँचा | The phone's time of the payment / when the server got it | — | Recorded at / Posted at |
+| Temporary no. (phone's) | (फ़ोन का) अस्थायी नं. | The phone's receipt no. `P-…` before the office number | — | Provisional reference |
+| Print receipt (A5) | रसीद प्रिंट करें (A5) | Opens the A5 receipt to print at the office | printer | Generate PDF |
+| Copy receipt link / Link copied | रसीद का लिंक कॉपी करें / लिंक कॉपी हो गया | Copies the receipt link to paste in WhatsApp or SMS; we never know if it was sent | share | Send receipt, Sent |
+| Wrong customer / Wrong amount / Saved twice / Money not received / Other reason | गलत ग्राहक / गलत रकम / दो बार सेव हुआ / पैसे नहीं मिले / कोई और वजह | Why the owner undoes a payment | undo | Error type |
+| Balance now | अब का हिसाब | What the customer owes (or has as credit) now | — | Outstanding balance, Ledger balance |
+
 ## Words we never show users
 
 Invoice, Ledger, Allocation, Adjustment, Reversal, Tenant, Sync / Synced / Pending sync,

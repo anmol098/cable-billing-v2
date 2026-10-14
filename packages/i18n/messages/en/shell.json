@@ -19,6 +19,8 @@
     "payments_new": "Take payment",
     "payments_check": "Payments to check",
     "payments_reversals": "Undo payment",
+    "payment_detail": "Payment",
+    "payment_undo": "Undo payment",
     "linemen": "Linemen",
     "lineman_day": "Lineman's day",
     "bills": "Bills",
