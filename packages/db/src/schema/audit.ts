@@ -51,6 +51,9 @@ export const auditEvents = pgTable(
     index("audit_events_operator_at_idx").on(t.operatorId, t.at.desc(), t.id.desc()),
     index("audit_events_operator_entity_idx").on(t.operatorId, t.entityType, t.entityId, t.at),
     index("audit_events_operator_actor_idx").on(t.operatorId, t.actorId, t.at),
+    // T-035 "filter by action": without it a rare action (e.g. `payments.reverse`) is a scan of
+    // every tenant's events; with it, a keyset range like the newest-first index.
+    index("audit_events_operator_action_idx").on(t.operatorId, t.action, t.at.desc(), t.id.desc()),
     check("audit_events_actor_consistent", sql`(${t.actorId} IS NULL) = (${t.actorRole} IS NULL)`),
     check(
       "audit_events_action_format",

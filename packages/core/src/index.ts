@@ -19,6 +19,7 @@ export {
   writeAuditEvent,
 } from "./audit/audit";
 export { isSensitiveAuditKey, REDACTED, redactForAudit } from "./audit/redact";
+export * from "./audit-query";
 export * from "./auth";
 export { assertRole } from "./authz/assert-role";
 export {
