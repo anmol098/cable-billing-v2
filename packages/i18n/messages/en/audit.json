@@ -1,0 +1,325 @@
+{
+  "description": "Every change in your business: who made it and when. Only you, the owner, can see this page.",
+  "filters": {
+    "label": "Choose which changes to see",
+    "from": "From",
+    "to": "To",
+    "who": "Who",
+    "who_anyone": "Anyone",
+    "who_app": "The app (by itself)",
+    "switched_off": "{name} (switched off)",
+    "what": "What",
+    "what_any": "Everything",
+    "change": "Change",
+    "change_any": "Any change",
+    "show": "Show",
+    "today": "Today",
+    "this_month": "This month",
+    "clear": "Show all",
+    "bad_dates": "The last day is before the first day. Showing all days."
+  },
+  "list": {
+    "caption": "Changes, newest first",
+    "empty": "No changes found.",
+    "empty_filtered": "No changes match. Try fewer choices.",
+    "older": "Older changes",
+    "newest": "Back to the newest",
+    "page_label": "More changes"
+  },
+  "time": "{date}, {time} {ampm, select, pm {PM} other {AM}}",
+  "who": {
+    "person": "{name} ({role})",
+    "someone": "Someone ({role})",
+    "app": "The app",
+    "support": "Cable Billing support"
+  },
+  "role": {
+    "owner": "Owner",
+    "staff": "Staff",
+    "lineman": "Lineman",
+    "platform_admin": "Support"
+  },
+  "entity": {
+    "customer": "Customer",
+    "vc_assignment": "Connection",
+    "plan": "Plan",
+    "adjustment": "Bill change",
+    "payment": "Payment",
+    "receipt": "Receipt",
+    "receipt_link": "Receipt link",
+    "collection_session": "Cash handover",
+    "billing_run": "Bills",
+    "user": "Person",
+    "device": "Phone",
+    "area": "Area",
+    "operator": "Business",
+    "other": "Other",
+    "subscription": "App subscription"
+  },
+  "unknown_target": "(not found)",
+  "sentence": {
+    "auth": {
+      "signed_in": "{channel, select, mobile {{who} signed in on the phone app} other {{who} signed in on the website}}",
+      "sign_in_blocked": "{channel, select, mobile {{who} could not sign in on the phone app: the sign-in is switched off} other {{who} could not sign in on the website: the sign-in is switched off}}",
+      "signed_out": "{channel, select, mobile {{who} signed out of the phone app} other {{who} signed out of the website}}",
+      "signed_out_everywhere": "{who} signed out on all devices",
+      "password_reset_requested": "{who} asked for a link to set a new password",
+      "password_reset_completed": "{who} set a new password with the email link",
+      "two_factor_enabled": "{who} turned on 2-step sign-in"
+    },
+    "mobile_auth": {
+      "refresh_reuse_detected": "The app signed out phone {target} of {who}: an old sign-in was used again"
+    },
+    "devices": {
+      "revoke": "{who} signed out phone {target}"
+    },
+    "tenant": {
+      "provisioned": "{who} created the business account"
+    },
+    "operators": {
+      "update_profile": "{who} changed the business details: {fields}"
+    },
+    "areas": {
+      "create": "{who} added area {target}",
+      "rename": "{who} renamed area {from} to {target}",
+      "archive": "{who} hid area {target}",
+      "restore": "{who} showed area {target} again"
+    },
+    "plans": {
+      "create": "{who} added plan {target}",
+      "update": "{who} changed plan {target}: {fields}",
+      "retire": "{who} hid plan {target}",
+      "restore": "{who} showed plan {target} again"
+    },
+    "team": {
+      "add_lineman": "{who} added lineman {target}",
+      "add_staff": "{who} added staff {target}",
+      "reset_password": "{who} set a new password for {target}",
+      "deactivate": "{who} switched off {target}",
+      "reactivate": "{who} switched on {target} again"
+    },
+    "customers": {
+      "create": "{who} added customer {target}",
+      "create_with_connections": "{who} added customer {target}",
+      "update": "{who} changed {fields} of customer {target}",
+      "set_status": "{status, select, inactive {{who} closed customer {target}} other {{who} made customer {target} active again}}",
+      "update_phone": "{field, select, alt_phone {{who} changed the other mobile no. of customer {target}} other {{who} changed the phone of customer {target}}}"
+    },
+    "connections": {
+      "add": "{who} added connection VC {target} to customer {customer}",
+      "suspend": "{who} stopped connection VC {target} of customer {customer} from {date}",
+      "reactivate": "{who} started connection VC {target} of customer {customer} again from {date}",
+      "disconnect": "{who} removed connection VC {target} of customer {customer} from {date}",
+      "change_plan": "{who} changed the rent of VC {target} (customer {customer}) from ₹{from} to ₹{to}"
+    },
+    "adjustments": {
+      "create": "{direction, select, credit {{who} gave customer {target} a discount of ₹{amount}} other {{who} added an extra charge of ₹{amount} for customer {target}}}",
+      "back_dated_change": "{kind, select, plan {{who} changed the plan of VC {target} (customer {customer}) from an earlier day, {date}} suspend {{who} stopped VC {target} (customer {customer}) from an earlier day, {date}} reactivate {{who} started VC {target} (customer {customer}) again from an earlier day, {date}} disconnect {{who} removed VC {target} (customer {customer}) from an earlier day, {date}} other {{who} changed VC {target} (customer {customer}) from an earlier day, {date}}}"
+    },
+    "payments": {
+      "post": "{method, select, upi {{who} took ₹{amount} by UPI from customer {customer} (receipt {target})} other {{who} took ₹{amount} in cash from customer {customer} (receipt {target})}}",
+      "reverse": "{who} cancelled payment {target} of ₹{amount} (customer {customer})",
+      "resolve_review": "{who} marked payment {target} as checked (customer {customer})"
+    },
+    "receipts": {
+      "create_link": "{who} made a link for receipt {target}",
+      "revoke_links": "{who} stopped {count, plural, one {# link} other {# links}} of receipt {target}"
+    },
+    "receipt_links": {
+      "purged": "{who} removed {count, plural, one {# old receipt link} other {# old receipt links}}"
+    },
+    "handover": {
+      "submit": "{who} handed over ₹{amount} cash for {date}",
+      "accept": "{who} accepted the cash of {target} for {date}: ₹{amount}",
+      "return": "{who} sent back the cash of {target} for {date}: ₹{amount}"
+    },
+    "billing": {
+      "run_scheduled": "{who} set the bills for {target} to be made",
+      "run_skipped": "{who} did not make the bills for {target}: the app was view only",
+      "run_requeued": "{who} set the bills for {target} to be made again",
+      "run_started": "{who} started making the bills for {target}",
+      "run_retry_started": "{who} tried the bills with problems for {target} again",
+      "start_run": "{who} started making the bills for {target}",
+      "retry_failed": "{who} tried the bills with problems for {target} again",
+      "run_completed": "{status, select, completed_with_errors {{who} finished the bills for {target}: {count, plural, one {# bill} other {# bills}} made, some problems} other {{who} finished the bills for {target}: {count, plural, one {# bill} other {# bills}} made}}"
+    },
+    "subscriptions": {
+      "checkout_started": "{who} started paying for the app with autopay"
+    },
+    "subscription": {
+      "state_changed": "{status, select, trialing {{who} set the app subscription to: Free trial} active {{who} set the app subscription to: Paid} grace {{who} set the app subscription to: Pay now} read_only {{who} set the app subscription to: View only} cancelled {{who} set the app subscription to: Stopped} other {{who} changed the app subscription}}",
+      "notice_sent": "{who} emailed a reminder about the app payment to {count, plural, one {# owner} other {# owners}}"
+    }
+  },
+  "generic": "{who} made a change: {entity} {target}",
+  "action": {
+    "auth": {
+      "signed_in": "Signed in",
+      "sign_in_blocked": "Sign-in refused",
+      "signed_out": "Signed out",
+      "signed_out_everywhere": "Signed out on all devices",
+      "password_reset_requested": "Asked for a new password",
+      "password_reset_completed": "Set a new password",
+      "two_factor_enabled": "Turned on 2-step sign-in"
+    },
+    "mobile_auth": {
+      "refresh_reuse_detected": "Phone signed out for safety"
+    },
+    "devices": {
+      "revoke": "Signed out a phone"
+    },
+    "tenant": {
+      "provisioned": "Business account created"
+    },
+    "operators": {
+      "update_profile": "Business details changed"
+    },
+    "areas": {
+      "create": "Area added",
+      "rename": "Area renamed",
+      "archive": "Area hidden",
+      "restore": "Area shown again"
+    },
+    "plans": {
+      "create": "Plan added",
+      "update": "Plan changed",
+      "retire": "Plan hidden",
+      "restore": "Plan shown again"
+    },
+    "team": {
+      "add_lineman": "Lineman added",
+      "add_staff": "Staff added",
+      "reset_password": "New password set",
+      "deactivate": "Person switched off",
+      "reactivate": "Person switched on"
+    },
+    "customers": {
+      "create": "Customer added",
+      "create_with_connections": "Customer added with connections",
+      "update": "Customer details changed",
+      "set_status": "Customer closed or made active",
+      "update_phone": "Customer phone changed"
+    },
+    "connections": {
+      "add": "Connection added",
+      "suspend": "Connection stopped",
+      "reactivate": "Connection started again",
+      "disconnect": "Connection removed",
+      "change_plan": "Rent changed"
+    },
+    "adjustments": {
+      "create": "Extra charge or discount",
+      "back_dated_change": "Change from an earlier day"
+    },
+    "payments": {
+      "post": "Payment taken",
+      "reverse": "Payment cancelled",
+      "resolve_review": "Payment marked as checked"
+    },
+    "receipts": {
+      "create_link": "Receipt link made",
+      "revoke_links": "Receipt links stopped"
+    },
+    "receipt_links": {
+      "purged": "Old receipt links removed"
+    },
+    "handover": {
+      "submit": "Cash handed over",
+      "accept": "Cash accepted",
+      "return": "Cash sent back"
+    },
+    "billing": {
+      "run_scheduled": "Bills set to be made",
+      "run_skipped": "Bills not made (view only)",
+      "run_requeued": "Bills set to be made again",
+      "run_started": "Bills started",
+      "run_retry_started": "Bills with problems tried again",
+      "start_run": "Make bills now",
+      "retry_failed": "Try problems again",
+      "run_completed": "Bills made"
+    },
+    "subscriptions": {
+      "checkout_started": "App payment started"
+    },
+    "subscription": {
+      "state_changed": "App subscription changed",
+      "notice_sent": "App payment reminder emailed"
+    }
+  },
+  "changes": {
+    "show": "See what changed",
+    "caption": "What changed",
+    "field": "What",
+    "before": "Before",
+    "after": "After",
+    "hidden": "Hidden",
+    "empty": "Not set",
+    "yes": "Yes",
+    "no": "No",
+    "items": "{count, plural, one {# item} other {# items}}",
+    "none": "No details were saved for this change."
+  },
+  "field": {
+    "name": "Name",
+    "phone": "Mobile no.",
+    "alt_phone": "Other mobile no.",
+    "office_phone": "Office phone",
+    "address": "Address",
+    "customer_code": "Customer code",
+    "status": "Status",
+    "kyc": "ID papers",
+    "email": "Email",
+    "login": "User name",
+    "language": "Language",
+    "role": "Role",
+    "amount_paise": "Amount",
+    "method": "Cash or UPI",
+    "source": "Taken on",
+    "business_date": "Day",
+    "receipt_number": "Receipt no.",
+    "reason": "Reason",
+    "note": "Note",
+    "has_note": "Note written",
+    "period": "Month",
+    "trigger": "Started by",
+    "rental_paise": "Rent (monthly)",
+    "effective_date": "From which day?",
+    "end_date": "Last day",
+    "start_date": "Start day",
+    "vc_number": "VC number",
+    "receipt_footer": "Receipt message",
+    "invoice_prefix": "Bill number start",
+    "default_language": "Receipt language",
+    "mid_month_start_policy": "New connection in the middle of the month",
+    "reversed": "Cancelled",
+    "balance_paise": "Balance",
+    "balance_after_paise": "Balance after",
+    "credit_added_paise": "Credit added",
+    "credit_after_paise": "Credit after",
+    "cash_expected_paise": "Cash expected",
+    "cash_handed_over_paise": "Cash handed over",
+    "discrepancy_paise": "Short / extra",
+    "discrepancy_reason": "Why short or extra",
+    "revoked_count": "Phones signed out",
+    "ended_sessions": "Websites signed out",
+    "channel": "Where",
+    "count": "How many",
+    "expires_at": "Works until",
+    "sign_in_setup": "Sign-in set up by",
+    "password": "Password",
+    "monthly_amount_paise": "Rent each month",
+    "connection_count": "Connections",
+    "trial_ends_at": "Free trial ends",
+    "current_period_end": "Paid till",
+    "grace_ends_at": "Pay by",
+    "cancelled_at": "Stopped on",
+    "razorpay_status": "Autopay status",
+    "transitions": "Changes",
+    "recipients": "Owners emailed",
+    "days_left": "Days left",
+    "direction": "Extra charge or discount",
+    "kind": "What changed",
+    "credit_applied_paise": "Credit used",
+    "total_paise": "Total"
+  }
+}

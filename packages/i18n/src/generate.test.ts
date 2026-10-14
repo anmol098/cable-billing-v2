@@ -48,7 +48,8 @@ describe("the real catalog (packages/i18n/messages)", () => {
   it("matches the committed generated files (run `pnpm --filter @cb/i18n i18n:build`)", () => {
     for (const file of generateFiles(result.catalog)) {
       expect(readFileSync(join(repoRoot, file.path), "utf8"), file.path).toBe(file.content);
-      expect(file.content).not.toContain("_review");
+      // The `_review` list itself (a key such as `resolve_review` is fine, T-035).
+      expect(file.content).not.toContain('"_review"');
     }
   });
 });

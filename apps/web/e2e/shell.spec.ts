@@ -177,7 +177,8 @@ test.describe("operator shell", () => {
     await page.goto("/settings");
     await page.getByRole("link", { name: "Who changed what" }).click();
     await expect(page).toHaveURL(/\/settings\/audit$/);
-    await expect(page.getByText(en.shell.coming_soon)).toBeVisible();
+    // Built by T-035 (no longer "Coming soon").
+    await expect(heading(page)).toHaveText("Who changed what");
   });
 
   test("phone (360px): bottom bar + More, no sideways scrolling, in English and Hindi", async ({
