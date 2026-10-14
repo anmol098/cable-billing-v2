@@ -243,7 +243,10 @@ class FieldDayOfflineTest {
         assertEquals("the office counted the payments before the handover", 70_000L, office.cashExpectedPaise)
         assertEquals(0L, office.discrepancyPaise)
         assertEquals(HandoverStatus.SUBMITTED, handovers.status)
-        assertEquals(listOf("printed", "print_failed"), receipts.actions.values.map { it.action.wire })
+        // Both recorded in the same phone-clock millisecond: their order is by random id, so compare as a set.
+        val recorded = receipts.actions.values.map { it.action.wire }
+        assertEquals(setOf("printed", "print_failed"), recorded.toSet())
+        assertEquals(2, receipts.actions.size)
         val rows = listOf(cash1, cash2, upi).map { await { app.db.paymentDao().get(it) }!! }
         assertTrue(
             rows.all { it.state == PaymentState.SENT_TO_OFFICE && it.receiptNumber == payments.receiptOf(it.id) },
