@@ -3,7 +3,7 @@ id: T-088
 title: End-to-end journey tests (Playwright)
 phase: 4
 area: qa
-status: claimed
+status: done
 owner: agent-t088
 claimed_at: 2026-10-14T11:47:52.264Z
 branch: task/T-088-end-to-end-journey-tests-playwright
@@ -29,7 +29,7 @@ Critical web journeys are protected against regressions.
 
 ## Acceptance criteria
 
-- [ ] Suite is stable (no retries needed) across 5 consecutive runs.
+- [x] Suite is stable (no retries needed) across 5 consecutive runs. (Locally, full suite, 2 workers, `--retries=0`; see Verification for the one earlier load-related failure of an older spec.)
 
 ## Files this task owns
 
@@ -55,7 +55,7 @@ PLAN §16, PRD §15 — see `docs/IMPLEMENTATION_PLAN.md`, `docs/PRD.md`, `docs/
 **The month journey** (numbers: Asha 2 VCs ₹250 + ₹350, Bina ₹250, Chandu ₹200 + a ₹700 old due)
 
 1. Sign up → Settings: 2 areas, 2 plans, a lineman (checklist 0 → 2 of 4).
-2. Customers (stepper + Connections tab): Asha with 2 VCs; Bina with code `102`, which another business also uses (allowed); a second `102` in this business is refused. Chandu's ₹700 old due is written as the import/migration brings it (an `opening_balance` bill + ledger line), because the import wizard (T-084) is not merged yet. Checklist 3 of 4.
+2. Customers: Asha through the 3-step form + the Connections tab (2 VCs); Bina and Chandu from a **CSV through the import wizard** (T-084; day-first start dates, plan by name and own rent). Bina's code `102` is also used by another business (allowed); a second `102` in this business is refused. Chandu's ₹700 old due is written directly as the migration brings it (an `opening_balance` bill + ledger line): the import file has no old-due column. Checklist 3 of 4.
 3. Bills: preview (3 customers, ₹1,050, no problems) → Make bills → job worker → made → register → Asha's **one** bill has **both** VCs (₹600).
 4. Counter: Chandu ₹800 cash → old bill Paid, this month's Part paid, ₹100 due; Bina ₹300 UPI → "₹50 credit" on the receipt screen and the customer page.
 5. Phone (mobile API): login; roster balances = the web's; a batch (Asha ₹400 cash + ₹100 UPI + one for the **other business's** customer → `posted, posted, rejected CUSTOMER_NOT_FOUND`); replayed 3× at once → `duplicate`, same receipts; allocations; detail of the other business's customer → 404; day totals cash/UPI apart; ₹350 handed over for ₹400 (`short`); receipt actions `printed`/`whatsapp_opened` recorded, `sent` rejected.
@@ -86,7 +86,7 @@ PLAN §16, PRD §15 — see `docs/IMPLEMENTATION_PLAN.md`, `docs/PRD.md`, `docs/
 
 - **One sign-in per journey.** The month journey reuses the sign-up's session (`storageState`) in every step, and both journeys send a per-seed TEST-NET `x-real-ip` (web and API). The whole suite shares one server's per-IP sign-in limit (100 per 15 min) and is already close to it (~90 sign-ins); the journeys add none to that budget. Against a deployed URL Vercel overwrites the header, which is fine (they then add 1 web sign-in, 1 sign-up and 1 phone login).
 - Steps are separate serial tests (not one long test) so a failure names the step; later steps are skipped when one fails.
-- Seeded data is limited to what has no page yet: the other business (cross-tenant ids), the Hindi business's account, and Chandu's old due (import wizard T-084 not merged). Everything else is made through the UI or the mobile API.
+- Seeded data is limited to what has no page yet: the other business (cross-tenant ids), the Hindi business's account, and Chandu's old due (no page or import column brings an old due; migration does). Everything else is made through the UI or the mobile API.
 - No change to `playwright.config.ts` was needed.
 
 **Things the journeys found (not bugs, reported for the owner)**
@@ -97,14 +97,17 @@ PLAN §16, PRD §15 — see `docs/IMPLEMENTATION_PLAN.md`, `docs/PRD.md`, `docs/
 **Gaps**
 
 - "Runs against Vercel preview URLs in CI with a seeded Neon branch" is not done: it needs H-01 (Vercel/Neon integration, secrets). The specs already support `E2E_BASE_URL` (the month journey skips there, since it needs the local email outbox; the Hindi journey runs).
-- Import (T-084) and the collection/handover reports (T-081) are not merged; add them to the month journey when they land (step 2 and step 7).
+- The collection / handover / connection reports (T-081) are not merged; add them to step 7 of the month journey when they land.
+- PRD §15 #8 (survives an app restart), #10 (print/share failure) are Android; #13/#14 are migration and restore drills. Not web e2e.
 
 **Verification** (Node 24.21.0, pnpm 12.11.2, Postgres 17, scratch DB migrated once, `next start` build)
 
-- Month journey alone: ~1.6–1.9 min; Hindi journey ~21–28 s. Full suite with 2 workers: 95 tests in 6.0 min before, 105 tests in 5.5–6.7 min after.
-- Full web e2e suite, 2 workers, `--retries=0`, **5 consecutive runs against the same scratch DB**: RESULTS_PLACEHOLDER
-- `pnpm install --frozen-lockfile`, `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build`, `pnpm generate` (no diff), `node scripts/tasks.mjs check --local`: see the PR.
+- Runtime: the month journey ~1.6–2.5 min (9 serial steps, one worker), the Hindi journey ~20–45 s, in parallel with the rest. Full suite with 2 workers on this (shared, heavily loaded) 4-core container: 95 tests in 6.0 min before; 107 tests in 5.0–8.9 min after.
+- **Full web e2e suite, 2 workers, `--retries=0`, 5 consecutive runs against the same scratch DB, after the final rebase: 5/5 green** (107 passed each; 6.5, 8.9, 5.6, 6.1, 5.0 min).
+- Before the rebase: 4 more full runs green (105 tests); one run had **1 failure in `audit.spec.ts` ("Staff can't open it")**: its first `/login` did not render within 30 s while the container's load average was 30–40 (other agents' Gradle builds); not a journey test, not reproduced in the next 5 runs. Two loop iterations never started because the shared pnpm shim was broken for ~2 min (someone ran `corepack enable`); not counted.
+- `pnpm install --frozen-lockfile`, `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build` (`--filter @cb/web`), `pnpm generate` (no diff), `node scripts/tasks.mjs check --local`: all pass.
 
 ## Board log
 
 - 2026-10-14T11:47:52.264Z claimed by agent-t088
+- 2026-10-14T13:53:47.405Z completed on task/T-088-end-to-end-journey-tests-playwright
