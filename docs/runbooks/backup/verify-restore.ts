@@ -4,7 +4,7 @@
  *   TARGET_DATABASE_URL=… pnpm --filter @cb/db exec tsx docs/runbooks/backup/verify-restore.ts \
  *     --manifest manifest.json --restored restored.json --report verify.md [--skip-invariants]
  *
- * 1. The restored copy's manifest (manifest.sql run on the target) must equal the backup's
+ * 1. The restored copy's manifest (manifest.pgsql run on the target) must equal the backup's
  *    manifest (taken in the dump's snapshot): same tables, same row counts, same money totals,
  *    same migration journal.
  * 2. T-052's checkTenantInvariants must report zero violations for every tenant (each in a

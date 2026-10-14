@@ -110,7 +110,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Monitoring config tests
-        run: node --test docs/runbooks/monitoring/
+        run: node --test docs/runbooks/monitoring/alerts.test.mjs
 
       - name: Migrate and seed the source database (fake data)
         run: pnpm db:seed --migrate --scale small

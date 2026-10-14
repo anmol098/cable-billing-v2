@@ -113,23 +113,23 @@ t_decrypted=$(now)
 
 # 3. Roles, then the restore, all or nothing. --no-owner: objects belong to the restoring (owner)
 #    role. Privileges are kept: the app roles' GRANTs and default privileges come back with the data.
-psql "$TARGET_DATABASE_URL" -X -q -v ON_ERROR_STOP=1 -f "$here/roles.sql" ||
+psql "$TARGET_DATABASE_URL" -X -q -v ON_ERROR_STOP=1 -f "$here/roles.pgsql" ||
   die "could not prepare the app roles (connect as the database owner that created app_rw/app_platform)"
 # The dump's DEFAULT ACL entries say "FOR ROLE <source owner>", which only works when restoring as
-# that same role; skip them and re-create them for the restoring owner (post-restore.sql).
+# that same role; skip them and re-create them for the restoring owner (post-restore.pgsql).
 pg_restore --list "$workdir/plain/db.dump" | sed -E 's/^([0-9]+; [0-9]+ [0-9]+ DEFAULT ACL )/;\1/' \
   >"$workdir/plain/restore.list"
 log "pg_restore into the target (single transaction)"
 pg_restore --dbname="$TARGET_DATABASE_URL" --no-owner --single-transaction --exit-on-error \
   --no-password --use-list="$workdir/plain/restore.list" "$workdir/plain/db.dump" ||
   die "pg_restore failed; the transaction was rolled back"
-psql "$TARGET_DATABASE_URL" -X -q -v ON_ERROR_STOP=1 -f "$here/post-restore.sql" ||
+psql "$TARGET_DATABASE_URL" -X -q -v ON_ERROR_STOP=1 -f "$here/post-restore.pgsql" ||
   die "could not re-create the default privileges"
 psql "$TARGET_DATABASE_URL" -X -q -v ON_ERROR_STOP=1 -c 'ANALYZE' || die "ANALYZE failed"
 t_restored=$(now)
 
 # 4. Verify: counts/totals/migrations against the manifest, then the invariants per tenant.
-grep -v '^--' "$here/manifest.sql" | tr '\n' ' ' >"$workdir/plain/manifest-one-line.sql"
+grep -v '^--' "$here/manifest.pgsql" | tr '\n' ' ' >"$workdir/plain/manifest-one-line.sql"
 psql "$TARGET_DATABASE_URL" -X -A -t -v ON_ERROR_STOP=1 -f "$workdir/plain/manifest-one-line.sql" \
   >"$workdir/plain/restored.json"
 verify_args=(--manifest "$manifest" --restored "$workdir/plain/restored.json" --report "$workdir/plain/verify.md")

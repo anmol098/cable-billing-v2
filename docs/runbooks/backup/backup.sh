@@ -80,8 +80,8 @@ coproc_pid=$SNAP_PID
 IFS= read -r -t 60 snapshot <&"${SNAP[0]}" || die "could not export a snapshot"
 [[ "$snapshot" =~ ^[0-9A-F-]+$ ]] || die "unexpected snapshot id from the server"
 
-# manifest.sql as one line (comment lines dropped), so one `read` gets its one-line result.
-manifest_sql=$(grep -v '^--' "$here/manifest.sql" | tr '\n' ' ')
+# manifest.pgsql as one line (comment lines dropped), so one `read` gets its one-line result.
+manifest_sql=$(grep -v '^--' "$here/manifest.pgsql" | tr '\n' ' ')
 printf '%s\n' "$manifest_sql" >&"${SNAP[1]}"
 IFS= read -r -t 600 db_manifest <&"${SNAP[0]}" || die "manifest query failed"
 [[ "$db_manifest" == \{* ]] || die "manifest query failed: ${db_manifest:0:200}"
