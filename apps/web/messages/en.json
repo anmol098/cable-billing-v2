@@ -1317,12 +1317,10 @@
       "note": "Note",
       "old_due_left": "Old due: {amount} paid, {left} left",
       "old_due_paid": "Old due: {amount} paid, nothing left",
-      "open_customer": "Open customer",
       "reached_office": "Reached the office",
       "receipt_no": "Receipt no.",
       "taken_at": "Money taken",
       "taken_by": "Taken by",
-      "taken_how": "Taken",
       "temporary_no": "Phone's temporary no.",
       "title": "Payment {number}",
       "title_no_receipt": "Payment",
@@ -1382,7 +1380,6 @@
       "search_failed": "Could not search. Try again.",
       "searching": "Searching…",
       "step": "Step {step} of 4",
-      "steps_label": "Steps",
       "upi_ref_help": "The number in the customer's UPI app. It is not proof of payment.",
       "upi_ref_label": "UPI ref no. (if you have it)"
     },
@@ -1489,8 +1486,7 @@
       "reason_label": "Why are you undoing it?",
       "reason_required": "Choose a reason.",
       "recent_empty": "No payment has been cancelled.",
-      "recent_title": "Cancelled payments",
-      "title": "Undo payment"
+      "recent_title": "Cancelled payments"
     },
     "undo_reason": {
       "entered_twice": "Saved twice",

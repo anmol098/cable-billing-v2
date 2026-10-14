@@ -1317,13 +1317,11 @@
       "note": "नोट",
       "old_due_left": "पुराना बाकी: {amount} भरा, {left} बाकी",
       "old_due_paid": "पुराना बाकी: {amount} भरा, कुछ बाकी नहीं",
-      "open_customer": "ग्राहक खोलें",
       "reached_office": "ऑफिस कब पहुँचा",
       "receipt_no": "रसीद नं.",
       "taken_at": "पैसे कब लिए",
       "taken_by": "किसने लिया",
-      "taken_how": "कहाँ लिया",
-      "temporary_no": "फ़ोन का कच्चा नं.",
+      "temporary_no": "फ़ोन का अस्थायी नं.",
       "title": "पेमेंट {number}",
       "title_no_receipt": "पेमेंट",
       "undo": "पेमेंट रद्द करें",
@@ -1382,7 +1380,6 @@
       "search_failed": "खोज नहीं पाए। फिर से करें।",
       "searching": "खोज रहे हैं…",
       "step": "कदम {step} / 4",
-      "steps_label": "कदम",
       "upi_ref_help": "ग्राहक के UPI ऐप में दिखने वाला नंबर। यह पेमेंट का सबूत नहीं है।",
       "upi_ref_label": "UPI रेफ़. नं. (अगर हो)"
     },
@@ -1489,8 +1486,7 @@
       "reason_label": "क्यों रद्द कर रहे हैं?",
       "reason_required": "वजह चुनें।",
       "recent_empty": "कोई पेमेंट रद्द नहीं हुआ है।",
-      "recent_title": "रद्द किए गए पेमेंट",
-      "title": "पेमेंट रद्द करें"
+      "recent_title": "रद्द किए गए पेमेंट"
     },
     "undo_reason": {
       "entered_twice": "दो बार सेव हुआ",
