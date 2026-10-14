@@ -40,7 +40,7 @@ export const EARLY_ERROR_LIMIT = 20;
 type EarlyError = { error: unknown; type: "onerror" | "onunhandledrejection" };
 
 /**
- * Browser Sentry, loaded after the page (T-087a). The SDK is ≈120 KB of compressed JavaScript; in
+ * Browser Sentry, loaded after the page (T-087a). The SDK is ≈55 KB of compressed JavaScript; in
  * the page's own bundle every visitor downloaded and ran it before the page became usable, on
  * slow phone data too (PRD §11). Here it is a separate chunk, fetched once the page has loaded and
  * the browser is idle.
@@ -65,7 +65,8 @@ export function startBrowserSentry({
   const keep = (entry: EarlyError) => {
     if (early.length < EARLY_ERROR_LIMIT) early.push(entry);
   };
-  const onError = (event: ErrorEvent) => keep({ error: event.error ?? event.message, type: "onerror" });
+  const onError = (event: ErrorEvent) =>
+    keep({ error: event.error ?? event.message, type: "onerror" });
   const onRejection = (event: PromiseRejectionEvent) =>
     keep({ error: event.reason, type: "onunhandledrejection" });
   target.addEventListener("error", onError);

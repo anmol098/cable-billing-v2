@@ -20,7 +20,10 @@ function fakeWindow(readyState: DocumentReadyState = "complete") {
     }),
     setTimeout: vi.fn(),
   });
-  return { win: win as unknown as Window, idle, runIdle: () => idle.splice(0).forEach((f) => f()) };
+  const runIdle = () => {
+    for (const callback of idle.splice(0)) callback();
+  };
+  return { win: win as unknown as Window, idle, runIdle };
 }
 
 function fakeSdk() {
@@ -77,7 +80,11 @@ describe("startBrowserSentry", () => {
     runIdle();
     await flush();
 
-    expect(sdk.init).toHaveBeenCalledWith({ ...sentrySharedOptions, dsn: DSN, environment: "preview" });
+    expect(sdk.init).toHaveBeenCalledWith({
+      ...sentrySharedOptions,
+      dsn: DSN,
+      environment: "preview",
+    });
     const options = sdk.init.mock.calls[0]?.[0];
     expect(options.dataCollection).toEqual({
       userInfo: false,
@@ -169,7 +176,8 @@ describe("startBrowserSentry", () => {
     startBrowserSentry({ dsn: DSN, environment: "test", load: async () => sdk, target: win });
     const timer = vi.mocked(win.setTimeout);
     expect(timer).toHaveBeenCalledTimes(1);
-    (timer.mock.calls[0]?.[0] as () => void)();
+    const [callback] = timer.mock.calls[0] ?? [];
+    (callback as () => void)();
     await flush();
     expect(sdk.init).toHaveBeenCalledTimes(1);
   });
