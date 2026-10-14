@@ -3,10 +3,10 @@ id: T-091
 title: Migration: mapping document draft
 phase: 5
 area: migration
-status: todo
-owner:
-claimed_at:
-branch:
+status: claimed
+owner: agent-t091
+claimed_at: 2026-10-14T13:47:15.228Z
+branch: task/T-091-migration-mapping-document-draft
 depends_on: [T-090, T-023]
 review: self
 claimable_by: agent
@@ -49,3 +49,7 @@ PLAN §15 step 2, PRD §14, BRD §13 — see `docs/IMPLEMENTATION_PLAN.md`, `doc
 ## Completion notes
 
 _The agent fills this in before opening the PR: what was built, decisions taken, deviations, follow-up tasks created, and how it was verified._
+
+## Board log
+
+- 2026-10-14T13:47:15.229Z claimed by agent-t091
