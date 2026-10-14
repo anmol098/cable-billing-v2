@@ -3,10 +3,10 @@ id: T-086d
 title: Enrol platform admins at creation with a one-time setup link; count every failed code
 phase: 4
 area: core
-status: todo
-owner:
-claimed_at:
-branch:
+status: claimed
+owner: agent-t086d
+claimed_at: 2026-10-14T21:26:48.076Z
+branch: task/T-086d-enrol-platform-admins-at-creation-with-a
 depends_on: [T-086b]
 review: required
 claimable_by: agent
@@ -98,3 +98,4 @@ PLAN §9.2, §12.4; T-026 (open question "Platform admin bootstrap"), T-086b com
 _The agent fills this in before opening the PR._
 
 ## Board log
+- 2026-10-14T21:26:48.076Z claimed by agent-t086d
