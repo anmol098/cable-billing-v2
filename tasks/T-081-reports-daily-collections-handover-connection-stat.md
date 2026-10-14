@@ -3,10 +3,10 @@ id: T-081
 title: Reports: daily collections, handover, connection status, billing runs
 phase: 4
 area: web
-status: todo
-owner:
-claimed_at:
-branch:
+status: claimed
+owner: agent-t081
+claimed_at: 2026-10-14T08:08:30.046Z
+branch: task/T-081-reports-daily-collections-handover-conne
 depends_on: [T-062, T-044, T-034]
 review: self
 claimable_by: agent
@@ -51,3 +51,7 @@ FR-023, BRD §12 — see `docs/IMPLEMENTATION_PLAN.md`, `docs/PRD.md`, `docs/BRD
 ## Completion notes
 
 _The agent fills this in before opening the PR: what was built, decisions taken, deviations, follow-up tasks created, and how it was verified._
+
+## Board log
+
+- 2026-10-14T08:08:30.047Z claimed by agent-t081
