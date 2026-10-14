@@ -156,6 +156,9 @@ export const AUDIT_ACTIONS = {
   "auth.password_reset_requested": {},
   "auth.password_reset_completed": {},
   "auth.two_factor_enabled": {},
+  "auth.other_sessions_ended": {
+    details: ({ after }) => ({ count: count(field(after, "sessions")) }),
+  },
   "mobile_auth.refresh_reuse_detected": {},
   "devices.revoke": {},
   // Business (T-027, T-030)

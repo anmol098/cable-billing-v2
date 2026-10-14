@@ -22,6 +22,8 @@ export const AUTH_AUDIT_ACTIONS = [
   "auth.password_reset_requested",
   "auth.password_reset_completed",
   "auth.two_factor_enabled",
+  /** T-086b: turning on TOTP ended the user's other sessions (`{ sessions, reason }`). */
+  "auth.other_sessions_ended",
 ] as const;
 export type AuthAuditAction = (typeof AUTH_AUDIT_ACTIONS)[number];
 

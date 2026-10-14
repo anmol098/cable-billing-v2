@@ -6,7 +6,8 @@
  * 1. T-026 `requirePlatformAdmin()`: no session → /login; a tenant user → /home; an admin who has
  *    not turned on TOTP yet → /login/2fa/setup (platform admin sessions last at most 8 hours).
  * 2. T-086 `resolveAdminContext`: re-reads the user's row (platform_admin, no tenant, active, TOTP
- *    on) and issues the `AdminContext` every admin service requires.
+ *    on) and this session's row (T-086b: it must itself have passed TOTP; a password-only session
+ *    → /login) and issues the `AdminContext` every admin service requires.
  */
 import {
   type AdminContext,
@@ -37,7 +38,7 @@ export const getAdminContext = cache(async (): Promise<AdminContext> => {
   const client = clientInfo(requestHeaders);
   const result = await resolveAdminContext(getServerRuntime(), {
     userId: session.userId,
-    twoFactorEnabled: session.twoFactorEnabled,
+    sessionId: session.sessionId,
     requestId: requestIdFromHeaders(requestHeaders),
     ...(client ? { client } : {}),
   });

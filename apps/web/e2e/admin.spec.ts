@@ -2,6 +2,8 @@
  * Platform admin console (T-086) against `next start` and a real, migrated database:
  * - every admin route refuses anonymous visitors (→ sign in), tenant owners (→ /home) and an
  *   admin without 2-step sign-in (→ TOTP enrolment), server-side;
+ * - T-086b: a password-only session opened before enrolment (another browser) is ended when
+ *   enrolment completes, and gets in only after signing in again with the code;
  * - the admin flow: overview metrics, operators list and detail, extend, offline payment,
  *   support access (reason, 2 hours, visible in the operator's own audit log, ended early →
  *   refused), job retry, Razorpay log, admin log, and adding an operator.
@@ -87,25 +89,28 @@ test.describe("platform admin console", () => {
         phone: mobileFromSeed(run),
       });
     });
-    const adminId = uuidv7();
     failedJobId = uuidv7();
     await db.withPlatform(async (tx) => {
-      await tx.insert(users).values({
-        id: adminId,
-        operatorId: null,
-        role: "platform_admin",
-        name: `E2E Admin ${run}`,
-        login: login("admin"),
-        email: `${login("admin")}@cable.test`,
-        language: "en",
-      });
-      await tx.insert(accounts).values({
-        id: uuidv7(),
-        userId: adminId,
-        accountId: adminId,
-        providerId: "credential",
-        password: hash,
-      });
+      // "admin": the console flow; "admin2": two browsers around enrolment (T-086b).
+      for (const who of ["admin", "admin2"]) {
+        const adminId = uuidv7();
+        await tx.insert(users).values({
+          id: adminId,
+          operatorId: null,
+          role: "platform_admin",
+          name: who === "admin" ? `E2E Admin ${run}` : `E2E Second Admin ${run}`,
+          login: login(who),
+          email: `${login(who)}@cable.test`,
+          language: "en",
+        });
+        await tx.insert(accounts).values({
+          id: uuidv7(),
+          userId: adminId,
+          accountId: adminId,
+          providerId: "credential",
+          password: hash,
+        });
+      }
       await tx.insert(jobs).values({
         id: failedJobId,
         operatorId,
@@ -170,6 +175,48 @@ test.describe("platform admin console", () => {
     await page.getByRole("button", { name: "Turn on" }).click();
     await expect(page).toHaveURL(/\/admin$/);
     await expect(page.getByRole("heading", { level: 1, name: "Overview" })).toBeVisible();
+  });
+
+  test("a password-only session from before enrolment never reaches the console (T-086b)", async ({
+    browser,
+  }) => {
+    // Two browsers sign in with the password alone; the second one turns on 2-step sign-in.
+    const before = await browser.newContext();
+    const enrolling = await browser.newContext();
+    try {
+      const stale = await before.newPage();
+      const page = await enrolling.newPage();
+      await signIn(stale, "admin2");
+      await expect(stale).toHaveURL(/\/login\/2fa\/setup$/);
+      await signIn(page, "admin2");
+      await expect(page).toHaveURL(/\/login\/2fa\/setup$/);
+      await page.getByLabel("Your password").fill(PASSWORD);
+      await page.getByRole("button", { name: "Next" }).click();
+      const secret = (await page.getByTestId("totp-secret").textContent())?.trim() ?? "";
+      await page.getByLabel("6-digit code from the app").fill(totp(secret));
+      await page.getByRole("button", { name: "Turn on" }).click();
+      await expect(page).toHaveURL(/\/admin$/);
+
+      // The first browser's session is gone: every admin route sends it to sign in.
+      for (const route of ADMIN_ROUTES) {
+        await stale.goto(route);
+        await expect(stale, route).toHaveURL(/\/login(\?|$)/);
+      }
+      await expect(stale.getByLabel("Mobile no., user name or email")).toBeVisible();
+
+      // Signing in there again needs the code; then it gets in.
+      await signIn(stale, "admin2");
+      await expect(stale).toHaveURL(/\/login\/2fa$/);
+      await stale.getByLabel("6-digit code").fill(totp(secret));
+      await stale.getByRole("button", { name: "Check code" }).click();
+      await expect(stale).toHaveURL(/\/admin$/);
+      // The enrolled browser is still in.
+      await page.goto("/admin/jobs");
+      await expect(page).toHaveURL(/\/admin\/jobs$/);
+    } finally {
+      await before.close();
+      await enrolling.close();
+    }
   });
 
   test("admin flow: operators, subscription, support access, jobs, logs", async ({ page }) => {

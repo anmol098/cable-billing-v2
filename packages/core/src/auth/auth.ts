@@ -24,7 +24,7 @@ import { err, ok, type Result } from "@cb/domain";
 import { APIError, type BetterAuthPlugin, betterAuth } from "better-auth";
 import { createAuthMiddleware, isAPIError } from "better-auth/api";
 import { twoFactor, username } from "better-auth/plugins";
-import { eq } from "drizzle-orm";
+import { and, eq, ne } from "drizzle-orm";
 import type { ServiceRuntime } from "../context/runtime";
 import {
   type ContextError,
@@ -106,6 +106,11 @@ export type AuthFailureCode =
   | "INVALID_CODE"
   /** The 2FA step timed out or was used up: sign in again. */
   | "TWO_FACTOR_EXPIRED"
+  /**
+   * The code was right but turning on 2-step sign-in did not finish as expected; every session of
+   * the user was ended to be safe (T-086b). Sign in again and try once more.
+   */
+  | "SIGN_IN_AGAIN"
   /** Reset link invalid, used or expired. */
   | "INVALID_TOKEN"
   /** New password too short or too long. */
@@ -140,7 +145,13 @@ export interface WebSession {
   /** `null` for a platform admin. */
   readonly operatorId: string | null;
   readonly language: "hi" | "en";
+  /** The **user** has TOTP on (Better Auth's `user.twoFactorEnabled`). */
   readonly twoFactorEnabled: boolean;
+  /**
+   * **This session** passed a TOTP check (the sign-in 2FA step, or enrolment), T-086b. A platform
+   * admin's session that lacks it while their TOTP is on is revoked by `getSession`.
+   */
+  readonly twoFactorVerified: boolean;
   /** Platform admin who must enrol TOTP before anything else. */
   readonly twoFactorEnrolmentRequired: boolean;
   readonly createdAt: Date;
@@ -158,6 +169,13 @@ export interface TwoFactorEnrolment {
 
 const SIGN_IN_PATHS = new Set(["/sign-in/username", "/sign-in/email"]);
 
+/**
+ * The Better Auth endpoint (twoFactor plugin, `auth.api.verifyTOTP`) that creates a session only
+ * after a TOTP code was checked: the sign-in 2FA step (`verifyTwoFactor`) and the enrolment
+ * re-issue (`confirmTwoFactorEnrolment`). A session created by any other endpoint is password-only.
+ */
+const TOTP_VERIFY_PATH = "/two-factor/verify-totp";
+
 /** Error codes our hooks put into Better Auth errors. */
 const RATE_LIMITED = "RATE_LIMITED";
 const ROLE_NOT_ALLOWED = "ROLE_NOT_ALLOWED";
@@ -174,6 +192,8 @@ interface CallScope {
   resetSubject?: AuthAuditSubject;
   /** Set by `requestPasswordReset({ invite })` (T-032): the link email is an invitation. */
   readonly invite?: PasswordResetInvite;
+  /** Set by the session-create hook: the token of a session that passed TOTP in this call. */
+  totpSessionToken?: string;
 }
 
 /** Builds the auth service. No I/O until a method is called. */
@@ -309,6 +329,10 @@ export function createAuthService(options: CreateAuthServiceOptions) {
       expiresIn: SESSION_POLICY.tenantExpiresInSeconds,
       updateAge: SESSION_POLICY.updateAgeSeconds,
       cookieCache: { enabled: false },
+      additionalFields: {
+        // T-086b: set only by the session-create hook below (never input, never copied).
+        twoFactorVerifiedAt: { type: "date", required: false, input: false },
+      },
     },
     verification: { storeIdentifier: "hashed" },
     emailAndPassword: {
@@ -377,19 +401,34 @@ export function createAuthService(options: CreateAuthServiceOptions) {
               logger.warn("auth.sign_in_blocked", { user_id: subject.userId, reason: block });
               throw blockedError(block);
             }
+            // T-086b: record whether THIS session passed TOTP. Only the TOTP verify endpoint
+            // creates a session after checking a code (sign-in 2FA step, enrolment re-issue);
+            // every other session is password-only. Forced either way, so a value can never be
+            // carried over from an older session that Better Auth re-issues.
+            const totpVerified = ctx?.path === TOTP_VERIFY_PATH;
+            const twoFactorVerifiedAt = totpVerified ? now() : null;
+            if (totpVerified) {
+              const store = scope.getStore();
+              if (store) store.totpSessionToken = session.token;
+            }
             if (subject.role === "platform_admin") {
               const createdAt = session.createdAt ?? now();
               const cap = platformAdminSessionExpiry(createdAt);
               const expiresAt = session.expiresAt < cap ? session.expiresAt : cap;
-              return { data: { ...session, expiresAt } };
+              return { data: { ...session, expiresAt, twoFactorVerifiedAt } };
             }
-            return { data: session };
+            return { data: { ...session, twoFactorVerifiedAt } };
           },
         },
         update: {
           // Better Auth slides every session it refreshes to `expiresIn` (30 days); a platform
           // admin's must stay within 8 hours of sign-in. (getSession also enforces the cap.)
           before: async (data, ctx) => {
+            // T-086b: the TOTP marker is written only when a session is created, never updated
+            // (Better Auth never sends it: the field is `input: false`; this keeps it that way).
+            if ("twoFactorVerifiedAt" in data) {
+              throw new Error("sessions.two_factor_verified_at is never updated");
+            }
             const current = (
               ctx?.context as
                 | { session?: { session?: { createdAt?: Date }; user?: { role?: unknown } } | null }
@@ -479,6 +518,14 @@ export function createAuthService(options: CreateAuthServiceOptions) {
     }
     const extra = user as typeof user & { language?: string; twoFactorEnabled?: boolean | null };
     const twoFactorEnabled = extra.twoFactorEnabled === true;
+    const verifiedAt = (session as typeof session & { twoFactorVerifiedAt?: Date | string | null })
+      .twoFactorVerifiedAt;
+    const twoFactorVerified = verifiedAt !== null && verifiedAt !== undefined;
+    // T-086b: once an admin has TOTP on, a session that never passed it (opened with the password
+    // before enrolment) is not an admin session: end it, so they sign in again with the code.
+    if (subject.role === "platform_admin" && twoFactorEnabled && !twoFactorVerified) {
+      return revoke("two_factor_not_verified_in_session");
+    }
     return {
       sessionId: session.id,
       userId: user.id,
@@ -486,6 +533,7 @@ export function createAuthService(options: CreateAuthServiceOptions) {
       operatorId: subject.operatorId,
       language: extra.language === "hi" ? "hi" : "en",
       twoFactorEnabled,
+      twoFactorVerified,
       twoFactorEnrolmentRequired: subject.role === "platform_admin" && !twoFactorEnabled,
       createdAt,
       expiresAt: new Date(session.expiresAt),
@@ -554,10 +602,20 @@ export function createAuthService(options: CreateAuthServiceOptions) {
     }): Promise<AuthResult<Extract<SignInOutcome, { status: "signed_in" }>>> {
       const code = input.code.replace(/\s+/g, "");
       if (!TOTP_CODE.test(code)) return err({ code: "INVALID_CODE" });
+      const store: CallScope = { headers: input.headers };
       try {
-        const data = await withHeaders(input.headers, () =>
-          auth.api.verifyTOTP({ body: { code }, headers: input.headers }),
+        const data = await withHeaders(
+          input.headers,
+          () => auth.api.verifyTOTP({ body: { code }, headers: input.headers }),
+          store,
         );
+        // T-086b: a sign-in is only a sign-in when Better Auth made a new, TOTP-checked session.
+        // With a session cookie (and no 2FA challenge) it checks the code against that session
+        // and returns its old token, creating nothing: not a sign-in, so not reported as one.
+        if (store.totpSessionToken === undefined) {
+          logger.warn("auth.two_factor_no_new_session");
+          return err({ code: "TWO_FACTOR_EXPIRED" });
+        }
         const subject = subjectOf(data.user as unknown as Record<string, unknown>);
         if (!subject || !isWebRole(subject.role)) throw new Error("verifyTwoFactor: no user");
         await audit("auth.signed_in", subject, input.headers, { method: "password_totp" });
@@ -603,37 +661,84 @@ export function createAuthService(options: CreateAuthServiceOptions) {
       }
     },
 
-    /** Finishes enrolment with a first code from the app. The session is re-issued. */
+    /**
+     * Finishes enrolment with a first code from the app. The session is re-issued (marked as
+     * having passed TOTP) and **every other session of the user is ended** (T-086b, for every
+     * role: owners and staff too): a session opened with the password alone, in another browser,
+     * before enrolment, must not live on. If Better Auth didn't re-issue this browser's session,
+     * every session is ended and the answer is SIGN_IN_AGAIN (nothing is audited as turned on).
+     */
     async confirmTwoFactorEnrolment(input: {
       code: string;
       headers: Headers;
-    }): Promise<AuthResult<{ userId: string; role: WebRole }>> {
+    }): Promise<AuthResult<{ userId: string; role: WebRole; otherSessionsEnded: number }>> {
       const session = await getSession(input.headers);
       if (!session) return err({ code: "UNAUTHENTICATED" });
+      // Already on: nothing to confirm (startTwoFactorEnrolment refuses the same way).
+      if (session.twoFactorEnabled) return err({ code: "INVALID_CODE" });
       const code = input.code.replace(/\s+/g, "");
       if (!TOTP_CODE.test(code)) return err({ code: "INVALID_CODE" });
+      const store: CallScope = { headers: input.headers };
       try {
-        await withHeaders(input.headers, () =>
-          auth.api.verifyTOTP({ body: { code }, headers: input.headers }),
+        await withHeaders(
+          input.headers,
+          () => auth.api.verifyTOTP({ body: { code }, headers: input.headers }),
+          store,
         );
       } catch (error) {
         return err(failureOf(error, "INVALID_CODE"));
       }
+      const subject = {
+        userId: session.userId,
+        role: session.role,
+        operatorId: session.operatorId,
+      };
+      const keep = store.totpSessionToken;
       const rows = await db.withPlatform((tx) =>
         tx
           .select({ enabled: users.twoFactorEnabled })
           .from(users)
           .where(eq(users.id, session.userId)),
       );
-      if (rows[0]?.enabled !== true) return err({ code: "INVALID_CODE" });
-      await audit(
-        "auth.two_factor_enabled",
-        { userId: session.userId, role: session.role, operatorId: session.operatorId },
-        input.headers,
-        { method: "totp" },
+      const enabled = rows[0]?.enabled === true;
+      if (keep === undefined || !enabled) {
+        // Better Auth accepted the code but did not turn TOTP on with a fresh, TOTP-checked session
+        // for this browser (e.g. a `two_factors` row already `verified` while the user's flag is
+        // off). Fail closed: end every session of the user, this one too, claim nothing in the
+        // audit log, and ask them to sign in again.
+        const ended = await db.withPlatform((tx) =>
+          tx
+            .delete(sessions)
+            .where(eq(sessions.userId, session.userId))
+            .returning({ id: sessions.id }),
+        );
+        logger.error("auth.two_factor_enrolment_incomplete", {
+          user_id: session.userId,
+          reason: keep === undefined ? "no_verified_session" : "not_enabled",
+          sessions: ended.length,
+        });
+        return err({ code: "SIGN_IN_AGAIN" });
+      }
+      // Keep only the session Better Auth just issued for this browser (it passed TOTP).
+      const ended = await db.withPlatform((tx) =>
+        tx
+          .delete(sessions)
+          .where(and(eq(sessions.userId, session.userId), ne(sessions.token, keep)))
+          .returning({ id: sessions.id }),
       );
+      if (ended.length > 0) {
+        await audit("auth.other_sessions_ended", subject, input.headers, {
+          sessions: ended.length,
+          reason: "two_factor_enabled",
+        });
+        logger.info("auth.other_sessions_ended", {
+          user_id: session.userId,
+          sessions: ended.length,
+        });
+      }
+      await audit("auth.two_factor_enabled", subject, input.headers, { method: "totp" });
       logger.info("auth.two_factor_enabled", { user_id: session.userId });
-      return ok({ userId: session.userId, role: session.role });
+      return ok({ userId: session.userId, role: session.role, otherSessionsEnded: ended.length });
     },
 
     getSession,

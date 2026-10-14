@@ -11,7 +11,12 @@ import { contextFor, type SeededTenant, seedTenant, testRuntime } from "../testi
 import { type AdminContext, resolveAdminContext } from "./context";
 import { endSupportAccess, grantSupportAccess, supportView } from "./support";
 import { tenantDetail } from "./tenants";
-import { adminContextFor, platformAuditActions, seedPlatformAdmin } from "./test-support";
+import {
+  adminContextFor,
+  platformAuditActions,
+  seedPlatformAdmin,
+  seedWebSession,
+} from "./test-support";
 
 const T0 = new Date("2026-11-02T05:00:00Z");
 const minutes = (n: number) => new Date(T0.getTime() + n * 60_000);
@@ -216,15 +221,16 @@ describeDb("AdminContext gate (T-086)", () => {
     tenant = await seedTenant(t.current);
   });
 
-  const principal = (userId: string, twoFactorEnabled = true) => ({
+  /** The principal of a fresh web session of `userId` (TOTP-verified unless `totp: false`). */
+  const principal = async (userId: string, totp = true) => ({
     userId,
-    twoFactorEnabled,
+    sessionId: await seedWebSession(rt(), userId, { totp }),
     requestId: newRequestId(),
   });
 
   it("tenant users (owner, staff, lineman) never get an admin context", async () => {
     for (const role of ["owner", "staff", "lineman"] as const) {
-      const result = await resolveAdminContext(rt(), principal(tenant.users[role]));
+      const result = await resolveAdminContext(rt(), await principal(tenant.users[role]));
       expect(result, role).toMatchObject({
         ok: false,
         error: { code: "FORBIDDEN", details: { reason: "not_a_platform_admin" } },
@@ -232,37 +238,62 @@ describeDb("AdminContext gate (T-086)", () => {
     }
   });
 
-  it("an admin without TOTP (row or session) is refused; a disabled admin too", async () => {
+  it("an admin without TOTP is refused; a disabled admin too", async () => {
     const noTotp = await seedPlatformAdmin(t.current, { twoFactor: false });
-    expect(await resolveAdminContext(rt(), principal(noTotp))).toMatchObject({
+    expect(await resolveAdminContext(rt(), await principal(noTotp))).toMatchObject({
       ok: false,
       error: { code: "FORBIDDEN", details: { reason: "two_factor_required" } },
     });
     const withTotp = await seedPlatformAdmin(t.current);
-    expect(await resolveAdminContext(rt(), principal(withTotp, false))).toMatchObject({
-      ok: false,
-      error: { code: "FORBIDDEN", details: { reason: "two_factor_required" } },
-    });
-    expect((await resolveAdminContext(rt(), principal(withTotp))).ok).toBe(true);
+    expect((await resolveAdminContext(rt(), await principal(withTotp))).ok).toBe(true);
     await t.current.admin.query("UPDATE users SET status = 'disabled' WHERE id = $1", [withTotp]);
-    expect(await resolveAdminContext(rt(), principal(withTotp))).toMatchObject({
+    expect(await resolveAdminContext(rt(), await principal(withTotp))).toMatchObject({
       ok: false,
       error: { code: "ACCOUNT_DISABLED" },
     });
-    const unknown = await resolveAdminContext(
-      rt(),
-      principal("0193a000-0000-7000-8000-000000000001"),
-    );
+    const unknown = await resolveAdminContext(rt(), {
+      userId: "0193a000-0000-7000-8000-000000000001",
+      sessionId: "0193a000-0000-7000-8000-000000000002",
+      requestId: newRequestId(),
+    });
     expect(unknown).toMatchObject({ ok: false, error: { code: "UNAUTHENTICATED" } });
     // A lineman-like row without a tenant can't exist; a tenant user with TOTP is still refused.
     const owner2 = await createUser(t.current, { operatorId: tenant.operatorId, role: "owner" });
     await t.current.admin.query("UPDATE users SET two_factor_enabled = true WHERE id = $1", [
       owner2.userId,
     ]);
-    expect(await resolveAdminContext(rt(), principal(owner2.userId))).toMatchObject({
+    expect(await resolveAdminContext(rt(), await principal(owner2.userId))).toMatchObject({
       ok: false,
       error: { code: "FORBIDDEN", details: { reason: "not_a_platform_admin" } },
     });
+  });
+
+  it("T-086b: the session in hand must itself have passed TOTP, be live and be the admin's", async () => {
+    const admin = await seedPlatformAdmin(t.current);
+    const other = await seedPlatformAdmin(t.current);
+    // Password-only session of an admin who has TOTP on (opened before enrolment).
+    expect(await resolveAdminContext(rt(), await principal(admin, false))).toMatchObject({
+      ok: false,
+      error: { code: "FORBIDDEN", details: { reason: "session_not_two_factor_verified" } },
+    });
+    const refusedNoSession = {
+      ok: false,
+      error: { code: "UNAUTHENTICATED", details: { reason: "no_session" } },
+    };
+    // Another admin's (verified) session, an expired one, a deleted one, a malformed id.
+    const othersSession = await seedWebSession(rt(), other);
+    const expired = await seedWebSession(rt(), admin, { expiresAt: new Date(Date.now() - 1000) });
+    const deleted = await seedWebSession(rt(), admin);
+    await t.current.admin.query("DELETE FROM sessions WHERE id = $1", [deleted]);
+    for (const sessionId of [othersSession, expired, deleted, "s1"]) {
+      const result = await resolveAdminContext(rt(), {
+        userId: admin,
+        sessionId,
+        requestId: newRequestId(),
+      });
+      expect(result, sessionId).toMatchObject(refusedNoSession);
+    }
+    expect((await resolveAdminContext(rt(), await principal(admin))).ok).toBe(true);
   });
 
   it("services refuse forged contexts and tenant contexts (a programming error, thrown)", async () => {

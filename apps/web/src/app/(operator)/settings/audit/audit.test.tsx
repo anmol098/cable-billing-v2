@@ -169,6 +169,27 @@ describe("auditSentence", () => {
     );
   });
 
+  it("says how many other devices were signed out when an owner turned on 2-step sign-in (T-086b)", () => {
+    const ended = (sessions: number) =>
+      event({
+        actor: { kind: "person", id: STAFF, name: "Suresh", role: "owner" },
+        action: "auth.other_sessions_ended",
+        entityType: "user",
+        target: null,
+        details: { count: { kind: "count", value: sessions } },
+      });
+    expect(auditSentence(auditT(), ended(1), "en")).toBe(
+      "Suresh (Owner) turned on 2-step sign-in, so 1 other device was signed out",
+    );
+    expect(auditSentence(auditT(), ended(3), "en")).toBe(
+      "Suresh (Owner) turned on 2-step sign-in, so 3 other devices were signed out",
+    );
+    expect(auditSentence(auditT("hi"), ended(1), "hi")).toMatch(
+      /^Suresh .+ ने 2-स्टेप लॉग इन चालू किया, इसलिए 1 दूसरे डिवाइस से लॉग आउट कर दिया गया$/,
+    );
+    expect(auditSentence(auditT("hi"), ended(2), "hi")).toMatch(/2 दूसरे डिवाइसों से लॉग आउट/);
+  });
+
   it("uses a safe generic sentence for actions it doesn't know", () => {
     const odd = event({
       action: "exports.csv_downloaded",
