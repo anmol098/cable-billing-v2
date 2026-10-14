@@ -3,10 +3,10 @@ id: T-072
 title: Android: durability and migration test suite
 phase: 3
 area: qa
-status: todo
-owner:
-claimed_at:
-branch:
+status: claimed
+owner: agent-t072
+claimed_at: 2026-10-14T08:08:23.603Z
+branch: task/T-072-android-durability-and-migration-test-su
 depends_on: [T-066]
 review: self
 claimable_by: agent
@@ -47,3 +47,7 @@ PRD §15 #8–#11, PLAN §16 — see `docs/IMPLEMENTATION_PLAN.md`, `docs/PRD.md
 ## Completion notes
 
 _The agent fills this in before opening the PR: what was built, decisions taken, deviations, follow-up tasks created, and how it was verified._
+
+## Board log
+
+- 2026-10-14T08:08:23.603Z claimed by agent-t072
