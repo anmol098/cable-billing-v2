@@ -118,7 +118,8 @@ describeDb("PLAN §8.3 changes after the month's bill is issued", () => {
         ] as const) {
           const changed = await changeConnectionPlan.call(s.rt(now), s.staff, {
             assignmentId: vc,
-            effectiveDate: now === OCT_5 ? "2026-10-05" : now === OCT_6 ? "2026-10-06" : "2026-10-07",
+            effectiveDate:
+              now === OCT_5 ? "2026-10-05" : now === OCT_6 ? "2026-10-06" : "2026-10-07",
             rentalPaise: amount,
           });
           expect(changed.ok).toBe(true);
@@ -290,10 +291,20 @@ describeDb("PLAN §8.3 changes after the month's bill is issued", () => {
         // The run has not looked at the newcomer: the month's bill will charge it (billed_by_run).
         expect(await adjustmentsOf(s, newcomer)).toEqual([]);
         expect(await adjustmentsOf(s, billed)).toMatchObject([
-          { assignmentId: newOnBilled, period: "2026-10-01", amount: 30_000, source: "mid_month_start" },
+          {
+            assignmentId: newOnBilled,
+            period: "2026-10-01",
+            amount: 30_000,
+            source: "mid_month_start",
+          },
         ]);
         expect(await adjustmentsOf(s, skipped)).toMatchObject([
-          { assignmentId: newOnSkipped, period: "2026-10-01", amount: 25_000, source: "mid_month_start" },
+          {
+            assignmentId: newOnSkipped,
+            period: "2026-10-01",
+            amount: 25_000,
+            source: "mid_month_start",
+          },
         ]);
 
         // The Owner bills October again: the billed customer is done; the skipped one now gets an
@@ -361,7 +372,12 @@ describeDb("PLAN §8.3 changes after the month's bill is issued", () => {
           const made = await adjustmentsOf(s, c);
           if (policy === "charge_full_month") {
             expect(made).toMatchObject([
-              { period: "2026-10-01", direction: "debit", amount: 30_000, source: "mid_month_start" },
+              {
+                period: "2026-10-01",
+                direction: "debit",
+                amount: 30_000,
+                source: "mid_month_start",
+              },
             ]);
           } else {
             expect(made).toEqual([]);
@@ -497,8 +513,22 @@ describeDb("PLAN §8.3 changes after the month's bill is issued", () => {
         expect(done.value.months).toEqual(preview.value.months);
         expect(done.value.totalPaise).toBe(20_000);
         expect(await adjustmentsOf(s, c)).toMatchObject([
-          { period: "2026-09-01", direction: "debit", amount: 10_000, source: "plan_change", reason: "Upgraded in September", createdBy: s.owner.userId },
-          { period: "2026-10-01", direction: "debit", amount: 10_000, source: "plan_change", reason: "Upgraded in September", createdBy: s.owner.userId },
+          {
+            period: "2026-09-01",
+            direction: "debit",
+            amount: 10_000,
+            source: "plan_change",
+            reason: "Upgraded in September",
+            createdBy: s.owner.userId,
+          },
+          {
+            period: "2026-10-01",
+            direction: "debit",
+            amount: 10_000,
+            source: "plan_change",
+            reason: "Upgraded in September",
+            createdBy: s.owner.userId,
+          },
         ]);
         const audit = await s.tx((tx) =>
           tx
@@ -590,7 +620,11 @@ describeDb("PLAN §8.3 changes after the month's bill is issued", () => {
         await runBilling(s, "2026-10-01", OCT_14);
         await runBilling(s, "2026-10-01", OCT_14);
         expect(await billsOf(s, c)).toMatchObject([
-          { period: "2026-10-01", charges: 30_000, lines: [{ type: "adjustment", amount: 30_000 }] },
+          {
+            period: "2026-10-01",
+            charges: 30_000,
+            lines: [{ type: "adjustment", amount: 30_000 }],
+          },
         ]);
         await runBilling(s, "2026-11-01", NOV_1);
         expect((await billsOf(s, c))[1]).toMatchObject({

@@ -5,7 +5,7 @@
 import { auditEvents, uuidv7 } from "@cb/db";
 import { describeDb, useTestDatabase } from "@cb/db/testing";
 import { and, eq } from "drizzle-orm";
-import { describe, expect, it } from "vitest";
+import { expect, it } from "vitest";
 import { changeConnectionPlan, suspendConnection } from "../connections/services";
 import { setSubscriptionStatus } from "../testing/fixtures";
 import {
@@ -121,7 +121,12 @@ describeDb("manual adjustments and the bill changes list", () => {
         tx
           .select()
           .from(auditEvents)
-          .where(and(eq(auditEvents.action, "adjustments.create"), eq(auditEvents.actorId, s.owner.userId))),
+          .where(
+            and(
+              eq(auditEvents.action, "adjustments.create"),
+              eq(auditEvents.actorId, s.owner.userId),
+            ),
+          ),
       );
       expect(audits).toHaveLength(2);
       expect(changedIssuedRows(issued, await issuedSnapshot(s))).toEqual([]);

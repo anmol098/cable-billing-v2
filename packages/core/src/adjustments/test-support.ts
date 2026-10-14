@@ -69,7 +69,8 @@ export function changedIssuedRows(before: IssuedSnapshot, after: IssuedSnapshot)
   for (const row of before.invoices) {
     const now = invoiceById.get(row.id);
     if (!now) problems.push(`invoice ${row.id} disappeared`);
-    else if (JSON.stringify(now) !== JSON.stringify(row)) problems.push(`invoice ${row.id} changed`);
+    else if (JSON.stringify(now) !== JSON.stringify(row))
+      problems.push(`invoice ${row.id} changed`);
   }
   const lineById = new Map(after.lines.map((row) => [row.id, row]));
   for (const row of before.lines) {
@@ -131,7 +132,8 @@ export async function billsOf(s: ConnectionSetup, customerId: string) {
         .from(invoiceLines)
         .where(eq(invoiceLines.invoiceId, invoice.id));
       // Adjustment lines first, then rent; each by amount (a stable order for the assertions).
-      const order = (l: (typeof lines)[number]) => `${l.type}:${String(l.amountPaise).padStart(12, "0")}`;
+      const order = (l: (typeof lines)[number]) =>
+        `${l.type}:${String(l.amountPaise).padStart(12, "0")}`;
       lines.sort((a, b) => order(a).localeCompare(order(b)));
       result.push({
         id: invoice.id,

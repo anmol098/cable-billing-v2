@@ -1,4 +1,149 @@
 {
+  "adjustments": {
+    "backdate": {
+      "description": "For a change that bills already made should have had. Only the owner can do this. Every bill change gets your reason.",
+      "kind": {
+        "disconnect": "Removed",
+        "plan": "Plan",
+        "reactivate": "Started again",
+        "suspend": "Stopped"
+      },
+      "reason_hint": "A few words, for example: forgot to enter it in September.",
+      "reason_label": "Why are you changing old bills?",
+      "save": "Save with bill changes",
+      "saved": "Saved. The bill changes are made.",
+      "stop_reason": "Why was it stopped?",
+      "stop_reason_choose": "Choose a reason",
+      "title": "Change from an earlier day · VC {vc}",
+      "what": "What changed?"
+    },
+    "connection": {
+      "backdate": "Change from an earlier day",
+      "change_plan": "Change plan"
+    },
+    "effect": {
+      "billed_owner": "Bills up to {month} are already made. Saving adds a bill change for each month below, with your reason.",
+      "billed_staff": "Bills for {month} are already made. Ask the owner to change it from this day.",
+      "checking": "Checking…",
+      "credit": "{month}: ₹{amount} less. It is taken off what the customer owes.",
+      "debit": "{month}: ₹{amount} extra will be added to the next bill.",
+      "new_rent": "New rent: ₹{to} a month (was ₹{from}).",
+      "reason": {
+        "already_charged": "{month}: rent is already charged. Nothing more.",
+        "billed_by_run": "{month}: the monthly bill will charge it.",
+        "not_billed_this_period": "{month}: no bill made yet. The bill will use the new rent.",
+        "same_amount": "{month}: no change.",
+        "start_next_month": "{month}: no charge. Rent starts from the next month.",
+        "zero_rental": "{month}: rent is ₹0. Nothing to add."
+      },
+      "same": "This is the same plan and rent. Nothing changes.",
+      "title": "What happens to the bills",
+      "total_credit": "In all: ₹{amount} less to pay.",
+      "total_debit": "In all: ₹{amount} more to pay.",
+      "total_none": "In all: no money changes."
+    },
+    "error": {
+      "amount": "Write the rent in rupees (0 to 1,00,000).",
+      "before_last_change": "The day can't be before the last change.",
+      "before_start": "The day can't be before the connection started.",
+      "billed_period": "Bills for that month are already made. Ask the owner.",
+      "customer": "Choose the customer.",
+      "direction": "Choose extra charge or take money off.",
+      "generic": "Could not save. Try again.",
+      "id_reused": "This form was already saved. Open the list to check.",
+      "in_future": "The day can't be after today.",
+      "invalid_transition": "This change is not possible for this connection now.",
+      "manual_amount": "Write an amount (₹1 to ₹1,00,000).",
+      "not_allowed": "You can't do this. Ask the owner.",
+      "not_found": "This connection was not found. Open the customer again.",
+      "plan_or_amount": "Choose a plan or write an amount.",
+      "read_only": "The app is view-only now. Pay the subscription to make changes.",
+      "reason": "Write why (at least 3 letters).",
+      "retired": "This plan is not offered any more. Choose another.",
+      "stop_reason": "Choose why it was stopped.",
+      "too_old": "That day is too long ago. Check the day."
+    },
+    "list": {
+      "all_sources": "All",
+      "all_states": "All",
+      "by": "By {name}",
+      "col": {
+        "bill": "Bill",
+        "change": "Change",
+        "customer": "Customer",
+        "date": "Date",
+        "why": "Why"
+      },
+      "description": "Extra charges and money taken off after bills were made. Each one has a reason.",
+      "empty": "No bill changes yet.",
+      "filters": "Filters",
+      "for_month": "For {month}",
+      "label": "Bill changes",
+      "less": "₹{amount} off",
+      "more": "₹{amount} extra",
+      "new": "New bill change",
+      "next": "Next",
+      "page": "Page {page}",
+      "pending_total": "Waiting for the next bills",
+      "pill": {
+        "billed": "On bill {number}",
+        "credit": "Taken off",
+        "pending": "Next bill"
+      },
+      "previous": "Previous",
+      "show": "Show",
+      "source": {
+        "manual": "Owner's change",
+        "mid_month_start": "Started this month",
+        "migration": "From old records",
+        "plan_change": "Plan changed"
+      },
+      "source_label": "Made by",
+      "state": "Show",
+      "state_option": {
+        "billed": "On a bill",
+        "credit": "Taken off",
+        "pending": "Waiting for the next bill"
+      },
+      "vc": "VC {number}"
+    },
+    "manual": {
+      "amount": "Amount (₹)",
+      "back": "All bill changes",
+      "change_customer": "Change customer",
+      "credit": "Take money off",
+      "credit_hint": "Taken off what the customer owes now",
+      "customer": "Customer",
+      "customer_code": "Code {code}",
+      "customer_placeholder": "Name, phone, code or VC number",
+      "debit": "Extra charge",
+      "debit_hint": "Added to the next bill",
+      "description": "Add an extra charge or take money off a customer's bills. Only the owner can do this.",
+      "direction": "What kind of change?",
+      "no_match": "No customer found.",
+      "reason": "Why?",
+      "reason_hint": "A few words, for example: repair visit, cable was cut for 10 days.",
+      "save": "Save bill change",
+      "saved": "Bill change saved.",
+      "searching": "Searching…",
+      "summary_credit": "₹{amount} will be taken off what {name} owes.",
+      "summary_debit": "₹{amount} extra will be added to {name}'s next bill.",
+      "title": "New bill change"
+    },
+    "plan_change": {
+      "cancel": "Cancel",
+      "from_day": "From which day?",
+      "from_day_hint": "Today or an earlier day.",
+      "new_plan": "New plan",
+      "now": "Now: ₹{amount} a month",
+      "own_amount": "Own amount",
+      "own_amount_label": "Rent a month (₹)",
+      "plan_option": "{name} · ₹{amount}",
+      "save": "Save new plan",
+      "saved": "New plan saved.",
+      "title": "Change plan · VC {vc}"
+    }
+  },
   "auth": {
     "email": {
       "reset_action": "Open this link to set it. It works once, for {minutes} minutes:",
@@ -342,6 +487,7 @@
       "suspend": "Stop"
     },
     "confirm": {
+      "charge_month": "₹{amount} for {month} will be added to the next bill.",
       "date_hint": "Today or an earlier day, from {date}.",
       "date_label": "From which day?",
       "disconnect_confirm": "Remove",
