@@ -330,7 +330,7 @@ describe("PLAN §8.4 invariants over random sequences", () => {
     for (const [path, count] of Object.entries(paths)) {
       expect({ path, count }).toEqual({ path, count: expect.toSatisfy((n: number) => n > 100) });
     }
-  }, 60_000); // About 4 s locally; the budget leaves room for slow CI runners.
+  }, 300_000); // About 4 s on an idle machine; a loaded shared runner was seen at ~100 s.
 
   it("are reported by checkLedger when a healthy account is corrupted", () => {
     type Corruption = (m: Model, pick: number, delta: number) => boolean;
@@ -415,5 +415,5 @@ describe("PLAN §8.4 invariants over random sequences", () => {
       ),
       { numRuns: 2_000 },
     );
-  });
+  }, 120_000); // Under a second when idle; 2,000 runs blew Vitest's 5 s default under load.
 });
