@@ -1,0 +1,42 @@
+{
+  "title": {
+    "whatsapp": "Receipt on WhatsApp",
+    "sms": "Receipt by SMS"
+  },
+  "phone": {
+    "label": "Customer's mobile number",
+    "question": "Is this the customer's number?",
+    "yes": "Yes, this number",
+    "change": "Change number",
+    "type": "Type the customer's mobile number",
+    "missing": "No mobile number on the phone. Type it.",
+    "invalid": "10 digits, starting with 6, 7, 8 or 9",
+    "use": "Use this number",
+    "delete": "Delete",
+    "queued": "New number saved on phone. The office gets it by itself when there is internet."
+  },
+  "link": {
+    "getting": "Getting the receipt link…",
+    "after_sync": "The link will be ready when there is internet.",
+    "ready": "Receipt link is ready",
+    "unavailable": "No receipt link: the office did not take this payment. PDF still works."
+  },
+  "whatsapp": {
+    "open": "Open WhatsApp",
+    "missing": "WhatsApp is not on this phone. Use SMS or Share PDF."
+  },
+  "sms": {
+    "open": "Open SMS",
+    "missing": "No SMS app on this phone."
+  },
+  "pdf": {
+    "share": "Share PDF",
+    "making": "Making the PDF…",
+    "shared": "PDF shared",
+    "failed": "Could not make the PDF. Try again."
+  },
+  "payment_safe": "The payment is saved. Only the receipt did not open.",
+  "message": {
+    "text": "{operator}: Receipt {number}. {amount} received from {customer}. See the receipt: {link}"
+  }
+}

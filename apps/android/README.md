@@ -163,6 +163,27 @@ Generated, never edited by hand: `core/designsystem/.../generated/Tokens.kt` (`p
   for check, sent back (office note, hand over again), accepted (final, no button). Today asks the office
   on every show and on "Check again".
 
+## Receipt PDF, WhatsApp / SMS and receipt actions (T-069)
+
+- `feature/receipt`: `ReceiptShareRoute(paymentId, channel)` (WhatsApp / SMS), opened by the Done screen's
+  tiles (`CableApp` passes `ReceiptShareActions`; any screen can call `navigateToReceiptShare`). Step 1
+  confirms the customer's number in big digits ("Yes, this number" / "Change number" on the pad, 10 digits
+  from 6–9, FR-004). Step 2: the link line, **Open WhatsApp** (`https://wa.me/91…?text=…` in WhatsApp or
+  WhatsApp Business only) or **Open SMS** (`smsto:`), **Share PDF** (WhatsApp first, then the share sheet),
+  and honest results ("WhatsApp opened", "PDF shared"). A failure says what did not open and "The payment is
+  saved"; nothing here touches the payment.
+- `data/receipts`: `ReceiptPdfWriter` (the printed receipt's layout on a `PdfDocument` page, written to
+  `cache/receipts/<paymentId>/Receipt-<number>.pdf`, shared via the `${applicationId}.receipts` FileProvider,
+  `res/xml/file_paths.xml`), `ReceiptIntents`, `ReceiptMessages`, `PhoneNumbers`, `ReceiptLinks` (reuses a
+  link until a day before expiry; queues it while offline or before the payment reached the office),
+  `ReceiptPhoneBook` (queued `PATCH /customers/{id}/phone`), `ReceiptActionRecorder` (Room
+  `receipt_actions_outbox`: printed / print_failed / whatsapp_opened / sms_opened / pdf_shared),
+  `ReceiptSync` + `ReceiptSyncWorker` + `ReceiptSyncScheduler` (unique work `receipt-sync`, network
+  constraint, backoff; also runs whenever payments leave the phone). Phone changes and link requests live
+  in the `receipt_requests` Preferences DataStore (no Room migration).
+- Robolectric has no PDF engine: tests swap `ReceiptPdfWriter.pages`; the real `PdfDocument` output is
+  checked on a phone.
+
 ## Settings, diagnostics and crash reporting (T-071)
 
 - `feature/settings`: `SettingsRoute` opened by the small gear (`SettingsButton`) at the end of the search

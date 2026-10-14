@@ -352,6 +352,22 @@ extra, Cash matches, Not handed over) are the ones in the web table above; the p
 | Money taken on {date} | पैसे {date} को लिए | The day the lineman took the money, when the office got it later | — | Recorded at, Business date |
 | Which days? / This month / Last 3 months / Last 12 months / Everything | कौन से दिन? / इस महीने / पिछले 3 महीने / पिछले 12 महीने / सब कुछ | The time choice above the account history | calendar-days | Period, Date range, Filter |
 
+## Receipt words (lineman app, T-069)
+
+| English | हिंदी | Means | Icon / colour | Not this |
+|---|---|---|---|---|
+| Customer's mobile number | ग्राहक का मोबाइल नंबर | The number the receipt goes to; confirmed before every WhatsApp/SMS receipt (FR-004) | — | Contact, MSISDN |
+| Yes, this number | हाँ, यही नंबर | Confirm the shown number | check-circle, green | Confirm, Verify |
+| Change number | नंबर बदलें | Type another number on the pad (the office gets the change) | pencil | Edit contact |
+| Receipt link | रसीद का लिंक | The online receipt page the customer opens | — | URL, Preview link |
+| The link will be ready when there is internet | इंटरनेट आने पर लिंक तैयार होगा | The link is asked for and comes by itself later | clock, `semantic.pending` (amber) | Pending sync, Queued |
+| Open WhatsApp / Open SMS | WhatsApp खोलें / SMS खोलें | Opens the chat / SMS app with the message ready; the lineman presses Send there | whatsapp / message | Send, भेजें |
+| Share PDF | PDF शेयर करें | Hands the receipt PDF to WhatsApp or the share sheet | share | Send PDF, Export |
+| PDF shared | PDF शेयर किया | We handed the PDF over; we don't know if it was sent | check-circle | Sent, Delivered |
+
+The receipt flow never uses "send / sent / delivered" (भेजें, भेजा गया, डिलीवर): the app only knows
+that it opened another app (RULE-19). `HonestReceiptWordsTest` checks every `mobile_receipt` string.
+
 ## Words we never show users
 
 Invoice, Ledger, Allocation, Adjustment, Reversal, Tenant, Sync / Synced / Pending sync,

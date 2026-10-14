@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- FileProvider paths (T-069): only the receipt PDFs in cache/receipts are shareable
+     (ReceiptPdfWriter.DIR). Nothing else of the app's storage is exposed. -->
+<paths>
+    <cache-path
+        name="receipts"
+        path="receipts/" />
+</paths>
