@@ -3,10 +3,10 @@ id: T-060
 title: Mobile API: roster sync, customer detail, phone update
 phase: 3
 area: api
-status: todo
-owner:
-claimed_at:
-branch:
+status: claimed
+owner: agent-t060
+claimed_at: 2026-10-14T04:57:27.748Z
+branch: task/T-060-mobile-api-roster-sync-customer-detail-p
 depends_on: [T-028, T-033, T-034, T-023]
 review: self
 claimable_by: agent
@@ -52,3 +52,7 @@ PLAN §10.3, FR-004, B-012 — see `docs/IMPLEMENTATION_PLAN.md`, `docs/PRD.md`,
 ## Completion notes
 
 _The agent fills this in before opening the PR: what was built, decisions taken, deviations, follow-up tasks created, and how it was verified._
+
+## Board log
+
+- 2026-10-14T04:57:27.749Z claimed by agent-t060
