@@ -368,6 +368,17 @@ extra, Cash matches, Not handed over) are the ones in the web table above; the p
 The receipt flow never uses "send / sent / delivered" (भेजें, भेजा गया, डिलीवर): the app only knows
 that it opened another app (RULE-19). `HonestReceiptWordsTest` checks every `mobile_receipt` string.
 
+## Plan words (web Settings → Plans, T-031)
+
+| English | हिंदी | Means | Icon / colour | Not this |
+|---|---|---|---|---|
+| Rent each month | हर महीने का किराया | A plan's monthly amount (whole rupees) | — | Price, Tariff, MRP, Rate |
+| Change (a plan) | बदलें | Change a plan's name or rent | pencil | Edit, Modify |
+| Save new rent | नया किराया सेव करें | Confirm a plan's new rent; its connections keep the old rent, bills already made never change | circle-check | Apply price, Update tariff |
+| Hide (a plan) | छिपाएँ | Stop offering a plan for new connections; its connections keep it and their rent | eye-off | Retire, Archive, Delete, Deactivate |
+| Show again (a plan) | फिर से दिखाएँ | Offer a hidden plan again | eye | Unretire, Restore |
+| Hidden (a plan) | छिपा हुआ | A plan not offered for new connections | eye-off | Retired, Inactive |
+
 ## Words we never show users
 
 Invoice, Ledger, Allocation, Adjustment, Reversal, Tenant, Sync / Synced / Pending sync,

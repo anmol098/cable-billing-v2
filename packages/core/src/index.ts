@@ -113,6 +113,7 @@ export * from "./mobile-auth";
 export * from "./operators";
 export * from "./payment-register";
 export * from "./payments";
+export * from "./plans";
 export * from "./receipts/actions";
 export * from "./receipts/links";
 export * from "./statements";
