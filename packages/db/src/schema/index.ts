@@ -20,4 +20,5 @@ export * from "./platform-admin";
 export * from "./receipts";
 export * from "./roster";
 export * from "./subscriptions";
+export * from "./sync-metrics";
 export * from "./tenancy";

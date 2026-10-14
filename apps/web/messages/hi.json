@@ -264,7 +264,8 @@
         "pdf_shared": "PDF शेयर किया",
         "printed": "रसीदें प्रिंट हुईं",
         "sms_opened": "SMS खोला",
-        "sync_success": "फ़ोन के पेमेंट पहली बार में सेव",
+        "sync_retry": "फ़ोन के पेमेंट जो दोबारा भेजने हैं",
+        "sync_success": "फ़ोन के पेमेंट सेव ({count, number} भेजे में से)",
         "title": "फ़ील्ड का काम (पिछले 30 दिन)",
         "whatsapp_opened": "WhatsApp खोला"
       },

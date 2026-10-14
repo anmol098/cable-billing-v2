@@ -8,14 +8,19 @@
  * |---|---|
  * | Billing success rate | billed (created + already existed) ÷ (billed + failed) items of the month's runs |
  * | Billing exception rate | failed ÷ looked-at items, and failed items by reason |
- * | Payment sync success rate | **not measured yet**: sync attempts are not recorded (T-086a) |
- * | Duplicate prevention count | **not measured yet**: idempotent replays are not recorded (T-086a) |
+ * | Payment sync success rate | phone payments accepted ÷ payment ids with a final answer (accepted or rejected), deduplicated by payment id, last 30 IST days (`payment_sync_batches`, T-086a) |
+ * | Duplicate prevention count | idempotent replays answered `duplicate`, last 30 IST days (`payment_sync_batches`) |
  * | Receipt action usage | print / WhatsApp / SMS launches in the last 30 days (`receipt_actions`) |
  * | Reconciliation discrepancy rate | accepted handovers with a discrepancy reason ÷ accepted, last 30 days |
  * | Migration exception count | **not measured yet**: the migration (T-092) has not run |
  * | Active operator / field usage | tenants and people with sign-in activity in the last 7 days |
  */
-import { BILLING_RUN_STATUSES, RECEIPT_ACTIONS } from "@cb/db";
+import {
+  BILLING_RUN_STATUSES,
+  type PaymentSyncRejectCode,
+  type PaymentSyncRetryCode,
+  RECEIPT_ACTIONS,
+} from "@cb/db";
 import { addDays, businessDateOf, ok, periodOfInstant } from "@cb/domain";
 import { sql } from "drizzle-orm";
 import * as z from "zod";
@@ -49,6 +54,32 @@ export interface PlatformMetrics {
     readonly failedByReason: Readonly<Record<string, number>>;
   };
   readonly receiptActionsLast30Days: Readonly<Record<string, number>>;
+  /**
+   * PRD §16 payment sync (T-086a), `/payments:batch` answers of the last 30 IST days. Deduplicated
+   * by payment id: `attempts` = distinct payment ids with a final answer (accepted, or rejected
+   * for the first time, an id accepted after an earlier refusal counted once); `retryLater` items
+   * (nothing decided yet, the phone sends them again) are not in the rate.
+   */
+  readonly paymentSync: {
+    readonly batches: number;
+    /** Items in those batches (every answer, replays included). */
+    readonly items: number;
+    readonly attempts: number;
+    /** Accepted payment ids (`posted` + `posted_needs_review`). */
+    readonly accepted: number;
+    readonly acceptedNeedsReview: number;
+    /** Rejected payment ids (first refusal of each id). */
+    readonly rejected: number;
+    /** Percent, one decimal: accepted ÷ attempts; null with nothing to measure. */
+    readonly successRate: number | null;
+    /** Idempotent replays answered `duplicate` (PRD §16 duplicate prevention count). */
+    readonly duplicatesPrevented: number;
+    /** Every `rejected` answer by code (replays included), and those without a payment id. */
+    readonly rejectedAnswersByCode: Readonly<Record<PaymentSyncRejectCode, number>>;
+    readonly rejectedWithoutId: number;
+    /** `retry_later` answers by code (temporary: the phone sends them again). */
+    readonly retryLaterByCode: Readonly<Record<PaymentSyncRetryCode, number>>;
+  };
   readonly reconciliation: {
     readonly acceptedLast30Days: number;
     readonly withDiscrepancy: number;
@@ -64,11 +95,7 @@ export interface PlatformMetrics {
     readonly waiting: number;
   };
   /** PRD §16 metrics with no data source yet (shown as "not measured"). */
-  readonly notMeasured: readonly (
-    | "payment_sync_success"
-    | "duplicate_prevention"
-    | "migration_exceptions"
-  )[];
+  readonly notMeasured: readonly "migration_exceptions"[];
 }
 
 export const PlatformMetricsInput = z.object({
@@ -122,6 +149,22 @@ export const platformMetrics = defineAdminService({
       const receipts = await rows(sql`
         SELECT action::text AS k, count(*)::int AS n FROM receipt_actions
          WHERE at >= ${windowSince.toISOString()}::timestamptz GROUP BY 1`);
+      const sync = await rows(sql`
+        SELECT count(*)::int AS batches,
+               coalesce(sum(items), 0)::int AS items,
+               coalesce(sum(posted), 0)::int AS posted,
+               coalesce(sum(posted_needs_review), 0)::int AS posted_needs_review,
+               coalesce(sum(duplicate), 0)::int AS duplicate,
+               coalesce(sum(rejected_validation), 0)::int AS rejected_validation,
+               coalesce(sum(rejected_customer_not_found), 0)::int AS rejected_customer_not_found,
+               coalesce(sum(rejected_id_reused), 0)::int AS rejected_id_reused,
+               coalesce(sum(rejected_without_id), 0)::int AS rejected_without_id,
+               coalesce(sum(rejected_new_ids), 0)::int AS rejected_new_ids,
+               coalesce(sum(accepted_after_rejection), 0)::int AS accepted_after_rejection,
+               coalesce(sum(retry_later_conflict), 0)::int AS retry_later_conflict,
+               coalesce(sum(retry_later_internal), 0)::int AS retry_later_internal,
+               coalesce(sum(retry_later_rate_limited), 0)::int AS retry_later_rate_limited
+          FROM payment_sync_batches WHERE business_date >= ${windowFromDay}::date`);
       const handovers = await rows(sql`
         SELECT count(*)::int AS accepted,
                count(*) FILTER (WHERE discrepancy_reason IS NOT NULL)::int AS discrepant
@@ -167,6 +210,20 @@ export const platformMetrics = defineAdminService({
         RECEIPT_ACTIONS.map((a) => [a, 0]),
       );
       for (const r of receipts) receiptActionsLast30Days[String(r.k)] = asInt(r.n);
+      const s0 = sync[0] ?? {};
+      const syncAccepted = asInt(s0.posted) + asInt(s0.posted_needs_review);
+      const syncRejected = asInt(s0.rejected_new_ids);
+      const syncAttempts = syncAccepted + syncRejected - asInt(s0.accepted_after_rejection);
+      const rejectedAnswersByCode: Record<PaymentSyncRejectCode, number> = {
+        VALIDATION: asInt(s0.rejected_validation),
+        CUSTOMER_NOT_FOUND: asInt(s0.rejected_customer_not_found),
+        ID_REUSED_WITH_DIFFERENT_DATA: asInt(s0.rejected_id_reused),
+      };
+      const retryLaterByCode: Record<PaymentSyncRetryCode, number> = {
+        CONFLICT: asInt(s0.retry_later_conflict),
+        INTERNAL: asInt(s0.retry_later_internal),
+        RATE_LIMITED: asInt(s0.retry_later_rate_limited),
+      };
       const accepted = asInt(handovers[0]?.accepted);
       const discrepant = asInt(handovers[0]?.discrepant);
       const result: PlatformMetrics = {
@@ -190,6 +247,19 @@ export const platformMetrics = defineAdminService({
           failedByReason,
         },
         receiptActionsLast30Days,
+        paymentSync: {
+          batches: asInt(s0.batches),
+          items: asInt(s0.items),
+          attempts: syncAttempts,
+          accepted: syncAccepted,
+          acceptedNeedsReview: asInt(s0.posted_needs_review),
+          rejected: syncRejected,
+          successRate: percent(syncAccepted, syncAttempts),
+          duplicatesPrevented: asInt(s0.duplicate),
+          rejectedAnswersByCode,
+          rejectedWithoutId: asInt(s0.rejected_without_id),
+          retryLaterByCode,
+        },
         reconciliation: {
           acceptedLast30Days: accepted,
           withDiscrepancy: discrepant,
@@ -203,7 +273,7 @@ export const platformMetrics = defineAdminService({
           failedLast7Days: asInt(jobRows[0]?.failed),
           waiting: asInt(jobRows[0]?.waiting),
         },
-        notMeasured: ["payment_sync_success", "duplicate_prevention", "migration_exceptions"],
+        notMeasured: ["migration_exceptions"],
       };
       return result;
     });

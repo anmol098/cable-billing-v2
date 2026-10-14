@@ -779,4 +779,175 @@ describeDb("POST /payments:batch (T-061)", () => {
     expect(crossBody.results[0]?.error?.code).toBe("CUSTOMER_NOT_FOUND");
     expect(await moneyRowCounts(t.current, a.tenant.operatorId)).toEqual(before);
   }, 60_000);
+
+  describe("PRD §16 sync metrics (T-086a)", () => {
+    /** Runs one query as the platform role (`app_platform`, what `withPlatform` uses). */
+    async function asPlatform(text: string, values: unknown[] = []) {
+      const client = await t.current.admin.connect();
+      try {
+        await client.query("BEGIN");
+        await client.query("SET LOCAL ROLE app_platform");
+        return (await client.query(text, values)).rows;
+      } finally {
+        await client.query("ROLLBACK");
+        client.release();
+      }
+    }
+
+    /** The tenant's summed sync counters, read on the platform path (counts only). */
+    async function platformCounters(operatorId: string) {
+      const rows = await asPlatform(
+        `SELECT count(*)::int AS batches, coalesce(sum(items), 0)::int AS items,
+                coalesce(sum(posted + posted_needs_review), 0)::int AS accepted,
+                coalesce(sum(duplicate), 0)::int AS duplicate,
+                coalesce(sum(rejected_validation), 0)::int AS rejected_validation,
+                coalesce(sum(rejected_customer_not_found), 0)::int AS rejected_customer_not_found,
+                coalesce(sum(rejected_id_reused), 0)::int AS rejected_id_reused,
+                coalesce(sum(rejected_without_id), 0)::int AS rejected_without_id,
+                coalesce(sum(rejected_new_ids), 0)::int AS rejected_new_ids,
+                coalesce(sum(accepted_after_rejection), 0)::int AS accepted_after_rejection,
+                coalesce(sum(retry_later_conflict + retry_later_internal
+                             + retry_later_rate_limited), 0)::int AS retry_later
+           FROM payment_sync_batches WHERE operator_id = $1`,
+        [operatorId],
+      );
+      return rows[0];
+    }
+
+    it("a batch with new, replayed and refused payments moves the counters once per payment id", async () => {
+      const { tenant, lineman } = await tenantWithLineman(t.current, h);
+      const other = await tenantWithLineman(t.current, h);
+      const op = tenant.operatorId;
+      const customer = await insertCustomer(t.current, op);
+      const theirs = await insertCustomer(t.current, other.tenant.operatorId);
+      const { id: _dropped, ...withoutId } = paymentItem(lineman, customer, {}, 9);
+      const a = paymentItem(lineman, customer, { amount_paise: 10_000 }, 1);
+      const b = paymentItem(lineman, customer, { amount_paise: 20_000 }, 2);
+      const batch = [
+        a, // new
+        b, // new
+        paymentItem(lineman, theirs, {}, 3), // another tenant's customer: CUSTOMER_NOT_FOUND
+        paymentItem(lineman, customer, { amount_paise: 12.5 }, 4), // VALIDATION
+        withoutId, // VALIDATION, no usable id
+      ];
+      const first = await ok(await send(lineman.accessToken, { payments: batch }), batch);
+      expect(first.results.map((r) => r.outcome)).toEqual([
+        "posted",
+        "posted",
+        "rejected",
+        "rejected",
+        "rejected",
+      ]);
+      // The phone lost the answer and sends the whole batch again, twice.
+      for (let i = 0; i < 2; i += 1) {
+        const replay = await ok(await send(lineman.accessToken, { payments: batch }), batch);
+        expect(replay.results.map((r) => r.outcome)).toEqual([
+          "duplicate",
+          "duplicate",
+          "rejected",
+          "rejected",
+          "rejected",
+        ]);
+      }
+      // Then a new payment, a replay and the same id with other data.
+      const c = paymentItem(lineman, customer, { amount_paise: 30_000 }, 5);
+      const last = [c, a, { ...b, amount_paise: 25_000 }];
+      const lastBody = await ok(await send(lineman.accessToken, { payments: last }), last);
+      expect(lastBody.results.map((r) => r.outcome)).toEqual(["posted", "duplicate", "rejected"]);
+
+      expect(await platformCounters(op)).toEqual({
+        batches: 4,
+        items: 18,
+        accepted: 3, // a, b, c: once each
+        duplicate: 5, // a, b twice, then a
+        rejected_validation: 3, // the fractional item, three sends
+        rejected_customer_not_found: 3,
+        rejected_id_reused: 1,
+        rejected_without_id: 3,
+        rejected_new_ids: 2, // the two refused ids, once each; b's reuse is a saved payment
+        accepted_after_rejection: 0,
+        retry_later: 0,
+      });
+      // Payment ids with a final answer: a, b, c accepted + 2 refused = 5; 3 ÷ 5 = 60 %.
+      const { rows: keys } = await t.current.admin.query<{ n: number }>(
+        "SELECT count(*)::int AS n FROM payment_sync_rejections WHERE operator_id = $1",
+        [op],
+      );
+      expect(keys[0]?.n).toBe(2);
+      // The other tenant's counters are untouched.
+      expect((await platformCounters(other.tenant.operatorId))?.batches).toBe(0);
+
+      // The platform reads the counts but no row id, time or refused payment id.
+      for (const statement of [
+        "SELECT * FROM payment_sync_batches",
+        "SELECT id, received_at FROM payment_sync_batches",
+      ]) {
+        const error = await asPlatform(statement).catch((e: unknown) => e);
+        expect((error as { code?: string }).code, statement).toBe("42501");
+      }
+      expect(await asPlatform("SELECT count(*)::int AS n FROM payment_sync_rejections")).toEqual([
+        { n: 0 },
+      ]);
+    }, 60_000);
+
+    it("retry_later answers are counted by code, and the later post counts the id once", async () => {
+      let writes = 0;
+      const flaky: DbClient = {
+        ...t.current.db,
+        withTenant: (operatorId, fn, options) => {
+          if (options?.accessMode !== "read only") {
+            writes += 1;
+            if (writes === 2) return Promise.reject(new Error("connection reset"));
+          }
+          return t.current.db.withTenant(operatorId, fn, options);
+        },
+      };
+      const faulty = mobileApiHarness(t.current, NOW, { db: flaky });
+      const handler = paymentBatchHandler(faulty.getDeps);
+      const { tenant, lineman } = await tenantWithLineman(t.current, faulty);
+      writes = 0;
+      const customer = await insertCustomer(t.current, tenant.operatorId);
+      const items = [1, 2].map((n) => paymentItem(lineman, customer, {}, n));
+      const first = await ok(await send(lineman.accessToken, { payments: items }, handler), items);
+      expect(first.results.map((r) => r.outcome)).toEqual(["posted", "retry_later"]);
+      const retry = await ok(await send(lineman.accessToken, { payments: items }, handler), items);
+      expect(retry.results.map((r) => r.outcome)).toEqual(["duplicate", "posted"]);
+      expect(await platformCounters(tenant.operatorId)).toMatchObject({
+        batches: 2,
+        items: 4,
+        accepted: 2,
+        duplicate: 1,
+        retry_later: 1,
+        rejected_new_ids: 0,
+      });
+    }, 60_000);
+
+    it("a failure to record the counts never changes the answer", async () => {
+      // A database client whose metrics transaction (the last write of the batch) fails.
+      let writes = 0;
+      const flaky: DbClient = {
+        ...t.current.db,
+        withTenant: (operatorId, fn, options) => {
+          if (options?.accessMode !== "read only") {
+            writes += 1;
+            if (writes === 2) return Promise.reject(new Error("connection reset"));
+          }
+          return t.current.db.withTenant(operatorId, fn, options);
+        },
+      };
+      const faulty = mobileApiHarness(t.current, NOW, { db: flaky });
+      const handler = paymentBatchHandler(faulty.getDeps);
+      const { tenant, lineman } = await tenantWithLineman(t.current, faulty);
+      writes = 0;
+      const customer = await insertCustomer(t.current, tenant.operatorId);
+      const items = [paymentItem(lineman, customer, {}, 1)];
+      const body = await ok(await send(lineman.accessToken, { payments: items }, handler), items);
+      expect(body.results[0]?.outcome).toBe("posted");
+      expect((await moneyRowCounts(t.current, tenant.operatorId)).payments).toBe(1);
+      expect((await platformCounters(tenant.operatorId))?.batches).toBe(0);
+      expect(
+        faulty.logs.records.some((r) => r.event === "mobile_api.payment_sync_metrics_failed"),
+      ).toBe(true);
+    }, 60_000);
+  });
 });

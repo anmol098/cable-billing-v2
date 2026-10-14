@@ -227,6 +227,9 @@ test.describe("platform admin console", () => {
     await page.getByRole("button", { name: "Check code" }).click();
     await expect(page).toHaveURL(/\/admin$/);
     await expect(page.locator('[data-metrics="billing"]')).toBeVisible();
+    // T-086a: phone payment sync and double payments stopped are measured now.
+    await expect(page.locator('[data-metrics="field"]')).toContainText("Phone payments saved");
+    await expect(page.locator('[data-metrics="field"]')).not.toContainText("Not measured yet");
 
     // Operators list → detail. Counts only, never a customer's name.
     await page.goto(`/admin/tenants?q=${encodeURIComponent(business())}`);

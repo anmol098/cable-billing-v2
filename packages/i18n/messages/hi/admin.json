@@ -65,6 +65,7 @@
     "overview.field.discrepancy_rate",
     "overview.field.sync_success",
     "overview.field.duplicates",
+    "overview.field.sync_retry",
     "overview.health.title",
     "overview.health.failed_jobs",
     "overview.health.waiting_jobs",
@@ -316,8 +317,9 @@
       "sms_opened": "SMS खोला",
       "pdf_shared": "PDF शेयर किया",
       "discrepancy_rate": "कैश जमा में फ़र्क ({count, number} में से)",
-      "sync_success": "फ़ोन के पेमेंट पहली बार में सेव",
-      "duplicates": "दोहरे पेमेंट रोके"
+      "sync_success": "फ़ोन के पेमेंट सेव ({count, number} भेजे में से)",
+      "duplicates": "दोहरे पेमेंट रोके",
+      "sync_retry": "फ़ोन के पेमेंट जो दोबारा भेजने हैं"
     },
     "health": {
       "title": "सेहत",

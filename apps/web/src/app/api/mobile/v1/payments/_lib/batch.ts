@@ -29,6 +29,10 @@
  * - Read-only tenants (D-13): `payments.record` is on the read-only allowlist, so payments post.
  * - Results are in request order, one per item, each echoing the item's id (lower case) and, for
  *   saved outcomes, the posted payment with its `provisional_ref` (T-066 needs both).
+ * - PRD §16 metrics (T-086a): after the last item, the answers (outcome, error code, payment id;
+ *   nothing else) are counted once with `recordPaymentSyncBatch`, in their own transaction. Best
+ *   effort: a failure there is logged and sent to Sentry but never changes the answer (the
+ *   payments are already saved); that batch is then missing from the console's figures.
  */
 import {
   ENDPOINTS,
@@ -36,7 +40,14 @@ import {
   PaymentBatchItem,
   type PaymentBatchResponse,
 } from "@cb/contracts";
-import { errorLogFields, PiiInLogError, type PostPaymentResult, postPayment } from "@cb/core";
+import {
+  errorLogFields,
+  type PaymentSyncItemInput,
+  PiiInLogError,
+  type PostPaymentResult,
+  postPayment,
+  recordPaymentSyncBatch,
+} from "@cb/core";
 import * as Sentry from "@sentry/nextjs";
 import {
   type AuthenticatedScope,
@@ -52,6 +63,7 @@ import {
   type ItemErrorWire,
   itemError,
   itemIdOf,
+  UNUSABLE_ITEM_ID,
 } from "./wire-errors";
 
 /** Stop starting new items after this long (the rest are `retry_later`), well inside `maxDuration`. */
@@ -191,6 +203,48 @@ async function postItem(
   }
 }
 
+type RejectCode = Extract<PaymentSyncItemInput, { outcome: "rejected" }>["code"];
+type RetryCode = Extract<PaymentSyncItemInput, { outcome: "retry_later" }>["code"];
+
+/** One answer → what the sync metrics count (T-086a): outcome, code and payment id only. */
+export function syncMetricItem(result: ResultWire): PaymentSyncItemInput {
+  const id = result.id === UNUSABLE_ITEM_ID ? null : result.id;
+  switch (result.outcome) {
+    case "posted":
+    case "posted_needs_review":
+    case "duplicate":
+      return { outcome: result.outcome, id: result.id };
+    case "rejected":
+      return { outcome: "rejected", id, code: result.error?.code as RejectCode };
+    case "retry_later":
+      return { outcome: "retry_later", id, code: result.error?.code as RetryCode };
+  }
+}
+
+/** Counts the batch's answers for the admin console (T-086a). Never fails the batch. */
+async function recordSyncMetrics(
+  scope: AuthenticatedScope<Endpoint, unknown>,
+  results: readonly ResultWire[],
+): Promise<void> {
+  try {
+    const recorded = await recordPaymentSyncBatch.call(scope.deps.runtime, scope.ctx, {
+      items: results.map(syncMetricItem),
+    });
+    if (!recorded.ok) {
+      scope.log.warn("mobile_api.payment_sync_metrics_failed", {
+        error_code: recorded.error.code,
+      });
+      Sentry.captureException(new Error(`payment sync metrics: ${recorded.error.code}`), {
+        tags: { endpoint: "postPaymentBatch" },
+      });
+    }
+  } catch (error) {
+    if (error instanceof PiiInLogError) throw error;
+    scope.log.error("mobile_api.payment_sync_metrics_failed", errorLogFields(error));
+    Sentry.captureException(error, { tags: { endpoint: "postPaymentBatch" } });
+  }
+}
+
 export function paymentBatchHandler(getDeps: () => MobileDeps, options: PaymentBatchOptions = {}) {
   const budgetMs = options.timeBudgetMs ?? PAYMENT_BATCH_TIME_BUDGET_MS;
   return withMobileAuth(ENDPOINTS.postPaymentBatch, getDeps, async (scope) => {
@@ -222,6 +276,7 @@ export function paymentBatchHandler(getDeps: () => MobileDeps, options: PaymentB
       retry_later: 0,
     };
     for (const r of results) counts[r.outcome] += 1;
+    await recordSyncMetrics(scope, results);
     scope.log.info("mobile_api.payment_batch", {
       items: results.length,
       ...counts,
