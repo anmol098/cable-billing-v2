@@ -17,4 +17,9 @@ export const IMPORT_LIMITS = Object.freeze({
   headerSearchRows: 10,
   /** Lines one import step (`imports.customers.apply`) takes. */
   applyBatchLines: 250,
+  /**
+   * Steps the page sends at the same time. Steps hold different customers and different VCs (a
+   * VC repeated in the file is refused in the preview), so they don't wait for each other.
+   */
+  parallelSteps: 2,
 });
