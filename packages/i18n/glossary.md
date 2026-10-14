@@ -266,6 +266,25 @@ the office has the payment.
 | Has not set a password yet | अभी पासवर्ड नहीं बनाया | Staff invited by email who have not used the link | clock, `semantic.pending` | Pending invite |
 | Email them a link | उन्हें ईमेल पर लिंक भेजें | Staff set their own password from an email | mail | Send invite |
 
+## Bills words (web Bills pages)
+
+| English | हिंदी | Means | Icon / colour | Not this |
+|---|---|---|---|---|
+| Make bills now | अभी बिल बनाएँ | Owner starts the month's bill run | receipt | Run billing, Generate invoices |
+| Preview (this month) | पहले देखें | What making bills would do, nothing saved | eye | Dry run, Simulation |
+| Bills made | बिल बन गए | The month's run finished | check-circle, `semantic.success` | Completed, Success |
+| Making bills | बिल बन रहे हैं | The run is working in the background | clock, `semantic.pending` | Running, Processing, Queued |
+| Some problems | कुछ में दिक्कत | The run finished but some customers got no bill | alert-triangle, `semantic.danger` | Completed with errors, Failed items |
+| Missed | छूट गया | The month's bills were not made while the app was view-only | alert-triangle, `semantic.danger` | Skipped |
+| Missed bill runs | छूटे हुए महीनों के बिल | Months to check and make by hand after paying again | alert-triangle | Catch-up, Backlog |
+| Try problems again | दिक्कत वाले फिर से करें | Owner retries only the customers with a problem | refresh | Retry failed items |
+| All bills | सारे बिल | The list of a month's bills | receipt | Bill register, Invoice list |
+| Not paid / Part paid / Paid | नहीं भरा / कुछ भरा / पूरा भरा | How much of one bill is paid | alert-triangle / clock / check-circle | Unpaid, Partially allocated, Settled |
+| Monthly rent | महीने का किराया | A connection's rent line on a bill | tv | Rental charge, Subscription fee |
+| Old due | पुराना बाकी | What the customer owed before this bill | `semantic.due` | Opening balance, Arrears |
+| Still due on this bill | इस बिल पर बाकी | This bill's charges not yet paid | `semantic.due` | Outstanding |
+| Print bill | बिल प्रिंट करें | The A5 paper bill, in the operator's language | printer | Export PDF, Invoice copy |
+
 ## Words we never show users
 
 Invoice, Ledger, Allocation, Adjustment, Reversal, Tenant, Sync / Synced / Pending sync,
