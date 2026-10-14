@@ -3,10 +3,10 @@ id: T-084
 title: Excel/CSV import wizard for customers and connections
 phase: 4
 area: web
-status: todo
-owner:
-claimed_at:
-branch:
+status: claimed
+owner: agent-t084
+claimed_at: 2026-10-14T06:30:54.236Z
+branch: task/T-084-excel-csv-import-wizard-for-customers-an
 depends_on: [T-034]
 review: self
 claimable_by: agent
@@ -51,3 +51,7 @@ FR-030, PLAN §12.2, D-15 — see `docs/IMPLEMENTATION_PLAN.md`, `docs/PRD.md`, 
 ## Completion notes
 
 _The agent fills this in before opening the PR: what was built, decisions taken, deviations, follow-up tasks created, and how it was verified._
+
+## Board log
+
+- 2026-10-14T06:30:54.236Z claimed by agent-t084
