@@ -1,0 +1,3 @@
+ALTER TABLE "subscriptions" ADD COLUMN "razorpay_status" text;--> statement-breakpoint
+ALTER TABLE "subscriptions" ADD COLUMN "razorpay_status_at" timestamp with time zone;--> statement-breakpoint
+ALTER TABLE "subscriptions" ADD CONSTRAINT "subscriptions_razorpay_status_known" CHECK ("subscriptions"."razorpay_status" IS NULL OR "subscriptions"."razorpay_status" IN ('created', 'authenticated', 'active', 'pending', 'halted', 'cancelled', 'completed', 'expired', 'paused'));

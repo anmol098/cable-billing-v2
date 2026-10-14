@@ -149,6 +149,17 @@ const serverShape = {
   RAZORPAY_WEBHOOK_SECRET: optional(generatedSecret(16)),
   /** The ₹400 + GST = ₹472/month plan (D-22). Test and live mode have different plan ids. */
   RAZORPAY_PLAN_ID: optional(z.string().regex(/^plan_[A-Za-z0-9]+$/, 'must look like "plan_…"')),
+  /**
+   * Local and CI end-to-end tests only: send Razorpay API calls to a local mock server instead of
+   * `https://api.razorpay.com/v1` (T-085). Refused on any Vercel deployment.
+   */
+  RAZORPAY_API_BASE_URL: optional(
+    z.url({
+      protocol: /^http$/,
+      hostname: /^(localhost|127\.0\.0\.1)$/,
+      error: "must be an http://localhost URL (local tests only)",
+    }),
+  ),
 
   // --- Monitoring (Sentry, E-08) ---
   /** Sentry DSN for server and edge code. Sentry stays disabled while it is unset. */
@@ -265,6 +276,9 @@ export function deploymentEnvProblems(env: AppEnv): string[] {
     .map((key) => `${key}: required in ${target}`);
   if (env.EMAIL_OUTBOX_DIR !== undefined) {
     problems.push(`EMAIL_OUTBOX_DIR: only for local tests; never set it in ${target}`);
+  }
+  if (env.RAZORPAY_API_BASE_URL !== undefined) {
+    problems.push(`RAZORPAY_API_BASE_URL: only for local tests; never set it in ${target}`);
   }
 
   const liveRazorpay = env.RAZORPAY_KEY_ID?.startsWith("rzp_live_");

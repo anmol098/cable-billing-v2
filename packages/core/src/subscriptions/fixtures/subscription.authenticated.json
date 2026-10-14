@@ -1,0 +1,43 @@
+{
+  "entity": "event",
+  "account_id": "acc_TestRzp000001",
+  "event": "subscription.authenticated",
+  "contains": ["subscription"],
+  "payload": {
+    "subscription": {
+      "entity": {
+        "id": "sub_TestRzp0000001",
+        "entity": "subscription",
+        "plan_id": "plan_TestRzp472Mo",
+        "customer_id": "cust_TestRzp00001",
+        "status": "authenticated",
+        "type": 2,
+        "current_start": null,
+        "current_end": null,
+        "ended_at": null,
+        "quantity": 1,
+        "notes": {
+          "operator_id": "00000000-0000-7000-8000-000000000000",
+          "plan_code": "monthly_400_gst18"
+        },
+        "charge_at": 1794542700,
+        "start_at": 1794542700,
+        "end_at": null,
+        "auth_attempts": 0,
+        "total_count": 120,
+        "paid_count": 0,
+        "customer_notify": true,
+        "created_at": 1794542400,
+        "expire_by": null,
+        "short_url": "https://rzp.io/i/TestRzp01",
+        "has_scheduled_changes": false,
+        "change_scheduled_at": null,
+        "source": "api",
+        "payment_method": "upi",
+        "offer_id": null,
+        "remaining_count": 120
+      }
+    }
+  },
+  "created_at": 1794542520
+}

@@ -379,6 +379,20 @@ that it opened another app (RULE-19). `HonestReceiptWordsTest` checks every `mob
 | Show again (a plan) | फिर से दिखाएँ | Offer a hidden plan again | eye | Unretire, Restore |
 | Hidden (a plan) | छिपा हुआ | A plan not offered for new connections | eye-off | Retired, Inactive |
 
+## Subscription words (web Settings → App subscription, T-085)
+
+| English | हिंदी | Means | Icon / colour | Not this |
+|---|---|---|---|---|
+| Free trial | फ़्री ट्रायल | Status: the first 30 days, nothing to pay | clock, `semantic.pending` | Trialing, Demo |
+| Paid | पेमेंट हो गया | Status: this month's fee is paid | check-circle, `semantic.success` | Active, Subscribed |
+| Pay now | अभी पेमेंट करें | Status and button: the fee is due, the app still works fully (grace) | clock, `semantic.pending` | Grace period, Overdue |
+| View only | सिर्फ़ देख सकते हैं | Status: unpaid after grace; looking and collecting money still work | alert-triangle, `semantic.danger` | Read-only, Suspended, Locked |
+| Stopped | बंद है | Status: autopay was cancelled and the paid time is over | alert-triangle, `semantic.danger` | Cancelled, Terminated |
+| Pay ₹472 a month | ₹472 महीना पेमेंट करें | The one button that opens Razorpay | credit-card | Subscribe, Checkout, Buy plan |
+| Autopay | ऑटोपे | Razorpay takes the fee every month by itself (UPI Autopay or card) | — | Mandate, e-NACH, Recurring billing |
+| Paid till 13 Dec | 13 दिस तक का पेमेंट हो गया | The last day this month's fee covers (IST) | — | Valid until, Expiry |
+| Payment was not finished | पेमेंट पूरा नहीं हुआ | Checkout was closed before paying (never "failed") | clock, `semantic.pending` | Payment failed, Declined |
+
 ## Words we never show users
 
 Invoice, Ledger, Allocation, Adjustment, Reversal, Tenant, Sync / Synced / Pending sync,

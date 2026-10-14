@@ -42,6 +42,10 @@ export function sentryDsnParts(dsn: string | undefined): SentryDsnParts | undefi
 /** Cloudflare Turnstile (sign-up bot check, T-027): its script and its challenge iframe. */
 export const TURNSTILE_ORIGIN = "https://challenges.cloudflare.com";
 
+/** Razorpay Checkout (T-085, Settings → App subscription): its script and its payment iframe. */
+export const RAZORPAY_CHECKOUT_ORIGIN = "https://checkout.razorpay.com";
+export const RAZORPAY_API_ORIGIN = "https://api.razorpay.com";
+
 export function contentSecurityPolicy({ isDev, sentryDsn }: SecurityHeaderOptions): string {
   const sentry = sentryDsnParts(sentryDsn);
   const directives: Record<string, string[]> = {
@@ -52,8 +56,9 @@ export function contentSecurityPolicy({ isDev, sentryDsn }: SecurityHeaderOption
       "'unsafe-inline'",
       ...(isDev ? ["'unsafe-eval'"] : []),
       TURNSTILE_ORIGIN,
+      RAZORPAY_CHECKOUT_ORIGIN,
     ],
-    "frame-src": [TURNSTILE_ORIGIN],
+    "frame-src": [TURNSTILE_ORIGIN, RAZORPAY_API_ORIGIN],
     "style-src": ["'self'", "'unsafe-inline'"],
     "img-src": ["'self'", "data:", "blob:"],
     "font-src": ["'self'"],

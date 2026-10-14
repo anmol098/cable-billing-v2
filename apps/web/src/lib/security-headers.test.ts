@@ -39,6 +39,9 @@ describe("securityHeaders", () => {
     const csp = contentSecurityPolicy({ isDev: false });
     expect(csp).toContain("script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com");
     expect(csp).toContain("frame-src https://challenges.cloudflare.com");
+    // Razorpay Checkout on Settings → App subscription (T-085).
+    expect(csp).toContain("https://challenges.cloudflare.com https://checkout.razorpay.com;");
+    expect(csp).toContain("frame-src https://challenges.cloudflare.com https://api.razorpay.com;");
     expect(csp).toContain("frame-ancestors 'none'");
   });
 

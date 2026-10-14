@@ -1,13 +1,37 @@
 /**
- * `subscription-states` cron (PLAN §14): moves subscriptions trialing/active → grace → read_only and reconciles with Razorpay.
+ * `subscription-states` cron (PLAN §14, `30 0 * * *` = 06:00 IST daily; T-085): moves subscriptions
+ * trialing/active → grace → read_only (or cancelled) by date, reconciles with Razorpay's API in case
+ * a webhook was missed, and emails the Owner the reminders that are due (T-7, T-1, grace start,
+ * grace T-7/T-1) and "working again" after a reconciled payment. Idempotent. Rules:
+ * `runSubscriptionStates` in `@cb/core` (subscriptions/daily.ts).
  *
- * Placeholder from T-043: authenticated like every cron route; answers 501 until T-085 replaces
- * this file with the real handler (use `cronRoute` from `../_lib/cron`).
+ * Without Razorpay keys the dates still apply (nothing is reconciled); without Resend the emails
+ * are logged as not sent. One tenant's database failure → the others continue, then 500 + Sentry.
  */
-import { cronStub } from "../_lib/cron";
+import { runSubscriptionStates, SubscriptionStatesError } from "@cb/core";
+import { razorpaySetup, subscriptionNotifier } from "@/lib/subscription/server";
+import { cronRoute } from "../_lib/cron";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const maxDuration = 300;
 
-export const GET = cronStub("subscription_states", "T-085");
+export const GET = cronRoute("subscription_states", async ({ db, log, requestId }) => {
+  try {
+    const report = await runSubscriptionStates({
+      db: db(),
+      now: () => new Date(),
+      log,
+      requestId,
+      razorpay: razorpaySetup()?.client ?? null,
+      notifier: subscriptionNotifier(log),
+    });
+    return { ...report };
+  } catch (error) {
+    // Keep the counts in the log line `cron.failed` comes with (cronRoute reports the error).
+    if (error instanceof SubscriptionStatesError) {
+      log.error("subscription_states.report", { failed: error.report.failed });
+    }
+    throw error;
+  }
+});
