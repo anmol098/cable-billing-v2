@@ -197,6 +197,11 @@
         "return": "Cash sent back",
         "submit": "Cash handed over"
       },
+      "imports": {
+        "customers": {
+          "apply": "Customers added from a file"
+        }
+      },
       "mobile_auth": {
         "refresh_reuse_detected": "Phone signed out for safety"
       },
@@ -417,6 +422,11 @@
         "accept": "{who} accepted the cash of {target} for {date}: ₹{amount}",
         "return": "{who} sent back the cash of {target} for {date}: ₹{amount}",
         "submit": "{who} handed over ₹{amount} cash for {date}"
+      },
+      "imports": {
+        "customers": {
+          "apply": "{who} added {count, plural, one {# customer} other {# customers}} from a file"
+        }
       },
       "mobile_auth": {
         "refresh_reuse_detected": "The app signed out phone {target} of {who}: an old sign-in was used again"

@@ -197,6 +197,11 @@
         "return": "कैश वापस भेजा",
         "submit": "कैश ऑफिस को दिया"
       },
+      "imports": {
+        "customers": {
+          "apply": "फ़ाइल से ग्राहक जोड़े"
+        }
+      },
       "mobile_auth": {
         "refresh_reuse_detected": "सुरक्षा के लिए फ़ोन लॉग आउट"
       },
@@ -417,6 +422,11 @@
         "accept": "{who} ने {target} का {date} का कैश मंज़ूर किया: ₹{amount}",
         "return": "{who} ने {target} का {date} का कैश वापस भेजा: ₹{amount}",
         "submit": "{who} ने {date} का ₹{amount} कैश ऑफिस को दिया"
+      },
+      "imports": {
+        "customers": {
+          "apply": "{who} ने फ़ाइल से {count, plural, one {# ग्राहक} other {# ग्राहक}} जोड़े"
+        }
       },
       "mobile_auth": {
         "refresh_reuse_detected": "ऐप ने {who} का फ़ोन {target} लॉग आउट किया: पुराना लॉग इन फिर से इस्तेमाल हुआ"
