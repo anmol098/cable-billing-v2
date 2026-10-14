@@ -196,9 +196,12 @@ scenarios already run per PR on Robolectric. Alternative: Gradle Managed Devices
   more with `--rerun` (green). One order-dependent assertion found that way (two receipt actions recorded in
   the same millisecond come back in random-id order) was fixed to compare as a set.
 - **Not run:** `connectedDevDebugAndroidTest` (no emulator/KVM here). Nothing in this task has run on a device.
-- Root: `pnpm install --frozen-lockfile`, `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build` (turbo
-  cache hits: no TypeScript input changed), `pnpm generate` (no diff), `node scripts/tasks.mjs check --local`:
-  all pass.
+- Root (after the final rebase on `feature/mvp` 1d0820c, whose new commits touch no Android input):
+  `pnpm install --frozen-lockfile`, `pnpm lint`, `pnpm typecheck`, `pnpm test` (10/10 incl. DB tests on
+  Postgres 17), `pnpm build`, `pnpm generate` (no diff), `node scripts/tasks.mjs check --local`: all pass.
+  The first `pnpm test` hit a 30 s timeout in `@cb/core` `auth.test.ts` ("password reset … single-use link",
+  42 s on a machine shared with other agents' builds); unrelated to this task (no TypeScript changed), it
+  passed on the re-run.
 
 ## Board log
 
