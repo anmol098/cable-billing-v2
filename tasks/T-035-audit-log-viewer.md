@@ -3,10 +3,10 @@ id: T-035
 title: Audit log viewer
 phase: 1
 area: web
-status: todo
-owner:
-claimed_at:
-branch:
+status: claimed
+owner: agent-t035
+claimed_at: 2026-10-14T06:30:49.438Z
+branch: task/T-035-audit-log-viewer
 depends_on: [T-029, T-025]
 review: self
 claimable_by: agent
@@ -51,3 +51,7 @@ FR-024 — see `docs/IMPLEMENTATION_PLAN.md`, `docs/PRD.md`, `docs/BRD.md`.
 ## Completion notes
 
 _The agent fills this in before opening the PR: what was built, decisions taken, deviations, follow-up tasks created, and how it was verified._
+
+## Board log
+
+- 2026-10-14T06:30:49.439Z claimed by agent-t035
