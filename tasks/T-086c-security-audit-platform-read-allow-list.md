@@ -3,10 +3,10 @@ id: T-086c
 title: Security audit checks app_platform read policies and column grants against an allow-list
 phase: 4
 area: db
-status: todo
-owner:
-claimed_at:
-branch:
+status: claimed
+owner: agent-t086c
+claimed_at: 2026-10-14T20:57:27.912Z
+branch: task/T-086c-security-audit-checks-app-platform-read
 depends_on: [T-086]
 review: required
 claimable_by: agent
@@ -77,3 +77,4 @@ PLAN §9.4, PRD §3; T-020 (security audit) and T-086 completion notes.
 _The agent fills this in before opening the PR._
 
 ## Board log
+- 2026-10-14T20:57:27.913Z claimed by agent-t086c
