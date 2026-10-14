@@ -191,7 +191,7 @@ test.describe("bill changes", () => {
     await expect(form(page).getByRole("button", { name: "Save new plan" })).toBeDisabled();
     const staffList = await page.goto("/bills/adjustments");
     expect(staffList?.status()).toBe(404);
-    const staffNew = await page.goto("/bills/adjustments/new");
+    const staffNew = await page.goto("/bills/adjustments?new=1");
     expect(staffNew?.status()).toBe(404);
     await page.context().clearCookies();
 
@@ -250,7 +250,7 @@ test.describe("bill changes", () => {
     await expect(page.locator(`[data-connection][data-vc="${VC}"]`)).toContainText("₹400 a month");
 
     // New bill change for Meena: take ₹100 off, with why.
-    await page.goto(`/bills/adjustments/new?customer=${ids.meena}`);
+    await page.goto(`/bills/adjustments?new=1&customer=${ids.meena}`);
     await expect(page.locator("[data-chosen-customer]")).toHaveText("Meena Devi");
     await page.getByRole("radio", { name: /Discount/ }).click();
     await page.getByLabel("Amount (₹)").fill("100");

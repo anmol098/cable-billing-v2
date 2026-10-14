@@ -3,8 +3,10 @@
  * FR-024): every extra charge and every amount taken off after bills were made, newest first, with
  * why (plan changed, started this month, the Owner's reason), where it stands (waiting for the
  * next bill, on bill INV-…, taken off) and who made it. A plain GET form for the filters. The
- * primary action is the Owner's "New bill change". Owner only in the menu (`adjustments.manage`);
- * the list service itself is a read (`billing.preview`), so it works in read-only mode.
+ * primary action is the Owner's "New bill change" (`?new=1`, optionally `&customer=<id>` to start
+ * with that customer chosen; another business's customer or a made-up id starts with the search).
+ * Owner only (`adjustments.manage`: Staff get 404; the services check again); the list service
+ * itself is a read (`billing.preview`), so it works in read-only mode.
  */
 import { type AdjustmentListRow, listAdjustments } from "@cb/core";
 import { type DisplayLocale, isPeriod, periodLabel } from "@cb/domain";
@@ -29,7 +31,11 @@ import { ShellPageHeader } from "@/components/shell/shell-page-header";
 import { getServerRuntime } from "@/lib/auth/server";
 import { getTenantContext } from "@/lib/auth/session";
 import { canSeeRoute } from "@/lib/nav";
+import { loadCustomerProfile } from "../../customers/_components/server";
+import { findCustomersAction } from "../../payments/actions";
+import { ManualAdjustmentForm, type ManualCustomer } from "./_parts/manual-form";
 import { ADJUSTMENT_SOURCES, ADJUSTMENT_STATES } from "./_parts/results";
+import { createManualAdjustmentAction } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -54,6 +60,13 @@ export default async function BillChangesPage({
   const result = await listAdjustments.call(getServerRuntime(), ctx, { state, source, page });
   if (!result.ok) throw new Error(`adjustments.list: ${result.error.code}`);
   const view = result.value;
+  const canCreate = roleCan(ctx.role)("adjustments.manage");
+  const creating = canCreate && first(params.new) === "1";
+  const customerParam = first(params.customer);
+  const profile = creating && customerParam ? await loadCustomerProfile(customerParam) : null;
+  const initialCustomer: ManualCustomer | null = profile
+    ? { id: profile.id, code: profile.customerCode, name: profile.name }
+    : null;
 
   const [shell, t, locale] = await Promise.all([
     getTranslations("shell"),
@@ -153,23 +166,41 @@ export default async function BillChangesPage({
     const text = query.toString();
     return text ? `/bills/adjustments?${text}` : "/bills/adjustments";
   };
-  const canCreate = roleCan(ctx.role)("adjustments.manage");
+  const showNewButton = canCreate && !creating;
 
   return (
-    <div className={`flex flex-col gap-6 ${canCreate ? PAGE_ACTION_CLEARANCE : ""}`}>
+    <div className={`flex flex-col gap-6 ${showNewButton ? PAGE_ACTION_CLEARANCE : ""}`}>
       <ShellPageHeader
         title={shell("routes.bills_adjustments")}
         description={t("list.description")}
         action={
-          canCreate ? (
+          showNewButton ? (
             <Button asChild size="lg" icon="add">
-              <Link href="/bills/adjustments/new" data-action="new-bill-change">
+              <Link href="/bills/adjustments?new=1" data-action="new-bill-change">
                 {t("list.new")}
               </Link>
             </Button>
           ) : undefined
         }
       />
+
+      {creating ? (
+        <section aria-labelledby="new-bill-change" className="flex max-w-3xl flex-col gap-3">
+          <div className="flex flex-col gap-1">
+            <h2 id="new-bill-change" className="font-strong text-xl">
+              {t("manual.title")}
+            </h2>
+            <p className="text-base text-text-muted">{t("manual.description")}</p>
+          </div>
+          <ManualAdjustmentForm
+            key={initialCustomer?.id ?? "none"}
+            initialCustomer={initialCustomer}
+            findCustomers={findCustomersAction}
+            save={createManualAdjustmentAction}
+            doneHref="/bills/adjustments"
+          />
+        </section>
+      ) : null}
 
       <form
         method="get"
