@@ -20,6 +20,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
+import { DownloadListLink } from "@/app/(operator)/reports/_export/download-link";
 import { billHref, monthText, PAY_STATE_PILL } from "@/components/bills/format";
 import {
   monthOptions,
@@ -157,6 +158,7 @@ export default async function BillsReportPage({
     <div className="flex flex-col gap-6">
       <ShellPageHeader title={shell("routes.reports_bills")} description={t("bills.description")} />
       <AsOfNote asOf={report.asOf} locale={displayLocale} t={t} />
+      <DownloadListLink kind="bills" params={params} role={ctx.role} />
 
       <form
         method="get"

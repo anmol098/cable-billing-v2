@@ -20,7 +20,7 @@ describe("CSV export cells (T-082)", () => {
       "\t=1",
       "\r=1",
       "\n=1",
-      "  =HYPERLINK(\"http://x\")",
+      '  =HYPERLINK("http://x")',
       " +1",
     ]) {
       expect(neutraliseCsvText(value), JSON.stringify(value)).toBe(`'${value}`);

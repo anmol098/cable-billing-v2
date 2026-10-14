@@ -17,6 +17,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
+import { DownloadListLink } from "@/app/(operator)/reports/_export/download-link";
 import { dayParam, monthStart, paymentHref, whenText } from "@/components/payments/format";
 import { MethodPill, PaymentStatusPill } from "@/components/payments/payment-parts";
 import { pickId, pickOption, pickPage, query, type Translate } from "@/components/reports/format";
@@ -170,6 +171,7 @@ export default async function PaymentsReportPage({
         description={t("payments.description")}
       />
       <AsOfNote asOf={{ at: now, date: today, endOfDay: false }} locale={displayLocale} t={t} />
+      <DownloadListLink kind="payments" params={params} role={ctx.role} />
 
       <form
         method="get"

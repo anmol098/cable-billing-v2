@@ -1,0 +1,126 @@
+{
+  "description": "Take your data out as a file. It opens in Excel or Google Sheets. Only you, the owner, can download it. Every download is noted in Who changed what.",
+  "file_help": "Amounts are in rupees. Times are India time.",
+  "download": "Download",
+  "download_list": "Download this list",
+  "download_help": "A file with every row of this list, not only this page.",
+  "kind": {
+    "customers": {
+      "title": "Customers",
+      "help": "Every customer: code, name, phone, area, due and advance."
+    },
+    "bills": {
+      "title": "Bills",
+      "help": "Every bill of the months you choose: amount, paid and still due."
+    },
+    "payments": {
+      "title": "Payments",
+      "help": "Every payment of the days you choose. Cash and UPI in separate columns."
+    },
+    "dues": {
+      "title": "Due list",
+      "help": "Who owes money, how much and since when."
+    },
+    "collections": {
+      "title": "Daily collection",
+      "help": "Cash and UPI each person took, day by day."
+    },
+    "handover": {
+      "title": "Cash handover",
+      "help": "Cash each lineman handed over, and any difference."
+    },
+    "connections": {
+      "title": "Connections",
+      "help": "Every connection on a day: status and monthly rent."
+    },
+    "billing_runs": {
+      "title": "Bill run",
+      "help": "Every customer the month's bill run looked at, and what happened."
+    }
+  },
+  "filters": {
+    "label": "Choose for {name}",
+    "from": "From",
+    "to": "To",
+    "from_month": "From month",
+    "to_month": "To month",
+    "month": "Month",
+    "day": "Day",
+    "as_of": "As of the end of",
+    "who": "Who",
+    "everyone": "Everyone",
+    "days_help": "At most 31 days.",
+    "months_help": "At most 12 months."
+  },
+  "problem": {
+    "bad_filters": "These days or months can't be downloaded. Choose other days and try again.",
+    "not_found": "Something you chose was not found. Choose again and try again.",
+    "too_many": "You downloaded many files just now. Try again in {minutes, plural, one {# minute} other {# minutes}}.",
+    "failed": "The file could not be made. Try again."
+  },
+  "forbidden": "Only the owner can download data.",
+  "truncated": "This file stops here: it has the first {count} rows only. Choose fewer days or months.",
+  "columns": {
+    "code": "Customer code",
+    "name": "Customer name",
+    "phone": "Phone",
+    "area": "Area",
+    "customer_status": "Customer",
+    "due": "Due (₹)",
+    "advance": "Advance (₹)",
+    "bill_number": "Bill no.",
+    "month": "Month",
+    "bill_kind": "Bill type",
+    "bill_amount": "Bill amount (₹)",
+    "paid": "Paid (₹)",
+    "still_due": "Still due (₹)",
+    "pay_state": "Paid?",
+    "receipt": "Receipt no.",
+    "day": "Day",
+    "taken_at": "Money taken at",
+    "reached_at": "Reached the office at",
+    "cash": "Cash (₹)",
+    "upi": "UPI (₹)",
+    "taken_by": "Taken by",
+    "where": "Where",
+    "status": "Status",
+    "check": "Check",
+    "check_reason": "Why check",
+    "bucket": "Due {age} (₹)",
+    "unpaid_since": "Unpaid since",
+    "who": "Who",
+    "role": "Role",
+    "payments": "Payments",
+    "cancelled": "Cancelled",
+    "cancelled_amount": "Cancelled (₹)",
+    "lineman": "Lineman",
+    "cash_expected": "Cash expected now (₹)",
+    "upi_apart": "UPI, not cash (₹)",
+    "expected_then": "Cash expected at handover (₹)",
+    "handed": "Cash handed over (₹)",
+    "difference": "Difference (₹)",
+    "reason": "Lineman's reason",
+    "lineman_note": "Lineman's note",
+    "handed_at": "Handed over at",
+    "checked_at": "Checked at",
+    "checked_by": "Checked by",
+    "office_note": "Office note",
+    "vc": "VC number",
+    "since": "Status since",
+    "start": "Start day",
+    "end": "Last day",
+    "plan": "Plan",
+    "rent": "Monthly rent (₹)",
+    "result": "Result",
+    "why": "Why",
+    "tries": "Tries",
+    "last_tried": "Last tried at"
+  },
+  "values": {
+    "regular": "Monthly",
+    "opening_balance": "Old due",
+    "own_amount": "Own amount",
+    "to_check": "To check",
+    "checked": "Checked"
+  }
+}

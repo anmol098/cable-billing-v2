@@ -69,7 +69,10 @@ export const startExportIsolation = defineIsolationCases(startExport, {
     },
     {
       name: "the connections of another tenant's plan",
-      input: (seed) => ({ kind: "connections" as const, filters: { date: today(), plan: seed.planId } }),
+      input: (seed) => ({
+        kind: "connections" as const,
+        filters: { date: today(), plan: seed.planId },
+      }),
     },
     {
       name: "a bill run of another tenant's area",

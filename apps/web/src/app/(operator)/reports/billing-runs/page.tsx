@@ -17,6 +17,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
+import { DownloadListLink } from "@/app/(operator)/reports/_export/download-link";
 import { monthParam, monthText, runsHref } from "@/components/bills/format";
 import { pickId, pickOption, pickPage, query, type Translate } from "@/components/reports/format";
 import { AsOfNote, Pager, TotalsRow } from "@/components/reports/parts";
@@ -79,6 +80,7 @@ export default async function BillingRunsReportPage({
         description={t("billing_runs.description")}
       />
       <AsOfNote asOf={report.asOf} locale={displayLocale} t={t} />
+      <DownloadListLink kind="billing_runs" params={params} role={ctx.role} />
 
       <form
         method="get"

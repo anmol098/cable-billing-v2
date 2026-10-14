@@ -39,7 +39,11 @@ import {
   validationError,
 } from "../errors/errors";
 import { errorLogFields } from "../logging/logger";
-import { listPayments, MAX_PAYMENT_OFFSET, MAX_PAYMENT_PAGE_SIZE } from "../payment-register/queries";
+import {
+  listPayments,
+  MAX_PAYMENT_OFFSET,
+  MAX_PAYMENT_PAGE_SIZE,
+} from "../payment-register/queries";
 import { REPORT_MAX_PAGE_SIZE } from "../reports/dues/as-of";
 import { duesReport } from "../reports/dues/queries";
 import { billingRunReport } from "../reports/operations/billing-runs";

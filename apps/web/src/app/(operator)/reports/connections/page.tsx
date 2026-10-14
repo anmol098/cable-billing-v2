@@ -21,6 +21,7 @@ import { Button, Input, Select } from "@cb/ui";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
+import { DownloadListLink } from "@/app/(operator)/reports/_export/download-link";
 import {
   firstParam,
   pickId,
@@ -99,6 +100,7 @@ export default async function ConnectionsReportPage({
         description={t("connections.description")}
       />
       <AsOfNote asOf={report.asOf} locale={displayLocale} t={t} />
+      <DownloadListLink kind="connections" params={params} role={ctx.role} />
 
       <form
         method="get"

@@ -83,7 +83,6 @@ export {
 } from "./context/tenant-context";
 export * from "./customers";
 export * from "./dashboard";
-export * from "./exports";
 export {
   CORE_ERROR_CODES,
   type CoreErrorCode,
@@ -96,6 +95,7 @@ export {
   toServiceError,
   validationError,
 } from "./errors/errors";
+export * from "./exports";
 export * from "./imports";
 export * from "./invariants";
 export * from "./jobs";
