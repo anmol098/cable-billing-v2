@@ -3,10 +3,10 @@ id: T-087a
 title: Shrink the app-wide web payload (Sentry bundle, fonts)
 phase: 4
 area: web
-status: todo
-owner:
-claimed_at:
-branch:
+status: claimed
+owner: agent-t087a
+claimed_at: 2026-10-14T11:47:39.092Z
+branch: task/T-087a-shrink-the-app-wide-web-payload-sentry-b
 depends_on: [T-087]
 review: self
 claimable_by: agent
@@ -69,3 +69,7 @@ PRD §11 (low-bandwidth payloads), PLAN §17, E-08 — see `docs/IMPLEMENTATION_
 ## Completion notes
 
 _The agent fills this in before opening the PR._
+
+## Board log
+
+- 2026-10-14T11:47:39.092Z claimed by agent-t087a
