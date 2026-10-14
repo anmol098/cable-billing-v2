@@ -35,6 +35,7 @@
     "entity.customer",
     "entity.vc_assignment",
     "entity.plan",
+    "entity.adjustment",
     "entity.payment",
     "entity.receipt",
     "entity.receipt_link",
@@ -81,6 +82,8 @@
     "sentence.connections.reactivate",
     "sentence.connections.disconnect",
     "sentence.connections.change_plan",
+    "sentence.adjustments.create",
+    "sentence.adjustments.back_dated_change",
     "sentence.payments.post",
     "sentence.payments.reverse",
     "sentence.payments.resolve_review",
@@ -136,6 +139,8 @@
     "action.connections.reactivate",
     "action.connections.disconnect",
     "action.connections.change_plan",
+    "action.adjustments.create",
+    "action.adjustments.back_dated_change",
     "action.payments.post",
     "action.payments.reverse",
     "action.payments.resolve_review",
@@ -223,7 +228,11 @@
     "field.razorpay_status",
     "field.transitions",
     "field.recipients",
-    "field.days_left"
+    "field.days_left",
+    "field.direction",
+    "field.kind",
+    "field.credit_applied_paise",
+    "field.total_paise"
   ],
   "description": "आपके बिज़नेस में हर बदलाव: किसने किया और कब। यह पेज सिर्फ़ आप (मालिक) देख सकते हैं।",
   "filters": {
@@ -269,6 +278,7 @@
     "customer": "ग्राहक",
     "vc_assignment": "कनेक्शन",
     "plan": "प्लान",
+    "adjustment": "बिल में बदलाव",
     "payment": "पेमेंट",
     "receipt": "रसीद",
     "receipt_link": "रसीद का लिंक",
@@ -336,6 +346,10 @@
       "reactivate": "{who} ने ग्राहक {customer} का कनेक्शन VC {target} {date} से फिर से चालू किया",
       "disconnect": "{who} ने ग्राहक {customer} का कनेक्शन VC {target} {date} से हटाया",
       "change_plan": "{who} ने VC {target} (ग्राहक {customer}) का किराया ₹{from} से ₹{to} किया"
+    },
+    "adjustments": {
+      "create": "{direction, select, credit {{who} ने ग्राहक {target} को ₹{amount} की छूट दी} other {{who} ने ग्राहक {target} पर ₹{amount} का एक्स्ट्रा चार्ज जोड़ा}}",
+      "back_dated_change": "{kind, select, plan {{who} ने VC {target} (ग्राहक {customer}) का प्लान पहले की तारीख {date} से बदला} suspend {{who} ने VC {target} (ग्राहक {customer}) को पहले की तारीख {date} से बंद किया} reactivate {{who} ने VC {target} (ग्राहक {customer}) को पहले की तारीख {date} से फिर से चालू किया} disconnect {{who} ने VC {target} (ग्राहक {customer}) को पहले की तारीख {date} से हटाया} other {{who} ने VC {target} (ग्राहक {customer}) को पहले की तारीख {date} से बदला}}"
     },
     "payments": {
       "post": "{method, select, upi {{who} ने ग्राहक {customer} से UPI में ₹{amount} लिए (रसीद {target})} other {{who} ने ग्राहक {customer} से नकद ₹{amount} लिए (रसीद {target})}}",
@@ -427,6 +441,10 @@
       "reactivate": "कनेक्शन फिर से चालू किया",
       "disconnect": "कनेक्शन हटाया",
       "change_plan": "किराया बदला"
+    },
+    "adjustments": {
+      "create": "एक्स्ट्रा चार्ज या छूट",
+      "back_dated_change": "पहले की तारीख से बदलाव"
     },
     "payments": {
       "post": "पेमेंट लिया",
@@ -533,6 +551,10 @@
     "razorpay_status": "ऑटोपे की स्थिति",
     "transitions": "बदलाव",
     "recipients": "कितने मालिकों को ईमेल",
-    "days_left": "कितने दिन बाकी"
+    "days_left": "कितने दिन बाकी",
+    "direction": "एक्स्ट्रा चार्ज या छूट",
+    "kind": "क्या बदला",
+    "credit_applied_paise": "एडवांस इस्तेमाल हुआ",
+    "total_paise": "कुल"
   }
 }

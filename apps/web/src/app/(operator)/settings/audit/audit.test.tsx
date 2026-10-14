@@ -214,6 +214,21 @@ describe("values", () => {
         "en",
       ),
     ).toBe("The app set the app subscription to: View only");
+    const discount = event({
+      actor: { kind: "person", id: STAFF, name: "Anil", role: "owner" },
+      action: "adjustments.create",
+      entityType: "adjustment",
+      details: {
+        direction: { kind: "code", value: "credit" },
+        amount: { kind: "paise", value: 5_000 },
+      },
+    });
+    expect(auditSentence(t, discount, "en")).toBe(
+      "Anil (Owner) gave customer 1045 a discount of ₹50",
+    );
+    expect(auditSentence(auditT("hi"), discount, "hi")).toBe(
+      "Anil (मालिक) ने ग्राहक 1045 को ₹50 की छूट दी",
+    );
     expect(fieldLabel(t, "settings.receipt_footer")).toBe("Receipt message");
   });
 });

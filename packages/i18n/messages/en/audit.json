@@ -43,6 +43,7 @@
     "customer": "Customer",
     "vc_assignment": "Connection",
     "plan": "Plan",
+    "adjustment": "Bill change",
     "payment": "Payment",
     "receipt": "Receipt",
     "receipt_link": "Receipt link",
@@ -110,6 +111,10 @@
       "reactivate": "{who} started connection VC {target} of customer {customer} again from {date}",
       "disconnect": "{who} removed connection VC {target} of customer {customer} from {date}",
       "change_plan": "{who} changed the rent of VC {target} (customer {customer}) from ₹{from} to ₹{to}"
+    },
+    "adjustments": {
+      "create": "{direction, select, credit {{who} gave customer {target} a discount of ₹{amount}} other {{who} added an extra charge of ₹{amount} for customer {target}}}",
+      "back_dated_change": "{kind, select, plan {{who} changed the plan of VC {target} (customer {customer}) from an earlier day, {date}} suspend {{who} stopped VC {target} (customer {customer}) from an earlier day, {date}} reactivate {{who} started VC {target} (customer {customer}) again from an earlier day, {date}} disconnect {{who} removed VC {target} (customer {customer}) from an earlier day, {date}} other {{who} changed VC {target} (customer {customer}) from an earlier day, {date}}}"
     },
     "payments": {
       "post": "{method, select, upi {{who} took ₹{amount} by UPI from customer {customer} (receipt {target})} other {{who} took ₹{amount} in cash from customer {customer} (receipt {target})}}",
@@ -201,6 +206,10 @@
       "reactivate": "Connection started again",
       "disconnect": "Connection removed",
       "change_plan": "Rent changed"
+    },
+    "adjustments": {
+      "create": "Extra charge or discount",
+      "back_dated_change": "Change from an earlier day"
     },
     "payments": {
       "post": "Payment taken",
@@ -307,6 +316,10 @@
     "razorpay_status": "Autopay status",
     "transitions": "Changes",
     "recipients": "Owners emailed",
-    "days_left": "Days left"
+    "days_left": "Days left",
+    "direction": "Extra charge or discount",
+    "kind": "What changed",
+    "credit_applied_paise": "Credit used",
+    "total_paise": "Total"
   }
 }

@@ -85,6 +85,8 @@ const DEFAULTS: Readonly<Record<string, string | number>> = {
   method: "other",
   channel: "other",
   field: "other",
+  direction: "other",
+  kind: "other",
 };
 
 /** One plain sentence for an event. */

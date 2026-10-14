@@ -144,6 +144,331 @@
       "title": "प्लान बदलें · VC {vc}"
     }
   },
+  "audit": {
+    "action": {
+      "adjustments": {
+        "back_dated_change": "पहले की तारीख से बदलाव",
+        "create": "एक्स्ट्रा चार्ज या छूट"
+      },
+      "areas": {
+        "archive": "एरिया छिपाया",
+        "create": "एरिया जोड़ा",
+        "rename": "एरिया का नाम बदला",
+        "restore": "एरिया फिर से दिखाया"
+      },
+      "auth": {
+        "password_reset_completed": "नया पासवर्ड बनाया",
+        "password_reset_requested": "नया पासवर्ड माँगा",
+        "sign_in_blocked": "लॉग इन रोका गया",
+        "signed_in": "लॉग इन किया",
+        "signed_out": "लॉग आउट किया",
+        "signed_out_everywhere": "सभी डिवाइस से लॉग आउट",
+        "two_factor_enabled": "2-स्टेप लॉग इन चालू किया"
+      },
+      "billing": {
+        "retry_failed": "दिक्कत वाले फिर से करें",
+        "run_completed": "बिल बन गए",
+        "run_requeued": "बिल फिर से बनाना तय हुआ",
+        "run_retry_started": "दिक्कत वाले फिर से किए",
+        "run_scheduled": "बिल बनाना तय हुआ",
+        "run_skipped": "बिल नहीं बने (सिर्फ़ देखने के लिए)",
+        "run_started": "बिल बनने शुरू हुए",
+        "start_run": "अभी बिल बनाएँ"
+      },
+      "connections": {
+        "add": "कनेक्शन जोड़ा",
+        "change_plan": "किराया बदला",
+        "disconnect": "कनेक्शन हटाया",
+        "reactivate": "कनेक्शन फिर से चालू किया",
+        "suspend": "कनेक्शन बंद किया"
+      },
+      "customers": {
+        "create": "ग्राहक जोड़ा",
+        "create_with_connections": "ग्राहक कनेक्शन के साथ जोड़ा",
+        "set_status": "ग्राहक बंद या चालू किया",
+        "update": "ग्राहक की जानकारी बदली",
+        "update_phone": "ग्राहक का फ़ोन बदला"
+      },
+      "devices": {
+        "revoke": "फ़ोन से लॉग आउट किया"
+      },
+      "handover": {
+        "accept": "कैश मंज़ूर किया",
+        "return": "कैश वापस भेजा",
+        "submit": "कैश ऑफिस को दिया"
+      },
+      "mobile_auth": {
+        "refresh_reuse_detected": "सुरक्षा के लिए फ़ोन लॉग आउट"
+      },
+      "operators": {
+        "update_profile": "बिज़नेस की जानकारी बदली"
+      },
+      "payments": {
+        "post": "पेमेंट लिया",
+        "resolve_review": "पेमेंट की जाँच हो गई",
+        "reverse": "पेमेंट रद्द किया"
+      },
+      "plans": {
+        "create": "प्लान जोड़ा",
+        "restore": "प्लान फिर से दिखाया",
+        "retire": "प्लान छिपाया",
+        "update": "प्लान बदला"
+      },
+      "receipt_links": {
+        "purged": "पुराने रसीद लिंक हटाए"
+      },
+      "receipts": {
+        "create_link": "रसीद का लिंक बनाया",
+        "revoke_links": "रसीद के लिंक बंद किए"
+      },
+      "subscription": {
+        "notice_sent": "ऐप पेमेंट की याद ईमेल की",
+        "state_changed": "ऐप सब्सक्रिप्शन बदला"
+      },
+      "subscriptions": {
+        "checkout_started": "ऐप का पेमेंट शुरू किया"
+      },
+      "team": {
+        "add_lineman": "लाइनमैन जोड़ा",
+        "add_staff": "स्टाफ़ जोड़ा",
+        "deactivate": "व्यक्ति को बंद किया",
+        "reactivate": "व्यक्ति को चालू किया",
+        "reset_password": "नया पासवर्ड बनाया"
+      },
+      "tenant": {
+        "provisioned": "बिज़नेस का अकाउंट बना"
+      }
+    },
+    "changes": {
+      "after": "बाद में",
+      "before": "पहले",
+      "caption": "क्या बदला",
+      "empty": "नहीं भरा",
+      "field": "क्या",
+      "hidden": "छिपा हुआ",
+      "items": "{count, plural, one {# चीज़} other {# चीज़ें}}",
+      "no": "नहीं",
+      "none": "इस बदलाव की कोई जानकारी सेव नहीं हुई।",
+      "show": "क्या बदला, देखें",
+      "yes": "हाँ"
+    },
+    "description": "आपके बिज़नेस में हर बदलाव: किसने किया और कब। यह पेज सिर्फ़ आप (मालिक) देख सकते हैं।",
+    "entity": {
+      "adjustment": "बिल में बदलाव",
+      "area": "एरिया",
+      "billing_run": "बिल",
+      "collection_session": "ऑफिस को कैश",
+      "customer": "ग्राहक",
+      "device": "फ़ोन",
+      "operator": "बिज़नेस",
+      "other": "दूसरा",
+      "payment": "पेमेंट",
+      "plan": "प्लान",
+      "receipt": "रसीद",
+      "receipt_link": "रसीद का लिंक",
+      "subscription": "ऐप सब्सक्रिप्शन",
+      "user": "व्यक्ति",
+      "vc_assignment": "कनेक्शन"
+    },
+    "field": {
+      "address": "पता",
+      "alt_phone": "दूसरा मोबाइल नंबर",
+      "amount_paise": "रकम",
+      "balance_after_paise": "बाद का हिसाब",
+      "balance_paise": "हिसाब",
+      "business_date": "दिन",
+      "cancelled_at": "कब बंद हुआ",
+      "cash_expected_paise": "कितना कैश होना चाहिए",
+      "cash_handed_over_paise": "कितना कैश दिया",
+      "channel": "कहाँ",
+      "connection_count": "कनेक्शन",
+      "count": "कितने",
+      "credit_added_paise": "एडवांस जुड़ा",
+      "credit_after_paise": "बाद का एडवांस",
+      "credit_applied_paise": "एडवांस इस्तेमाल हुआ",
+      "current_period_end": "कब तक का पेमेंट हो गया",
+      "customer_code": "ग्राहक कोड",
+      "days_left": "कितने दिन बाकी",
+      "default_language": "रसीद की भाषा",
+      "direction": "एक्स्ट्रा चार्ज या छूट",
+      "discrepancy_paise": "कम / ज़्यादा",
+      "discrepancy_reason": "कम या ज़्यादा क्यों",
+      "effective_date": "किस दिन से?",
+      "email": "ईमेल",
+      "end_date": "आख़िरी दिन",
+      "ended_sessions": "वेबसाइट लॉग आउट",
+      "expires_at": "कब तक चलेगा",
+      "grace_ends_at": "कब तक पेमेंट करें",
+      "has_note": "नोट लिखा",
+      "invoice_prefix": "बिल नंबर की शुरुआत",
+      "kind": "क्या बदला",
+      "kyc": "पहचान के कागज़",
+      "language": "भाषा",
+      "login": "यूज़र नेम",
+      "method": "नकद या UPI",
+      "mid_month_start_policy": "महीने के बीच में नया कनेक्शन",
+      "monthly_amount_paise": "हर महीने का किराया",
+      "name": "नाम",
+      "note": "नोट",
+      "office_phone": "ऑफिस का फ़ोन",
+      "password": "पासवर्ड",
+      "period": "महीना",
+      "phone": "मोबाइल नंबर",
+      "razorpay_status": "ऑटोपे की स्थिति",
+      "reason": "वजह",
+      "receipt_footer": "रसीद पर संदेश",
+      "receipt_number": "रसीद नं.",
+      "recipients": "कितने मालिकों को ईमेल",
+      "rental_paise": "किराया",
+      "reversed": "रद्द",
+      "revoked_count": "फ़ोन लॉग आउट",
+      "role": "काम",
+      "sign_in_setup": "लॉग इन किसने बनाया",
+      "source": "कहाँ लिया",
+      "start_date": "शुरू का दिन",
+      "status": "स्थिति",
+      "total_paise": "कुल",
+      "transitions": "बदलाव",
+      "trial_ends_at": "फ़्री ट्रायल कब खत्म",
+      "trigger": "किसने शुरू किया",
+      "vc_number": "VC नंबर"
+    },
+    "filters": {
+      "bad_dates": "आख़िरी दिन पहले दिन से पहले है। सारे दिन दिखा रहे हैं।",
+      "change": "बदलाव",
+      "change_any": "कोई भी बदलाव",
+      "clear": "सब दिखाएँ",
+      "from": "कब से",
+      "label": "कौन से बदलाव देखने हैं, चुनें",
+      "show": "दिखाएँ",
+      "switched_off": "{name} (बंद)",
+      "this_month": "इस महीने",
+      "to": "कब तक",
+      "today": "आज",
+      "what": "क्या",
+      "what_any": "सब कुछ",
+      "who": "किसने",
+      "who_anyone": "कोई भी",
+      "who_app": "ऐप ने खुद"
+    },
+    "generic": "{who} ने बदलाव किया: {entity} {target}",
+    "list": {
+      "caption": "बदलाव, नए पहले",
+      "empty": "कोई बदलाव नहीं मिला।",
+      "empty_filtered": "कोई बदलाव नहीं मिला। कम चीज़ें चुनकर देखें।",
+      "newest": "सबसे नए पर वापस",
+      "older": "पुराने बदलाव",
+      "page_label": "और बदलाव"
+    },
+    "role": {
+      "lineman": "लाइनमैन",
+      "owner": "मालिक",
+      "platform_admin": "सपोर्ट",
+      "staff": "स्टाफ़"
+    },
+    "sentence": {
+      "adjustments": {
+        "back_dated_change": "{kind, select, plan {{who} ने VC {target} (ग्राहक {customer}) का प्लान पहले की तारीख {date} से बदला} suspend {{who} ने VC {target} (ग्राहक {customer}) को पहले की तारीख {date} से बंद किया} reactivate {{who} ने VC {target} (ग्राहक {customer}) को पहले की तारीख {date} से फिर से चालू किया} disconnect {{who} ने VC {target} (ग्राहक {customer}) को पहले की तारीख {date} से हटाया} other {{who} ने VC {target} (ग्राहक {customer}) को पहले की तारीख {date} से बदला}}",
+        "create": "{direction, select, credit {{who} ने ग्राहक {target} को ₹{amount} की छूट दी} other {{who} ने ग्राहक {target} पर ₹{amount} का एक्स्ट्रा चार्ज जोड़ा}}"
+      },
+      "areas": {
+        "archive": "{who} ने एरिया {target} छिपाया",
+        "create": "{who} ने एरिया {target} जोड़ा",
+        "rename": "{who} ने एरिया {from} का नाम बदलकर {target} किया",
+        "restore": "{who} ने एरिया {target} फिर से दिखाया"
+      },
+      "auth": {
+        "password_reset_completed": "{who} ने ईमेल के लिंक से नया पासवर्ड बनाया",
+        "password_reset_requested": "{who} ने नया पासवर्ड बनाने का लिंक माँगा",
+        "sign_in_blocked": "{channel, select, mobile {{who} फ़ोन ऐप में लॉग इन नहीं कर सके: लॉग इन बंद है} other {{who} वेबसाइट पर लॉग इन नहीं कर सके: लॉग इन बंद है}}",
+        "signed_in": "{channel, select, mobile {{who} ने फ़ोन ऐप में लॉग इन किया} other {{who} ने वेबसाइट पर लॉग इन किया}}",
+        "signed_out": "{channel, select, mobile {{who} ने फ़ोन ऐप से लॉग आउट किया} other {{who} ने वेबसाइट से लॉग आउट किया}}",
+        "signed_out_everywhere": "{who} ने सभी डिवाइस से लॉग आउट किया",
+        "two_factor_enabled": "{who} ने 2-स्टेप लॉग इन चालू किया"
+      },
+      "billing": {
+        "retry_failed": "{who} ने {target} के दिक्कत वाले बिल फिर से बनाने शुरू किए",
+        "run_completed": "{status, select, completed_with_errors {{who} ने {target} के बिल पूरे किए: {count, plural, one {# बिल} other {# बिल}} बने, कुछ में दिक्कत} other {{who} ने {target} के बिल पूरे किए: {count, plural, one {# बिल} other {# बिल}} बने}}",
+        "run_requeued": "{who} ने {target} के बिल फिर से बनाना तय किया",
+        "run_retry_started": "{who} ने {target} के दिक्कत वाले बिल फिर से बनाने शुरू किए",
+        "run_scheduled": "{who} ने {target} के बिल बनाना तय किया",
+        "run_skipped": "{who} ने {target} के बिल नहीं बनाए: ऐप सिर्फ़ देखने के लिए था",
+        "run_started": "{who} ने {target} के बिल बनाना शुरू किया",
+        "start_run": "{who} ने {target} के बिल बनाना शुरू किया"
+      },
+      "connections": {
+        "add": "{who} ने ग्राहक {customer} पर कनेक्शन VC {target} जोड़ा",
+        "change_plan": "{who} ने VC {target} (ग्राहक {customer}) का किराया ₹{from} से ₹{to} किया",
+        "disconnect": "{who} ने ग्राहक {customer} का कनेक्शन VC {target} {date} से हटाया",
+        "reactivate": "{who} ने ग्राहक {customer} का कनेक्शन VC {target} {date} से फिर से चालू किया",
+        "suspend": "{who} ने ग्राहक {customer} का कनेक्शन VC {target} {date} से बंद किया"
+      },
+      "customers": {
+        "create": "{who} ने ग्राहक {target} जोड़ा",
+        "create_with_connections": "{who} ने ग्राहक {target} जोड़ा",
+        "set_status": "{status, select, inactive {{who} ने ग्राहक {target} को बंद किया} other {{who} ने ग्राहक {target} को फिर से चालू किया}}",
+        "update": "{who} ने ग्राहक {target} का {fields} बदला",
+        "update_phone": "{field, select, alt_phone {{who} ने ग्राहक {target} का दूसरा मोबाइल नंबर बदला} other {{who} ने ग्राहक {target} का मोबाइल नंबर बदला}}"
+      },
+      "devices": {
+        "revoke": "{who} ने फ़ोन {target} से लॉग आउट किया"
+      },
+      "handover": {
+        "accept": "{who} ने {target} का {date} का कैश मंज़ूर किया: ₹{amount}",
+        "return": "{who} ने {target} का {date} का कैश वापस भेजा: ₹{amount}",
+        "submit": "{who} ने {date} का ₹{amount} कैश ऑफिस को दिया"
+      },
+      "mobile_auth": {
+        "refresh_reuse_detected": "ऐप ने {who} का फ़ोन {target} लॉग आउट किया: पुराना लॉग इन फिर से इस्तेमाल हुआ"
+      },
+      "operators": {
+        "update_profile": "{who} ने बिज़नेस की जानकारी बदली: {fields}"
+      },
+      "payments": {
+        "post": "{method, select, upi {{who} ने ग्राहक {customer} से UPI में ₹{amount} लिए (रसीद {target})} other {{who} ने ग्राहक {customer} से नकद ₹{amount} लिए (रसीद {target})}}",
+        "resolve_review": "{who} ने पेमेंट {target} (ग्राहक {customer}) की जाँच पूरी की",
+        "reverse": "{who} ने पेमेंट {target} (₹{amount}, ग्राहक {customer}) रद्द किया"
+      },
+      "plans": {
+        "create": "{who} ने प्लान {target} जोड़ा",
+        "restore": "{who} ने प्लान {target} फिर से दिखाया",
+        "retire": "{who} ने प्लान {target} छिपाया",
+        "update": "{who} ने प्लान {target} बदला: {fields}"
+      },
+      "receipt_links": {
+        "purged": "{who} ने {count, plural, one {# पुराना रसीद लिंक} other {# पुराने रसीद लिंक}} हटाए"
+      },
+      "receipts": {
+        "create_link": "{who} ने रसीद {target} का लिंक बनाया",
+        "revoke_links": "{who} ने रसीद {target} के {count, plural, one {# लिंक} other {# लिंक}} बंद किए"
+      },
+      "subscription": {
+        "notice_sent": "{who} ने ऐप पेमेंट की याद {count, plural, one {# मालिक} other {# मालिकों}} को ईमेल की",
+        "state_changed": "{status, select, trialing {{who} ने ऐप सब्सक्रिप्शन बदला: फ़्री ट्रायल} active {{who} ने ऐप सब्सक्रिप्शन बदला: पेमेंट हो गया} grace {{who} ने ऐप सब्सक्रिप्शन बदला: अभी पेमेंट करें} read_only {{who} ने ऐप सब्सक्रिप्शन बदला: सिर्फ़ देख सकते हैं} cancelled {{who} ने ऐप सब्सक्रिप्शन बदला: बंद है} other {{who} ने ऐप सब्सक्रिप्शन बदला}}"
+      },
+      "subscriptions": {
+        "checkout_started": "{who} ने ऑटोपे से ऐप का पेमेंट शुरू किया"
+      },
+      "team": {
+        "add_lineman": "{who} ने लाइनमैन {target} जोड़ा",
+        "add_staff": "{who} ने स्टाफ़ {target} जोड़ा",
+        "deactivate": "{who} ने {target} को बंद किया",
+        "reactivate": "{who} ने {target} को फिर से चालू किया",
+        "reset_password": "{who} ने {target} का नया पासवर्ड बनाया"
+      },
+      "tenant": {
+        "provisioned": "{who} ने बिज़नेस का अकाउंट बनाया"
+      }
+    },
+    "time": "{date}, {time} {ampm, select, pm {PM} other {AM}}",
+    "unknown_target": "(नहीं मिला)",
+    "who": {
+      "app": "ऐप",
+      "person": "{name} ({role})",
+      "someone": "कोई ({role})",
+      "support": "केबल बिलिंग सपोर्ट"
+    }
+  },
   "auth": {
     "email": {
       "reset_action": "नया पासवर्ड बनाने के लिए यह लिंक खोलें। यह एक बार, {minutes} मिनट तक काम करेगा:",

@@ -47,6 +47,7 @@ export const AUDIT_ENTITY_TYPES = [
   "customer",
   "vc_assignment",
   "plan",
+  "adjustment",
   "payment",
   "receipt",
   "receipt_link",
@@ -211,6 +212,19 @@ export const AUDIT_ACTIONS = {
     details: ({ before, after }) => ({
       from: paise(field(before, "rentalPaise", "rental_paise")),
       to: paise(field(after, "rentalPaise", "rental_paise")),
+    }),
+  },
+  // Bill changes (T-045)
+  "adjustments.create": {
+    details: ({ after }) => ({
+      direction: code(field(after, "direction")),
+      amount: paise(field(after, "amountPaise", "amount_paise")),
+    }),
+  },
+  "adjustments.back_dated_change": {
+    details: ({ after }) => ({
+      kind: code(field(after, "kind")),
+      date: date(field(after, "effectiveDate", "effective_date")),
     }),
   },
   // Payments and receipts (T-046, T-048, T-050)

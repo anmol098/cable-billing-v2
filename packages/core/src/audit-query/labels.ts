@@ -8,6 +8,7 @@
  * Only business identifiers come back: codes, numbers, names, months. Never a phone or email.
  */
 import {
+  adjustments,
   areas,
   billingRuns,
   collectionSessions,
@@ -56,6 +57,20 @@ const LOOKUPS: Readonly<Record<string, Lookup>> = {
       .from(users)
       .where(and(eq(users.operatorId, op), inArray(users.id, ids)));
     return new Map(rows.map((r) => [r.id, { target: text(r.name) }]));
+  },
+  async adjustment(tx, op, ids) {
+    const rows = await tx
+      .select({ id: adjustments.id, customer: customers.customerCode })
+      .from(adjustments)
+      .innerJoin(
+        customers,
+        and(
+          eq(customers.operatorId, adjustments.operatorId),
+          eq(customers.id, adjustments.customerId),
+        ),
+      )
+      .where(and(eq(adjustments.operatorId, op), inArray(adjustments.id, ids)));
+    return new Map(rows.map((r) => [r.id, { target: text(r.customer) }]));
   },
   async plan(tx, op, ids) {
     const rows = await tx
