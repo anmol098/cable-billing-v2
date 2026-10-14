@@ -207,8 +207,9 @@ H-10 (GSTIN) is still needed for tax invoices of our fee (not built here; see op
 
 **Known pre-existing e2e hazard (not changed):** the specs seed logins in `beforeAll` from a describe-level
 random suffix; Playwright re-runs `beforeAll` when a worker returns to a file after another file's tests, which
-can seed the same login twice (`users_login_unique`). Seen once locally in `customers.spec.ts` (T-033's
-file) in one of two full runs; `subscription.spec.ts` makes its suffix inside `beforeAll` to avoid it.
+can seed the same login twice (`users_login_unique`). Seen locally in `customers.spec.ts` (T-033) and
+`connections.spec.ts` (T-034) with `--retries=0`; with CI's 2 retries it shows as "flaky" and passes.
+`subscription.spec.ts` makes its suffix inside `beforeAll` to avoid it. Worth a small follow-up in those specs.
 
 **Verification** (Node v24.21.0, pnpm 12.11.2, local PostgreSQL 17)
 - `@cb/core` (58 files, 825 passed + 1 pre-existing skip): `state.test.ts` (27: every transition, exact-instant
@@ -233,7 +234,8 @@ file) in one of two full runs; `subscription.spec.ts` makes its suffix inside `b
   email after the response, 500 on a DB failure), the read-only flow with T-061's handler, the page in
   every state (EN + HI), the Pay button with a fake Checkout (open → handler → confirm; closed; errors;
   autopay on; "not confirmed yet"), the trial banner, the emails (EN + HI, honest wording), env and CSP tests.
-- Playwright (`next start`, migrated scratch DB, pre-installed Chromium, local Razorpay mock): **71 passed**,
+- Playwright (`next start`, migrated scratch DB, pre-installed Chromium, local Razorpay mock), after
+  rebasing on T-034: **72 passed, 1 flaky** (`connections.spec.ts`, the hazard above) with retries 2,
   5 new in `subscription.spec.ts` (read-only Owner pays → forged handler refused → paid → active, banner
   gone; 360 px from the banner without sideways scroll; closing Checkout; webhook 401 / applied /
   duplicate; Staff 404).
