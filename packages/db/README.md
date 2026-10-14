@@ -92,6 +92,15 @@ table-wide SELECT the default privileges gave it and grants SELECT on the listed
 compares the catalog with `PLATFORM_READ_COLUMNS`. Adding a column to that list is a reviewed
 decision, like adding a policy.
 
+**The audit holds this table (T-086c).** `auditDatabaseSecurity`'s `platformRead` check compares
+everything `app_platform` can read (a SELECT/ALL policy for it or PUBLIC, or RLS off, plus its
+column privileges) with the `PLATFORM_READ` allow-list in `src/testing/harness.test.ts`: per
+table, the columns (`"all"` or the exact list, taken from `PLATFORM_READ_COLUMNS`), the rows
+(`"all"` or the exact USING filter) and the reason. A new platform or PUBLIC policy, an extra
+column grant, a table-wide SELECT on a column-limited table or a widened row filter fails the
+@cb/db suite until the list is updated in a reviewed PR. When you add a platform policy, add the
+row to the table above and the entry to `PLATFORM_READ`.
+
 ## API
 
 ```ts
