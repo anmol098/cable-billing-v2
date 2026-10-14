@@ -15,8 +15,9 @@
  *    no duplicates; another business's customer refused), the day's cash/UPI, a ₹50-short handover,
  *    receipt actions never "sent".
  * 6. The office accepts the handover; the phone's temporary number sits next to the receipt no.
- * 7. Bill, statement, dues report, bill and payment reports, payment register, home and the phone
- *    all show the same numbers (home also in Hindi); another business's pages are 404.
+ * 7. Bill, statement, dues report, bill/payment/collection/handover reports, payment register,
+ *    home and the phone all show the same numbers (home also in Hindi); another business's pages
+ *    are 404.
  * 8. A plan change after the bill and a reused VC leave the issued bills alone; making the bills
  *    again makes none.
  * 9. The Owner undoes a payment: every page moves together, and "Who changed what" shows it.
@@ -755,6 +756,24 @@ test.describe("journey: an operator's first month", () => {
     await expect(page.getByTestId("payments-totals-cash")).toContainText("₹1,200");
     await expect(page.getByTestId("payments-totals-upi")).toContainText("₹400");
     await expect(page.getByTestId("payments-totals-all")).toContainText("₹1,600");
+    await page.goto("/reports/collections");
+    await expect(page.getByTestId("collections-totals-cash")).toContainText("₹1,200");
+    await expect(page.getByTestId("collections-totals-upi")).toContainText("₹400");
+    await expect(page.getByTestId("collections-totals-count")).toContainText("4 payments");
+    const people = page.getByRole("table", { name: "Who took how much" });
+    await expect(people.getByRole("row").filter({ hasText: OWNER_NAME })).toContainText(
+      "₹800₹3002",
+    );
+    await expect(people.getByRole("row").filter({ hasText: "Ravi Kumar" })).toContainText(
+      "₹400₹1002",
+    );
+    await page.goto("/reports/handover");
+    await expect(page.getByTestId("handover-totals-expected")).toContainText("₹400");
+    await expect(page.getByTestId("handover-totals-handed")).toContainText("₹350");
+    await expect(page.getByTestId("handover-totals-difference")).toContainText("₹50 short");
+    const handedOver = page.getByRole("table", { name: "Linemen's days" }).getByRole("row").nth(1);
+    await expect(handedOver).toContainText("Ravi Kumar");
+    await expect(handedOver).toContainText("Accepted");
 
     // Each customer's bill, Bills tab and History end on the same number.
     for (const [id, name, outstanding, closing] of [
@@ -949,6 +968,11 @@ test.describe("journey: an operator's first month", () => {
     await expect(page.getByTestId("dues-totals-credit")).toContainText("₹0");
     await page.goto("/reports/payments");
     await expect(page.getByTestId("payments-totals-all")).toContainText("₹1,300");
+    await page.goto("/reports/collections");
+    await expect(page.getByTestId("collections-totals-upi")).toContainText("₹100");
+    await expect(page.getByTestId("collections-totals-count")).toContainText(
+      "1 cancelled (₹300), not counted",
+    );
     await page.goto(`/bills/register?month=${period}`);
     await expect(page.getByTestId("register-paid")).toHaveText("₹600");
     await expect(page.getByTestId("register-due")).toHaveText("₹450");
