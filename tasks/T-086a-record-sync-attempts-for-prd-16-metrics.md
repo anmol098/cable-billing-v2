@@ -3,10 +3,10 @@ id: T-086a
 title: Record payment sync attempts and duplicates for the PRD §16 metrics
 phase: 4
 area: core
-status: todo
-owner:
-claimed_at:
-branch:
+status: claimed
+owner: agent-t086a
+claimed_at: 2026-10-14T21:32:13.218Z
+branch: task/T-086a-record-payment-sync-attempts-and-duplica
 depends_on: [T-086]
 review: required
 claimable_by: agent
@@ -63,3 +63,4 @@ PRD §16, PLAN §10.4, T-086 completion notes.
 _The agent fills this in before opening the PR._
 
 ## Board log
+- 2026-10-14T21:32:13.219Z claimed by agent-t086a
