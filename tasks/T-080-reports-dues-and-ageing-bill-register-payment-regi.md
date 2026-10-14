@@ -3,7 +3,7 @@ id: T-080
 title: Reports: dues and ageing, bill register, payment register
 phase: 4
 area: web
-status: claimed
+status: done
 owner: agent-t080
 claimed_at: 2026-10-14T04:25:46.155Z
 branch: task/T-080-reports-dues-and-ageing-bill-register-pa
@@ -30,7 +30,7 @@ Money reports whose totals always match the ledger.
 
 ## Acceptance criteria
 
-- [ ] Report totals equal ledger totals for the same filters (automated test).
+- [x] Report totals equal ledger totals for the same filters (automated test).
 
 ## Tests required
 
@@ -102,8 +102,21 @@ FR-023, BRD §12 — see `docs/IMPLEMENTATION_PLAN.md`, `docs/PRD.md`, `docs/BRD
 - `packages/i18n/glossary.md` (new table), generated `apps/web/messages/{en,hi}.json`, new `apps/web/e2e/reports.spec.ts`.
 - The report test world (`test-world.ts`) and the isolation seed (`test-seed.ts`) are non-test modules in `reports/dues/` (not exported from the package) so both report folders can share them.
 
-VERIFICATION_PLACEHOLDER
+**Verification** (Node v24.21.0, pnpm 12.11.2, local PostgreSQL 17; rebased on `feature/mvp` 24c71ba, which has T-034 and T-048)
+- `@cb/core` report tests (all against a real database, no skips except the opt-in bench):
+  - `dues/ageing.test.ts` (pure): day counts across months/years/leap years, bucket edges 30/31, 60/61, 90/91, October's bill moving to 31–60 on 1 Nov, `spreadDue` (newest back, credit pays oldest, due not on a bill, ties by id), `resolveAsOf` (now, end of a past IST day = next 00:00 IST, future refused, just after IST midnight).
+  - `dues/dues.test.ts`: a world made by the real services (4 monthly runs + job worker, cash/UPI payments, a ₹1,000 advance used by two later bills, a part payment, an undone payment, a migrated opening-balance bill, payments at 23:45 and 00:15 IST): **for 5 as-of moments × 3 area filters, total due − credit = Σ `ledger_entries` before the cutoff; Σ buckets = due; Σ areas = total; each list's totals row = Σ its rows = Σ the ledger of exactly those customers**; every customer's buckets equal the reference `spreadDue` and its balance the ledger (and, now, `customer_balances`); hand-checked numbers now / end of 31 Oct / end of 1 Nov / 15 Aug / 31 Aug; age cards = the lists they open; area, kind, bucket, page filters; Staff ok, lineman FORBIDDEN, future/invalid date VALIDATION, unknown area NOT_FOUND. The world passes T-052's `checkTenantInvariants`.
+  - `dues/seeded.test.ts` on T-036's `small` seed (3 operators, seed 7; asserts the seed has undone payments, credit applications, reversal rows, opening balances, credit adjustments, part payments and advances): dues = ledger for every operator × 4 as-of days × 3 area filters, buckets = reference for every customer; bill register (12-month windows) billed = Σ the bills' ledger entries, paid = Σ their allocations, count and pay-state counts add up, Σ still due − Σ credit = ledger = dues net; **payment register counted cash + UPI = −Σ ledger (payment + undo entries) month by month × method**; timing sanity (median < 2 s).
+  - `registers/registers.test.ts`: bill register totals = ledger for 4 ranges × 3 areas, hand-checked totals and pay-state counts, **rows and totals equal T-047's `listBills` month by month**, ordering, pay-state filter, page 2 keeps totals, roles and validation.
+  - `registers/payments.test.ts`: T-048 `listPayments` counted cash + UPI = ledger for 9 filters (ranges, method, collector), the undone payment listed but not counted, IST day edges.
+  - Isolation: 4 new cases (`reports.dues` no-leak + other tenant's area, `reports.bill_register` no-leak + area) pass; the coverage test passes.
+  - Bench (`CB_REPORTS_BENCH=1`, legacy seed: 8 operators, 7,616 customers, 23 months; biggest operator 1,393 customers): dues now ~99 ms, as of a month end ~89 ms, over-90 list ~96 ms, bill register 12 months ~115 ms (medians of 5, transaction included); dues total = ledger.
+- `apps/web` vitest: `components/reports/format.test.ts`, `parts.test.tsx` (17 tests: params, as-of text EN/HI, totals row, age cards, area table with Total row, dues list incl. the age-filtered Due column, credit list, Hindi, empty state, pager).
+- Playwright `e2e/reports.spec.ts` (4 tests, real billing run + job worker + payments): Owner opens each report from `/reports`; dues totals ₹800 / ₹600 / ₹200, age cards ₹300 / ₹500, area table + Total row, list + totals row, Over 90 days filter (₹500 of ₹800, totals = card), area South, credit list, **as of the end of yesterday (₹700 only)**, row → customer; bill register over 5 months (3 bills, ₹1,400 / ₹600 / ₹800), Paid? filter, row → bill; payment register (2 payments, cash ₹1,000, UPI ₹200), UPI filter, row → payment; Staff opens all three at 360 px with no sideways scroll. Screenshots (1280 EN, 360 EN, 360 HI) checked by eye.
+- Root: `pnpm install --frozen-lockfile`, `pnpm lint`, `pnpm typecheck` (10/10), `pnpm test` (10/10, run with `--concurrency=1`; core 62 files / 879 tests, web 41 / 375), `TURBO_FORCE=1 pnpm build` (10/10), `pnpm generate` (no diff), tokens / icons / i18n / openapi `--check`, `pnpm i18n:check`, `node scripts/tasks.mjs check --local`.
+- Whole e2e suite (scratch DB `cb_e2e_t080`, `E2E_PORT=3280`, pre-installed Chromium, `--workers=2`): 74 passed, 1 failed: T-034's `connections.spec.ts` "phone (360px)" hit `users_login_unique` in its own `seedTenant` (its describe is not serial, so with 2 workers its setup can run twice). Run again on its own with `reports.spec.ts`: 6/6 passed. Not touched by this task.
 
 ## Board log
 
 - 2026-10-14T04:25:46.155Z claimed by agent-t080
+- 2026-10-14T05:34:45.868Z completed on task/T-080-reports-dues-and-ageing-bill-register-pa
