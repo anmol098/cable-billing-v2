@@ -48,10 +48,12 @@ function SummaryLine({
   extra?: ReactNode;
 }) {
   return (
-    <li className="flex flex-wrap items-center gap-x-3 gap-y-1 text-lg">
-      <Icon name={icon} className={`size-6 shrink-0 ${tone}`} />
-      <span className="font-strong">{children}</span>
-      {extra ? <span className="text-text-muted">{extra}</span> : null}
+    <li className="flex items-start gap-3 text-lg">
+      <Icon name={icon} className={`mt-1 size-6 shrink-0 ${tone}`} />
+      <span className="flex flex-wrap gap-x-3">
+        <span className="font-strong">{children}</span>
+        {extra ? <span className="text-text-muted">{extra}</span> : null}
+      </span>
     </li>
   );
 }

@@ -443,6 +443,20 @@ that it opened another app (RULE-19). `HonestReceiptWordsTest` checks every `mob
 
 Phone numbers in the details show only the last four digits (`XXXXXX3210`), as on the receipt page.
 
+## Import words (web Customers → Add from Excel, T-084)
+
+| English | हिंदी | Means | Icon / colour | Not this |
+|---|---|---|---|---|
+| Form (the file to fill) | फ़ॉर्म | The Excel/CSV template with our column names | download | Template, Schema |
+| Download / Upload | डाउनलोड करें / अपलोड करें | Take the form to the computer / give the filled file to the app | download / upload | Export / Import |
+| Line | लाइन | One row of the file (one set-top box), numbered as in Excel | — | Row, Record, पंक्ति |
+| Ready | तैयार | A customer that will be added when "Add" is pressed | plus, `semantic.pending` | Valid, Queued |
+| Added | जुड़ गया | The customer is now in the app | check-circle, `semantic.success` | Imported, Created |
+| Already in the app: not changed | पहले से ऐप में: नहीं बदला | A customer code that was there before; the file does not change it | x, grey | Duplicate, Skipped |
+| Problem / What to fix | दिक्कत / क्या ठीक करें | Why a line was not added, in words | alert-triangle, `semantic.danger` | Error, Validation failed |
+| Lines with problems (file) | दिक्कत वाली लाइनें | The file of lines not added, with the reason, to fix and upload again | download | Error report, Exception log |
+| Column | कॉलम | A column of the file ("Customer code", "VC number") | — | Field, Header |
+
 ## Words we never show users
 
 Invoice, Ledger, Allocation, Adjustment, Reversal, Tenant, Sync / Synced / Pending sync,
