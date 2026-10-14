@@ -8,7 +8,10 @@ import kotlinx.serialization.Serializable
 /** How the receipt goes to the customer (the Done screen's WhatsApp and SMS tiles). */
 @Keep // A navigation argument: its serializer must survive R8.
 @Serializable
-enum class ShareChannel { WhatsApp, Sms }
+enum class ShareChannel {
+    WhatsApp,
+    Sms,
+}
 
 /** The payment as the share screen shows it. Money is integer paise. */
 data class SharePayment(
