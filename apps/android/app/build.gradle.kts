@@ -42,7 +42,9 @@ android {
         versionCode = 1
         versionName = "0.1.0"
 
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        // T-072: AndroidJUnitRunner with a plain Application (src/androidTest/java/…/durability), so the
+        // instrumented suite wires the real classes by hand without CableApplication's start-up work.
+        testInstrumentationRunner = "com.cablebilling.lineman.durability.DurabilityTestRunner"
     }
 
     flavorDimensions += "env"
@@ -187,6 +189,14 @@ dependencies {
     testImplementation(libs.androidx.room.testing)
     testImplementation(libs.androidx.work.testing)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
+
+    // T-072: the instrumented durability + migration suite (src/androidTest; emulator or phone).
+    androidTestImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.test.runner)
+    androidTestImplementation(libs.androidx.test.ext.junit)
+    androidTestImplementation(libs.okhttp.mockwebserver3)
+    androidTestImplementation(libs.androidx.room.testing)
+    androidTestImplementation(libs.androidx.work.testing)
 }
 
 // T-063: the mobile API contract is an input of the unit tests. ApiModelsUpToDateTest regenerates the
@@ -230,4 +240,16 @@ tasks.withType<Test>().configureEach {
         .withPropertyName("domainLabels")
         .withPathSensitivity(PathSensitivity.RELATIVE)
     if (writeReceiptSnapshots != null) systemProperty("cb.writeReceiptSnapshots", writeReceiptSnapshots)
+}
+
+// T-072: the durability and migration scenarios in src/androidTest/shared run twice: as instrumented tests
+// on an emulator or phone (connectedDevDebugAndroidTest: real SQLite, files, Keystore, WorkManager) and on
+// Robolectric inside testDevDebugUnitTest, so every PR runs them. Code there may only use what both test
+// classpaths have (no contract fixture files, no src/test helpers). Instrumented-only code: src/androidTest/java.
+android {
+    sourceSets {
+        // `kotlin`, not `java`: AGP 9's built-in Kotlin compiles only the Kotlin source directories.
+        getByName("androidTest").kotlin.srcDir("src/androidTest/shared/java")
+        getByName("test").kotlin.srcDir("src/androidTest/shared/java")
+    }
 }
