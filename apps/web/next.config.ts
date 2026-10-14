@@ -22,6 +22,12 @@ const nextConfig: NextConfig = {
   // Workspace libraries are TypeScript source (no dist); Next.js compiles them. Add new @cb/* deps here.
   transpilePackages: ["@cb/contracts", "@cb/core", "@cb/db", "@cb/domain", "@cb/i18n", "@cb/ui"],
   turbopack: { root: workspaceRoot },
+  compiler: {
+    // Strips the Sentry SDK's debug logger (we never set `debug`) from the browser and server
+    // bundles. `withSentryConfig`'s tree-shaking options are webpack-only, and `next build` uses
+    // Turbopack, so the SDK's own flag is defined here instead (T-087a).
+    define: { __SENTRY_DEBUG__: false },
+  },
   outputFileTracingRoot: workspaceRoot,
   async headers() {
     return [
