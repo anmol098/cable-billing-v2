@@ -115,5 +115,6 @@ export * from "./payment-register";
 export * from "./payments";
 export * from "./receipts/actions";
 export * from "./receipts/links";
+export * from "./statements";
 export * from "./team";
 export * from "./tenants";

@@ -317,6 +317,21 @@ the office has the payment.
 | Wrong customer / Wrong amount / Saved twice / Money not received / Other reason | गलत ग्राहक / गलत रकम / दो बार सेव हुआ / पैसे नहीं मिले / कोई और वजह | Why the owner undoes a payment | undo | Error type |
 | Balance now | अब का हिसाब | What the customer owes (or has as credit) now | — | Outstanding balance, Ledger balance |
 
+## Account history words (web customer History and Bills tabs)
+
+| English | हिंदी | Means | Icon / colour | Not this |
+|---|---|---|---|---|
+| Account history | खाते का हिसाब | Every bill, payment, cancelled payment and discount of a customer, with the balance after each | rotate-ccw-clock | Ledger, Statement of account, खाता बही |
+| Account statement | खाते का हिसाब | The printed / saved-as-PDF account history for chosen days | printer | Ledger report, Statement |
+| Balance | हिसाब | Due or credit right after a line (says "Due" / "Credit", never a minus sign) | `semantic.due` / `semantic.credit` | Running balance, Closing balance, शेष |
+| Balance before {date} | {date} से पहले का हिसाब | What the customer owed (or had as credit) when the chosen days start | — | Opening balance, B/F |
+| Extra charge | एक्स्ट्रा चार्ज | A bill change that adds money | pencil | Debit adjustment, Debit note |
+| Discount | छूट | A bill change that takes money off (it becomes credit) | pencil | Credit adjustment, Credit note, Rebate |
+| Payment cancelled / Cancelled later | पेमेंट रद्द / बाद में रद्द | The Owner undid a payment; the money is owed again | undo, `semantic.danger` | Reversal, Refund, Void |
+| Old dues from your old records | पुराने रिकॉर्ड से पुराना बाकी | Dues brought in from the operator's old software | receipt | Opening balance invoice, Migration |
+| Money taken on {date} | पैसे {date} को लिए | The day the lineman took the money, when the office got it later | — | Recorded at, Business date |
+| Which days? / This month / Last 3 months / Last 12 months / Everything | कौन से दिन? / इस महीने / पिछले 3 महीने / पिछले 12 महीने / सब कुछ | The time choice above the account history | calendar-days | Period, Date range, Filter |
+
 ## Words we never show users
 
 Invoice, Ledger, Allocation, Adjustment, Reversal, Tenant, Sync / Synced / Pending sync,
