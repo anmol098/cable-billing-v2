@@ -23,6 +23,13 @@ import {
 } from "@cb/domain";
 import { type ServiceError, serviceError } from "../../errors/errors";
 
+/**
+ * The biggest `pageSize` a report service accepts (T-082). Pages show 50 rows; a CSV export walks
+ * the same services with pages of up to this many rows, so a long export is tens of calls, not
+ * hundreds.
+ */
+export const REPORT_MAX_PAGE_SIZE = 500;
+
 export interface ReportAsOf {
   /** The instant the numbers are for (now, or the end of the chosen day). */
   readonly at: Date;

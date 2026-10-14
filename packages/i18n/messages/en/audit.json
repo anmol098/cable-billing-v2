@@ -54,7 +54,8 @@
     "area": "Area",
     "operator": "Business",
     "other": "Other",
-    "subscription": "App subscription"
+    "subscription": "App subscription",
+    "export": "Download"
   },
   "unknown_target": "(not found)",
   "sentence": {
@@ -176,6 +177,9 @@
       "customers": {
         "apply": "{who} added {count, plural, one {# customer} other {# customers}} from a file"
       }
+    },
+    "exports": {
+      "download": "{who} downloaded {kind, select, customers {the customer list} bills {the bill register} payments {the payment register} dues {the due list} collections {the daily collection} handover {the cash handovers} connections {the connections} billing_runs {a bill run} other {some data}} as a file"
     }
   },
   "generic": "{who} made a change: {entity} {target}",
@@ -298,6 +302,9 @@
       "customers": {
         "apply": "Customers added from a file"
       }
+    },
+    "exports": {
+      "download": "Data downloaded"
     }
   },
   "changes": {
@@ -374,6 +381,17 @@
     "direction": "Extra charge or discount",
     "kind": "What changed",
     "credit_applied_paise": "Credit used",
-    "total_paise": "Total"
+    "total_paise": "Total",
+    "report": "What",
+    "from": "From",
+    "to": "To",
+    "as_of_date": "As of",
+    "bucket": "How old",
+    "pay_state": "Paid?",
+    "searched": "Searched",
+    "outcome": "Result",
+    "difference": "Short or extra",
+    "plan": "Plan",
+    "date": "Day"
   }
 }

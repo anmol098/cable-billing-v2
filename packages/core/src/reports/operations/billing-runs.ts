@@ -31,7 +31,7 @@ import { BillingPeriodInput } from "../../billing/services";
 import { idInput } from "../../collections/inputs";
 import { defineService } from "../../context/service";
 import { notFound } from "../../errors/errors";
-import { resolveAsOf } from "../dues/as-of";
+import { REPORT_MAX_PAGE_SIZE, resolveAsOf } from "../dues/as-of";
 import type { BillingRunReport, BillingRunReportRow, BillingRunReportRun } from "./types";
 
 /** Customers per page. */
@@ -43,6 +43,8 @@ export const BillingRunReportInput = z.object({
   outcome: z.enum(BILLING_RUN_ITEM_OUTCOMES).optional(),
   areaId: idInput.optional(),
   page: z.int().min(1).max(10_000).default(1),
+  /** Rows per page (T-082: an export reads bigger pages). */
+  pageSize: z.int().min(1).max(REPORT_MAX_PAGE_SIZE).default(BILLING_RUN_REPORT_PAGE_SIZE),
 });
 
 export type BillingRunReportCommand = z.output<typeof BillingRunReportInput>;
@@ -140,7 +142,7 @@ export const billingRunReport = defineService({
       createdChargesPaise: zero,
       alreadyExistsChargesPaise: zero,
     };
-    const pageSize = BILLING_RUN_REPORT_PAGE_SIZE;
+    const pageSize = input.pageSize;
     const base = {
       asOf: { at: asOf.value.at, date: asOf.value.date, endOfDay: false },
       period,

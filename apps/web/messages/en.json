@@ -520,6 +520,9 @@
       "devices": {
         "revoke": "Signed out a phone"
       },
+      "exports": {
+        "download": "Data downloaded"
+      },
       "handover": {
         "accept": "Cash accepted",
         "return": "Cash sent back",
@@ -599,6 +602,7 @@
       "collection_session": "Cash handover",
       "customer": "Customer",
       "device": "Phone",
+      "export": "Download",
       "operator": "Business",
       "other": "Other",
       "payment": "Payment",
@@ -613,8 +617,10 @@
       "address": "Address",
       "alt_phone": "Other mobile no.",
       "amount_paise": "Amount",
+      "as_of_date": "As of",
       "balance_after_paise": "Balance after",
       "balance_paise": "Balance",
+      "bucket": "How old",
       "business_date": "Day",
       "cancelled_at": "Stopped on",
       "cash_expected_paise": "Cash expected",
@@ -627,8 +633,10 @@
       "credit_applied_paise": "Credit used",
       "current_period_end": "Paid till",
       "customer_code": "Customer code",
+      "date": "Day",
       "days_left": "Days left",
       "default_language": "Receipt language",
+      "difference": "Short or extra",
       "direction": "Extra charge or discount",
       "discrepancy_paise": "Short / extra",
       "discrepancy_reason": "Why short or extra",
@@ -637,6 +645,7 @@
       "end_date": "Last day",
       "ended_sessions": "Websites signed out",
       "expires_at": "Works until",
+      "from": "From",
       "grace_ends_at": "Pay by",
       "has_note": "Note written",
       "invoice_prefix": "Bill number start",
@@ -650,22 +659,28 @@
       "name": "Name",
       "note": "Note",
       "office_phone": "Office phone",
+      "outcome": "Result",
       "password": "Password",
+      "pay_state": "Paid?",
       "period": "Month",
       "phone": "Mobile no.",
+      "plan": "Plan",
       "razorpay_status": "Autopay status",
       "reason": "Reason",
       "receipt_footer": "Receipt message",
       "receipt_number": "Receipt no.",
       "recipients": "Owners emailed",
       "rental_paise": "Rent (monthly)",
+      "report": "What",
       "reversed": "Cancelled",
       "revoked_count": "Phones signed out",
       "role": "Role",
+      "searched": "Searched",
       "sign_in_setup": "Sign-in set up by",
       "source": "Taken on",
       "start_date": "Start day",
       "status": "Status",
+      "to": "To",
       "total_paise": "Total",
       "transitions": "Changes",
       "trial_ends_at": "Free trial ends",
@@ -767,6 +782,9 @@
       },
       "devices": {
         "revoke": "{who} signed out phone {target}"
+      },
+      "exports": {
+        "download": "{who} downloaded {kind, select, customers {the customer list} bills {the bill register} payments {the payment register} dues {the due list} collections {the daily collection} handover {the cash handovers} connections {the connections} billing_runs {a bill run} other {some data}} as a file"
       },
       "handover": {
         "accept": "{who} accepted the cash of {target} for {date}: ₹{amount}",
@@ -1501,6 +1519,132 @@
       "show_pending": "Show waiting",
       "show_problem": "Show problem",
       "show_success": "Show done"
+    }
+  },
+  "exports": {
+    "columns": {
+      "advance": "Advance (₹)",
+      "area": "Area",
+      "bill_amount": "Bill amount (₹)",
+      "bill_kind": "Bill type",
+      "bill_number": "Bill no.",
+      "bucket": "Due {age} (₹)",
+      "cancelled": "Cancelled",
+      "cancelled_amount": "Cancelled (₹)",
+      "cash": "Cash (₹)",
+      "cash_expected": "Cash expected now (₹)",
+      "check": "Check",
+      "check_reason": "Why check",
+      "checked_at": "Checked at",
+      "checked_by": "Checked by",
+      "code": "Customer code",
+      "customer_status": "Customer",
+      "day": "Day",
+      "difference": "Difference (₹)",
+      "due": "Due (₹)",
+      "end": "Last day",
+      "expected_then": "Cash expected at handover (₹)",
+      "handed": "Cash handed over (₹)",
+      "handed_at": "Handed over at",
+      "last_tried": "Last tried at",
+      "lineman": "Lineman",
+      "lineman_note": "Lineman's note",
+      "month": "Month",
+      "name": "Customer name",
+      "office_note": "Office note",
+      "paid": "Paid (₹)",
+      "pay_state": "Paid?",
+      "payments": "Payments",
+      "phone": "Phone",
+      "plan": "Plan",
+      "reached_at": "Reached the office at",
+      "reason": "Lineman's reason",
+      "receipt": "Receipt no.",
+      "rent": "Monthly rent (₹)",
+      "result": "Result",
+      "role": "Role",
+      "since": "Status since",
+      "start": "Start day",
+      "status": "Status",
+      "still_due": "Still due (₹)",
+      "taken_at": "Money taken at",
+      "taken_by": "Taken by",
+      "tries": "Tries",
+      "unpaid_since": "Unpaid since",
+      "upi": "UPI (₹)",
+      "upi_apart": "UPI, not cash (₹)",
+      "vc": "VC number",
+      "where": "Where",
+      "who": "Who",
+      "why": "Why"
+    },
+    "description": "Take your data out as a file. It opens in Excel or Google Sheets. Only you, the owner, can download it. Every download is noted in Who changed what.",
+    "download": "Download",
+    "download_help": "A file with every row of this list, not only this page.",
+    "download_list": "Download this list",
+    "file_help": "Amounts are in rupees. Times are India time.",
+    "filters": {
+      "as_of": "As of the end of",
+      "day": "Day",
+      "days_help": "At most 31 days.",
+      "everyone": "Everyone",
+      "from": "From",
+      "from_month": "From month",
+      "label": "Choose for {name}",
+      "month": "Month",
+      "months_help": "At most 12 months.",
+      "to": "To",
+      "to_month": "To month",
+      "who": "Who"
+    },
+    "forbidden": "Only the owner can download data.",
+    "kind": {
+      "billing_runs": {
+        "help": "Every customer the month's bill run looked at, and what happened.",
+        "title": "Bill run"
+      },
+      "bills": {
+        "help": "Every bill of the months you choose: amount, paid and still due.",
+        "title": "Bills"
+      },
+      "collections": {
+        "help": "Cash and UPI each person took, day by day.",
+        "title": "Daily collection"
+      },
+      "connections": {
+        "help": "Every connection on a day: status and monthly rent.",
+        "title": "Connections"
+      },
+      "customers": {
+        "help": "Every customer: code, name, phone, area, due and advance.",
+        "title": "Customers"
+      },
+      "dues": {
+        "help": "Who owes money, how much and since when.",
+        "title": "Due list"
+      },
+      "handover": {
+        "help": "Cash each lineman handed over, and any difference.",
+        "title": "Cash handover"
+      },
+      "payments": {
+        "help": "Every payment of the days you choose. Cash and UPI in separate columns.",
+        "title": "Payments"
+      }
+    },
+    "problem": {
+      "bad_filters": "These days or months can't be downloaded. Choose other days and try again.",
+      "failed": "The file could not be made. Try again.",
+      "not_found": "Something you chose was not found. Choose again and try again.",
+      "too_many": "You downloaded many files just now. Try again in {minutes, plural, one {# minute} other {# minutes}}."
+    },
+    "truncated": "This file stops here: it has the first {count} rows only. Choose fewer days or months.",
+    "values": {
+      "checked": "Checked",
+      "opening_balance": "Old due",
+      "own_amount": "Own amount",
+      "regular": "Monthly",
+      "to_check": "To check"
     }
   },
   "home": {

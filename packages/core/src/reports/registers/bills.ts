@@ -28,7 +28,7 @@ import { billPayState } from "../../billing/views";
 import { idInput } from "../../collections/inputs";
 import { defineService } from "../../context/service";
 import { notFound } from "../../errors/errors";
-import { resolveAsOf } from "../dues/as-of";
+import { REPORT_MAX_PAGE_SIZE, resolveAsOf } from "../dues/as-of";
 import type { BillRegisterReport } from "./types";
 
 /** Rows per page. */
@@ -43,6 +43,8 @@ export const BillRegisterReportInput = z
     areaId: idInput.optional(),
     payState: z.enum(BILL_PAY_STATES).optional(),
     page: z.int().min(1).max(10_000).default(1),
+    /** Rows per page (T-082: an export reads bigger pages). */
+    pageSize: z.int().min(1).max(REPORT_MAX_PAGE_SIZE).default(BILL_REPORT_PAGE_SIZE),
   })
   .superRefine((value, ctx) => {
     const span = monthsBetween(value.from, value.to);
@@ -139,7 +141,7 @@ export const billRegisterReport = defineService({
          WHERE true ${stateFilter}`)
     ).rows;
 
-    const pageSize = BILL_REPORT_PAGE_SIZE;
+    const pageSize = input.pageSize;
     const listed = await tx.execute<BillDbRow>(sql`
       WITH ${cte}
       SELECT b.id, b.invoice_number, b.period::text AS period, b.kind, b.status,

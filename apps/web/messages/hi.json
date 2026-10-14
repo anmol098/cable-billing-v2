@@ -520,6 +520,9 @@
       "devices": {
         "revoke": "फ़ोन से लॉग आउट किया"
       },
+      "exports": {
+        "download": "डेटा डाउनलोड किया"
+      },
       "handover": {
         "accept": "कैश मंज़ूर किया",
         "return": "कैश वापस भेजा",
@@ -599,6 +602,7 @@
       "collection_session": "ऑफिस को कैश",
       "customer": "ग्राहक",
       "device": "फ़ोन",
+      "export": "डाउनलोड",
       "operator": "बिज़नेस",
       "other": "दूसरा",
       "payment": "पेमेंट",
@@ -613,8 +617,10 @@
       "address": "पता",
       "alt_phone": "दूसरा मोबाइल नंबर",
       "amount_paise": "रकम",
+      "as_of_date": "किस दिन तक",
       "balance_after_paise": "बाद का हिसाब",
       "balance_paise": "हिसाब",
+      "bucket": "कितना पुराना",
       "business_date": "दिन",
       "cancelled_at": "कब बंद हुआ",
       "cash_expected_paise": "कितना कैश होना चाहिए",
@@ -627,8 +633,10 @@
       "credit_applied_paise": "एडवांस इस्तेमाल हुआ",
       "current_period_end": "कब तक का पेमेंट हो गया",
       "customer_code": "ग्राहक कोड",
+      "date": "दिन",
       "days_left": "कितने दिन बाकी",
       "default_language": "रसीद की भाषा",
+      "difference": "कम या ज़्यादा",
       "direction": "एक्स्ट्रा चार्ज या छूट",
       "discrepancy_paise": "कम / ज़्यादा",
       "discrepancy_reason": "कम या ज़्यादा क्यों",
@@ -637,6 +645,7 @@
       "end_date": "आख़िरी दिन",
       "ended_sessions": "वेबसाइट लॉग आउट",
       "expires_at": "कब तक चलेगा",
+      "from": "कब से",
       "grace_ends_at": "कब तक पेमेंट करें",
       "has_note": "नोट लिखा",
       "invoice_prefix": "बिल नंबर की शुरुआत",
@@ -650,22 +659,28 @@
       "name": "नाम",
       "note": "नोट",
       "office_phone": "ऑफिस का फ़ोन",
+      "outcome": "नतीजा",
       "password": "पासवर्ड",
+      "pay_state": "पैसे मिले?",
       "period": "महीना",
       "phone": "मोबाइल नंबर",
+      "plan": "प्लान",
       "razorpay_status": "ऑटोपे की स्थिति",
       "reason": "वजह",
       "receipt_footer": "रसीद पर संदेश",
       "receipt_number": "रसीद नं.",
       "recipients": "कितने मालिकों को ईमेल",
       "rental_paise": "किराया",
+      "report": "क्या",
       "reversed": "रद्द",
       "revoked_count": "फ़ोन लॉग आउट",
       "role": "काम",
+      "searched": "खोजा",
       "sign_in_setup": "लॉग इन किसने बनाया",
       "source": "कहाँ लिया",
       "start_date": "शुरू का दिन",
       "status": "स्थिति",
+      "to": "कब तक",
       "total_paise": "कुल",
       "transitions": "बदलाव",
       "trial_ends_at": "फ़्री ट्रायल कब खत्म",
@@ -767,6 +782,9 @@
       },
       "devices": {
         "revoke": "{who} ने फ़ोन {target} से लॉग आउट किया"
+      },
+      "exports": {
+        "download": "{who} ने {kind, select, customers {ग्राहकों की लिस्ट} bills {बिलों की लिस्ट} payments {पेमेंट की लिस्ट} dues {बाकी की लिस्ट} collections {रोज़ का कलेक्शन} handover {कैश जमा की लिस्ट} connections {कनेक्शन की लिस्ट} billing_runs {बिल बनने की रिपोर्ट} other {डेटा}} फ़ाइल में डाउनलोड की"
       },
       "handover": {
         "accept": "{who} ने {target} का {date} का कैश मंज़ूर किया: ₹{amount}",
@@ -1501,6 +1519,132 @@
       "show_pending": "इंतज़ार दिखाएँ",
       "show_problem": "दिक्कत दिखाएँ",
       "show_success": "हो गया दिखाएँ"
+    }
+  },
+  "exports": {
+    "columns": {
+      "advance": "एडवांस (₹)",
+      "area": "एरिया",
+      "bill_amount": "बिल की रकम (₹)",
+      "bill_kind": "बिल किस का",
+      "bill_number": "बिल नंबर",
+      "bucket": "बाकी {age} (₹)",
+      "cancelled": "रद्द",
+      "cancelled_amount": "रद्द (₹)",
+      "cash": "नकद (₹)",
+      "cash_expected": "अभी कितना कैश आना है (₹)",
+      "check": "जाँच",
+      "check_reason": "जाँच क्यों",
+      "checked_at": "कब जाँचा",
+      "checked_by": "किसने जाँचा",
+      "code": "ग्राहक कोड",
+      "customer_status": "ग्राहक",
+      "day": "दिन",
+      "difference": "फ़र्क (₹)",
+      "due": "बाकी (₹)",
+      "end": "आख़िरी दिन",
+      "expected_then": "जमा के समय कितना कैश आना था (₹)",
+      "handed": "कितना कैश जमा किया (₹)",
+      "handed_at": "कब जमा किया",
+      "last_tried": "आख़िरी बार कब",
+      "lineman": "लाइनमैन",
+      "lineman_note": "लाइनमैन का नोट",
+      "month": "महीना",
+      "name": "ग्राहक का नाम",
+      "office_note": "ऑफिस का नोट",
+      "paid": "मिले (₹)",
+      "pay_state": "पैसे मिले?",
+      "payments": "पेमेंट",
+      "phone": "फ़ोन",
+      "plan": "प्लान",
+      "reached_at": "ऑफिस कब पहुँचा",
+      "reason": "लाइनमैन की वजह",
+      "receipt": "रसीद नंबर",
+      "rent": "महीने का किराया (₹)",
+      "result": "नतीजा",
+      "role": "काम",
+      "since": "स्टेटस कब से",
+      "start": "शुरू का दिन",
+      "status": "स्टेटस",
+      "still_due": "अभी बाकी (₹)",
+      "taken_at": "पैसे कब लिए",
+      "taken_by": "किसने लिए",
+      "tries": "कितनी बार",
+      "unpaid_since": "कब से बाकी",
+      "upi": "UPI (₹)",
+      "upi_apart": "UPI, कैश नहीं (₹)",
+      "vc": "VC नंबर",
+      "where": "कहाँ",
+      "who": "कौन",
+      "why": "क्यों"
+    },
+    "description": "अपना डेटा फ़ाइल में ले जाएँ। यह Excel या Google Sheets में खुलती है। सिर्फ़ आप (मालिक) डाउनलोड कर सकते हैं। हर डाउनलोड \"किसने क्या बदला\" में लिखा जाता है।",
+    "download": "डाउनलोड करें",
+    "download_help": "इस लिस्ट की हर लाइन वाली फ़ाइल, सिर्फ़ यह पेज नहीं।",
+    "download_list": "यह लिस्ट डाउनलोड करें",
+    "file_help": "रकम रुपये में है। समय भारत का है।",
+    "filters": {
+      "as_of": "किस दिन के आख़िर तक",
+      "day": "दिन",
+      "days_help": "ज़्यादा से ज़्यादा 31 दिन।",
+      "everyone": "सभी",
+      "from": "कब से",
+      "from_month": "किस महीने से",
+      "label": "{name} के लिए चुनें",
+      "month": "महीना",
+      "months_help": "ज़्यादा से ज़्यादा 12 महीने।",
+      "to": "कब तक",
+      "to_month": "किस महीने तक",
+      "who": "कौन"
+    },
+    "forbidden": "सिर्फ़ मालिक डेटा डाउनलोड कर सकते हैं।",
+    "kind": {
+      "billing_runs": {
+        "help": "महीने के बिल बनाते समय देखे गए हर ग्राहक का नतीजा।",
+        "title": "बिल बनना"
+      },
+      "bills": {
+        "help": "चुने गए महीनों का हर बिल: रकम, मिले पैसे और बाकी।",
+        "title": "बिल"
+      },
+      "collections": {
+        "help": "हर व्यक्ति ने रोज़ कितना नकद और UPI लिया।",
+        "title": "रोज़ का कलेक्शन"
+      },
+      "connections": {
+        "help": "एक दिन का हर कनेक्शन: स्टेटस और महीने का किराया।",
+        "title": "कनेक्शन"
+      },
+      "customers": {
+        "help": "हर ग्राहक: कोड, नाम, फ़ोन, एरिया, बाकी और एडवांस।",
+        "title": "ग्राहक"
+      },
+      "dues": {
+        "help": "किस पर कितना बाकी है और कब से।",
+        "title": "बाकी की लिस्ट"
+      },
+      "handover": {
+        "help": "हर लाइनमैन ने कितना कैश जमा किया, और कोई फ़र्क।",
+        "title": "कैश जमा"
+      },
+      "payments": {
+        "help": "चुने गए दिनों का हर पेमेंट। नकद और UPI अलग कॉलम में।",
+        "title": "पेमेंट"
+      }
+    },
+    "problem": {
+      "bad_filters": "ये दिन या महीने डाउनलोड नहीं हो सकते। दूसरे दिन चुनें और फिर से कोशिश करें।",
+      "failed": "फ़ाइल नहीं बन सकी। फिर से कोशिश करें।",
+      "not_found": "आपने जो चुना वह नहीं मिला। फिर से चुनें और कोशिश करें।",
+      "too_many": "आपने अभी बहुत फ़ाइलें डाउनलोड कीं। {minutes, plural, one {# मिनट} other {# मिनट}} बाद फिर कोशिश करें।"
+    },
+    "truncated": "फ़ाइल यहीं रुक गई: इसमें सिर्फ़ पहली {count} लाइनें हैं। कम दिन या महीने चुनें।",
+    "values": {
+      "checked": "जाँच हो गई",
+      "opening_balance": "पुराना बाकी",
+      "own_amount": "अपनी रकम",
+      "regular": "महीने का",
+      "to_check": "जाँचना है"
     }
   },
   "home": {

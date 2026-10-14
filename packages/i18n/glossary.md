@@ -484,6 +484,19 @@ Phone numbers in the details show only the last four digits (`XXXXXX3210`), as o
 | Admin log | एडमिन लॉग | Every admin action and every look at operator data | audit | Platform audit trail |
 | Not measured yet | अभी नापा नहीं जाता | A PRD §16 number with no data source yet | — | 0, N/A |
 
+## Download words (web Reports → Download data, T-082)
+
+| English | हिंदी | Means | Icon / colour | Not this |
+|---|---|---|---|---|
+| Download data | डेटा डाउनलोड | The Owner-only page with one file per list or report | download | Export, Backup |
+| Download / Download this list | डाउनलोड करें / यह लिस्ट डाउनलोड करें | Save a file with every row of the list (not only the page shown) | download | Export CSV |
+| Advance (₹) | एडवांस (₹) | Money paid ahead (credit), as a file column | — | Credit balance, Negative balance |
+| Old due | पुराना बाकी | A bill that brings a due from before (the old app) | — | Opening balance |
+| Cash expected now / at handover | अभी कितना कैश आना है / जमा के समय कितना कैश आना था | The cash total today, and the one the lineman handed over against | cash | Expected amount, Snapshot |
+
+Amounts in files are plain rupees (`450`, `12.50`), times are India time (`2026-11-01 15:30`).
+Cash and UPI are always separate columns.
+
 ## Words we never show users
 
 Invoice, Ledger, Allocation, Adjustment, Reversal, Tenant, Sync / Synced / Pending sync,

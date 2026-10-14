@@ -17,6 +17,7 @@ import { Button, Input, Select } from "@cb/ui";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
+import { DownloadListLink } from "@/app/(operator)/reports/_export/download-link";
 import { pickId, pickOption, pickPage, query, type Translate } from "@/components/reports/format";
 import { AsOfNote, Pager, TotalsRow } from "@/components/reports/parts";
 import { roleCan } from "@/components/shell/access";
@@ -81,6 +82,7 @@ export default async function HandoverReportPage({
         description={t("handover.description")}
       />
       <AsOfNote asOf={report.asOf} locale={displayLocale} t={t} />
+      <DownloadListLink kind="handover" params={params} role={ctx.role} />
 
       <form
         method="get"

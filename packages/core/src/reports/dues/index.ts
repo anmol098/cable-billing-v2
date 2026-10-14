@@ -13,7 +13,12 @@ export {
   spreadDue,
   type UnpaidBill,
 } from "./ageing";
-export { type ReportAsOf, type ResolvedAsOf, resolveAsOf } from "./as-of";
+export {
+  REPORT_MAX_PAGE_SIZE,
+  type ReportAsOf,
+  type ResolvedAsOf,
+  resolveAsOf,
+} from "./as-of";
 export { DUES_PAGE_SIZE, type DuesReportCommand, DuesReportInput, duesReport } from "./queries";
 export {
   DUES_LIST_KINDS,

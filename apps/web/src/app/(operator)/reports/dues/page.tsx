@@ -11,6 +11,7 @@ import { Amount, Button, Input, Select } from "@cb/ui";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
+import { DownloadListLink } from "@/app/(operator)/reports/_export/download-link";
 import {
   BUCKETS,
   duesHref,
@@ -81,6 +82,7 @@ export default async function DuesReportPage({
     <div className="flex flex-col gap-6">
       <ShellPageHeader title={shell("routes.reports_dues")} description={t("dues.description")} />
       <AsOfNote asOf={report.asOf} locale={displayLocale} t={t} />
+      <DownloadListLink kind="dues" params={params} role={ctx.role} />
 
       <form
         method="get"
