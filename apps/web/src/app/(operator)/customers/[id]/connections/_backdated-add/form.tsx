@@ -68,7 +68,9 @@ export function BackDatedAddForm(props: BackDatedAddFormProps) {
   const asked = useRef<{ key: string; request: number }>({ key: "", request: 0 });
 
   useEffect(() => {
-    if (state.error) setVersion((v) => v + 1);
+    // The bills changed since the preview: ask for it again (the key no longer matches).
+    if (state.stale) asked.current = { key: "", request: asked.current.request };
+    if (state.error || state.stale) setVersion((v) => v + 1);
   }, [state]);
 
   // After each edit (and once at the start), ask the server what the rent and day would do to the
@@ -121,7 +123,11 @@ export function BackDatedAddForm(props: BackDatedAddFormProps) {
         data-form="add-connection"
         data-backdated={backDated ? "1" : "0"}
       >
-        {state.error ? <FormMessage tone="danger">{t(`error.${state.error}`)}</FormMessage> : null}
+        {state.stale ? (
+          <FormMessage tone="danger">{ta("add_backdated.stale")}</FormMessage>
+        ) : state.error ? (
+          <FormMessage tone="danger">{t(`error.${state.error}`)}</FormMessage>
+        ) : null}
         <ConnectionFields
           key={version}
           plans={props.plans}
@@ -143,6 +149,8 @@ export function BackDatedAddForm(props: BackDatedAddFormProps) {
         {text && ready ? (
           <>
             <input type="hidden" name="backDated" value="1" />
+            {/* What the Owner was shown: the server refuses to charge anything else. */}
+            <input type="hidden" name="previewTotal" value={String(ready.totalPaise)} />
             <section
               aria-live="polite"
               aria-labelledby={`${ids}-effect`}

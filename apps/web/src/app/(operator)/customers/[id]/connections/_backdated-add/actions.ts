@@ -8,8 +8,11 @@
  *
  * - `previewAddAction`: `adjustments.preview_add`, nothing saved.
  * - `saveAddAction`: a start day the preview said reaches back into a billed month →
- *   `adjustments.back_dated_add` with the reason; any other day → `connections.add` (T-034), which
- *   still refuses a billed month with `billed_period` (e.g. when the preview was not shown yet).
+ *   `adjustments.back_dated_add` with the reason and the total the Owner was shown; any other day →
+ *   `connections.add` (T-034), which still refuses a billed month with `billed_period` (e.g. when
+ *   the preview was not shown yet). When the bills changed after the preview (CONFLICT
+ *   `preview_stale`, or VALIDATION `not_back_dated`), nothing is saved and the form asks the Owner
+ *   to check the new preview.
  */
 import { addConnection, backDatedAddConnection, previewAddConnection } from "@cb/core";
 import { revalidatePath } from "next/cache";
@@ -80,11 +83,15 @@ function failedState(
   reason: string,
 ): BackDatedAddFormState {
   const fields = Array.isArray(error.details?.fields)
-    ? (error.details.fields as { path?: unknown }[])
+    ? (error.details.fields as { path?: unknown; code?: unknown }[])
     : [];
   if (error.code === "VALIDATION" && fields.some((f) => f.path === "reason")) {
     return { error: "fix_fields", values, reason, reasonMissing: true };
   }
+  const stale =
+    (error.code === "CONFLICT" && error.details?.reason === "preview_stale") ||
+    (error.code === "VALIDATION" && fields.some((f) => f.code === "not_back_dated"));
+  if (stale) return { values, reason, stale: true };
   return { ...connectionFormStateFor(error, values), reason };
 }
 
@@ -97,10 +104,15 @@ export async function saveAddAction(
   const ctx = await getTenantContext();
   const values = connectionValuesFrom(formData);
   const backDated = formData.get("backDated") === "1";
+  const shown = formData.get("previewTotal");
+  const expectedTotalPaise =
+    typeof shown === "string" && /^[0-9]{1,15}$/.test(shown) ? Number(shown) : null;
   const typed = formData.get("reason");
   const reason = typeof typed === "string" ? typed.slice(0, REASON_MAX).trim() : "";
   const parsed = connectionInputFrom(values);
   const reasonMissing = backDated && reason.length < REASON_MIN;
+  // A back-dated save without the total the Owner was shown: show the preview again.
+  if (backDated && expectedTotalPaise === null) return { values, reason, stale: true };
   if (!parsed.ok || reasonMissing) {
     return {
       error: "fix_fields",
@@ -116,7 +128,7 @@ export async function saveAddAction(
     if (backDated) {
       const result = await callAsUser(
         backDatedAddConnection,
-        { customerId, ...parsed.input, reason },
+        { customerId, ...parsed.input, reason, expectedTotalPaise: expectedTotalPaise ?? 0 },
         ctx,
       );
       if (!result.ok) return failedState(result.error, values, reason);

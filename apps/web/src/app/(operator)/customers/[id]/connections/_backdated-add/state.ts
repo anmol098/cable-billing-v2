@@ -34,6 +34,11 @@ export interface BackDatedAddFormState extends ConnectionFormState {
   readonly reason?: string;
   /** The reason is missing or too short. */
   readonly reasonMissing?: boolean;
+  /**
+   * The bills changed after the preview (a run started, or the day no longer reaches a billed
+   * month): nothing was saved; the form shows the new preview to check and save again.
+   */
+  readonly stale?: boolean;
 }
 
 /** The fewest letters of a reason (the core's `ADJUSTMENT_LIMITS.reasonMin`). */

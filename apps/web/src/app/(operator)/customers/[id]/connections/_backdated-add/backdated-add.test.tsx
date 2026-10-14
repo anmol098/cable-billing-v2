@@ -160,16 +160,21 @@ describe("preview input and errors", () => {
 });
 
 describe("the Owner's add connection form", () => {
-  function renderForm(answer: (startDate: string) => AddPreviewResult) {
+  function renderForm(
+    answer: (startDate: string) => AddPreviewResult,
+    reply?: (formData: FormData) => BackDatedAddFormState,
+  ) {
     const preview = vi.fn(async (input: { startDate: string }) => answer(input.startDate));
     const saved: FormData[] = [];
     const save = vi.fn(async (_state: BackDatedAddFormState, formData: FormData) => {
       saved.push(formData);
-      return {
-        error: "fix_fields" as const,
-        reason: String(formData.get("reason") ?? ""),
-        reasonMissing: true,
-      };
+      return (
+        reply?.(formData) ?? {
+          error: "fix_fields" as const,
+          reason: String(formData.get("reason") ?? ""),
+          reasonMissing: true,
+        }
+      );
     });
     renderWithIntl(
       <BackDatedAddForm
@@ -226,8 +231,38 @@ describe("the Owner's add connection form", () => {
     expect(sent?.get("reason")).toBe("Box fitted on 10 Sep");
     expect(sent?.get("startDate")).toBe("2026-09-10");
     expect(sent?.get("rentChoice")).toBe("p1");
+    // The total the Owner was shown goes with the save (the server refuses anything else).
+    expect(sent?.get("previewTotal")).toBe("90000");
     // The answer said the reason is missing: the message shows under the box.
     await screen.findByText("Write why (at least 3 letters).");
+  });
+
+  it("bills that changed after the preview: says so in words and asks for the preview again", async () => {
+    const { preview, save } = renderForm(answer, (formData) => ({
+      values: {
+        vcNumber: String(formData.get("vcNumber")),
+        rentChoice: String(formData.get("rentChoice")),
+        rentalPaise: "",
+        startDate: String(formData.get("startDate")),
+      },
+      reason: String(formData.get("reason") ?? ""),
+      stale: true,
+    }));
+    fireEvent.change(screen.getByLabelText("VC number"), { target: { value: "8800 1122" } });
+    fireEvent.change(screen.getByLabelText("Monthly rent"), { target: { value: "p1" } });
+    fireEvent.change(screen.getByLabelText("Start day"), { target: { value: "2026-09-10" } });
+    await screen.findByText("In all: ₹900 more to pay.");
+    const asked = preview.mock.calls.length;
+    fireEvent.change(screen.getByLabelText("Why are you changing old bills?"), {
+      target: { value: "Box fitted on 10 Sep" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /Save with bill changes/ }));
+    await waitFor(() => expect(save).toHaveBeenCalled());
+    await screen.findByText(
+      "The bills changed while you were looking. Check the new amounts below, then save again.",
+    );
+    await waitFor(() => expect(preview.mock.calls.length).toBeGreaterThan(asked));
+    expect(preview).toHaveBeenLastCalledWith({ planId: "p1", startDate: "2026-09-10" });
   });
 
   it("a preview refusal is shown in words", async () => {

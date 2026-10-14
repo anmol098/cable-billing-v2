@@ -1,7 +1,8 @@
 {
   "adjustments": {
     "add_backdated": {
-      "headline": "New connection: ₹{amount} a month from {date}."
+      "headline": "New connection: ₹{amount} a month from {date}.",
+      "stale": "The bills changed while you were looking. Check the new amounts below, then save again."
     },
     "backdate": {
       "description": "For a change that bills already made should have had. Only the owner can do this. Every bill change gets your reason.",
