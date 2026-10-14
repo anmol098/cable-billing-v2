@@ -261,10 +261,11 @@ test.describe("operator shell", () => {
       expect(response?.status(), path).toBe(404);
     }
 
-    // Staff's setup checklist has only their own step.
+    // Staff's setup checklist has only their own step ("Add customers"), and this business already
+    // has a customer, so it is done and the checklist is gone (T-083: steps tick from real data;
+    // home.spec.ts checks Staff's one step on a new business).
     await page.goto("/home");
-    const checklist = page.getByRole("region", { name: "Get started" });
-    await expect(checklist.getByRole("listitem")).toHaveCount(1);
+    await expect(page.getByRole("region", { name: "Get started" })).toHaveCount(0);
   });
 
   test("subscription banner: grace for the Owner, read-only for Staff", async ({ browser }) => {
