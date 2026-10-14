@@ -476,7 +476,7 @@ Phone numbers in the details show only the last four digits (`XXXXXX3210`), as o
 | English | हिंदी | Means | Icon / colour | Not this |
 |---|---|---|---|---|
 | Operator | ऑपरेटर | One cable business using the app (one tenant) | business | Tenant, Account, Client |
-| Support access | सपोर्ट एक्सेस | A 2-hour, reason-given look at a few of an operator's records; the owner sees it in their audit log | search | Impersonate, Log in as |
+| Support access | सपोर्ट एक्सेस | A time-boxed (15 minutes to 2 hours), reason-given look at a few of an operator's records; the owner sees it in their audit log | search | Impersonate, Log in as |
 | Support view | सपोर्ट व्यू | The read-only page shown during support access | search | Shadow mode |
 | Extend subscription | सब्सक्रिप्शन बढ़ाएँ | Give paid access till a day, by hand | subscription | Comp, Override |
 | Payment made outside Razorpay | Razorpay के बाहर मिला पेमेंट | Our fee paid by bank transfer, UPI to us, cash or cheque | cash | Manual payment, Offline txn |

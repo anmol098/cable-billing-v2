@@ -1,6 +1,8 @@
 -- T-086 custom SQL (packages/db/src/schema/platform-admin.ts):
 -- 1. support_access_grants is append-only except ending a grant early (ended_at, ended_by): the
---    reason, the admin and the expiry never change, and no grant is ever deleted.
+--    reason, the admin and the expiry never change, and no grant is ever deleted. Ending is
+--    final: once ended_at is set, neither it nor ended_by changes again (no reopening a grant by
+--    setting them back to NULL, no moving the end time).
 -- 2. subscription_offline_payments (a money record) is fully append-only.
 -- 3. app_platform reads only the columns listed in PLATFORM_READ_COLUMNS of six tenant tables
 --    (platformReadGrantsSql()): the table-wide SELECT from the default privileges is revoked and
@@ -11,6 +13,13 @@ CREATE TRIGGER "support_access_grants_append_only"
   BEFORE UPDATE OR DELETE ON "public"."support_access_grants"
   FOR EACH ROW
   EXECUTE FUNCTION app.forbid_update_delete('ended_at', 'ended_by');
+--> statement-breakpoint
+CREATE TRIGGER "support_access_grants_end_final"
+  BEFORE UPDATE OF ended_at, ended_by ON "public"."support_access_grants"
+  FOR EACH ROW
+  WHEN (OLD.ended_at IS NOT NULL
+    AND (NEW.ended_at IS DISTINCT FROM OLD.ended_at OR NEW.ended_by IS DISTINCT FROM OLD.ended_by))
+  EXECUTE FUNCTION app.forbid_update_delete();
 --> statement-breakpoint
 CREATE TRIGGER "support_access_grants_no_truncate"
   BEFORE TRUNCATE ON "public"."support_access_grants"

@@ -146,6 +146,29 @@ describe("auditSentence", () => {
     );
   });
 
+  it("says how long support access was opened for (T-086)", () => {
+    const granted = (minutes?: number) =>
+      event({
+        actor: { kind: "person", id: STAFF, name: null, role: "platform_admin" },
+        action: "support.access_granted",
+        entityType: "support_access",
+        knownEntityType: false,
+        target: null,
+        details: minutes === undefined ? {} : { count: { kind: "count", value: minutes } },
+      });
+    expect(auditSentence(auditT(), granted(30), "en")).toBe(
+      "Cable Billing support opened support access to your records for 30 minutes",
+    );
+    expect(auditSentence(auditT(), granted(120), "en")).toMatch(/for 120 minutes$/);
+    expect(auditSentence(auditT("hi"), granted(45), "hi")).toMatch(
+      /सपोर्ट एक्सेस 45 मिनट के लिए खोला$/,
+    );
+    // An event without the minutes still reads as a sentence (no "0 minutes").
+    expect(auditSentence(auditT(), granted(), "en")).toBe(
+      "Cable Billing support opened support access to your records",
+    );
+  });
+
   it("uses a safe generic sentence for actions it doesn't know", () => {
     const odd = event({
       action: "exports.csv_downloaded",

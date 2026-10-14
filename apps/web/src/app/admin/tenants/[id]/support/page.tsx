@@ -132,7 +132,7 @@ export default async function SupportViewPage({ params }: { params: Promise<{ id
             {v.failedJobs.map((j) => (
               <li key={j.jobId} className="flex flex-wrap gap-x-4">
                 <code>{j.type}</code>
-                <span>{timeText(j.finishedAt, dl)}</span>
+                <span>{timeText(j.finishedAt, dl, t("common.none"))}</span>
                 <span className="text-text-muted">{j.lastError ?? ""}</span>
               </li>
             ))}

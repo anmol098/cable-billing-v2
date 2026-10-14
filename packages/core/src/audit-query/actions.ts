@@ -278,7 +278,11 @@ export const AUDIT_ACTIONS = {
   // Platform admin console (T-086). `support.*` and `subscription.offline_payment_recorded` are
   // written to the tenant's own log (the Owner reads them here); `admin.*` are platform events
   // (operator_id NULL), never in a tenant's log, listed so every written action has words.
-  "support.access_granted": {},
+  // How long the grant runs (15–120 minutes, written by `admin.support_access_grant`). Never the
+  // reason: it is free text.
+  "support.access_granted": {
+    details: ({ after }) => ({ count: count(field(after, "minutes")) }),
+  },
   "support.data_viewed": {},
   "support.access_ended": {},
   "subscription.offline_payment_recorded": {

@@ -110,15 +110,15 @@ export default async function AdminTenantPage({
           rows={[
             {
               label: t("tenant.subscription.trial_last_day"),
-              value: lastDayText(d.tenant.trialEndsAt, dl),
+              value: lastDayText(d.tenant.trialEndsAt, dl, t("common.none")),
             },
             {
               label: t("tenant.subscription.paid_last_day"),
-              value: lastDayText(d.tenant.currentPeriodEnd, dl),
+              value: lastDayText(d.tenant.currentPeriodEnd, dl, t("common.none")),
             },
             {
               label: t("tenant.subscription.grace_last_day"),
-              value: lastDayText(d.tenant.graceEndsAt, dl),
+              value: lastDayText(d.tenant.graceEndsAt, dl, t("common.none")),
             },
             {
               label: t("tenant.subscription.autopay"),

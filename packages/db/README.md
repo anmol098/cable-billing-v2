@@ -57,7 +57,8 @@ tenant's data, list tenant ids in `withPlatform`, then call `withTenant` per ten
 Platform admin "support access" (T-086) is a separate, audited path: the admin opens a time-boxed
 grant (`support_access_grants`, reason required, at most 2 hours by CHECK) in the **tenant's**
 transaction together with a tenant audit event, and the support view then reads in `withTenant`
-only while that grant is live (checked inside the same transaction on every request). See
+only while that grant is live (checked inside the same transaction on every request). Ending a
+grant early is final (a trigger refuses clearing or moving `ended_at`/`ended_by`). See
 `src/schema/platform-admin.ts` and the T-086 completion notes.
 
 Platform policies that exist (T-021, each one reviewed):

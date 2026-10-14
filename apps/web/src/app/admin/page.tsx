@@ -29,6 +29,7 @@ export default async function AdminOverviewPage() {
   const m = result.value;
   const dl = displayLocale(locale);
   const notMeasured = t("common.not_measured");
+  const none = t("common.none");
   const reasons = Object.entries(m.billing.failedByReason).sort((a, b) => b[1] - a[1]);
 
   return (
@@ -63,11 +64,11 @@ export default async function AdminOverviewPage() {
       >
         <StatGrid>
           <Stat
-            value={percentText(m.billing.successRate)}
+            value={percentText(m.billing.successRate, dl, none)}
             label={t("overview.billing.success_rate")}
           />
           <Stat
-            value={percentText(m.billing.exceptionRate)}
+            value={percentText(m.billing.exceptionRate, dl, none)}
             label={t("overview.billing.exception_rate")}
           />
           <Stat value={m.billing.billed} label={t("overview.billing.billed")} />
@@ -107,7 +108,7 @@ export default async function AdminOverviewPage() {
             label={t("overview.field.pdf_shared")}
           />
           <Stat
-            value={percentText(m.reconciliation.discrepancyRate)}
+            value={percentText(m.reconciliation.discrepancyRate, dl, none)}
             label={t("overview.field.discrepancy_rate", {
               count: m.reconciliation.acceptedLast30Days,
             })}

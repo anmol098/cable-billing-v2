@@ -1,7 +1,8 @@
 /**
  * T-086 platform admin tables and platform read access:
  * - `support_access_grants`: tenant-scoped, readable by the platform, time box ≤ 2 h (CHECK),
- *   reason required, append-only except ending early.
+ *   reason required, append-only except ending early, and ending is final (no reopening, no
+ *   moving the end).
  * - `subscription_offline_payments`: tenant-scoped, readable by the platform, fully append-only.
  * - `PLATFORM_READ_COLUMNS`: the catalog grants `app_platform` exactly those columns (no
  *   table-wide SELECT), so `SELECT *` and every name, phone, amount and note column is refused.
@@ -25,6 +26,7 @@ import { customers } from "./customers";
 import {
   PLATFORM_READ_COLUMNS,
   platformReadGrantsSql,
+  SUPPORT_GRANT_END_FINAL_SQL,
   subscriptionOfflinePayments,
   supportAccessGrants,
 } from "./platform-admin";
@@ -172,6 +174,47 @@ describeDb("platform admin tables (T-086)", () => {
     expect(isImmutableRowError(truncate)).toBe(true);
   });
 
+  it("grants: ending is final (no reopening, no moving the end or who ended it)", async () => {
+    const g = grant(a.operatorId);
+    const update = (set: Partial<typeof supportAccessGrants.$inferInsert>) =>
+      t.current.db.withTenant(a.operatorId, (tx) =>
+        tx
+          .update(supportAccessGrants)
+          .set(set)
+          .where(eq(supportAccessGrants.id, g.id))
+          .returning({ id: supportAccessGrants.id }),
+      );
+    await t.current.db.withTenant(a.operatorId, (tx) => tx.insert(supportAccessGrants).values(g));
+    const endedAt = new Date("2026-11-01T10:20:00Z");
+    const other = await createUser(t.current, { operatorId: null });
+    expect(await update({ endedAt, endedBy: admin.userId })).toEqual([{ id: g.id }]);
+    for (const change of [
+      // Un-ending: back to NULL (reopens the grant).
+      { endedAt: null, endedBy: null },
+      // Re-ending: a different end time, a different admin, or both.
+      { endedAt: new Date("2026-11-01T10:40:00Z") },
+      { endedAt: new Date("2026-11-01T10:10:00Z"), endedBy: admin.userId },
+      { endedBy: other.userId },
+      { endedAt: new Date("2026-11-01T10:40:00Z"), endedBy: other.userId },
+    ]) {
+      const error = await update(change).catch((e: unknown) => e);
+      expect(isImmutableRowError(error), JSON.stringify(change)).toBe(true);
+    }
+    // The superuser connection (no RLS) is refused too: the trigger, not a policy, holds.
+    const asAdmin = await t.current.admin
+      .query("UPDATE support_access_grants SET ended_at = NULL, ended_by = NULL WHERE id = $1", [
+        g.id,
+      ])
+      .catch((e: unknown) => e);
+    expect(isImmutableRowError(asAdmin)).toBe(true);
+    // Writing the same values again changes nothing and passes; the row is as it was ended.
+    expect(await update({ endedAt, endedBy: admin.userId })).toEqual([{ id: g.id }]);
+    const [row] = await t.current.db.withTenant(a.operatorId, (tx) =>
+      tx.select().from(supportAccessGrants).where(eq(supportAccessGrants.id, g.id)),
+    );
+    expect(row).toMatchObject({ endedAt, endedBy: admin.userId, expiresAt: g.expiresAt });
+  });
+
   it("offline payments: tenant-scoped, platform reads, fully append-only, checked", async () => {
     const p = payment(a.operatorId);
     await t.current.db.withTenant(a.operatorId, (tx) =>
@@ -279,6 +322,7 @@ describeDb("platform admin tables (T-086)", () => {
         table: "support_access_grants",
         allowedColumns: ["ended_at", "ended_by"],
       }),
+      SUPPORT_GRANT_END_FINAL_SQL,
       appendOnlyTriggerSql({ table: "subscription_offline_payments" }),
       platformReadGrantsSql(),
     ].flatMap((s) => s.split("\n--> statement-breakpoint\n"));

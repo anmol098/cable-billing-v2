@@ -9,8 +9,11 @@
  * reason (required) and a hard expiry at most {@link SUPPORT_ACCESS_MAX_MINUTES} after the grant
  * (CHECK). Written in the **tenant's** transaction together with a tenant audit event, so the Owner
  * sees every grant in their audit log (T-035). Append-only except ending it early (`ended_at`,
- * `ended_by`): the expiry can never be moved. The support view checks the grant (not ended, not
- * expired at the server's clock) on every request, inside the same tenant transaction it reads in.
+ * `ended_by`): the expiry can never be moved, and ending is final
+ * ({@link SUPPORT_GRANT_END_FINAL_SQL}): once `ended_at` is set, neither it nor `ended_by` changes
+ * again, so an ended grant can't be reopened (set back to NULL) or its end moved. The support view
+ * checks the grant (not ended, not expired at the server's clock) on every request, inside the
+ * same tenant transaction it reads in.
  *
  * **`subscription_offline_payments`**: our SaaS fee paid outside Razorpay (bank transfer, cash,
  * UPI to our account, cheque), recorded by an admin (PLAN §13 "The admin can record an offline
@@ -70,7 +73,7 @@ export const supportAccessGrants = pgTable(
     grantedAt: timestamp("granted_at", { withTimezone: true }).notNull(),
     /** Hard end. Never moved (append-only). */
     expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
-    /** Ended early by an admin. */
+    /** Ended early by an admin. Final once set (never cleared or moved). */
     endedAt: timestamp("ended_at", { withTimezone: true }),
     endedBy: uuid("ended_by").references(() => users.id),
   },
@@ -107,6 +110,19 @@ export const supportAccessGrants = pgTable(
     }),
   ],
 ).enableRLS();
+
+/**
+ * The custom-migration trigger that makes ending a grant final (the `receipt_links` "revocation
+ * final" pattern of migration 0007): `app.forbid_update_delete('ended_at', 'ended_by')` lets those
+ * two columns change, so without it `app_rw` could set them back to NULL (reopening the grant) or
+ * move the end. `platform-admin.test.ts` checks migration 0017 holds this exact SQL.
+ */
+export const SUPPORT_GRANT_END_FINAL_SQL = `CREATE TRIGGER "support_access_grants_end_final"
+  BEFORE UPDATE OF ended_at, ended_by ON "public"."support_access_grants"
+  FOR EACH ROW
+  WHEN (OLD.ended_at IS NOT NULL
+    AND (NEW.ended_at IS DISTINCT FROM OLD.ended_at OR NEW.ended_by IS DISTINCT FROM OLD.ended_by))
+  EXECUTE FUNCTION app.forbid_update_delete();`;
 
 /** How an offline fee payment reached us. */
 export const OFFLINE_PAYMENT_METHODS = ["bank_transfer", "upi", "cash", "cheque"] as const;

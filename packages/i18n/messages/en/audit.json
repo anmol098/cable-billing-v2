@@ -152,7 +152,7 @@
       "offline_payment_recorded": "{who} saved an app payment of {amount} for {count, plural, one {# month} other {# months}}, made outside Razorpay"
     },
     "support": {
-      "access_granted": "{who} opened support access to your records for up to 2 hours",
+      "access_granted": "{count, plural, =0 {{who} opened support access to your records} one {{who} opened support access to your records for # minute} other {{who} opened support access to your records for # minutes}}",
       "data_viewed": "{who} looked at your records during support access",
       "access_ended": "{who} ended support access to your records"
     },
