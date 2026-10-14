@@ -202,8 +202,11 @@ function hookContext(tx: Tx, env: ConnectionWriteEnv): ConnectionHookContext {
   };
 }
 
-/** Plan or own amount → what the assignment stores. NOT_FOUND for another tenant's plan. */
-async function resolveRental(
+/**
+ * Plan or own amount → what the assignment stores. NOT_FOUND for another tenant's plan. Also used by
+ * T-045a's back-dated new connection preview (../adjustments/back-dated-add).
+ */
+export async function resolveRental(
   tx: Tx,
   operatorId: string,
   input: { readonly planId?: string | null; readonly rentalPaise?: number | null },
