@@ -179,7 +179,7 @@
       }
     },
     "exports": {
-      "download": "{who} downloaded {report, select, customers {the customer list} bills {the bill register} payments {the payment register} dues {the due list} collections {the daily collection} handover {the cash handovers} connections {the connections} billing_runs {a bill run} other {some data}} as a file"
+      "download": "{who} downloaded {kind, select, customers {the customer list} bills {the bill register} payments {the payment register} dues {the due list} collections {the daily collection} handover {the cash handovers} connections {the connections} billing_runs {a bill run} other {some data}} as a file"
     }
   },
   "generic": "{who} made a change: {entity} {target}",

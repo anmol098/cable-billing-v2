@@ -263,7 +263,7 @@ export const AUDIT_ACTIONS = {
   },
   // CSV exports (T-082): what was downloaded (`report`), never the rows
   "exports.download": {
-    details: ({ after }) => ({ report: code(field(after, "report")) }),
+    details: ({ after }) => ({ kind: code(field(after, "report")) }),
   },
   // Bills (T-043, T-044)
   "billing.run_scheduled": { details: billingRun },

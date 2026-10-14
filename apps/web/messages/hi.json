@@ -784,7 +784,7 @@
         "revoke": "{who} ने फ़ोन {target} से लॉग आउट किया"
       },
       "exports": {
-        "download": "{who} ने {report, select, customers {ग्राहकों की लिस्ट} bills {बिलों की लिस्ट} payments {पेमेंट की लिस्ट} dues {बाकी की लिस्ट} collections {रोज़ का कलेक्शन} handover {कैश जमा की लिस्ट} connections {कनेक्शन की लिस्ट} billing_runs {बिल बनने की रिपोर्ट} other {डेटा}} फ़ाइल में डाउनलोड की"
+        "download": "{who} ने {kind, select, customers {ग्राहकों की लिस्ट} bills {बिलों की लिस्ट} payments {पेमेंट की लिस्ट} dues {बाकी की लिस्ट} collections {रोज़ का कलेक्शन} handover {कैश जमा की लिस्ट} connections {कनेक्शन की लिस्ट} billing_runs {बिल बनने की रिपोर्ट} other {डेटा}} फ़ाइल में डाउनलोड की"
       },
       "handover": {
         "accept": "{who} ने {target} का {date} का कैश मंज़ूर किया: ₹{amount}",
