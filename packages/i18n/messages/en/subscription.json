@@ -1,0 +1,79 @@
+{
+  "description": "Our monthly fee for Cable Billing. Your data is never deleted.",
+  "status": {
+    "trialing": "Free trial",
+    "active": "Paid",
+    "grace": "Pay now",
+    "read_only": "View only",
+    "cancelled": "Stopped",
+    "none": "View only"
+  },
+  "explain": {
+    "trialing": "Free till {date}.",
+    "active": "Paid till {date}.",
+    "grace": "Pay by {date}. After that you can only look and collect money.",
+    "read_only": "You can look and collect money. Pay to make bills and changes again.",
+    "cancelled": "Autopay was stopped. You can look and collect money. Pay to start again.",
+    "none": "Your account is not set up right. Please call support."
+  },
+  "price": {
+    "title": "Price",
+    "total": "{total} a month",
+    "breakdown": "{price} + {gst} GST ({percent}%)",
+    "unlimited": "Any number of customers."
+  },
+  "autopay": {
+    "on": "Autopay is on. Razorpay takes {total} every month by itself.",
+    "on_first": "Autopay is on. The first payment is on {date}.",
+    "not_finished": "The last payment was not finished. You can try again.",
+    "failing": "This month's autopay payment has not reached us. Please pay again."
+  },
+  "pay": "Pay {total} a month",
+  "pay_how": "UPI Autopay or card. You allow it once; then it pays every month by itself.",
+  "pay_first_later": "Nothing is taken today. The first payment is on {date}.",
+  "opening": "Opening…",
+  "checking": "Checking payment…",
+  "checkout_name": "Cable Billing",
+  "checkout_description": "Monthly fee: {total}",
+  "not_set_up": "Online payment is not set up yet. Please call support.",
+  "result": {
+    "paid": "Thank you. Paid till {date}.",
+    "waiting": "Razorpay has not confirmed the payment yet. This page will show it soon.",
+    "autopay_on": "Autopay is already on. Nothing to pay now.",
+    "closed": "Payment was not finished."
+  },
+  "error": {
+    "provider": "Razorpay is not answering. Please try again in a few minutes.",
+    "plan_mismatch": "Online payment is not set up right. Please call support.",
+    "unexpected": "Something went wrong. Please try again."
+  },
+  "missed": {
+    "title": "Missed bill runs",
+    "body": "These months got no bills while the app was view only: {months}. Check them and make them by hand.",
+    "open": "Open bills"
+  },
+  "banner": {
+    "trial_ending": "Free trial ends on {date}. Pay to keep using the app."
+  },
+  "email": {
+    "trial_ending": {
+      "subject": "Your Cable Billing free trial ends on {date}",
+      "body": "Your free trial of Cable Billing ends on {date}. To keep using the app, pay {total} a month (UPI Autopay or card)."
+    },
+    "grace_started": {
+      "subject": "Please pay for Cable Billing by {date}",
+      "body": "We have not received the payment for Cable Billing. The app works fully till {date}. After that you can only look and collect money until you pay."
+    },
+    "grace_ending": {
+      "subject": "Cable Billing will be view only after {date}",
+      "body": "We have not received the payment for Cable Billing yet. After {date} you can only look and collect money. Pay {total} a month to keep making bills."
+    },
+    "reactivated": {
+      "subject": "Cable Billing is working again",
+      "body": "Thank you, we received your payment. The app works fully again, paid till {date}.",
+      "missed": "These months got no bills while the app was view only: {months}. Open Bills to check them and make them by hand."
+    },
+    "open": "Open: {url}",
+    "data_kept": "Your data is never deleted."
+  }
+}

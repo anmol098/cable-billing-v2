@@ -36,6 +36,24 @@ export const SUBSCRIPTION_STATUSES = [
 export type SubscriptionStatus = (typeof SUBSCRIPTION_STATUSES)[number];
 export const subscriptionStatusEnum = pgEnum("subscription_status", SUBSCRIPTION_STATUSES);
 
+/**
+ * Razorpay's own subscription statuses (T-085), mirrored in `subscriptions.razorpay_status` so the
+ * app can say "Autopay is on" without calling Razorpay. Text + CHECK (not an enum): the list is
+ * Razorpay's, not ours.
+ */
+export const RAZORPAY_SUBSCRIPTION_STATUSES = [
+  "created",
+  "authenticated",
+  "active",
+  "pending",
+  "halted",
+  "cancelled",
+  "completed",
+  "expired",
+  "paused",
+] as const;
+export type RazorpaySubscriptionStatus = (typeof RAZORPAY_SUBSCRIPTION_STATUSES)[number];
+
 export const subscriptions = pgTable(
   "subscriptions",
   {
@@ -48,6 +66,10 @@ export const subscriptions = pgTable(
     graceEndsAt: timestamp("grace_ends_at", { withTimezone: true }),
     razorpayCustomerId: text("razorpay_customer_id"),
     razorpaySubscriptionId: text("razorpay_subscription_id"),
+    /** Razorpay's status of `razorpay_subscription_id` (T-085), as of `razorpay_status_at`. */
+    razorpayStatus: text("razorpay_status").$type<RazorpaySubscriptionStatus>(),
+    /** When Razorpay reported `razorpay_status` (event time or API read); older reports lose. */
+    razorpayStatusAt: timestamp("razorpay_status_at", { withTimezone: true }),
     /** Which configured price plan (PLAN §13: amounts live in config, not here). */
     planCode: text("plan_code"),
     cancelledAt: timestamp("cancelled_at", { withTimezone: true }),
@@ -63,6 +85,12 @@ export const subscriptions = pgTable(
     check(
       "subscriptions_grace_has_end",
       sql`${t.status} <> 'grace' OR ${t.graceEndsAt} IS NOT NULL`,
+    ),
+    check(
+      "subscriptions_razorpay_status_known",
+      sql`${t.razorpayStatus} IS NULL OR ${t.razorpayStatus} IN (${sql.raw(
+        RAZORPAY_SUBSCRIPTION_STATUSES.map((s) => `'${s}'`).join(", "),
+      )})`,
     ),
     ...tenantPolicies(t),
     pgPolicy("subscriptions_platform_select", { for: "select", to: appPlatform, using: sql`true` }),

@@ -85,6 +85,13 @@
       "when": 1791907048181,
       "tag": "0011_handover_events_append_only",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1791952936291,
+      "tag": "0012_subscription_razorpay_status",
+      "breakpoints": true
     }
   ]
 }

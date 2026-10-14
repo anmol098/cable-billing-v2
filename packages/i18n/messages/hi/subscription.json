@@ -1,0 +1,132 @@
+{
+  "_review": [
+    "description",
+    "status.trialing",
+    "status.active",
+    "status.grace",
+    "status.read_only",
+    "status.cancelled",
+    "status.none",
+    "explain.trialing",
+    "explain.active",
+    "explain.grace",
+    "explain.read_only",
+    "explain.cancelled",
+    "explain.none",
+    "price.title",
+    "price.total",
+    "price.breakdown",
+    "price.unlimited",
+    "autopay.on",
+    "autopay.on_first",
+    "autopay.not_finished",
+    "autopay.failing",
+    "pay",
+    "pay_how",
+    "pay_first_later",
+    "opening",
+    "checking",
+    "checkout_name",
+    "checkout_description",
+    "not_set_up",
+    "result.paid",
+    "result.waiting",
+    "result.autopay_on",
+    "result.closed",
+    "error.provider",
+    "error.plan_mismatch",
+    "error.unexpected",
+    "missed.title",
+    "missed.body",
+    "missed.open",
+    "banner.trial_ending",
+    "email.trial_ending.subject",
+    "email.trial_ending.body",
+    "email.grace_started.subject",
+    "email.grace_started.body",
+    "email.grace_ending.subject",
+    "email.grace_ending.body",
+    "email.reactivated.subject",
+    "email.reactivated.body",
+    "email.reactivated.missed",
+    "email.open",
+    "email.data_kept"
+  ],
+  "description": "केबल बिलिंग की हमारी महीने की फ़ीस। आपका डेटा कभी नहीं मिटाया जाता।",
+  "status": {
+    "trialing": "फ़्री ट्रायल",
+    "active": "पेमेंट हो गया",
+    "grace": "अभी पेमेंट करें",
+    "read_only": "सिर्फ़ देख सकते हैं",
+    "cancelled": "बंद है",
+    "none": "सिर्फ़ देख सकते हैं"
+  },
+  "explain": {
+    "trialing": "{date} तक मुफ़्त।",
+    "active": "{date} तक का पेमेंट हो गया है।",
+    "grace": "{date} तक पेमेंट करें। उसके बाद आप सिर्फ़ देख पाएँगे और पैसे ले पाएँगे।",
+    "read_only": "आप देख सकते हैं और पैसे ले सकते हैं। बिल बनाने और बदलाव करने के लिए पेमेंट करें।",
+    "cancelled": "ऑटोपे बंद कर दिया गया था। आप देख सकते हैं और पैसे ले सकते हैं। फिर से शुरू करने के लिए पेमेंट करें।",
+    "none": "आपका खाता ठीक से सेट नहीं है। कृपया सपोर्ट को कॉल करें।"
+  },
+  "price": {
+    "title": "कीमत",
+    "total": "{total} महीना",
+    "breakdown": "{price} + {gst} GST ({percent}%)",
+    "unlimited": "ग्राहक जितने चाहें।"
+  },
+  "autopay": {
+    "on": "ऑटोपे चालू है। Razorpay हर महीने {total} अपने आप लेगा।",
+    "on_first": "ऑटोपे चालू है। पहला पेमेंट {date} को होगा।",
+    "not_finished": "पिछला पेमेंट पूरा नहीं हुआ। आप फिर से कोशिश कर सकते हैं।",
+    "failing": "इस महीने का ऑटोपे पेमेंट हम तक नहीं पहुँचा। कृपया फिर से पेमेंट करें।"
+  },
+  "pay": "{total} महीना पेमेंट करें",
+  "pay_how": "UPI ऑटोपे या कार्ड। आप एक बार मंज़ूरी देते हैं, फिर हर महीने अपने आप पेमेंट होता है।",
+  "pay_first_later": "आज कुछ नहीं कटेगा। पहला पेमेंट {date} को होगा।",
+  "opening": "खुल रहा है…",
+  "checking": "पेमेंट देख रहे हैं…",
+  "checkout_name": "केबल बिलिंग",
+  "checkout_description": "महीने की फ़ीस: {total}",
+  "not_set_up": "ऑनलाइन पेमेंट अभी सेट नहीं है। कृपया सपोर्ट को कॉल करें।",
+  "result": {
+    "paid": "धन्यवाद। {date} तक का पेमेंट हो गया।",
+    "waiting": "Razorpay ने अभी पेमेंट पक्का नहीं किया है। यह पेज जल्द ही दिखाएगा।",
+    "autopay_on": "ऑटोपे पहले से चालू है। अभी कुछ नहीं भरना है।",
+    "closed": "पेमेंट पूरा नहीं हुआ।"
+  },
+  "error": {
+    "provider": "Razorpay जवाब नहीं दे रहा। कृपया कुछ मिनट बाद फिर से कोशिश करें।",
+    "plan_mismatch": "ऑनलाइन पेमेंट ठीक से सेट नहीं है। कृपया सपोर्ट को कॉल करें।",
+    "unexpected": "कुछ गड़बड़ हो गई। कृपया फिर से कोशिश करें।"
+  },
+  "missed": {
+    "title": "छूटे हुए महीनों के बिल",
+    "body": "जब ऐप सिर्फ़ देखने के लिए था, इन महीनों के बिल नहीं बने: {months}। इन्हें देखें और हाथ से बनाएँ।",
+    "open": "बिल खोलें"
+  },
+  "banner": {
+    "trial_ending": "फ़्री ट्रायल {date} को ख़त्म होगा। ऐप चलाते रहने के लिए पेमेंट करें।"
+  },
+  "email": {
+    "trial_ending": {
+      "subject": "केबल बिलिंग का फ़्री ट्रायल {date} को ख़त्म होगा",
+      "body": "केबल बिलिंग का आपका फ़्री ट्रायल {date} को ख़त्म होगा। ऐप चलाते रहने के लिए {total} महीना पेमेंट करें (UPI ऑटोपे या कार्ड)।"
+    },
+    "grace_started": {
+      "subject": "कृपया {date} तक केबल बिलिंग का पेमेंट करें",
+      "body": "केबल बिलिंग का पेमेंट हमें नहीं मिला है। ऐप {date} तक पूरा चलेगा। उसके बाद पेमेंट होने तक आप सिर्फ़ देख पाएँगे और पैसे ले पाएँगे।"
+    },
+    "grace_ending": {
+      "subject": "{date} के बाद केबल बिलिंग सिर्फ़ देखने के लिए होगा",
+      "body": "केबल बिलिंग का पेमेंट हमें अभी तक नहीं मिला है। {date} के बाद आप सिर्फ़ देख पाएँगे और पैसे ले पाएँगे। बिल बनाते रहने के लिए {total} महीना पेमेंट करें।"
+    },
+    "reactivated": {
+      "subject": "केबल बिलिंग फिर से चालू है",
+      "body": "धन्यवाद, आपका पेमेंट मिल गया। ऐप फिर से पूरा चालू है, {date} तक का पेमेंट हो गया है।",
+      "missed": "जब ऐप सिर्फ़ देखने के लिए था, इन महीनों के बिल नहीं बने: {months}। इन्हें देखने और हाथ से बनाने के लिए बिल खोलें।"
+    },
+    "open": "खोलें: {url}",
+    "data_kept": "आपका डेटा कभी नहीं मिटाया जाता।"
+  }
+}

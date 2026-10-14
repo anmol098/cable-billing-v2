@@ -270,6 +270,20 @@ describe("deployment presence rules", () => {
     ]);
   });
 
+  it("RAZORPAY_API_BASE_URL (e2e mock Razorpay) is local only and localhost only", () => {
+    expect(
+      deploymentEnvProblems(appEnv({ RAZORPAY_API_BASE_URL: "http://localhost:3999/v1" })),
+    ).toEqual([]);
+    expect(
+      deploymentEnvProblems(
+        appEnv({ ...production, RAZORPAY_API_BASE_URL: "http://127.0.0.1:3999/v1" }),
+      ),
+    ).toEqual(["RAZORPAY_API_BASE_URL: only for local tests; never set it in production"]);
+    for (const value of ["https://api.razorpay.example/v1", "http://evil.example/v1"]) {
+      expect(() => appEnv({ RAZORPAY_API_BASE_URL: value })).toThrow(/RAZORPAY_API_BASE_URL/);
+    }
+  });
+
   it("never allows live Razorpay keys outside production", () => {
     const env = appEnv({
       VERCEL_ENV: "preview",

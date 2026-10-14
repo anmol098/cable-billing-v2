@@ -22,6 +22,21 @@ if (!externalBaseUrl) {
   process.env.EMAIL_OUTBOX_DIR ??= join(tmpdir(), `cb-e2e-outbox-${PORT}`);
 }
 
+/**
+ * Razorpay in the e2e suite (T-085): test-mode-shaped fake keys and a local mock of the
+ * Subscriptions API (`e2e/support/razorpay-mock.mjs`), so the subscription page's checkout runs
+ * end to end without ever calling Razorpay. `RAZORPAY_API_BASE_URL` is refused on Vercel.
+ */
+const RAZORPAY_MOCK_PORT = Number(process.env.E2E_RAZORPAY_MOCK_PORT ?? PORT + 1000);
+if (!externalBaseUrl) {
+  process.env.RAZORPAY_KEY_ID ??= "rzp_test_E2eMock0001";
+  process.env.RAZORPAY_KEY_SECRET ??= "e2e-key-secret-not-a-real-secret";
+  process.env.RAZORPAY_WEBHOOK_SECRET ??= "e2e-webhook-secret-not-a-real-one";
+  process.env.RAZORPAY_PLAN_ID ??= "plan_E2eMonthly472";
+  process.env.RAZORPAY_API_BASE_URL ??= `http://localhost:${RAZORPAY_MOCK_PORT}/v1`;
+  process.env.E2E_RAZORPAY_MOCK_URL ??= `http://localhost:${RAZORPAY_MOCK_PORT}`;
+}
+
 export default defineConfig({
   testDir: "./e2e",
   fullyParallel: true,
@@ -40,11 +55,23 @@ export default defineConfig({
   ],
   webServer: externalBaseUrl
     ? undefined
-    : {
-        command: `pnpm exec next start --port ${PORT}`,
-        env: { ...(process.env as Record<string, string>) },
-        url: `http://localhost:${PORT}/api/health`,
-        reuseExistingServer: !process.env.CI,
-        timeout: 60_000,
-      },
+    : [
+        {
+          command: `pnpm exec next start --port ${PORT}`,
+          env: { ...(process.env as Record<string, string>) },
+          url: `http://localhost:${PORT}/api/health`,
+          reuseExistingServer: !process.env.CI,
+          timeout: 60_000,
+        },
+        {
+          command: "node e2e/support/razorpay-mock.mjs",
+          env: {
+            ...(process.env as Record<string, string>),
+            RAZORPAY_MOCK_PORT: String(RAZORPAY_MOCK_PORT),
+          },
+          url: `http://localhost:${RAZORPAY_MOCK_PORT}/health`,
+          reuseExistingServer: !process.env.CI,
+          timeout: 20_000,
+        },
+      ],
 });

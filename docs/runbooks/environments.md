@@ -86,6 +86,7 @@ value per environment, never shared between production and anything else.
 | `RAZORPAY_KEY_SECRET` | with key id | test | test | **required**, live | same |
 | `RAZORPAY_WEBHOOK_SECRET` | optional | test | test | **required**, live | you choose it (`openssl rand -hex 32`) and type it into Razorpay |
 | `RAZORPAY_PLAN_ID` | optional | test plan | test plan | **required**, live plan | Razorpay → Subscriptions → Plans |
+| `RAZORPAY_API_BASE_URL` | e2e tests only (`http://localhost:<port>/v1`) | **never** (refused) | **never** (refused) | **never** (refused) | Playwright config sets it to its mock Razorpay (T-085) |
 | `SENTRY_DSN` | unset | non-prod or same project | same project | **required** | Sentry → project → Client Keys |
 | `NEXT_PUBLIC_SENTRY_DSN` | unset | same as `SENTRY_DSN` | same | **required** | same |
 | `SENTRY_ENVIRONMENT` | unset | unset | `staging` | unset | — (defaults to `VERCEL_ENV`) |

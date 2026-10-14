@@ -1,0 +1,72 @@
+{
+  "entity": "event",
+  "account_id": "acc_TestRzp000001",
+  "event": "subscription.charged",
+  "contains": ["subscription", "payment"],
+  "payload": {
+    "subscription": {
+      "entity": {
+        "id": "sub_TestRzp0000001",
+        "entity": "subscription",
+        "plan_id": "plan_TestRzp472Mo",
+        "customer_id": "cust_TestRzp00001",
+        "status": "active",
+        "type": 2,
+        "current_start": 1794542700,
+        "current_end": 1797134700,
+        "ended_at": null,
+        "quantity": 1,
+        "notes": {
+          "operator_id": "00000000-0000-7000-8000-000000000000",
+          "plan_code": "monthly_400_gst18"
+        },
+        "charge_at": 1797134700,
+        "start_at": 1794542700,
+        "end_at": 2107483500,
+        "auth_attempts": 0,
+        "total_count": 120,
+        "paid_count": 1,
+        "customer_notify": true,
+        "created_at": 1794542400,
+        "expire_by": null,
+        "short_url": "https://rzp.io/i/TestRzp01",
+        "has_scheduled_changes": false,
+        "change_scheduled_at": null,
+        "source": "api",
+        "payment_method": "upi",
+        "offer_id": null,
+        "remaining_count": 119
+      }
+    },
+    "payment": {
+      "entity": {
+        "id": "pay_TestRzp0000001",
+        "entity": "payment",
+        "amount": 47200,
+        "currency": "INR",
+        "status": "captured",
+        "order_id": "order_TestRzp00001",
+        "invoice_id": "inv_TestRzp000001",
+        "international": false,
+        "method": "upi",
+        "amount_refunded": 0,
+        "refund_status": null,
+        "captured": true,
+        "description": "Cable Billing monthly",
+        "card_id": null,
+        "bank": null,
+        "wallet": null,
+        "vpa": "success@razorpay",
+        "email": "void@example.com",
+        "contact": "+910000000000",
+        "notes": [],
+        "fee": 1114,
+        "tax": 170,
+        "error_code": null,
+        "error_description": null,
+        "created_at": 1794542700
+      }
+    }
+  },
+  "created_at": 1794542712
+}

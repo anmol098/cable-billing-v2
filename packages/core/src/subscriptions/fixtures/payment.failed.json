@@ -1,0 +1,38 @@
+{
+  "entity": "event",
+  "account_id": "acc_TestRzp000001",
+  "event": "payment.failed",
+  "contains": ["payment"],
+  "payload": {
+    "payment": {
+      "entity": {
+        "id": "pay_TestRzpFailed01",
+        "entity": "payment",
+        "amount": 47200,
+        "currency": "INR",
+        "status": "failed",
+        "order_id": "order_TestRzp00001",
+        "invoice_id": "inv_TestRzp000001",
+        "international": false,
+        "method": "upi",
+        "amount_refunded": 0,
+        "refund_status": null,
+        "captured": false,
+        "description": "Cable Billing monthly",
+        "card_id": null,
+        "bank": null,
+        "wallet": null,
+        "vpa": "success@razorpay",
+        "email": "void@example.com",
+        "contact": "+910000000000",
+        "notes": [],
+        "fee": null,
+        "tax": null,
+        "error_code": "BAD_REQUEST_ERROR",
+        "error_description": "Payment failed",
+        "created_at": 1797134760
+      }
+    }
+  },
+  "created_at": 1797134760
+}
