@@ -1,0 +1,37 @@
+{
+  "page_description": "How today and this month are going.",
+  "take_payment": "Take payment",
+  "today": {
+    "title": "Today, {date}",
+    "cash": "Cash today",
+    "upi": "UPI today"
+  },
+  "month": {
+    "title": "This month: {month}",
+    "billed": "Bills made",
+    "bill_count": "{count, plural, =0 {No bills yet} one {# bill} other {# bills}}",
+    "collected": "Money taken"
+  },
+  "due": {
+    "title": "Total due",
+    "customers": "{count, plural, =0 {Nobody owes money} one {# customer owes money} other {# customers owe money}}"
+  },
+  "run": {
+    "title": "Bills of {month}",
+    "none": "No bills made yet. Bills are made by themselves on the 1st of every month."
+  },
+  "alerts": {
+    "title": "To check",
+    "none": "Nothing to check now.",
+    "handovers": "{count, plural, one {# cash handover to check} other {# cash handovers to check}}",
+    "payments": "{count, plural, one {# payment to check} other {# payments to check}}",
+    "missed": "{count, plural, one {Bills of # month were missed} other {Bills of # months were missed}}",
+    "trial": "{days, plural, =0 {Free trial ends today} one {Free trial: # day left} other {Free trial: # days left}}",
+    "trial_until": "Free until {date}.",
+    "pay": "Pay now"
+  },
+  "app": {
+    "scan": "Scan this with the lineman's phone, or open the link on it.",
+    "qr": "QR code: the lineman app on Google Play"
+  }
+}

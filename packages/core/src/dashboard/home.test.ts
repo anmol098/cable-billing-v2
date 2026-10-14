@@ -9,8 +9,8 @@ import { plans, type Tx, uuidv7 } from "@cb/db";
 import { createTenant, createUser, describeDb, useTestDatabase } from "@cb/db/testing";
 import { businessDate, period } from "@cb/domain";
 import { describe, expect, it } from "vitest";
-import { billingMonths } from "../billing/views";
 import { missedRuns } from "../billing/services";
+import { billingMonths } from "../billing/views";
 import { getLinemenDay } from "../collections/day";
 import { submitHandover } from "../collections/handover";
 import { postField, reverse } from "../collections/test-support";
@@ -87,7 +87,12 @@ describe("dashboard.home", () => {
         await issueInvoice(tx, op, chandu, { period: OCT, chargesPaise: 10_000 });
         return { asha, bina, chandu, advance };
       });
-      const counter = async (rtx: ServiceRuntime, customerId: string, paise: number, upi = false) => {
+      const counter = async (
+        rtx: ServiceRuntime,
+        customerId: string,
+        paise: number,
+        upi = false,
+      ) => {
         const id = uuidv7();
         const result = await postPayment.call(rtx, owner, {
           id,

@@ -1,11 +1,12 @@
 /**
  * The Home page's setup checklist for new businesses (PLAN §12.3 step 3): ① plans → ② customers
- * → ③ linemen → ④ the app on linemen's phones. Props-driven: T-083 passes `done` from real data
- * (and the Play Store link / QR for the last step); until then every step shows as not done.
+ * → ③ linemen → ④ the app on linemen's phones. Props-driven: the Home page (T-083) passes `done`
+ * from real data, and the Play Store link (`external`) plus its QR code (`detail`) for the last step.
  */
 import { Button, Card, cn, Icon, StatusPill } from "@cb/ui";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
+import type { ReactNode } from "react";
 import { type CanFn, findRoute, type NavCapability, type NavRouteId } from "@/lib/nav";
 
 export const SETUP_STEP_IDS = ["plans", "customers", "linemen", "app"] as const;
@@ -24,6 +25,10 @@ export type SetupStep = {
   done: boolean;
   /** The step's button target; `undefined` shows no button. */
   href?: string;
+  /** `href` is another site (the Play Store): it opens in a new tab. */
+  external?: boolean;
+  /** Shown under a step that is not done yet (the app step's QR code). */
+  detail?: ReactNode;
 };
 
 /**
@@ -84,10 +89,17 @@ export function SetupChecklist({ steps }: { steps: readonly SetupStep[] }) {
                 // Phones: the button takes its own full-width line under the words.
                 <div className="flex w-full *:w-full sm:w-auto sm:*:w-auto">
                   <Button asChild variant="secondary" icon={step.id === "app" ? "lineman" : "add"}>
-                    <Link href={step.href}>{t(`${step.id}_action`)}</Link>
+                    {step.external ? (
+                      <a href={step.href} target="_blank" rel="noopener noreferrer">
+                        {t(`${step.id}_action`)}
+                      </a>
+                    ) : (
+                      <Link href={step.href}>{t(`${step.id}_action`)}</Link>
+                    )}
                   </Button>
                 </div>
               ) : null}
+              {step.done || !step.detail ? null : <div className="w-full">{step.detail}</div>}
             </li>
           ))}
         </ol>

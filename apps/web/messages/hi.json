@@ -812,6 +812,43 @@
       "show_success": "हो गया दिखाएँ"
     }
   },
+  "home": {
+    "alerts": {
+      "handovers": "{count, plural, one {# कैश जाँचना बाकी} other {# कैश जाँचने बाकी}}",
+      "missed": "{count, plural, one {# महीने के बिल छूट गए} other {# महीनों के बिल छूट गए}}",
+      "none": "अभी कुछ जाँचना नहीं है।",
+      "pay": "अभी पेमेंट करें",
+      "payments": "{count, plural, one {# पेमेंट जाँचना है} other {# पेमेंट जाँचने हैं}}",
+      "title": "जाँचना है",
+      "trial": "{days, plural, =0 {फ़्री ट्रायल आज ख़त्म} one {फ़्री ट्रायल: # दिन बाकी} other {फ़्री ट्रायल: # दिन बाकी}}",
+      "trial_until": "{date} तक मुफ़्त।"
+    },
+    "app": {
+      "qr": "QR कोड: Google Play पर लाइनमैन ऐप",
+      "scan": "लाइनमैन के फ़ोन से यह QR स्कैन करें, या उस फ़ोन पर लिंक खोलें।"
+    },
+    "due": {
+      "customers": "{count, plural, =0 {किसी का बाकी नहीं} one {# ग्राहक का बाकी है} other {# ग्राहकों का बाकी है}}",
+      "title": "कुल बाकी"
+    },
+    "month": {
+      "bill_count": "{count, plural, =0 {अभी कोई बिल नहीं} one {# बिल} other {# बिल}}",
+      "billed": "बिल बने",
+      "collected": "पैसे मिले",
+      "title": "इस महीने: {month}"
+    },
+    "page_description": "आज और इस महीने का हाल।",
+    "run": {
+      "none": "अभी कोई बिल नहीं बना। हर महीने की 1 तारीख को बिल अपने आप बनते हैं।",
+      "title": "{month} के बिल"
+    },
+    "take_payment": "पैसे लें",
+    "today": {
+      "cash": "आज नकद",
+      "title": "आज, {date}",
+      "upi": "आज UPI"
+    }
+  },
   "job_alerts": {
     "admin": {
       "attempts": "कोशिशें: {maxAttempts} में से {attempts}",
