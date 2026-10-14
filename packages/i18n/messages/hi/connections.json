@@ -100,7 +100,8 @@
     "form.no_plans",
     "form.check_title",
     "form.check_none",
-    "form.check_value"
+    "form.check_value",
+    "confirm.charge_month"
   ],
   "tab": {
     "add": "कनेक्शन जोड़ें",
@@ -161,6 +162,7 @@
     "note_label": "नोट (ज़रूरी नहीं)",
     "rent_stops": "{month} से किराया नहीं लगेगा।",
     "rent_starts": "{month} से किराया फिर लगेगा।",
+    "charge_month": "{month} के ₹{amount} अगले बिल में जुड़ेंगे।",
     "old_due": "₹{amount} पुराना बाकी रहेगा।",
     "reuse": "यह बॉक्स {date} से दूसरे ग्राहक को दे सकते हैं।",
     "final": "यह वापस नहीं होगा। बॉक्स फिर से लगाना हो तो नया कनेक्शन जोड़ें।",

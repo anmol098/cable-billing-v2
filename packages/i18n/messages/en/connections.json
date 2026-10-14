@@ -58,6 +58,7 @@
     "note_label": "Note (optional)",
     "rent_stops": "Rent stops from {month}.",
     "rent_starts": "Rent starts again from {month}.",
+    "charge_month": "₹{amount} for {month} will be added to the next bill.",
     "old_due": "₹{amount} old due stays.",
     "reuse": "The box can go to another customer from {date}.",
     "final": "This can't be undone. To use the box again, add it as a new connection.",

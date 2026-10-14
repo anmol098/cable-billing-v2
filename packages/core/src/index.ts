@@ -9,6 +9,7 @@
  */
 export const packageName = "@cb/core";
 
+export * from "./adjustments";
 export * from "./areas";
 export {
   type AuditEventInput,

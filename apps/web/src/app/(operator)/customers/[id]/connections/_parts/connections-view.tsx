@@ -4,9 +4,15 @@
  * with its history, then the removed ("old") connections with theirs. A removed VC that went to
  * another customer shows only here, on the old customer, with its old dates (RULE-07).
  */
-import type { ConnectionDetail, ConnectionEventView, CustomerConnections } from "@cb/core";
+import type {
+  ConnectionChargedMonths,
+  ConnectionDetail,
+  ConnectionEventView,
+  CustomerConnections,
+} from "@cb/core";
 import { businessDate, type DisplayLocale, formatBusinessDate } from "@cb/domain";
-import { Card, formatRupees, Icon, type IconName, StatusPill } from "@cb/ui";
+import { Button, Card, formatRupees, Icon, type IconName, StatusPill } from "@cb/ui";
+import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { MutedPill } from "../../../_components/status-pills";
 import type { StatusChangeResult } from "./form-state";
@@ -99,6 +105,47 @@ function Timeline({
   );
 }
 
+/** T-045: which change links a connection card shows ("Change plan", Owner's earlier-day change). */
+export interface ChangeLinks {
+  readonly plan: boolean;
+  readonly backdate: boolean;
+}
+
+function ChangeLinkButtons({
+  connection,
+  customerId,
+  links,
+  words,
+}: {
+  connection: ConnectionDetail;
+  customerId: string;
+  links: ChangeLinks;
+  words: { plan: string; backdate: string };
+}) {
+  const base = `/customers/${customerId}/connections`;
+  const plan = links.plan && connection.actions.includes("change_plan");
+  const backdate = links.backdate && connection.actions.length > 0;
+  if (!plan && !backdate) return null;
+  return (
+    <div className="flex flex-wrap gap-3" data-change-links={connection.assignmentId}>
+      {plan ? (
+        <Button asChild variant="secondary" icon="plan">
+          <Link href={`${base}?change=${connection.assignmentId}`} data-action="change-plan">
+            {words.plan}
+          </Link>
+        </Button>
+      ) : null}
+      {backdate ? (
+        <Button asChild variant="quiet" icon="edit">
+          <Link href={`${base}?backdate=${connection.assignmentId}`} data-action="backdate">
+            {words.backdate}
+          </Link>
+        </Button>
+      ) : null}
+    </div>
+  );
+}
+
 function ConnectionCard({
   connection,
   data,
@@ -106,6 +153,9 @@ function ConnectionCard({
   t,
   duePaise,
   statusAction,
+  changeLinks,
+  changeWords,
+  chargedMonths,
 }: {
   connection: ConnectionDetail;
   data: CustomerConnections;
@@ -113,6 +163,9 @@ function ConnectionCard({
   t: T;
   duePaise: number;
   statusAction: ((command: StatusCommand) => Promise<StatusChangeResult>) | null;
+  changeLinks: ChangeLinks | null;
+  changeWords: { plan: string; backdate: string };
+  chargedMonths: ConnectionChargedMonths | null;
 }) {
   const day = (value: string) => formatBusinessDate(businessDate(value), locale);
   const statusActions = connection.actions.filter(
@@ -168,6 +221,23 @@ function ConnectionCard({
           lastChangeDate={lastChangeOf(connection)}
           duePaise={duePaise}
           action={statusAction}
+          startCharge={
+            chargedMonths
+              ? {
+                  policy: chargedMonths.policy,
+                  rentalPaise: connection.rentalPaise,
+                  chargedPeriods: chargedMonths.charged[connection.assignmentId] ?? [],
+                }
+              : null
+          }
+        />
+      ) : null}
+      {changeLinks ? (
+        <ChangeLinkButtons
+          connection={connection}
+          customerId={data.customerId}
+          links={changeLinks}
+          words={changeWords}
         />
       ) : null}
       <Timeline connection={connection} locale={locale} t={t} />
@@ -180,14 +250,25 @@ export async function ConnectionsView({
   locale,
   duePaise,
   statusAction,
+  changeLinks = null,
+  chargedMonths = null,
 }: {
   data: CustomerConnections;
   locale: DisplayLocale;
   duePaise: number;
   /** `changeConnectionStatusAction` bound to the customer, or null when the role can't change. */
   statusAction: ((command: StatusCommand) => Promise<StatusChangeResult>) | null;
+  /** T-045: "Change plan" / earlier-day change links, or null for none. */
+  changeLinks?: ChangeLinks | null;
+  /** T-045: the D-18 policy and charged months, for the "Start again" effect. */
+  chargedMonths?: ConnectionChargedMonths | null;
 }) {
   const t = await getTranslations("connections");
+  const ta = await getTranslations("adjustments");
+  const changeWords = {
+    plan: ta("connection.change_plan"),
+    backdate: ta("connection.backdate"),
+  };
   return (
     <div className="flex flex-col gap-6" data-connections={data.customerId}>
       {!data.customerActive ? (
@@ -217,6 +298,9 @@ export async function ConnectionsView({
               t={t}
               duePaise={duePaise}
               statusAction={statusAction}
+              changeLinks={changeLinks}
+              changeWords={changeWords}
+              chargedMonths={chargedMonths}
             />
           ))
         )}
@@ -238,6 +322,9 @@ export async function ConnectionsView({
               t={t}
               duePaise={duePaise}
               statusAction={null}
+              changeLinks={null}
+              changeWords={changeWords}
+              chargedMonths={null}
             />
           ))}
         </section>

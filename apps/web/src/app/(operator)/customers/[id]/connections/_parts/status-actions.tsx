@@ -20,7 +20,7 @@ import { Button, ConfirmSheet, formatRupees, type IconName, Input, Select, useTo
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
-import { effectLines, type StatusActionName } from "./effect";
+import { effectLines, type StartCharge, type StatusActionName } from "./effect";
 import type { StatusChangeError, StatusChangeResult } from "./form-state";
 
 /** The reasons a person can pick (the same list as `@cb/core` STOP_REASONS). */
@@ -54,6 +54,8 @@ export interface StatusActionsProps {
   duePaise: number;
   /** `changeConnectionStatusAction` bound to the customer id. */
   action: (command: StatusCommand) => Promise<StatusChangeResult>;
+  /** For "Start again": the D-18 policy and the months already charged (T-045). */
+  startCharge?: StartCharge | null;
 }
 
 const STYLE: Record<
@@ -140,6 +142,7 @@ function StatusSheet({ kind, props }: { kind: StatusActionName; props: StatusAct
         duePaise: props.duePaise,
         locale,
         rupees,
+        startCharge: props.startCharge ?? null,
       })
     : [];
 
@@ -205,7 +208,9 @@ function StatusSheet({ kind, props }: { kind: StatusActionName; props: StatusAct
               <li
                 key={line.key}
                 className={
-                  line.key === "rent_stops" || line.key === "rent_starts"
+                  line.key === "rent_stops" ||
+                  line.key === "rent_starts" ||
+                  line.key === "charge_month"
                     ? "font-strong text-lg"
                     : line.key === "old_due"
                       ? "text-lg text-due"

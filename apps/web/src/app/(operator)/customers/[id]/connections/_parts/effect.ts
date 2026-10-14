@@ -7,7 +7,9 @@
  *   effect at the end of its day, so D's month stays charged); old due stays (BR-08, RULE-08).
  * - Remove also frees the VC from D + 1 (both date ends inclusive, T-022).
  * - Start again effective D: the monthly bill charges it again from the month after D's month.
- *   (D's own month is the D-18 mid-month case; T-045's hook may add it as a bill change.)
+ *   D's own month is the D-18 mid-month case (T-045's hook): under `charge_full_month` the full
+ *   rent for D's month goes on the next bill, unless that month already has rent for this
+ *   connection (`startCharge.chargedPeriods`, from `adjustments.charged_months`).
  */
 import {
   addDays,
@@ -23,8 +25,16 @@ import {
 export type StatusActionName = "suspend" | "reactivate" | "disconnect";
 
 export interface EffectLine {
-  readonly key: "rent_stops" | "rent_starts" | "old_due" | "reuse" | "final";
+  readonly key: "rent_stops" | "rent_starts" | "charge_month" | "old_due" | "reuse" | "final";
   readonly values: Record<string, string>;
+}
+
+/** What "Start again" needs to say whether D's month gets a full-month charge (D-18, T-045). */
+export interface StartCharge {
+  readonly policy: "charge_full_month" | "start_next_month";
+  readonly rentalPaise: number;
+  /** Recent months (`YYYY-MM-01`) that already have rent for this connection. */
+  readonly chargedPeriods: readonly string[];
 }
 
 /** First month without rent after a stop / removal effective `date`. */
@@ -47,10 +57,24 @@ export function effectLines(input: {
   readonly duePaise: number;
   readonly locale: DisplayLocale;
   readonly rupees: (paise: number) => string;
+  readonly startCharge?: StartCharge | null;
 }): EffectLine[] {
   const { action, date, locale } = input;
   const lines: EffectLine[] = [];
   if (action === "reactivate") {
+    const charge = input.startCharge;
+    const month = periodOf(date);
+    if (
+      charge &&
+      charge.policy === "charge_full_month" &&
+      charge.rentalPaise > 0 &&
+      !charge.chargedPeriods.includes(month)
+    ) {
+      lines.push({
+        key: "charge_month",
+        values: { amount: input.rupees(charge.rentalPaise), month: periodLabel(month, locale) },
+      });
+    }
     lines.push({
       key: "rent_starts",
       values: { month: periodLabel(rentStartsAgainFrom(date), locale) },

@@ -4,7 +4,7 @@
  * `connections.status.change`); "Add connection" (`?add=1`, `customers.manage`). Another
  * business's customer and made-up ids answer 404.
  */
-import { can, connectionFormOptions, listConnections } from "@cb/core";
+import { can, connectionChargedMonths, connectionFormOptions, listConnections } from "@cb/core";
 import { Button } from "@cb/ui";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -18,6 +18,7 @@ import { callAsUser, loadCustomerProfile } from "../../_components/server";
 import { SavedNotice } from "../summary/saved-notice";
 import { AddConnectionForm } from "./_parts/add-connection-form";
 import { ConnectionsView } from "./_parts/connections-view";
+import { ConnectionChangePanel, changeRequestOf } from "./_plan-change/panel";
 import { addConnectionAction, changeConnectionStatusAction } from "./actions";
 
 type Params = Promise<{ id: string }>;
@@ -51,12 +52,34 @@ export default async function CustomerConnectionsPage({
   }
   const data = list.value;
   const adding = canManage && data.customerActive && query.add === "1";
-  const options = adding ? await callAsUser(connectionFormOptions, { customerId: id }, ctx) : null;
+  // T-045: "Change plan" (Owner, Staff) and the Owner's "Change from an earlier day".
+  const isOwner = ctx.role === "owner";
+  const request = changeRequestOf(query);
+  const changing =
+    request && !adding
+      ? (data.current.find(
+          (c) =>
+            c.assignmentId === request.assignmentId &&
+            (request.mode === "plan"
+              ? canManage && c.actions.includes("change_plan")
+              : isOwner && c.actions.length > 0),
+        ) ?? null)
+      : null;
+  const options =
+    adding || changing ? await callAsUser(connectionFormOptions, { customerId: id }, ctx) : null;
   if (options && !options.ok) {
     throw new Error(`connections.form_options failed: ${options.error.code}`);
   }
+  const charged = canChange
+    ? await callAsUser(connectionChargedMonths, { customerId: id }, ctx)
+    : null;
+  const chargedMonths = charged?.ok ? charged.value : null;
 
-  const [t, locale] = await Promise.all([getTranslations("connections"), getLocale()]);
+  const [t, ta, locale] = await Promise.all([
+    getTranslations("connections"),
+    getTranslations("adjustments"),
+    getLocale(),
+  ]);
   const addButton =
     canManage && data.customerActive && !adding ? (
       <Button asChild size="lg" icon="add">
@@ -71,6 +94,18 @@ export default async function CustomerConnectionsPage({
       {(profile) => (
         <>
           {query.saved === "added" ? <SavedNotice message={t("done.added")} /> : null}
+          {query.saved === "plan" ? <SavedNotice message={ta("plan_change.saved")} /> : null}
+          {query.saved === "backdate" ? <SavedNotice message={ta("backdate.saved")} /> : null}
+          {changing && request && options?.ok ? (
+            <ConnectionChangePanel
+              customerId={profile.id}
+              connection={changing}
+              mode={request.mode}
+              isOwner={isOwner}
+              plans={options.value.plans}
+              today={options.value.today}
+            />
+          ) : null}
           {adding && options?.ok ? (
             <AddConnectionForm
               action={addConnectionAction.bind(null, profile.id)}
@@ -86,6 +121,8 @@ export default async function CustomerConnectionsPage({
             locale={resolveLocale(locale)}
             duePaise={profile.balancePaise}
             statusAction={canChange ? changeConnectionStatusAction.bind(null, profile.id) : null}
+            changeLinks={data.customerActive ? { plan: canManage, backdate: isOwner } : null}
+            chargedMonths={chargedMonths}
           />
         </>
       )}
