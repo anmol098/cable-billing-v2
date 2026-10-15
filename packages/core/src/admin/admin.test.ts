@@ -145,7 +145,7 @@ describeDb("admin console services (T-086)", () => {
       failedByReason: { balance_mismatch: 1 },
     });
     expect(metrics.value.books.tenantsWithBreach).toBeGreaterThanOrEqual(1);
-    expect(metrics.value.notMeasured).toContain("payment_sync_success");
+    expect(metrics.value.notMeasured).toEqual(["migration_exceptions"]);
     outputs.push(metrics.value);
 
     const runs = await expectAudited(

@@ -29,6 +29,11 @@
  * - Read-only tenants (D-13): `payments.record` is on the read-only allowlist, so payments post.
  * - Results are in request order, one per item, each echoing the item's id (lower case) and, for
  *   saved outcomes, the posted payment with its `provisional_ref` (T-066 needs both).
+ * - PRD §16 metrics (T-086a): after the last item, the answers (outcome, error code, payment id;
+ *   nothing else) are counted once with `recordPaymentSyncBatch`, in their own transaction, after
+ *   the answer is sent (`MobileDeps.afterResponse`, Next's `after`). Best effort: a failure there
+ *   is logged and sent to Sentry but never changes or delays the answer (the payments are already
+ *   saved); that batch is then missing from the console's figures.
  */
 import {
   ENDPOINTS,
@@ -36,7 +41,20 @@ import {
   PaymentBatchItem,
   type PaymentBatchResponse,
 } from "@cb/contracts";
-import { errorLogFields, PiiInLogError, type PostPaymentResult, postPayment } from "@cb/core";
+import {
+  errorLogFields,
+  type PaymentSyncItemInput,
+  PiiInLogError,
+  type PostPaymentResult,
+  postPayment,
+  recordPaymentSyncBatch,
+} from "@cb/core";
+import {
+  PAYMENT_SYNC_REJECT_CODES,
+  PAYMENT_SYNC_RETRY_CODES,
+  type PaymentSyncRejectCode,
+  type PaymentSyncRetryCode,
+} from "@cb/db";
 import * as Sentry from "@sentry/nextjs";
 import {
   type AuthenticatedScope,
@@ -52,6 +70,7 @@ import {
   type ItemErrorWire,
   itemError,
   itemIdOf,
+  UNUSABLE_ITEM_ID,
 } from "./wire-errors";
 
 /** Stop starting new items after this long (the rest are `retry_later`), well inside `maxDuration`. */
@@ -191,6 +210,68 @@ async function postItem(
   }
 }
 
+const isRejectCode = (code: string | undefined): code is PaymentSyncRejectCode =>
+  (PAYMENT_SYNC_REJECT_CODES as readonly (string | undefined)[]).includes(code);
+const isRetryCode = (code: string | undefined): code is PaymentSyncRetryCode =>
+  (PAYMENT_SYNC_RETRY_CODES as readonly (string | undefined)[]).includes(code);
+
+/**
+ * One answer → what the sync metrics count (T-086a): outcome, code and payment id only. Every
+ * code `postItem` answers is one of `PAYMENT_SYNC_*_CODES` (tested); anything else would be
+ * counted as VALIDATION / INTERNAL rather than lost, and `unknownCode` is set.
+ */
+export function syncMetricItem(result: ResultWire): {
+  item: PaymentSyncItemInput;
+  unknownCode: boolean;
+} {
+  const id = result.id === UNUSABLE_ITEM_ID ? null : result.id;
+  const code = result.error?.code;
+  switch (result.outcome) {
+    case "posted":
+    case "posted_needs_review":
+    case "duplicate":
+      return { item: { outcome: result.outcome, id: result.id }, unknownCode: false };
+    case "rejected":
+      return isRejectCode(code)
+        ? { item: { outcome: "rejected", id, code }, unknownCode: false }
+        : { item: { outcome: "rejected", id, code: "VALIDATION" }, unknownCode: true };
+    case "retry_later":
+      return isRetryCode(code)
+        ? { item: { outcome: "retry_later", id, code }, unknownCode: false }
+        : { item: { outcome: "retry_later", id, code: "INTERNAL" }, unknownCode: true };
+  }
+}
+
+/** Counts the batch's answers for the admin console (T-086a). Never fails the batch. */
+async function recordSyncMetrics(
+  scope: AuthenticatedScope<Endpoint, unknown>,
+  results: readonly ResultWire[],
+): Promise<void> {
+  try {
+    const mapped = results.map(syncMetricItem);
+    if (mapped.some((m) => m.unknownCode)) {
+      scope.log.warn("mobile_api.payment_sync_unknown_code", {
+        items: mapped.filter((m) => m.unknownCode).length,
+      });
+    }
+    const recorded = await recordPaymentSyncBatch.call(scope.deps.runtime, scope.ctx, {
+      items: mapped.map((m) => m.item),
+    });
+    if (!recorded.ok) {
+      scope.log.warn("mobile_api.payment_sync_metrics_failed", {
+        error_code: recorded.error.code,
+      });
+      Sentry.captureException(new Error(`payment sync metrics: ${recorded.error.code}`), {
+        tags: { endpoint: "postPaymentBatch" },
+      });
+    }
+  } catch (error) {
+    if (error instanceof PiiInLogError) throw error;
+    scope.log.error("mobile_api.payment_sync_metrics_failed", errorLogFields(error));
+    Sentry.captureException(error, { tags: { endpoint: "postPaymentBatch" } });
+  }
+}
+
 export function paymentBatchHandler(getDeps: () => MobileDeps, options: PaymentBatchOptions = {}) {
   const budgetMs = options.timeBudgetMs ?? PAYMENT_BATCH_TIME_BUDGET_MS;
   return withMobileAuth(ENDPOINTS.postPaymentBatch, getDeps, async (scope) => {
@@ -222,6 +303,11 @@ export function paymentBatchHandler(getDeps: () => MobileDeps, options: PaymentB
       retry_later: 0,
     };
     for (const r of results) counts[r.outcome] += 1;
+    // After the answer in production (`afterResponse` = Next's `after`): a slow or stalled
+    // metrics write must never hold up the phone's answer. Inline when there is no hook (tests).
+    const afterResponse = scope.deps.afterResponse;
+    if (afterResponse) afterResponse(() => recordSyncMetrics(scope, results));
+    else await recordSyncMetrics(scope, results);
     scope.log.info("mobile_api.payment_batch", {
       items: results.length,
       ...counts,

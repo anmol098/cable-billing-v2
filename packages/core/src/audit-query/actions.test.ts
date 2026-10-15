@@ -122,6 +122,8 @@ const NEVER_THE_DEFAULT_ACTION: Readonly<Record<string, string>> = {
   "adjustments.back_dated_add":
     "records `connections.add`, `adjustments.create` and `adjustments.back_dated_change` (kind `start`)",
   "imports.customers.check": "the preview: always calls audit.skip('no_change')",
+  "sync_metrics.record_payment_batch":
+    "T-086a: stores sync counts only, always calls audit.skip('no_change')",
 };
 
 async function writtenActions(): Promise<Map<string, string>> {

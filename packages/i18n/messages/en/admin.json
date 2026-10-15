@@ -88,8 +88,9 @@
       "sms_opened": "SMS opened",
       "pdf_shared": "PDF shared",
       "discrepancy_rate": "Cash handovers with a difference (of {count, number} accepted)",
-      "sync_success": "Phone payments saved on first try",
-      "duplicates": "Double payments stopped"
+      "sync_success": "Phone payments saved (of {count, number} sent)",
+      "duplicates": "Double payments stopped",
+      "sync_retry": "Phone payments to send again"
     },
     "health": {
       "title": "Health",

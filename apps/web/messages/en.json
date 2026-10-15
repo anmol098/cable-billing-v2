@@ -264,7 +264,8 @@
         "pdf_shared": "PDF shared",
         "printed": "Receipts printed",
         "sms_opened": "SMS opened",
-        "sync_success": "Phone payments saved on first try",
+        "sync_retry": "Phone payments to send again",
+        "sync_success": "Phone payments saved (of {count, number} sent)",
         "title": "Field work (last 30 days)",
         "whatsapp_opened": "WhatsApp opened"
       },

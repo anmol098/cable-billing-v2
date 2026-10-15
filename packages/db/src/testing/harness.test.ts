@@ -41,6 +41,8 @@ const PLATFORM_READ_COLUMN_REASONS: Record<PlatformReadTable, string> = {
   invariant_checks: "T-086: nightly books-check status and counts per tenant; never the samples",
   receipt_actions: "T-086: receipt action usage, print / WhatsApp / SMS launches (PRD §16)",
   collection_sessions: "T-086: reconciliation discrepancy rate (PRD §16); the reason, no amounts",
+  payment_sync_batches:
+    "T-086a: payment sync success rate and duplicate prevention count (PRD §16); per-batch counts by IST day, no id, time, amount or payment id",
 };
 
 /**
@@ -167,7 +169,7 @@ describeDb("migrated database", () => {
     expect(await audit()).toEqual([]);
   });
 
-  it("the platform read allow-list holds exactly the 20 reviewed tables", () => {
+  it("the platform read allow-list holds exactly the 21 reviewed tables", () => {
     expect(Object.keys(PLATFORM_READ).sort()).toEqual(
       [
         "accounts",
@@ -180,6 +182,7 @@ describeDb("migrated database", () => {
         "jobs",
         "mobile_refresh_tokens",
         "operators",
+        "payment_sync_batches",
         "receipt_actions",
         "receipt_links",
         "sessions",

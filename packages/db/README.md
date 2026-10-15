@@ -82,8 +82,9 @@ Platform policies that exist (T-021, each one reviewed):
 | `invariant_checks` (T-086) | SELECT of everything but `samples` | nightly books-check status per tenant |
 | `receipt_actions` (T-086) | SELECT of `operator_id`, `action`, `at` **only** | receipt action usage (PRD §16) |
 | `collection_sessions` (T-086) | SELECT of `operator_id`, `status`, `business_date`, `discrepancy_reason` **only** | reconciliation discrepancy rate (PRD §16) |
+| `payment_sync_batches` (T-086a) | SELECT of `operator_id`, `business_date` and the answer counts **only** (no `id`, no `received_at`) | payment sync success rate and duplicate prevention count (PRD §16); `payment_sync_rejections` (the refusal dedupe key) has no platform access |
 
-**Column-limited platform reads (T-086).** For the six tenant tables marked "only" above, a
+**Column-limited platform reads (T-086).** For the tenant tables marked "only" above, a
 `USING (true)` SELECT policy lets `app_platform` see the rows, and a custom migration revokes the
 table-wide SELECT the default privileges gave it and grants SELECT on the listed columns
 (`PLATFORM_READ_COLUMNS` / `platformReadGrantsSql()` in `src/schema/platform-admin.ts`). So

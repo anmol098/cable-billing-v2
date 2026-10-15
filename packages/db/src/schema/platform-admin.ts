@@ -51,6 +51,7 @@ import { collectionSessions } from "./collections";
 import { customers } from "./customers";
 import { invariantChecks } from "./invariants";
 import { receiptActions } from "./receipts";
+import { paymentSyncBatches } from "./sync-metrics";
 import { operators } from "./tenancy";
 
 /** Longest support access, in minutes (PLAN §9.4: "time-boxed, e.g. 2 h"). Enforced by CHECK. */
@@ -225,6 +226,28 @@ export const PLATFORM_READ_COLUMNS = {
   receipt_actions: ["operator_id", "action", "at"],
   /** Reconciliation discrepancy rate (PRD §16). The reason only, never the amounts. */
   collection_sessions: ["operator_id", "status", "business_date", "discrepancy_reason"],
+  /**
+   * Payment sync success rate and duplicate prevention count (PRD §16, T-086a): per-batch answer
+   * counts by IST day. Counts only (the table has nothing else); not the row id or the time.
+   */
+  payment_sync_batches: [
+    "operator_id",
+    "business_date",
+    "items",
+    "posted",
+    "posted_needs_review",
+    "duplicate",
+    "rejected_validation",
+    "rejected_customer_not_found",
+    "rejected_id_reused",
+    "rejected_without_id",
+    "rejected_new_ids",
+    "accepted_after_rejection",
+    "accepted_after_rejection_by_day",
+    "retry_later_conflict",
+    "retry_later_internal",
+    "retry_later_rate_limited",
+  ],
 } as const satisfies Readonly<Record<string, readonly string[]>>;
 
 export type PlatformReadTable = keyof typeof PLATFORM_READ_COLUMNS;
@@ -249,13 +272,18 @@ export const receiptActionsPlatformSelect = platformSelect("receipt_actions_plat
 export const collectionSessionsPlatformSelect = platformSelect(
   "collection_sessions_platform_select",
 ).link(collectionSessions);
+export const paymentSyncBatchesPlatformSelect = platformSelect(
+  "payment_sync_batches_platform_select",
+).link(paymentSyncBatches);
 
 /**
- * SQL for the custom migration: for each table in {@link PLATFORM_READ_COLUMNS}, revoke the
- * table-wide SELECT from `app_platform` and grant the listed columns.
+ * SQL for the custom migration: for each table in {@link PLATFORM_READ_COLUMNS} (or only `tables`,
+ * for a later migration that adds one), revoke the table-wide SELECT from `app_platform` and grant
+ * the listed columns.
  */
-export function platformReadGrantsSql(): string {
+export function platformReadGrantsSql(tables?: readonly PlatformReadTable[]): string {
   return Object.entries(PLATFORM_READ_COLUMNS)
+    .filter(([table]) => !tables || tables.includes(table as PlatformReadTable))
     .flatMap(([table, columns]) => [
       `REVOKE SELECT ON TABLE "public"."${table}" FROM app_platform;`,
       `GRANT SELECT (${columns.map((c) => `"${c}"`).join(", ")}) ON TABLE "public"."${table}" TO app_platform;`,

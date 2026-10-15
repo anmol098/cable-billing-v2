@@ -3,7 +3,7 @@ id: T-086a
 title: Record payment sync attempts and duplicates for the PRD §16 metrics
 phase: 4
 area: core
-status: claimed
+status: done
 owner: agent-t086a
 claimed_at: 2026-10-14T21:32:13.218Z
 branch: task/T-086a-record-payment-sync-attempts-and-duplica
@@ -39,7 +39,7 @@ success rate and duplicate prevention count.
 
 ## Acceptance criteria
 
-- [ ] `/admin` shows a sync success rate (accepted ÷ attempts, deduplicated by payment id) and a
+- [x] `/admin` shows a sync success rate (accepted ÷ attempts, deduplicated by payment id) and a
       duplicate count for the last 30 days instead of "Not measured yet".
 
 ## Tests required
@@ -60,7 +60,84 @@ PRD §16, PLAN §10.4, T-086 completion notes.
 
 ## Completion notes
 
-_The agent fills this in before opening the PR._
+**What exists**
+
+| Where | What |
+|---|---|
+| `packages/db/src/schema/sync-metrics.ts` (+ migrations `0019_payment_sync_metrics`, `0020_payment_sync_metrics_grants`) | `payment_sync_batches`: one append-only row per answered `/payments:batch` (tenant, IST `business_date`, `received_at`, `items` and the count of every answer kind: `posted`, `posted_needs_review`, `duplicate`, `rejected_{validation,customer_not_found,id_reused,without_id}`, `retry_later_{conflict,internal,rate_limited}`, plus the dedupe counts `rejected_new_ids` and `accepted_after_rejection`). CHECKs: counts ≥ 0, they add up to `items` (1–50), the dedupe counts stay inside them. `payment_sync_rejections`: append-only dedupe key, one row per rejected payment id per tenant (`(operator_id, id)` PK, first code and time); tenant-only, no platform access. `PAYMENT_SYNC_REJECT_CODES`, `PAYMENT_SYNC_RETRY_CODES`, `PAYMENT_SYNC_BATCH_MAX`. |
+| `packages/db/src/schema/platform-admin.ts` | `PLATFORM_READ_COLUMNS.payment_sync_batches` = `operator_id`, `business_date` and the count columns (not `id`, not `received_at`); `payment_sync_batches_platform_select` (`USING (true)`); `platformReadGrantsSql(tables?)` can now emit one table's grant for a later migration. |
+| `packages/core/src/sync-metrics/` (`record.ts`, `index.ts`; one line in `packages/core/src/index.ts`) | Service **`recordPaymentSyncBatch`** (`sync_metrics.record_payment_batch`, capability `payments.record`, allowed in read-only mode, `audit.skip("no_change")`). Input `{ items: [{ outcome, id, code? }] }` (1–50; `posted` / `posted_needs_review` / `duplicate` need the payment id; `rejected` / `retry_later` take a code and an optional id, the nil UUID meaning none). Output `{ batchId, businessDate, counts }`. Isolation cases in `sync-metrics.isolation.ts`. |
+| `packages/core/src/admin/metrics.ts` | `platformMetrics().paymentSync`: `batches`, `items`, `attempts`, `accepted`, `acceptedNeedsReview`, `rejected`, `successRate` (percent, one decimal, null with nothing), `duplicatesPrevented`, `rejectedAnswersByCode`, `rejectedWithoutId`, `retryLaterByCode`, over the last 30 IST days (`business_date >= today − 30`, same window as the reconciliation figure). `notMeasured` is now `["migration_exceptions"]` (until T-092). |
+| `apps/web/src/app/api/mobile/v1/payments/_lib/batch.ts` (T-061) | After the last item, `recordSyncMetrics` maps each answer (`syncMetricItem`: outcome, error code, id) and calls the service once, in its own transaction, **after the answer is sent**: `MobileDeps.afterResponse` (new, optional; production `getMobileDeps` sets it to Next's `after`, tests leave it out to run the task inline). Best effort: an error or a non-ok result is logged (`mobile_api.payment_sync_metrics_failed`, code only) and sent to Sentry; the answer to the phone never changes or waits. Whole-request failures (auth, version gate, a body that isn't a batch) are not counted: no payment was looked at. |
+| `apps/web/src/app/admin/page.tsx` | Field work section: "Phone payments saved (of N sent)" = the rate, "Double payments stopped" = the duplicate count, and a new "Phone payments to send again" = retry-later answers. The health section's migration figure still reads "Not measured yet". |
+
+**How the numbers are counted (reviewer please check)**
+
+- *Duplicate prevention count* = every answer `duplicate` (PRD §16 "idempotent retries detected"): a replayed batch of 3 saved payments adds 3, 10 concurrent copies of one batch add 9 per payment.
+- *Sync success rate* = accepted ids ÷ attempts, **deduplicated by payment id**: accepted ids = `posted + posted_needs_review` (T-046 posts an id once per tenant, so each accepted id is counted once); attempts = accepted ids + rejected ids answered for the first time (`rejected_new_ids`) − accepted ids that had been rejected earlier (`accepted_after_rejection`), i.e. distinct payment ids with a final answer.
+  - A rejected id is new only if it is not in `payment_sync_rejections` (insert `ON CONFLICT DO NOTHING`, so concurrent replays count it once) and not a saved payment. `ID_REUSED_WITH_DIFFERENT_DATA` of a saved payment is therefore not a new attempt (by payment id it is the accepted one); it still shows in `rejectedAnswersByCode`.
+  - `retry_later` answers are not in the rate (nothing was decided; the phone sends the id again and its final answer counts). They are shown on their own, by code.
+  - Items without a usable id (`rejected_without_id`) can't be deduplicated, so they are not in the rate; shown in `rejectedWithoutId`.
+- Accepted and duplicate ids must be payments of the calling tenant or the service answers NOT_FOUND and writes nothing, so the counts can't claim payments that don't exist (and another tenant's id is just unknown, RLS).
+
+**Decisions**
+
+- An append-only row per batch rather than an upsert-by-day counter: no row lock shared by every lineman of a tenant, no lost updates, nothing ever updated; the console sums ≤ a few thousand small rows per day.
+- `payment_sync_rejections` is a per-payment-id key (id, first code, time; no amount, customer, name or phone). It is needed to keep a refusal from counting again when a phone resends a batch whose answer it lost (the T-061 "timeout then retry" case). It is tenant-only and never read by the platform. It is effectively a per-payment-id refusal log (no PII). It is kept, but whether to keep it and for how long is **a product call** (follow-up T-086f, with the rate limit). Dropping it means double-counted refusals on replays.
+- Recording happens after the response, in a separate transaction (not inside each `postPayment` transaction). This needs no change to T-046's posting code, and a metrics failure can't fail or delay a payment. Cost: a crash between the answer and the recording loses that batch's counts (logged).
+- Capability `payments.record` with `audit.skip("no_change")`: the service changes no business record and auditing every batch would flood the Owner's log. Registered in T-035's `NEVER_THE_DEFAULT_ACTION` (`packages/core/src/audit-query/actions.test.ts`).
+- The day is the server's IST day when it answered (not the phone's `recorded_at`).
+
+**Deviations / files outside the owned paths**
+
+- DB: new `packages/db/src/schema/sync-metrics.ts` (+ `sync-metrics.test.ts`), one export line in `schema/index.ts`, migrations 0019/0020 + snapshot/journal, `platform-admin.ts` (one `PLATFORM_READ_COLUMNS` entry, one policy, `platformReadGrantsSql(tables?)`), `packages/db/README.md` (platform-access table row).
+- T-086c (merged as #88): `packages/db/src/testing/harness.test.ts` gets the `payment_sync_batches` reason in `PLATFORM_READ_COLUMN_REASONS` and the allow-list count goes 20 → 21.
+- T-061 (done): `payments/_lib/batch.ts` (the recording call) and `batch.test.ts` (3 new tests).
+- T-086 (done): `apps/web/src/app/admin/page.tsx`, `packages/core/src/admin/admin.test.ts` (`notMeasured` is now only `migration_exceptions`), `apps/web/e2e/admin.spec.ts` (the field section no longer says "Not measured yet"), `packages/i18n/messages/{en,hi}/admin.json` (`overview.field.sync_success` reworded with the count, new `overview.field.sync_retry`; Hindi in `_review`), regenerated `apps/web/messages/*.json`.
+- T-035 (done): one `NEVER_THE_DEFAULT_ACTION` entry.
+
+**Open questions (product owner)**
+
+- Should a `retry_later` that never reaches a final answer (e.g. a phone that is lost) count as a failed attempt? Today it doesn't, since the server can't tell "will come again" from "never".
+- Is counting `ID_REUSED_WITH_DIFFERENT_DATA` outside the rate right (by payment id it is an accepted payment), or should a second payment on a reused id count as a failed attempt?
+- Keep `payment_sync_rejections` (a per-id refusal log) and for how long? See T-086f.
+
+**Review fixes (PR #91)**
+
+1. **The metrics write no longer blocks the phone's answer.** It runs through `MobileDeps.afterResponse` (Next's `after` in production; the repo's `afterResponse` pattern from the Razorpay webhook) after `reply.ok`. The metrics transaction sets `SET LOCAL statement_timeout = 5000` and `lock_timeout = 3000` (`SYNC_METRICS_*_TIMEOUT_MS`). Tests:
+   - the web test injects a metrics transaction that never resolves and checks the reply still returns with the payment posted;
+   - the core test holds the batches table and checks the call fails after about the lock timeout.
+2. **The rate is exact across the window edge.**
+   - Each batch row now also stores `accepted_after_rejection_by_day`: the IST day of each earlier refusal, as a `jsonb` day → count map, platform-readable, with an "is an object" CHECK.
+   - `platformMetrics` subtracts only the refusals whose day is inside the window, and clamps `attempts ≥ accepted` as a safety net.
+   - Tests: a refusal 40 days ago accepted today (+1 accepted, +1 attempt, rate ≤ 100 % and not null); a batch on day 30 is counted and one on day 31 is not.
+3. **No deadlock between two batches.** New refusals are inserted sorted by id. A core test holds a table lock so that two batches refusing the same 50 ids in opposite order insert at the same moment, 5 rounds. Without the sort it fails with CONFLICT (a deadlock); with the sort it passes.
+4. **Ids follow T-061's `itemIdOf`, which is strict since #93.** `PaymentSyncItem` keeps the strict `z.uuid()`, the same check as the contract's `Uuid`. The nil UUID (`UNUSABLE_ITEM_ID`: what T-061 answers for a missing or non-RFC id) is mapped to null before that check, so such items are counted under `rejected_without_id` and never fail the batch's counts. Tests:
+   - web: a batch with a valid item and `12345678-1234-0234-0234-123456789abc` answers posted + rejected VALIDATION (nil id), and the metrics row is still written (2 items, 1 accepted, 1 without id, no failure logged);
+   - core: nil and null ids are counted without id and store no key, while a non-RFC id passed directly is refused.
+5. **The mapping is tied to the wire codes, without casts.** `syncMetricItem` uses type guards on `PAYMENT_SYNC_*_CODES`. An unknown code falls back to VALIDATION / INTERNAL and logs `mobile_api.payment_sync_unknown_code`. Tests check:
+   - every code maps;
+   - the codes `batch.ts` answers (scanned from its source) equal the metrics codes exactly;
+   - `PAYMENT_SYNC_BATCH_MAX === PAYMENT_BATCH_MAX`. `@cb/db` can't import `@cb/contracts`, so the two are tied by this test instead.
+6. **The "same batch sent 10× at once" test also checks the counters:** 20 batches, 100 items, 5 accepted, 95 duplicates, nothing rejected or retried.
+7. **Follow-up task T-086f:** a rate limit on `/payments:batch` (one token wrote 200 refusal rows in 4 requests) and a retention decision for both tables.
+- Verified after the fixes (rebased on `feature/mvp` 8f7755a, after #93 and T-087b):
+  - `pnpm install --frozen-lockfile`, lint, typecheck and build pass.
+  - `TURBO_FORCE=1 pnpm test --concurrency=1`: 10/10 packages (core 1288 + 3 skipped, web 614, db 279).
+  - `pnpm generate` leaves no diff. The `--check` modes, `db:check`, the `@cb/db` harness security audit and `tasks.mjs check --local` pass.
+  - Playwright `admin`, `mobile-collect` and `payments` pass 9/9 on a fresh scratch DB. Under `next start` the counters were written after the response via `after`: 1 posted batch, then 5 duplicate batches.
+- Migrations 0019/0020 were regenerated, since they are not on `feature/mvp` yet. Files outside the owned paths, added in this round: `apps/web/src/lib/mobile/{http,server}.ts` (the optional `afterResponse` hook) and T-061's `test-support.ts` (the `afterResponse` option).
+
+**Verification**
+
+Node v24.21.0, pnpm 12.11.2, local PostgreSQL 17; rebased on `feature/mvp` 1d7c3ee (after T-086c). DB suites really ran.
+
+- `@cb/db` `schema/sync-metrics.test.ts` (6): tenant scoping; the platform role sums the counts but `SELECT *`, `id`, `received_at` and inserts → 42501; another tenant's insert refused; CHECKs (sum = items, 1–50, ≥ 0, dedupe counts within); rejections: one key per id per tenant, same id in two tenants, no platform rows, known codes only; both tables append-only (UPDATE/DELETE/TRUNCATE as the owner, UPDATE as `app_rw`); migration 0020 holds the exact trigger and grant SQL. `platform-admin.test.ts` (catalog == `PLATFORM_READ_COLUMNS`, now incl. the new table) and T-086c's `harness.test.ts` security audit (allow-list of 21) pass.
+- `@cb/core` `sync-metrics/sync-metrics.test.ts` (5, real `postPayment`): batch → replay (lost answer) → `ID_REUSED` → refused-then-accepted, totals exact (accepted 4, duplicates 2, new refused ids 2, accepted after refusal 1, 5 distinct ids); the same id twice in one batch and **6 concurrent replays** of one refused id → one new id; accepted/duplicate ids of another tenant or unknown → NOT_FOUND, nothing written; refused ids per tenant; read-only tenant (D-13); validation; `platformMetrics` deltas (3 batches, 13 items, 4 attempts, 3 accepted, 1 rejected, 6 duplicates, by code; a batch 31 days old is outside the window), no payment/customer/tenant id in the output, `notMeasured` = `["migration_exceptions"]`. Isolation suite: 2 new `not_found` cases pass; coverage and the T-035 audit registry tests pass.
+- `@cb/web` `payments/_lib/batch.test.ts` (+3, through the real handler, read back **as `app_platform`**): a batch with 2 new, a CUSTOMER_NOT_FOUND, a VALIDATION and an id-less item, replayed twice, then a new one, a replay and an id reuse → `batches 4, items 18, accepted 3, duplicate 5, rejected_new_ids 2, rejected_without_id 3, id_reused 1`; 2 rejection keys; other tenant untouched; platform can't `SELECT *`/ids/times or see rejections. A `retry_later` then posted id counts once. A failing metrics transaction leaves the answer and the payment as they were and logs `mobile_api.payment_sync_metrics_failed`.
+- Playwright (`next start`, fresh scratch DB `cb_e2e_t086a`, `E2E_PORT=3386`, pre-installed Chromium; DB and `.next` removed afterwards): `admin.spec.ts` (incl. the field section no longer saying "Not measured yet"), `mobile-collect.spec.ts`, `payments.spec.ts`: 9/9. The mobile spec's post + 5 parallel replays left 6 rows: 2 posted, then 5 × 2 duplicates.
+- Root: `pnpm install --frozen-lockfile`, `pnpm lint`, `pnpm typecheck` (10/10), `TURBO_FORCE=1 pnpm test --concurrency=1` (10/10: core 1279 + 3 skipped, web 605, db 279, contracts 175, domain 373, ui 210, …), `pnpm build` (10/10), `pnpm generate` (no diff), tokens / icons / i18n / openapi `--check`, `pnpm --filter @cb/db db:check`, `node scripts/tasks.mjs check --local`.
 
 ## Board log
 - 2026-10-14T21:32:13.219Z claimed by agent-t086a
+- 2026-10-14T21:56:08.204Z completed on task/T-086a-record-payment-sync-attempts-and-duplica

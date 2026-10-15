@@ -128,5 +128,6 @@ export * from "./reports/operations";
 export * from "./reports/registers";
 export * from "./statements";
 export * from "./subscriptions";
+export * from "./sync-metrics";
 export * from "./team";
 export * from "./tenants";

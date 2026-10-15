@@ -31,6 +31,7 @@ export default async function AdminOverviewPage() {
   const notMeasured = t("common.not_measured");
   const none = t("common.none");
   const reasons = Object.entries(m.billing.failedByReason).sort((a, b) => b[1] - a[1]);
+  const syncRetryLater = Object.values(m.paymentSync.retryLaterByCode).reduce((a, b) => a + b, 0);
 
   return (
     <>
@@ -113,8 +114,12 @@ export default async function AdminOverviewPage() {
               count: m.reconciliation.acceptedLast30Days,
             })}
           />
-          <Stat value={notMeasured} label={t("overview.field.sync_success")} />
-          <Stat value={notMeasured} label={t("overview.field.duplicates")} />
+          <Stat
+            value={percentText(m.paymentSync.successRate, dl, none)}
+            label={t("overview.field.sync_success", { count: m.paymentSync.attempts })}
+          />
+          <Stat value={m.paymentSync.duplicatesPrevented} label={t("overview.field.duplicates")} />
+          <Stat value={syncRetryLater} label={t("overview.field.sync_retry")} />
         </StatGrid>
       </Section>
 

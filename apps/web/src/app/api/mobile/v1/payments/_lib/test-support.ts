@@ -45,12 +45,13 @@ export interface MobileApiHarness {
 
 /**
  * A harness over `database` with a clock starting at `start`. `db` replaces the database client
- * (a bigger pool for parallel requests, or a wrapper that injects faults).
+ * (a bigger pool for parallel requests, or a wrapper that injects faults). Without
+ * `afterResponse`, after-the-answer work (T-086a metrics) runs inline before the reply.
  */
 export function mobileApiHarness(
   database: TestDatabase,
   start: Date,
-  options: { db?: DbClient } = {},
+  options: { db?: DbClient; afterResponse?: MobileDeps["afterResponse"] } = {},
 ): MobileApiHarness {
   const clock: Clock = {
     now: start,
@@ -66,7 +67,12 @@ export function mobileApiHarness(
     rateLimiter: createMemoryRateLimiter({ now: () => clock.now.getTime() }),
     minAppVersionCode: MIN_APP_VERSION_CODE,
   });
-  const deps: MobileDeps = { auth, runtime, logger: runtime.logger };
+  const deps: MobileDeps = {
+    auth,
+    runtime,
+    logger: runtime.logger,
+    ...(options.afterResponse ? { afterResponse: options.afterResponse } : {}),
+  };
   return { clock, logs, auth, getDeps: () => deps };
 }
 

@@ -48,6 +48,11 @@ export interface MobileDeps {
   readonly auth: MobileAuthService;
   readonly runtime: ServiceRuntime;
   readonly logger: Logger;
+  /**
+   * Runs `task` after the response is sent (production: Next's `after`). Omitted (tests): a route
+   * runs the task inline before answering, so its effects are visible when the call returns.
+   */
+  readonly afterResponse?: (task: () => Promise<void>) => void;
 }
 
 export interface FieldProblem {
