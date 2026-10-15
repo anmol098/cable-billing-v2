@@ -267,4 +267,53 @@ recorded here.
 
 ### Local tooling smoke (not a capacity measurement)
 
-RESULTS_PLACEHOLDER
+> **These are tooling smoke results on a shared, loaded 4-CPU container, not a capacity
+> measurement.** One `next start` process, the local Postgres 17 and the load generator shared the same
+> 4 CPUs with other agents' builds (load average 9–11 during the runs). They prove that every
+> scenario, the rate-limit plan, the result files and the gate work end to end. They say nothing about
+> Vercel + Neon, where each request gets its own function instance and the database is elsewhere.
+
+2026-10-14, commit `736f8d3` (T-095 branch on `feature/mvp` `fd84c43`), `next start` on a fresh scratch
+database seeded with `pnpm db:seed --migrate --scale legacy --as-of 2026-09-30` (8 operators, 7,616
+customers, 147,943 bills, 108,077 payments).
+
+**1. `pnpm load run --base-url http://localhost:3295 --profile smoke --gate` (every scenario): PASS, exit 0.**
+8 sign-ins. The billing run billed October for all 8 tenants in 137 s in 2 worker invocations (6,519
+bills created, 228 customers with nothing to bill, 0 failed; counted in the database afterwards). 40
+phone payments and 6 counter payments posted, every replayed item answered `duplicate`, 4 CSV files
+(18,009 rows).
+
+| Rule | Worst metric | p95 / value | Limit |
+|---|---|---:|---:|
+| B-WEB-LIST | `web.page.customers` (of 20 pages) | 1,045 ms | 2,000 ms |
+| B-WEB-SEARCH | `web.search.name` | 336 ms | 2,000 ms |
+| B-COUNTER-FIND / -SAVE | find / save | 140 / 345 ms | 2,000 ms |
+| B-SYNC-PAGE / -FULL / -BYTES | page / full roster / bytes | 870 ms / 1,192 ms / 69.4 KiB | 2 s / 10 s / 1 MiB |
+| B-PAY-BATCH | 10-item batches | 840 ms | 10,000 ms |
+| B-EXPORT | `export.bills` (12 months) | 3,795 ms | 60 s |
+| B-BILLING-RUN / -INVOCATION | wall / longest invocation | 137 s / 136.6 s | 30 min / 300 s |
+
+**2. `pnpm load run --base-url http://localhost:3295 --profile legacy --scenarios sync,counter,reports,exports,payments --gate`
+(billing already done): FAIL, exit 1.** 68 new sign-ins (8 reused from the cache), 0 errors on any
+request (43 metrics), 6,000 phone payments + 80 counter payments posted (6,126 payments in the database
+including run 1), 0 rejected, 0 `retry_later`, every replay `duplicate`, 24 files (86,153 rows).
+What failed, on one Node process for 60 phones + 24 office users on 4 shared CPUs:
+
+| Metric | p50 | p95 | Limit |
+|---|---:|---:|---:|
+| `web.page.*` (15 of 20 pages over) | 1.5–1.9 s | 2.1–2.7 s | 2 s |
+| `web.search.name` / `.phone` | | 2.2 / 2.3 s | 2 s |
+| `mobile.sync.page` / `.delta` | 1.9 s | 2.4 / 2.1 s | 2 s |
+| `mobile.payments.batch` (50 items, 60 phones at once) | 24.3 s | 25.8 s | 10 s |
+| `mobile.receipts.actions` (100 actions) | | 11.6 s | 2 s |
+| passed: counter save / find, customer detail, day totals, full roster (5.6 s), exports (9.1 s) | | | |
+
+This shows the gate catching a target that is too slow; it is **not** evidence about production.
+It does point at what to watch on the first real run: a 50-payment batch is posted item by item in
+one request (T-061), so 60 phones pushing at once queue on the database; locally a batch took 25.8 s
+at p95, close to T-061's 30 s per-batch budget (after which items come back `retry_later` and the
+phone re-sends them: safe, but slow). Receipt actions are also recorded one by one.
+
+Earlier runs on the same container at a lower load average (2–3) passed every rule in `smoke`, and in
+`legacy` failed only `mobile.sync.page` (2.3 s), `mobile.payments.batch` (20.1 s) and
+`mobile.receipts.actions` (9.8 s): the same pattern, scaled by how busy the machine was.
