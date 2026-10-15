@@ -277,6 +277,40 @@ describeDb("receipts API (T-061)", () => {
       expect(await rowsOf(tenant.operatorId)).toHaveLength(2);
     }, 60_000);
 
+    it("refuses an action whose id is UUID-shaped but not an RFC UUID on its own; the rest are recorded", async () => {
+      const { tenant, lineman, paymentId } = await withPayment();
+      const actions: Record<string, unknown>[] = [
+        { id: uuidv7(), payment_id: paymentId, action: "printed", at: "2026-10-13T05:16:10.000Z" },
+        {
+          // Hex in UUID shape, but the version (0) and variant (0) digits are not RFC 9562.
+          id: "12345678-1234-0234-0234-123456789abc",
+          payment_id: paymentId,
+          action: "whatsapp_opened",
+          at: "2026-10-13T05:16:30.000Z",
+        },
+        {
+          id: uuidv7(),
+          payment_id: paymentId,
+          action: "pdf_shared",
+          at: "2026-10-13T05:17:00.000Z",
+        },
+      ];
+      const results = await actionResults(await sendActions(lineman.accessToken, { actions }));
+      expect(results.map((r) => [r.id, r.outcome])).toEqual([
+        [actions[0]?.id, "recorded"],
+        [UNUSABLE_ITEM_ID, "rejected"],
+        [actions[2]?.id, "recorded"],
+      ]);
+      expect(results[1]?.error).toMatchObject({
+        code: "VALIDATION",
+        fields: [{ path: "actions.1.id" }],
+      });
+      expect((await rowsOf(tenant.operatorId)).map((r) => r.action).sort()).toEqual([
+        "pdf_shared",
+        "printed",
+      ]);
+    }, 60_000);
+
     it("takes the contract fixture's actions once their payments are synced; read-only is fine", async () => {
       const { tenant, lineman, paymentId } = await withPayment({ subscription: "read_only" });
       const request = fixture("postReceiptActions.request");
