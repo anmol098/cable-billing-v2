@@ -435,23 +435,30 @@ describeDb("payment sync metrics (T-086a)", () => {
     }
   }, 60_000);
 
-  it("accepts any well-formed id, as T-061's itemIdOf does (not only RFC variants)", async () => {
+  it("ids are strict like T-061's itemIdOf; the nil id counts as 'without id'", async () => {
     const s = await setup();
-    const odd = "12345678-1234-0234-0234-123456789ABC";
+    // What T-061 answers for a missing or non-RFC id: the nil UUID, counted apart, no key stored.
     const counts = await record(s, [
-      { outcome: "rejected", id: odd, code: "VALIDATION" },
-      { outcome: "retry_later", id: odd, code: "INTERNAL" },
+      { outcome: "rejected", id: NIL, code: "VALIDATION" },
+      { outcome: "retry_later", id: NIL, code: "RATE_LIMITED" },
+      { outcome: "rejected", id: null, code: "VALIDATION" },
     ]);
-    expect(counts).toMatchObject({ rejectedNewIds: 1, rejectedWithoutId: 0 });
-    const { rows } = await t.current.admin.query<{ id: string }>(
-      "SELECT id FROM payment_sync_rejections WHERE operator_id = $1",
-      [s.tenant.operatorId],
-    );
-    expect(rows.map((r) => r.id)).toEqual([odd.toLowerCase()]);
-    const notAnId = await recordPaymentSyncBatch.call(s.rt, s.lineman, {
-      items: [{ outcome: "rejected", id: "12345678-1234", code: "VALIDATION" }],
+    expect(counts).toMatchObject({
+      items: 3,
+      rejectedWithoutId: 2,
+      rejectedNewIds: 0,
+      rejected: { VALIDATION: 0 },
+      retryLater: { RATE_LIMITED: 1 },
     });
-    expect(!notAnId.ok && notAnId.error.code).toBe("VALIDATION");
+    expect(await totals(s.tenant.operatorId)).toMatchObject({ batches: 1, keys: 0 });
+    // A non-RFC id never reaches the recorder from T-061 (it answers the nil id); passed
+    // directly, it is refused like the contract refuses it.
+    for (const id of ["12345678-1234-0234-0234-123456789abc", "12345678-1234"]) {
+      const r = await recordPaymentSyncBatch.call(s.rt, s.lineman, {
+        items: [{ outcome: "rejected", id, code: "VALIDATION" }],
+      });
+      expect(!r.ok && r.error.code, id).toBe("VALIDATION");
+    }
   }, 60_000);
 
   it("its transaction has a short lock timeout: a held table ends the call quickly", async () => {

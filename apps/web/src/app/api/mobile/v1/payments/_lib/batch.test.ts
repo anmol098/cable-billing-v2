@@ -1042,5 +1042,33 @@ describeDb("POST /payments:batch (T-061)", () => {
       );
       expect(source).toMatch(/case "ID_REUSED_WITH_DIFFERENT_DATA": \{[^}]*itemError\(\s*code,/);
     });
+
+    it("a non-RFC item id is counted 'without id' and the batch's metrics row is still written", async () => {
+      const { tenant, lineman } = await tenantWithLineman(t.current, h);
+      const customer = await insertCustomer(t.current, tenant.operatorId);
+      const items = [
+        paymentItem(lineman, customer, {}, 1),
+        paymentItem(lineman, customer, { id: "12345678-1234-0234-0234-123456789abc" }, 2),
+      ];
+      const response = await send(lineman.accessToken, { payments: items });
+      expect(response.status).toBe(200);
+      const body = PaymentBatchResponse.parse(await response.json());
+      expect(body.results.map((r) => [r.outcome, r.error?.code ?? null])).toEqual([
+        ["posted", null],
+        ["rejected", "VALIDATION"],
+      ]);
+      expect(body.results[1]?.id).toBe(UNUSABLE_ITEM_ID);
+      expect(await platformCounters(tenant.operatorId)).toMatchObject({
+        batches: 1,
+        items: 2,
+        accepted: 1,
+        rejected_validation: 0,
+        rejected_without_id: 1,
+        rejected_new_ids: 0,
+      });
+      expect(h.logs.records.some((r) => r.event === "mobile_api.payment_sync_metrics_failed")).toBe(
+        false,
+      );
+    }, 60_000);
   });
 });

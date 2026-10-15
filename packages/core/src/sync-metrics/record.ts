@@ -32,7 +32,6 @@
  * (`audit.skip("no_change")`): it changes no business record, the row is itself the count.
  */
 import {
-  isUuid,
   PAYMENT_SYNC_BATCH_MAX,
   PAYMENT_SYNC_REJECT_CODES,
   PAYMENT_SYNC_RETRY_CODES,
@@ -60,17 +59,19 @@ export const SYNC_METRICS_STATEMENT_TIMEOUT_MS = 5_000;
 export const SYNC_METRICS_LOCK_TIMEOUT_MS = 3_000;
 
 /**
- * A payment id: any well-formed UUID (the same loose check as T-061's `itemIdOf`, `isUuid`), in
- * lower case. Stricter than the route would make one odd id fail the whole batch's counts.
+ * A payment id, in lower case: an RFC 9562 UUID, the same strict check as T-061's `itemIdOf`
+ * (the contract's `Uuid`), so every id the route echoes for a saved payment passes.
  */
-const paymentId = z
-  .string()
-  .refine((value) => isUuid(value), { message: "Invalid UUID" })
-  .transform((value) => value.toLowerCase());
-/** A payment id, or null (or the nil UUID) when the item had none. */
-const optionalPaymentId = paymentId
-  .nullable()
-  .transform((value) => (value === null || value === NIL_UUID ? null : value));
+const paymentId = z.uuid().transform((value) => value.toLowerCase());
+/**
+ * A payment id, or null when the item had none. The nil UUID (`UNUSABLE_ITEM_ID`, what T-061
+ * answers for a missing or non-RFC id) is mapped to null **before** the strict check, so such
+ * items are counted as "without id" and never fail the batch's counts.
+ */
+const optionalPaymentId = z.preprocess(
+  (value) => (value === NIL_UUID ? null : value),
+  paymentId.nullable(),
+);
 
 export const PaymentSyncItem = z.discriminatedUnion("outcome", [
   z.object({

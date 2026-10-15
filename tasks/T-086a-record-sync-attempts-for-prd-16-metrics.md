@@ -112,16 +112,18 @@ PRD §16, PLAN §10.4, T-086 completion notes.
    - `platformMetrics` subtracts only the refusals whose day is inside the window, and clamps `attempts ≥ accepted` as a safety net.
    - Tests: a refusal 40 days ago accepted today (+1 accepted, +1 attempt, rate ≤ 100 % and not null); a batch on day 30 is counted and one on day 31 is not.
 3. **No deadlock between two batches.** New refusals are inserted sorted by id. A core test holds a table lock so that two batches refusing the same 50 ids in opposite order insert at the same moment, 5 rounds. Without the sort it fails with CONFLICT (a deadlock); with the sort it passes.
-4. **Loose ids, as in T-061's `itemIdOf`.** `PaymentSyncItem` accepts any well-formed UUID (`isUuid`), stored in lower case. Tested with `12345678-1234-0234-0234-123456789ABC`. T-061's wire contract is untouched.
+4. **Ids follow T-061's `itemIdOf`, which is strict since #93.** `PaymentSyncItem` keeps the strict `z.uuid()`, the same check as the contract's `Uuid`. The nil UUID (`UNUSABLE_ITEM_ID`: what T-061 answers for a missing or non-RFC id) is mapped to null before that check, so such items are counted under `rejected_without_id` and never fail the batch's counts. Tests:
+   - web: a batch with a valid item and `12345678-1234-0234-0234-123456789abc` answers posted + rejected VALIDATION (nil id), and the metrics row is still written (2 items, 1 accepted, 1 without id, no failure logged);
+   - core: nil and null ids are counted without id and store no key, while a non-RFC id passed directly is refused.
 5. **The mapping is tied to the wire codes, without casts.** `syncMetricItem` uses type guards on `PAYMENT_SYNC_*_CODES`. An unknown code falls back to VALIDATION / INTERNAL and logs `mobile_api.payment_sync_unknown_code`. Tests check:
    - every code maps;
    - the codes `batch.ts` answers (scanned from its source) equal the metrics codes exactly;
    - `PAYMENT_SYNC_BATCH_MAX === PAYMENT_BATCH_MAX`. `@cb/db` can't import `@cb/contracts`, so the two are tied by this test instead.
 6. **The "same batch sent 10× at once" test also checks the counters:** 20 batches, 100 items, 5 accepted, 95 duplicates, nothing rejected or retried.
 7. **Follow-up task T-086f:** a rate limit on `/payments:batch` (one token wrote 200 refusal rows in 4 requests) and a retention decision for both tables.
-- Verified after the fixes (on `feature/mvp` with T-087b):
+- Verified after the fixes (rebased on `feature/mvp` 8f7755a, after #93 and T-087b):
   - `pnpm install --frozen-lockfile`, lint, typecheck and build pass.
-  - `TURBO_FORCE=1 pnpm test --concurrency=1`: 10/10 packages (core 1288 + 3 skipped, web 607, db 279).
+  - `TURBO_FORCE=1 pnpm test --concurrency=1`: 10/10 packages (core 1288 + 3 skipped, web 614, db 279).
   - `pnpm generate` leaves no diff. The `--check` modes, `db:check`, the `@cb/db` harness security audit and `tasks.mjs check --local` pass.
   - Playwright `admin`, `mobile-collect` and `payments` pass 9/9 on a fresh scratch DB. Under `next start` the counters were written after the response via `after`: 1 posted batch, then 5 duplicate batches.
 - Migrations 0019/0020 were regenerated, since they are not on `feature/mvp` yet. Files outside the owned paths, added in this round: `apps/web/src/lib/mobile/{http,server}.ts` (the optional `afterResponse` hook) and T-061's `test-support.ts` (the `afterResponse` option).
