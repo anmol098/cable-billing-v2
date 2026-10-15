@@ -16,8 +16,12 @@
  *   (the phone lost the answer and sent the batch again) or of an id that is a saved payment
  *   (`ID_REUSED_WITH_DIFFERENT_DATA`) is not a new id. Rejected items without a usable id are
  *   counted apart (`rejected_without_id`): there is nothing to deduplicate them by.
- * - An accepted id that was refused earlier is counted in `accepted_after_rejection`, so the rate
- *   doesn't count that id twice.
+ * - An accepted id that was refused earlier is counted in `accepted_after_rejection` (and by the
+ *   IST day of that refusal in `accepted_after_rejection_by_day`), so the rate doesn't count that
+ *   id twice, and a window only subtracts refusals it also counts.
+ * - Refusal keys are inserted sorted by id, so two batches with the same ids never deadlock.
+ * - The transaction has short statement and lock timeouts: it runs after the phone's answer, and
+ *   a stalled database must not hold a connection long for a count.
  * - `retry_later`: nothing was decided for the id (it comes again); counted by code only.
  *
  * Every accepted or duplicate id must be a payment of this tenant (NOT_FOUND otherwise, nothing
@@ -28,6 +32,7 @@
  * (`audit.skip("no_change")`): it changes no business record, the row is itself the count.
  */
 import {
+  isUuid,
   PAYMENT_SYNC_BATCH_MAX,
   PAYMENT_SYNC_REJECT_CODES,
   PAYMENT_SYNC_RETRY_CODES,
@@ -39,7 +44,7 @@ import {
   uuidv7,
 } from "@cb/db";
 import { businessDateOf, err, ok } from "@cb/domain";
-import { and, eq, inArray } from "drizzle-orm";
+import { and, eq, inArray, sql } from "drizzle-orm";
 import { z } from "zod";
 import { defineService } from "../context/service";
 import { notFound } from "../errors/errors";
@@ -47,7 +52,21 @@ import { notFound } from "../errors/errors";
 /** The nil UUID T-061 answers for an item without a usable id. */
 const NIL_UUID = "00000000-0000-0000-0000-000000000000";
 
-const paymentId = z.uuid().transform((value) => value.toLowerCase());
+/**
+ * How long the metrics transaction may wait on one statement or one lock: a stalled database must
+ * not hold a connection for long for a count (the answer has already gone to the phone).
+ */
+export const SYNC_METRICS_STATEMENT_TIMEOUT_MS = 5_000;
+export const SYNC_METRICS_LOCK_TIMEOUT_MS = 3_000;
+
+/**
+ * A payment id: any well-formed UUID (the same loose check as T-061's `itemIdOf`, `isUuid`), in
+ * lower case. Stricter than the route would make one odd id fail the whole batch's counts.
+ */
+const paymentId = z
+  .string()
+  .refine((value) => isUuid(value), { message: "Invalid UUID" })
+  .transform((value) => value.toLowerCase());
 /** A payment id, or null (or the nil UUID) when the item had none. */
 const optionalPaymentId = paymentId
   .nullable()
@@ -86,6 +105,8 @@ export interface PaymentSyncCounts {
   readonly rejectedWithoutId: number;
   readonly rejectedNewIds: number;
   readonly acceptedAfterRejection: number;
+  /** `acceptedAfterRejection` by the IST day of the earlier refusal. */
+  readonly acceptedAfterRejectionByDay: Readonly<Record<string, number>>;
   readonly retryLater: Readonly<Record<PaymentSyncRetryCode, number>>;
 }
 
@@ -107,6 +128,8 @@ export const recordPaymentSyncBatch = defineService<
   capability: "payments.record",
   input: RecordPaymentSyncBatchInput,
   async run({ ctx, input, tx, audit, log, now }) {
+    await tx.execute(sql.raw(`SET LOCAL statement_timeout = ${SYNC_METRICS_STATEMENT_TIMEOUT_MS}`));
+    await tx.execute(sql.raw(`SET LOCAL lock_timeout = ${SYNC_METRICS_LOCK_TIMEOUT_MS}`));
     const accepted = new Set<string>(); // posted or posted_needs_review
     const known = new Set<string>(); // accepted or duplicate: must be payments of this tenant
     const rejectedCode = new Map<string, PaymentSyncRejectCode>(); // first code per id
@@ -163,7 +186,7 @@ export const recordPaymentSyncBatch = defineService<
       acceptedIds.length === 0
         ? []
         : await tx
-            .select({ id: paymentSyncRejections.id })
+            .select({ at: paymentSyncRejections.firstRejectedAt })
             .from(paymentSyncRejections)
             .where(
               and(
@@ -172,7 +195,16 @@ export const recordPaymentSyncBatch = defineService<
               ),
             );
 
-    const newRefusals = [...rejectedCode].filter(([id]) => !saved.has(id));
+    const acceptedAfterRejectionByDay: Record<string, number> = {};
+    for (const { at } of refusedBefore) {
+      const day = businessDateOf(at);
+      acceptedAfterRejectionByDay[day] = (acceptedAfterRejectionByDay[day] ?? 0) + 1;
+    }
+
+    // Sorted by id: two batches inserting the same keys lock them in the same order (no deadlock).
+    const newRefusals = [...rejectedCode]
+      .filter(([id]) => !saved.has(id))
+      .sort(([x], [y]) => (x < y ? -1 : x > y ? 1 : 0));
     const firstRefusals =
       newRefusals.length === 0
         ? []
@@ -198,6 +230,7 @@ export const recordPaymentSyncBatch = defineService<
       rejectedWithoutId,
       rejectedNewIds: firstRefusals.length,
       acceptedAfterRejection: refusedBefore.length,
+      acceptedAfterRejectionByDay,
       retryLater,
     };
     const batchId = uuidv7();
@@ -217,6 +250,7 @@ export const recordPaymentSyncBatch = defineService<
       rejectedWithoutId,
       rejectedNewIds: counts.rejectedNewIds,
       acceptedAfterRejection: counts.acceptedAfterRejection,
+      acceptedAfterRejectionByDay,
       retryLaterConflict: retryLater.CONFLICT,
       retryLaterInternal: retryLater.INTERNAL,
       retryLaterRateLimited: retryLater.RATE_LIMITED,

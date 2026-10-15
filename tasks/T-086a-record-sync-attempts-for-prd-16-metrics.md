@@ -68,7 +68,7 @@ PRD §16, PLAN §10.4, T-086 completion notes.
 | `packages/db/src/schema/platform-admin.ts` | `PLATFORM_READ_COLUMNS.payment_sync_batches` = `operator_id`, `business_date` and the count columns (not `id`, not `received_at`); `payment_sync_batches_platform_select` (`USING (true)`); `platformReadGrantsSql(tables?)` can now emit one table's grant for a later migration. |
 | `packages/core/src/sync-metrics/` (`record.ts`, `index.ts`; one line in `packages/core/src/index.ts`) | Service **`recordPaymentSyncBatch`** (`sync_metrics.record_payment_batch`, capability `payments.record`, allowed in read-only mode, `audit.skip("no_change")`). Input `{ items: [{ outcome, id, code? }] }` (1–50; `posted` / `posted_needs_review` / `duplicate` need the payment id; `rejected` / `retry_later` take a code and an optional id, the nil UUID meaning none). Output `{ batchId, businessDate, counts }`. Isolation cases in `sync-metrics.isolation.ts`. |
 | `packages/core/src/admin/metrics.ts` | `platformMetrics().paymentSync`: `batches`, `items`, `attempts`, `accepted`, `acceptedNeedsReview`, `rejected`, `successRate` (percent, one decimal, null with nothing), `duplicatesPrevented`, `rejectedAnswersByCode`, `rejectedWithoutId`, `retryLaterByCode`, over the last 30 IST days (`business_date >= today − 30`, same window as the reconciliation figure). `notMeasured` is now `["migration_exceptions"]` (until T-092). |
-| `apps/web/src/app/api/mobile/v1/payments/_lib/batch.ts` (T-061) | After the last item, `recordSyncMetrics` maps each answer (`syncMetricItem`: outcome, error code, id) and calls the service once, in its own transaction. Best effort: an error or a non-ok result is logged (`mobile_api.payment_sync_metrics_failed`, code only) and sent to Sentry; the answer to the phone never changes. Whole-request failures (auth, version gate, a body that isn't a batch) are not counted: no payment was looked at. |
+| `apps/web/src/app/api/mobile/v1/payments/_lib/batch.ts` (T-061) | After the last item, `recordSyncMetrics` maps each answer (`syncMetricItem`: outcome, error code, id) and calls the service once, in its own transaction, **after the answer is sent**: `MobileDeps.afterResponse` (new, optional; production `getMobileDeps` sets it to Next's `after`, tests leave it out to run the task inline). Best effort: an error or a non-ok result is logged (`mobile_api.payment_sync_metrics_failed`, code only) and sent to Sentry; the answer to the phone never changes or waits. Whole-request failures (auth, version gate, a body that isn't a batch) are not counted: no payment was looked at. |
 | `apps/web/src/app/admin/page.tsx` | Field work section: "Phone payments saved (of N sent)" = the rate, "Double payments stopped" = the duplicate count, and a new "Phone payments to send again" = retry-later answers. The health section's migration figure still reads "Not measured yet". |
 
 **How the numbers are counted (reviewer please check)**
@@ -83,8 +83,8 @@ PRD §16, PLAN §10.4, T-086 completion notes.
 **Decisions**
 
 - An append-only row per batch rather than an upsert-by-day counter: no row lock shared by every lineman of a tenant, no lost updates, nothing ever updated; the console sums ≤ a few thousand small rows per day.
-- `payment_sync_rejections` is a per-payment-id key (id, first code, time; no amount, customer, name or phone). It is needed to keep a refusal from counting again when a phone resends a batch whose answer it lost (the T-061 "timeout then retry" case). It is tenant-only and never read by the platform. If the reviewer reads "per-payment logs" in Out of scope as excluding even this, the alternative is to drop it and accept double-counted refusals on replays.
-- Recording happens after the batch in a separate transaction (not inside each `postPayment` transaction): no change to T-046's posting code, and a metrics failure can't fail a payment. Cost: a crash between the last item and the recording loses that batch's counts (logged).
+- `payment_sync_rejections` is a per-payment-id key (id, first code, time; no amount, customer, name or phone). It is needed to keep a refusal from counting again when a phone resends a batch whose answer it lost (the T-061 "timeout then retry" case). It is tenant-only and never read by the platform. It is effectively a per-payment-id refusal log (no PII). It is kept, but whether to keep it and for how long is **a product call** (follow-up T-086f, with the rate limit). Dropping it means double-counted refusals on replays.
+- Recording happens after the response, in a separate transaction (not inside each `postPayment` transaction). This needs no change to T-046's posting code, and a metrics failure can't fail or delay a payment. Cost: a crash between the answer and the recording loses that batch's counts (logged).
 - Capability `payments.record` with `audit.skip("no_change")`: the service changes no business record and auditing every batch would flood the Owner's log. Registered in T-035's `NEVER_THE_DEFAULT_ACTION` (`packages/core/src/audit-query/actions.test.ts`).
 - The day is the server's IST day when it answered (not the phone's `recorded_at`).
 
@@ -100,6 +100,26 @@ PRD §16, PLAN §10.4, T-086 completion notes.
 
 - Should a `retry_later` that never reaches a final answer (e.g. a phone that is lost) count as a failed attempt? Today it doesn't, since the server can't tell "will come again" from "never".
 - Is counting `ID_REUSED_WITH_DIFFERENT_DATA` outside the rate right (by payment id it is an accepted payment), or should a second payment on a reused id count as a failed attempt?
+- Keep `payment_sync_rejections` (a per-id refusal log) and for how long? See T-086f.
+
+**Review fixes (PR #91)**
+
+1. **The metrics write no longer blocks the phone's answer.** It runs through `MobileDeps.afterResponse` (Next's `after` in production; the repo's `afterResponse` pattern from the Razorpay webhook) after `reply.ok`. The metrics transaction sets `SET LOCAL statement_timeout = 5000` and `lock_timeout = 3000` (`SYNC_METRICS_*_TIMEOUT_MS`). Tests:
+   - the web test injects a metrics transaction that never resolves and checks the reply still returns with the payment posted;
+   - the core test holds the batches table and checks the call fails after about the lock timeout.
+2. **The rate is exact across the window edge.**
+   - Each batch row now also stores `accepted_after_rejection_by_day`: the IST day of each earlier refusal, as a `jsonb` day → count map, platform-readable, with an "is an object" CHECK.
+   - `platformMetrics` subtracts only the refusals whose day is inside the window, and clamps `attempts ≥ accepted` as a safety net.
+   - Tests: a refusal 40 days ago accepted today (+1 accepted, +1 attempt, rate ≤ 100 % and not null); a batch on day 30 is counted and one on day 31 is not.
+3. **No deadlock between two batches.** New refusals are inserted sorted by id. A core test holds a table lock so that two batches refusing the same 50 ids in opposite order insert at the same moment, 5 rounds. Without the sort it fails with CONFLICT (a deadlock); with the sort it passes.
+4. **Loose ids, as in T-061's `itemIdOf`.** `PaymentSyncItem` accepts any well-formed UUID (`isUuid`), stored in lower case. Tested with `12345678-1234-0234-0234-123456789ABC`. T-061's wire contract is untouched.
+5. **The mapping is tied to the wire codes, without casts.** `syncMetricItem` uses type guards on `PAYMENT_SYNC_*_CODES`. An unknown code falls back to VALIDATION / INTERNAL and logs `mobile_api.payment_sync_unknown_code`. Tests check:
+   - every code maps;
+   - the codes `batch.ts` answers (scanned from its source) equal the metrics codes exactly;
+   - `PAYMENT_SYNC_BATCH_MAX === PAYMENT_BATCH_MAX`. `@cb/db` can't import `@cb/contracts`, so the two are tied by this test instead.
+6. **The "same batch sent 10× at once" test also checks the counters:** 20 batches, 100 items, 5 accepted, 95 duplicates, nothing rejected or retried.
+7. **Follow-up task T-086f:** a rate limit on `/payments:batch` (one token wrote 200 refusal rows in 4 requests) and a retention decision for both tables.
+- Migrations 0019/0020 were regenerated, since they are not on `feature/mvp` yet. Files outside the owned paths, added in this round: `apps/web/src/lib/mobile/{http,server}.ts` (the optional `afterResponse` hook) and T-061's `test-support.ts` (the `afterResponse` option).
 
 **Verification**
 

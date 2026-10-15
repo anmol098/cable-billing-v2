@@ -5,6 +5,7 @@
  * `next build` works without any environment (T-011). Server-only.
  */
 import { createMobileAuthService, type MobileAuthService } from "@cb/core";
+import { after } from "next/server";
 import { requireServerEnv } from "@/env";
 import { getRateLimiter, getServerRuntime } from "@/lib/auth/server";
 import { MIN_APP_VERSION_CODE, MOBILE_FEATURES } from "./config";
@@ -32,5 +33,11 @@ function mobileAuth(): MobileAuthService {
 /** What every mobile route needs (pass `getMobileDeps` to the route factories in `./http`). */
 export function getMobileDeps(): MobileDeps {
   const runtime = getServerRuntime();
-  return { auth: mobileAuth(), runtime, logger: runtime.logger };
+  return {
+    auth: mobileAuth(),
+    runtime,
+    logger: runtime.logger,
+    // Work that must not hold up the answer (T-086a sync metrics) runs after it is sent.
+    afterResponse: (task) => after(task),
+  };
 }

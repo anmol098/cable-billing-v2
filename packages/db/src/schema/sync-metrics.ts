@@ -13,14 +13,20 @@
  * - Deduplicated by payment id (PRD §16): a payment id is posted once (T-046 idempotency), so
  *   `posted + posted_needs_review` counts each accepted id once. `rejected_new_ids` counts the
  *   rejected ids never answered before (a first refusal, recorded in `payment_sync_rejections`),
- *   and `accepted_after_rejection` the accepted ids that had been rejected earlier, so
- *   accepted ids ÷ (accepted ids + rejected_new_ids − accepted_after_rejection) is the rate over
- *   distinct payment ids that got a final answer. A replay of a rejected id (the phone lost the
- *   answer and sent the batch again) is in `rejected_*` but not in `rejected_new_ids`.
- *   `rejected_without_id` items had no usable id, so they can't be deduplicated.
+ *   and `accepted_after_rejection` the accepted ids that had been rejected earlier, with
+ *   `accepted_after_rejection_by_day` splitting them by the IST day of that earlier refusal. Over
+ *   a window of days, accepted ids ÷ (accepted ids + rejected_new_ids − the accepted-after-
+ *   rejection ids whose refusal day is inside the window) is the rate over distinct payment ids
+ *   that got a final answer in the window (a refusal older than the window is not in
+ *   `rejected_new_ids` there, so it must not be subtracted either). A replay of a rejected id (the
+ *   phone lost the answer and sent the batch again) is in `rejected_*` but not in
+ *   `rejected_new_ids`. `rejected_without_id` items had no usable id, so they can't be
+ *   deduplicated.
  *
  * **`payment_sync_rejections`**: the dedupe key for refusals: one row per rejected payment id per
- * tenant (the first refusal's code and time). Tenant-only: the platform has no access to it.
+ * tenant (the first refusal's code and time). Tenant-only: the platform has no access to it. It is
+ * in effect a per-payment-id log of refusals (no amount, name, phone or customer): keeping it, and
+ * for how long, is a product call (follow-up T-086f).
  *
  * Both tables are **append-only** (custom migration): a count, once recorded, is never edited.
  */
@@ -30,6 +36,7 @@ import {
   date,
   index,
   integer,
+  jsonb,
   pgTable,
   primaryKey,
   text,
@@ -81,6 +88,14 @@ export const paymentSyncBatches = pgTable(
     rejectedNewIds: count("rejected_new_ids"),
     /** Accepted payment ids that had been rejected before. */
     acceptedAfterRejection: count("accepted_after_rejection"),
+    /**
+     * `accepted_after_rejection` by the IST day of the earlier refusal (`YYYY-MM-DD` → count), so
+     * a window only subtracts refusals it also counts.
+     */
+    acceptedAfterRejectionByDay: jsonb("accepted_after_rejection_by_day")
+      .$type<Record<string, number>>()
+      .notNull()
+      .default({}),
     retryLaterConflict: count("retry_later_conflict"),
     retryLaterInternal: count("retry_later_internal"),
     retryLaterRateLimited: count("retry_later_rate_limited"),
@@ -114,6 +129,10 @@ export const paymentSyncBatches = pgTable(
     check(
       "payment_sync_batches_after_rejection_within_accepted",
       sql`${t.acceptedAfterRejection} <= ${t.posted} + ${t.postedNeedsReview}`,
+    ),
+    check(
+      "payment_sync_batches_after_rejection_by_day_object",
+      sql`jsonb_typeof(${t.acceptedAfterRejectionByDay}) = 'object'`,
     ),
     ...tenantPolicies(t),
   ],

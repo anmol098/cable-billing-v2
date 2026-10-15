@@ -11,7 +11,7 @@
  */
 import { createDb, type Tx, uuidv7 } from "@cb/db";
 import { describeDb, useTestDatabase } from "@cb/db/testing";
-import { beforeAll, expect, it } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
 import { platformMetrics } from "../admin/metrics";
 import { adminContextFor, seedPlatformAdmin } from "../admin/test-support";
 import type { ServiceRuntime } from "../context/runtime";
@@ -25,7 +25,12 @@ import {
   setSubscriptionStatus,
   testRuntime,
 } from "../testing/fixtures";
-import { type PaymentSyncItemInput, recordPaymentSyncBatch } from "./record";
+import {
+  type PaymentSyncItemInput,
+  recordPaymentSyncBatch,
+  SYNC_METRICS_LOCK_TIMEOUT_MS,
+  SYNC_METRICS_STATEMENT_TIMEOUT_MS,
+} from "./record";
 
 const NOW = new Date("2026-10-13T06:00:00.000Z"); // 11:30 IST, 13 Oct 2026
 const NIL = "00000000-0000-0000-0000-000000000000";
@@ -114,6 +119,7 @@ describeDb("payment sync metrics (T-086a)", () => {
       rejectedWithoutId: 1,
       rejectedNewIds: 1,
       acceptedAfterRejection: 0,
+      acceptedAfterRejectionByDay: {},
       retryLater: { CONFLICT: 0, INTERNAL: 1, RATE_LIMITED: 0 },
     });
 
@@ -149,7 +155,11 @@ describeDb("payment sync metrics (T-086a)", () => {
     await record(s, [{ outcome: "rejected", id: flip, code: "VALIDATION" }]);
     await post(s, flip);
     const flipped = await record(s, [{ outcome: "posted", id: flip }]);
-    expect(flipped).toMatchObject({ posted: 1, acceptedAfterRejection: 1 });
+    expect(flipped).toMatchObject({
+      posted: 1,
+      acceptedAfterRejection: 1,
+      acceptedAfterRejectionByDay: { "2026-10-13": 1 },
+    });
 
     // Distinct ids with a final answer: p1, p2, later, flip (accepted) + bad (rejected) = 5.
     const sum = await totals(s.tenant.operatorId);
@@ -317,6 +327,151 @@ describeDb("payment sync metrics (T-086a)", () => {
     const text = JSON.stringify(await read());
     for (const id of [p1, p2, p3, refused, s.customerId, s.tenant.operatorId]) {
       expect(text).not.toContain(id);
+    }
+  }, 60_000);
+
+  describe("the 30-day window (review fixes)", () => {
+    const DAY = 86_400_000;
+
+    async function metricsNow() {
+      const adminId = await seedPlatformAdmin(t.current);
+      const ctx = await adminContextFor(rtNow, adminId);
+      return async () => {
+        const r = await platformMetrics.call(rtNow, ctx, {});
+        if (!r.ok) throw new Error(r.error.code);
+        return r.value.paymentSync;
+      };
+    }
+
+    /** The same tenant and lineman, with the clock at `now`. */
+    async function at(s: Setup, now: Date): Promise<Setup> {
+      const rt = testRuntime(t.current.db, { now: () => now });
+      return { ...s, rt, lineman: await contextFor(rt, s.tenant, "lineman") };
+    }
+
+    it("a refusal older than the window, accepted today, is one attempt and one accepted id", async () => {
+      const read = await metricsNow();
+      const before = await read();
+      const old = await setup(new Date(NOW.getTime() - 40 * DAY));
+      const id = uuidv7();
+      await record(old, [{ outcome: "rejected", id, code: "VALIDATION" }]);
+      const today = await at(old, NOW);
+      await post(today, id);
+      const counts = await record(today, [{ outcome: "posted", id }]);
+      expect(counts.acceptedAfterRejectionByDay).toEqual({ "2026-09-03": 1 });
+      const after = await read();
+      expect(after.accepted - before.accepted).toBe(1);
+      expect(after.rejected - before.rejected).toBe(0);
+      expect(after.attempts - before.attempts).toBe(1);
+      expect(after.attempts).toBeGreaterThanOrEqual(after.accepted);
+      expect(after.successRate).not.toBeNull();
+      expect(after.successRate ?? 0).toBeLessThanOrEqual(100);
+    }, 60_000);
+
+    it("day 30 is inside the window and day 31 is not", async () => {
+      const read = await metricsNow();
+      const before = await read();
+      // On each day a batch refuses one id; the id is accepted today.
+      for (const days of [30, 31]) {
+        const then = await setup(new Date(NOW.getTime() - days * DAY));
+        const id = uuidv7();
+        await record(then, [{ outcome: "rejected", id, code: "CUSTOMER_NOT_FOUND" }]);
+        const today = await at(then, NOW);
+        await post(today, id);
+        await record(today, [{ outcome: "posted", id }]);
+      }
+      const after = await read();
+      // Day 30's refusal batch counts (a new rejected id, then subtracted on acceptance); day
+      // 31's doesn't. Each id is one attempt and one accepted id either way.
+      expect(after.batches - before.batches).toBe(3);
+      expect(after.rejected - before.rejected).toBe(1);
+      expect(after.accepted - before.accepted).toBe(2);
+      expect(after.attempts - before.attempts).toBe(2);
+    }, 60_000);
+  });
+
+  it("concurrent batches refusing the same ids in opposite order don't deadlock", async () => {
+    const s = await setup();
+    const pool = createDb({
+      connectionString: t.current.url,
+      driver: "pg",
+      max: 6,
+      onIdleError: () => {},
+    });
+    const holder = await t.current.admin.connect();
+    try {
+      const rt = testRuntime(pool, { now: () => NOW });
+      for (let round = 0; round < 5; round += 1) {
+        const ids = Array.from({ length: 50 }, () => uuidv7());
+        const items = (list: string[]) =>
+          list.map((id) => ({ outcome: "rejected" as const, id, code: "VALIDATION" as const }));
+        // Both calls block at their INSERT (SHARE conflicts with ROW EXCLUSIVE), then insert the
+        // same 50 keys at the same moment, one in each order.
+        await holder.query("BEGIN");
+        await holder.query("LOCK TABLE payment_sync_rejections IN SHARE MODE");
+        const pending = Promise.all([
+          recordPaymentSyncBatch.call(rt, s.lineman, { items: items(ids) }),
+          recordPaymentSyncBatch.call(rt, s.lineman, { items: items([...ids].reverse()) }),
+        ]);
+        const deadline = Date.now() + 2_000;
+        for (;;) {
+          const { rows: waiting } = await t.current.admin.query<{ n: number }>(
+            `SELECT count(*)::int AS n FROM pg_stat_activity
+              WHERE datname = current_database() AND wait_event_type = 'Lock'`,
+          );
+          if ((waiting[0]?.n ?? 0) >= 2) break;
+          if (Date.now() > deadline) break; // lock_timeout is 3 s: never hold them longer
+          await new Promise((resolve) => setTimeout(resolve, 10));
+        }
+        await holder.query("COMMIT");
+        const results = await pending;
+        expect(results.map((r) => (r.ok ? "ok" : r.error.code))).toEqual(["ok", "ok"]);
+        const newIds = results.map((r) => (r.ok ? r.value.counts.rejectedNewIds : -1));
+        expect((newIds[0] ?? 0) + (newIds[1] ?? 0)).toBe(50);
+      }
+    } finally {
+      holder.release();
+      await pool.end();
+    }
+  }, 60_000);
+
+  it("accepts any well-formed id, as T-061's itemIdOf does (not only RFC variants)", async () => {
+    const s = await setup();
+    const odd = "12345678-1234-0234-0234-123456789ABC";
+    const counts = await record(s, [
+      { outcome: "rejected", id: odd, code: "VALIDATION" },
+      { outcome: "retry_later", id: odd, code: "INTERNAL" },
+    ]);
+    expect(counts).toMatchObject({ rejectedNewIds: 1, rejectedWithoutId: 0 });
+    const { rows } = await t.current.admin.query<{ id: string }>(
+      "SELECT id FROM payment_sync_rejections WHERE operator_id = $1",
+      [s.tenant.operatorId],
+    );
+    expect(rows.map((r) => r.id)).toEqual([odd.toLowerCase()]);
+    const notAnId = await recordPaymentSyncBatch.call(s.rt, s.lineman, {
+      items: [{ outcome: "rejected", id: "12345678-1234", code: "VALIDATION" }],
+    });
+    expect(!notAnId.ok && notAnId.error.code).toBe("VALIDATION");
+  }, 60_000);
+
+  it("its transaction has a short lock timeout: a held table ends the call quickly", async () => {
+    const s = await setup();
+    const holder = await t.current.admin.connect();
+    try {
+      // Hold the batches table so the insert must wait on a lock: lock_timeout ends the wait.
+      await holder.query("BEGIN");
+      await holder.query("LOCK TABLE payment_sync_batches IN ACCESS EXCLUSIVE MODE");
+      const started = Date.now();
+      const r = await recordPaymentSyncBatch.call(s.rt, s.lineman, {
+        items: [{ outcome: "retry_later", id: null, code: "INTERNAL" }],
+      });
+      const waited = Date.now() - started;
+      expect(r.ok).toBe(false);
+      expect(waited).toBeGreaterThanOrEqual(SYNC_METRICS_LOCK_TIMEOUT_MS - 200);
+      expect(waited).toBeLessThan(SYNC_METRICS_STATEMENT_TIMEOUT_MS + 10_000);
+    } finally {
+      await holder.query("ROLLBACK");
+      holder.release();
     }
   }, 60_000);
 });

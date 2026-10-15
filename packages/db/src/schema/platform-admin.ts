@@ -243,6 +243,7 @@ export const PLATFORM_READ_COLUMNS = {
     "rejected_without_id",
     "rejected_new_ids",
     "accepted_after_rejection",
+    "accepted_after_rejection_by_day",
     "retry_later_conflict",
     "retry_later_internal",
     "retry_later_rate_limited",

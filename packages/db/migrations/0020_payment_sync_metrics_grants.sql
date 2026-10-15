@@ -28,4 +28,4 @@ CREATE TRIGGER "payment_sync_rejections_no_truncate"
 --> statement-breakpoint
 REVOKE SELECT ON TABLE "public"."payment_sync_batches" FROM app_platform;
 --> statement-breakpoint
-GRANT SELECT ("operator_id", "business_date", "items", "posted", "posted_needs_review", "duplicate", "rejected_validation", "rejected_customer_not_found", "rejected_id_reused", "rejected_without_id", "rejected_new_ids", "accepted_after_rejection", "retry_later_conflict", "retry_later_internal", "retry_later_rate_limited") ON TABLE "public"."payment_sync_batches" TO app_platform;
+GRANT SELECT ("operator_id", "business_date", "items", "posted", "posted_needs_review", "duplicate", "rejected_validation", "rejected_customer_not_found", "rejected_id_reused", "rejected_without_id", "rejected_new_ids", "accepted_after_rejection", "accepted_after_rejection_by_day", "retry_later_conflict", "retry_later_internal", "retry_later_rate_limited") ON TABLE "public"."payment_sync_batches" TO app_platform;

@@ -109,6 +109,8 @@ describeDb("payment sync metric tables (T-086a)", () => {
       { posted: -1, items: 1 },
       { rejectedNewIds: 2 }, // only one rejected
       { acceptedAfterRejection: 3 }, // only two accepted
+      // biome-ignore lint/suspicious/noExplicitAny: not an object on purpose.
+      { acceptedAfterRejectionByDay: [] as any }, // must be a day → count object
     ]) {
       const error = await t.current.db
         .withTenant(a.operatorId, (tx) =>

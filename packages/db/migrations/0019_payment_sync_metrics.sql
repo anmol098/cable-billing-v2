@@ -13,6 +13,7 @@ CREATE TABLE "payment_sync_batches" (
 	"rejected_without_id" integer DEFAULT 0 NOT NULL,
 	"rejected_new_ids" integer DEFAULT 0 NOT NULL,
 	"accepted_after_rejection" integer DEFAULT 0 NOT NULL,
+	"accepted_after_rejection_by_day" jsonb DEFAULT '{}'::jsonb NOT NULL,
 	"retry_later_conflict" integer DEFAULT 0 NOT NULL,
 	"retry_later_internal" integer DEFAULT 0 NOT NULL,
 	"retry_later_rate_limited" integer DEFAULT 0 NOT NULL,
@@ -27,7 +28,8 @@ CREATE TABLE "payment_sync_batches" (
         + "payment_sync_batches"."rejected_without_id" + "payment_sync_batches"."retry_later_conflict" + "payment_sync_batches"."retry_later_internal"
         + "payment_sync_batches"."retry_later_rate_limited"),
 	CONSTRAINT "payment_sync_batches_new_ids_within_rejected" CHECK ("payment_sync_batches"."rejected_new_ids" <= "payment_sync_batches"."rejected_validation" + "payment_sync_batches"."rejected_customer_not_found" + "payment_sync_batches"."rejected_id_reused"),
-	CONSTRAINT "payment_sync_batches_after_rejection_within_accepted" CHECK ("payment_sync_batches"."accepted_after_rejection" <= "payment_sync_batches"."posted" + "payment_sync_batches"."posted_needs_review")
+	CONSTRAINT "payment_sync_batches_after_rejection_within_accepted" CHECK ("payment_sync_batches"."accepted_after_rejection" <= "payment_sync_batches"."posted" + "payment_sync_batches"."posted_needs_review"),
+	CONSTRAINT "payment_sync_batches_after_rejection_by_day_object" CHECK (jsonb_typeof("payment_sync_batches"."accepted_after_rejection_by_day") = 'object')
 );
 --> statement-breakpoint
 ALTER TABLE "payment_sync_batches" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint

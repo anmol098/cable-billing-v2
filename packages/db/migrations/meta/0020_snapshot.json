@@ -1,6 +1,6 @@
 {
-  "id": "26274ff5-7ee2-40cf-95ea-91caac800a3c",
-  "prevId": "c078bd57-b929-4492-9bdf-39966cb843a0",
+  "id": "b85eccec-b9a6-4736-9350-bad6b5354aa8",
+  "prevId": "ddc5c041-5764-4eb5-bf78-795f8dbdfd21",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -7853,6 +7853,13 @@
           "notNull": true,
           "default": 0
         },
+        "accepted_after_rejection_by_day": {
+          "name": "accepted_after_rejection_by_day",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{}'::jsonb"
+        },
         "retry_later_conflict": {
           "name": "retry_later_conflict",
           "type": "integer",
@@ -7980,6 +7987,10 @@
         "payment_sync_batches_after_rejection_within_accepted": {
           "name": "payment_sync_batches_after_rejection_within_accepted",
           "value": "\"payment_sync_batches\".\"accepted_after_rejection\" <= \"payment_sync_batches\".\"posted\" + \"payment_sync_batches\".\"posted_needs_review\""
+        },
+        "payment_sync_batches_after_rejection_by_day_object": {
+          "name": "payment_sync_batches_after_rejection_by_day_object",
+          "value": "jsonb_typeof(\"payment_sync_batches\".\"accepted_after_rejection_by_day\") = 'object'"
         }
       },
       "isRLSEnabled": true

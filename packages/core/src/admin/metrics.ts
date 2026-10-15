@@ -160,7 +160,11 @@ export const platformMetrics = defineAdminService({
                coalesce(sum(rejected_id_reused), 0)::int AS rejected_id_reused,
                coalesce(sum(rejected_without_id), 0)::int AS rejected_without_id,
                coalesce(sum(rejected_new_ids), 0)::int AS rejected_new_ids,
-               coalesce(sum(accepted_after_rejection), 0)::int AS accepted_after_rejection,
+               coalesce((SELECT sum(d.value::int) FROM payment_sync_batches b2,
+                                 jsonb_each_text(b2.accepted_after_rejection_by_day) d
+                          WHERE b2.business_date >= ${windowFromDay}::date
+                            AND d.key >= ${windowFromDay}), 0)::int
+                 AS accepted_after_rejection_in_window,
                coalesce(sum(retry_later_conflict), 0)::int AS retry_later_conflict,
                coalesce(sum(retry_later_internal), 0)::int AS retry_later_internal,
                coalesce(sum(retry_later_rate_limited), 0)::int AS retry_later_rate_limited
@@ -213,7 +217,12 @@ export const platformMetrics = defineAdminService({
       const s0 = sync[0] ?? {};
       const syncAccepted = asInt(s0.posted) + asInt(s0.posted_needs_review);
       const syncRejected = asInt(s0.rejected_new_ids);
-      const syncAttempts = syncAccepted + syncRejected - asInt(s0.accepted_after_rejection);
+      // Subtract only the accepted ids whose earlier refusal is inside the window (a refusal before
+      // it is not in `rejected_new_ids` here either); never fewer attempts than accepted ids.
+      const syncAttempts = Math.max(
+        syncAccepted,
+        syncAccepted + syncRejected - asInt(s0.accepted_after_rejection_in_window),
+      );
       const rejectedAnswersByCode: Record<PaymentSyncRejectCode, number> = {
         VALIDATION: asInt(s0.rejected_validation),
         CUSTOMER_NOT_FOUND: asInt(s0.rejected_customer_not_found),

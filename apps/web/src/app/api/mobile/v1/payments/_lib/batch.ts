@@ -30,9 +30,10 @@
  * - Results are in request order, one per item, each echoing the item's id (lower case) and, for
  *   saved outcomes, the posted payment with its `provisional_ref` (T-066 needs both).
  * - PRD §16 metrics (T-086a): after the last item, the answers (outcome, error code, payment id;
- *   nothing else) are counted once with `recordPaymentSyncBatch`, in their own transaction. Best
- *   effort: a failure there is logged and sent to Sentry but never changes the answer (the
- *   payments are already saved); that batch is then missing from the console's figures.
+ *   nothing else) are counted once with `recordPaymentSyncBatch`, in their own transaction, after
+ *   the answer is sent (`MobileDeps.afterResponse`, Next's `after`). Best effort: a failure there
+ *   is logged and sent to Sentry but never changes or delays the answer (the payments are already
+ *   saved); that batch is then missing from the console's figures.
  */
 import {
   ENDPOINTS,
@@ -48,6 +49,12 @@ import {
   postPayment,
   recordPaymentSyncBatch,
 } from "@cb/core";
+import {
+  PAYMENT_SYNC_REJECT_CODES,
+  PAYMENT_SYNC_RETRY_CODES,
+  type PaymentSyncRejectCode,
+  type PaymentSyncRetryCode,
+} from "@cb/db";
 import * as Sentry from "@sentry/nextjs";
 import {
   type AuthenticatedScope,
@@ -203,21 +210,35 @@ async function postItem(
   }
 }
 
-type RejectCode = Extract<PaymentSyncItemInput, { outcome: "rejected" }>["code"];
-type RetryCode = Extract<PaymentSyncItemInput, { outcome: "retry_later" }>["code"];
+const isRejectCode = (code: string | undefined): code is PaymentSyncRejectCode =>
+  (PAYMENT_SYNC_REJECT_CODES as readonly (string | undefined)[]).includes(code);
+const isRetryCode = (code: string | undefined): code is PaymentSyncRetryCode =>
+  (PAYMENT_SYNC_RETRY_CODES as readonly (string | undefined)[]).includes(code);
 
-/** One answer → what the sync metrics count (T-086a): outcome, code and payment id only. */
-export function syncMetricItem(result: ResultWire): PaymentSyncItemInput {
+/**
+ * One answer → what the sync metrics count (T-086a): outcome, code and payment id only. Every
+ * code `postItem` answers is one of `PAYMENT_SYNC_*_CODES` (tested); anything else would be
+ * counted as VALIDATION / INTERNAL rather than lost, and `unknownCode` is set.
+ */
+export function syncMetricItem(result: ResultWire): {
+  item: PaymentSyncItemInput;
+  unknownCode: boolean;
+} {
   const id = result.id === UNUSABLE_ITEM_ID ? null : result.id;
+  const code = result.error?.code;
   switch (result.outcome) {
     case "posted":
     case "posted_needs_review":
     case "duplicate":
-      return { outcome: result.outcome, id: result.id };
+      return { item: { outcome: result.outcome, id: result.id }, unknownCode: false };
     case "rejected":
-      return { outcome: "rejected", id, code: result.error?.code as RejectCode };
+      return isRejectCode(code)
+        ? { item: { outcome: "rejected", id, code }, unknownCode: false }
+        : { item: { outcome: "rejected", id, code: "VALIDATION" }, unknownCode: true };
     case "retry_later":
-      return { outcome: "retry_later", id, code: result.error?.code as RetryCode };
+      return isRetryCode(code)
+        ? { item: { outcome: "retry_later", id, code }, unknownCode: false }
+        : { item: { outcome: "retry_later", id, code: "INTERNAL" }, unknownCode: true };
   }
 }
 
@@ -227,8 +248,14 @@ async function recordSyncMetrics(
   results: readonly ResultWire[],
 ): Promise<void> {
   try {
+    const mapped = results.map(syncMetricItem);
+    if (mapped.some((m) => m.unknownCode)) {
+      scope.log.warn("mobile_api.payment_sync_unknown_code", {
+        items: mapped.filter((m) => m.unknownCode).length,
+      });
+    }
     const recorded = await recordPaymentSyncBatch.call(scope.deps.runtime, scope.ctx, {
-      items: results.map(syncMetricItem),
+      items: mapped.map((m) => m.item),
     });
     if (!recorded.ok) {
       scope.log.warn("mobile_api.payment_sync_metrics_failed", {
@@ -276,7 +303,11 @@ export function paymentBatchHandler(getDeps: () => MobileDeps, options: PaymentB
       retry_later: 0,
     };
     for (const r of results) counts[r.outcome] += 1;
-    await recordSyncMetrics(scope, results);
+    // After the answer in production (`afterResponse` = Next's `after`): a slow or stalled
+    // metrics write must never hold up the phone's answer. Inline when there is no hook (tests).
+    const afterResponse = scope.deps.afterResponse;
+    if (afterResponse) afterResponse(() => recordSyncMetrics(scope, results));
+    else await recordSyncMetrics(scope, results);
     scope.log.info("mobile_api.payment_batch", {
       items: results.length,
       ...counts,

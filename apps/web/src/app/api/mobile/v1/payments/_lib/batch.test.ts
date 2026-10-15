@@ -20,10 +20,17 @@ import {
 } from "@cb/contracts";
 import { revokeDevice, revokeMobileRefreshTokens } from "@cb/core";
 import { contextFor, setSubscriptionStatus } from "@cb/core/testing";
-import { createDb, type DbClient, uuidv7 } from "@cb/db";
+import {
+  createDb,
+  type DbClient,
+  PAYMENT_SYNC_BATCH_MAX,
+  PAYMENT_SYNC_REJECT_CODES,
+  PAYMENT_SYNC_RETRY_CODES,
+  uuidv7,
+} from "@cb/db";
 import { describeDb, useTestDatabase } from "@cb/db/testing";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
-import { paymentBatchHandler } from "./batch";
+import { paymentBatchHandler, syncMetricItem } from "./batch";
 import {
   insertCustomer,
   issueBill,
@@ -93,6 +100,39 @@ describeDb("POST /payments:batch (T-061)", () => {
   async function failure(response: Response, status: number) {
     expect(response.status).toBe(status);
     return ErrorResponse.parse(await response.json()).error;
+  }
+
+  /** Runs one query as the platform role (`app_platform`, what `withPlatform` uses). */
+  async function asPlatform(text: string, values: unknown[] = []) {
+    const client = await t.current.admin.connect();
+    try {
+      await client.query("BEGIN");
+      await client.query("SET LOCAL ROLE app_platform");
+      return (await client.query(text, values)).rows;
+    } finally {
+      await client.query("ROLLBACK");
+      client.release();
+    }
+  }
+
+  /** The tenant's summed sync counters, read on the platform path (counts only). */
+  async function platformCounters(operatorId: string) {
+    const rows = await asPlatform(
+      `SELECT count(*)::int AS batches, coalesce(sum(items), 0)::int AS items,
+              coalesce(sum(posted + posted_needs_review), 0)::int AS accepted,
+              coalesce(sum(duplicate), 0)::int AS duplicate,
+              coalesce(sum(rejected_validation), 0)::int AS rejected_validation,
+              coalesce(sum(rejected_customer_not_found), 0)::int AS rejected_customer_not_found,
+              coalesce(sum(rejected_id_reused), 0)::int AS rejected_id_reused,
+              coalesce(sum(rejected_without_id), 0)::int AS rejected_without_id,
+              coalesce(sum(rejected_new_ids), 0)::int AS rejected_new_ids,
+              coalesce(sum(accepted_after_rejection), 0)::int AS accepted_after_rejection,
+              coalesce(sum(retry_later_conflict + retry_later_internal
+                           + retry_later_rate_limited), 0)::int AS retry_later
+         FROM payment_sync_batches WHERE operator_id = $1`,
+      [operatorId],
+    );
+    return rows[0];
   }
 
   it("posts each payment and answers the posted payment the phone prints", async () => {
@@ -505,6 +545,17 @@ describeDb("POST /payments:batch (T-061)", () => {
         );
       }
       expect(await moneyRowCounts(t.current, op)).toEqual(counts);
+
+      // T-086a: 20 batches of 5 counted once each; each payment accepted once, the other 9 + 10
+      // sends of it are duplicates. No double counting under concurrent replays.
+      expect(await platformCounters(op)).toMatchObject({
+        batches: 20,
+        items: 100,
+        accepted: 5,
+        duplicate: 95,
+        rejected_new_ids: 0,
+        retry_later: 0,
+      });
     }, 120_000);
 
     it("a timeout after the office saved the batch: the retry gets the same payments, nothing doubles", async () => {
@@ -781,39 +832,6 @@ describeDb("POST /payments:batch (T-061)", () => {
   }, 60_000);
 
   describe("PRD §16 sync metrics (T-086a)", () => {
-    /** Runs one query as the platform role (`app_platform`, what `withPlatform` uses). */
-    async function asPlatform(text: string, values: unknown[] = []) {
-      const client = await t.current.admin.connect();
-      try {
-        await client.query("BEGIN");
-        await client.query("SET LOCAL ROLE app_platform");
-        return (await client.query(text, values)).rows;
-      } finally {
-        await client.query("ROLLBACK");
-        client.release();
-      }
-    }
-
-    /** The tenant's summed sync counters, read on the platform path (counts only). */
-    async function platformCounters(operatorId: string) {
-      const rows = await asPlatform(
-        `SELECT count(*)::int AS batches, coalesce(sum(items), 0)::int AS items,
-                coalesce(sum(posted + posted_needs_review), 0)::int AS accepted,
-                coalesce(sum(duplicate), 0)::int AS duplicate,
-                coalesce(sum(rejected_validation), 0)::int AS rejected_validation,
-                coalesce(sum(rejected_customer_not_found), 0)::int AS rejected_customer_not_found,
-                coalesce(sum(rejected_id_reused), 0)::int AS rejected_id_reused,
-                coalesce(sum(rejected_without_id), 0)::int AS rejected_without_id,
-                coalesce(sum(rejected_new_ids), 0)::int AS rejected_new_ids,
-                coalesce(sum(accepted_after_rejection), 0)::int AS accepted_after_rejection,
-                coalesce(sum(retry_later_conflict + retry_later_internal
-                             + retry_later_rate_limited), 0)::int AS retry_later
-           FROM payment_sync_batches WHERE operator_id = $1`,
-        [operatorId],
-      );
-      return rows[0];
-    }
-
     it("a batch with new, replayed and refused payments moves the counters once per payment id", async () => {
       const { tenant, lineman } = await tenantWithLineman(t.current, h);
       const other = await tenantWithLineman(t.current, h);
@@ -949,5 +967,80 @@ describeDb("POST /payments:batch (T-061)", () => {
         faulty.logs.records.some((r) => r.event === "mobile_api.payment_sync_metrics_failed"),
       ).toBe(true);
     }, 60_000);
+
+    it("the answer never waits for the metrics write: a stalled one runs after the response", async () => {
+      // The metrics transaction (the 2nd write of a one-item batch) never resolves.
+      let writes = 0;
+      const stalled: DbClient = {
+        ...t.current.db,
+        withTenant: (operatorId, fn, options) => {
+          if (options?.accessMode !== "read only") {
+            writes += 1;
+            if (writes === 2) return new Promise<never>(() => {});
+          }
+          return t.current.db.withTenant(operatorId, fn, options);
+        },
+      };
+      const deferred: Promise<void>[] = [];
+      const harness = mobileApiHarness(t.current, NOW, {
+        db: stalled,
+        afterResponse: (task) => {
+          deferred.push(task());
+        },
+      });
+      const handler = paymentBatchHandler(harness.getDeps);
+      const { tenant, lineman } = await tenantWithLineman(t.current, harness);
+      writes = 0;
+      const customer = await insertCustomer(t.current, tenant.operatorId);
+      const items = [paymentItem(lineman, customer, {}, 1)];
+      const answered = await Promise.race([
+        send(lineman.accessToken, { payments: items }, handler),
+        new Promise<"timed out">((resolve) => setTimeout(() => resolve("timed out"), 10_000)),
+      ]);
+      expect(answered).not.toBe("timed out");
+      const body = await ok(answered as Response, items);
+      expect(body.results[0]?.outcome).toBe("posted");
+      expect(deferred).toHaveLength(1); // handed to afterResponse, still pending
+      expect((await moneyRowCounts(t.current, tenant.operatorId)).payments).toBe(1);
+      expect((await platformCounters(tenant.operatorId))?.batches).toBe(0);
+    }, 60_000);
+
+    it("maps every answer code to a metrics code, and the batch limits agree", () => {
+      expect(PAYMENT_SYNC_BATCH_MAX).toBe(PAYMENT_BATCH_MAX);
+      const id = uuidv7();
+      const answer = (outcome: "rejected" | "retry_later", code: string) =>
+        syncMetricItem({
+          id,
+          outcome,
+          payment: null,
+          review_reason: null,
+          // biome-ignore lint/suspicious/noExplicitAny: every code postItem answers.
+          error: { code: code as any, message: "x" },
+        });
+      for (const code of PAYMENT_SYNC_REJECT_CODES) {
+        expect(answer("rejected", code)).toEqual({
+          item: { outcome: "rejected", id, code },
+          unknownCode: false,
+        });
+      }
+      for (const code of PAYMENT_SYNC_RETRY_CODES) {
+        expect(answer("retry_later", code)).toEqual({
+          item: { outcome: "retry_later", id, code },
+          unknownCode: false,
+        });
+      }
+      expect(answer("rejected", "DEVICE_REVOKED").unknownCode).toBe(true);
+      // Every code batch.ts can answer for an item (string literals passed to itemError, plus
+      // the ID_REUSED code passed through) is one the metrics know.
+      const source = readFileSync(new URL("./batch.ts", import.meta.url), "utf8");
+      const answered = new Set(
+        [...source.matchAll(/itemError\(\s*"([A-Z_]+)"/g)].map((m) => m[1] ?? ""),
+      );
+      answered.add("ID_REUSED_WITH_DIFFERENT_DATA");
+      expect([...answered].sort()).toEqual(
+        [...PAYMENT_SYNC_REJECT_CODES, ...PAYMENT_SYNC_RETRY_CODES].sort(),
+      );
+      expect(source).toMatch(/case "ID_REUSED_WITH_DIFFERENT_DATA": \{[^}]*itemError\(\s*code,/);
+    });
   });
 });
