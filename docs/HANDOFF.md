@@ -2,8 +2,8 @@
 
 | | |
 |---|---|
-| **Date** | 2026-10-14 |
-| **State** | 67 of 91 tasks done. Phases 0–4 are essentially built: billing, payments, statements, reports, import, subscriptions, the admin console, the audit log and the whole Android collect/handover path are merged (see §2). In flight at the time of writing: T-045a, T-082, T-086b, T-088. What's left is mostly blocked on people: accounts (H-01), the legacy dump (H-06) and product decisions (§8). |
+| **Date** | 2026-10-15 |
+| **State** | 76 of 96 tasks done. Every task an agent can do without a product decision, real accounts or the legacy dump is merged. What's left: product decisions (§8: T-031a, T-045b, T-062a, T-086e, T-086f), accounts (H-01 → T-073, T-095a) and the legacy dump (H-06 → T-092…T-094). Nothing is in flight. |
 | **Environment** | A cloud container with full network access (Android SDK, Google Maven, Maven Central, Gradle plugin portal all reachable). Setup steps are in §3. |
 
 Read this first, then `CLAUDE.md` and `tasks/README.md`.
@@ -23,7 +23,7 @@ Read this first, then `CLAUDE.md` and `tasks/README.md`.
 | Environments runbook (H-01 walkthrough) | `docs/runbooks/environments.md` |
 | Android build notes | `apps/android/README.md` |
 | CI | `.github/workflows/{web,android,generated-check}.yml`. Required-check names: `Web`, `Web e2e`, `Generated files`, `Android` |
-| Merged PRs so far | Phase 0: #1 T-001 · #2 T-004 · #3 T-002 · #5 T-003 · #6 T-005 · #7 T-011 · #8 T-006 · #9 T-008 · #10 T-010 · #12 T-007 · #13 T-009 · #15 CI fix<br>Phase 1: #16 T-024 · #17 T-020 · #18 T-041 · #19 T-067 · #20 T-051 · #21 T-042 · #22 T-040 · #23 T-021 · #24 test fix · #25 T-020a · #26 T-063 · #27 T-022 · #28 T-025 · #29 handoff<br>Phase 1–3 (continued): #30 T-023 · #31 T-064 · #32 T-046 · #33 T-043 · #34 T-068 · #35 T-026 · #36 T-044 · #37/#39/#41/#46 test fixes · #38 T-036 · #40 T-065 · #42 T-050 · #43 T-029 · #44 T-028 · #45 T-027 · #47 T-052 · #48 T-066 · #49 T-087 · #50 T-090<br>Wave 3: #51 T-062 · #52 T-033 · #53 handoff · #54 T-030 · #55 T-071 · #56 T-061 · #57 T-047 · #58 T-032 · #59 T-034 · #60 T-048 · #61 T-049 · #62 T-070 · #63 T-069 · #64 T-031 · #65 T-085 · #66 T-080 · #67 T-060 · #68 T-045 · #69/#70/#76/#77 test fixes · #71 T-083 · #72 T-035 · #73 T-084 · #74 T-081 · #75 T-086 · #78 T-072 · #79 T-096 · #80 T-087a · #81 T-091 |
+| Merged PRs so far | Phase 0: #1 T-001 · #2 T-004 · #3 T-002 · #5 T-003 · #6 T-005 · #7 T-011 · #8 T-006 · #9 T-008 · #10 T-010 · #12 T-007 · #13 T-009 · #15 CI fix<br>Phase 1: #16 T-024 · #17 T-020 · #18 T-041 · #19 T-067 · #20 T-051 · #21 T-042 · #22 T-040 · #23 T-021 · #24 test fix · #25 T-020a · #26 T-063 · #27 T-022 · #28 T-025 · #29 handoff<br>Phase 1–3 (continued): #30 T-023 · #31 T-064 · #32 T-046 · #33 T-043 · #34 T-068 · #35 T-026 · #36 T-044 · #37/#39/#41/#46 test fixes · #38 T-036 · #40 T-065 · #42 T-050 · #43 T-029 · #44 T-028 · #45 T-027 · #47 T-052 · #48 T-066 · #49 T-087 · #50 T-090<br>Wave 3: #51 T-062 · #52 T-033 · #53 handoff · #54 T-030 · #55 T-071 · #56 T-061 · #57 T-047 · #58 T-032 · #59 T-034 · #60 T-048 · #61 T-049 · #62 T-070 · #63 T-069 · #64 T-031 · #65 T-085 · #66 T-080 · #67 T-060 · #68 T-045 · #69/#70/#76/#77 test fixes · #71 T-083 · #72 T-035 · #73 T-084 · #74 T-081 · #75 T-086 · #78 T-072 · #79 T-096 · #80 T-087a · #81 T-091<br>Wave 4: #82 handoff · #83 T-088 · #84 T-082 · #85 T-045a · #86 T-086b · #87 T-096a · #88 T-086c · #89 T-087b · #90 import race fix (T-084) · #91 T-086a · #92 T-086d · #93 mobile batch id fix (T-061) · #94 T-095 |
 
 **Verified on `feature/mvp`** (Node 24.21.0, pnpm 12.11.2, JDK 21, Postgres 17): `pnpm install --frozen-lockfile`, `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build`, `pnpm generate` (no diff), the tokens / icons / i18n `--check` modes, `node scripts/tasks.mjs check --local`, the Playwright e2e suite, and in `apps/android` `./gradlew ktlintCheck detekt lint testDevDebugUnitTest assembleDevDebug :detekt-rules:test`. CI runs the same on every PR.
 
@@ -34,11 +34,10 @@ Read this first, then `CLAUDE.md` and `tasks/README.md`.
 | Status | Tasks |
 |---|---|
 | **Done (Phase 0)** | T-001 … T-011 |
-| **Done (Phases 1–5)** | T-020 … T-036 (data, core, auth, sign-up, shell, settings, plans, team, customers, connections, audit, seed) · T-040 … T-052 (billing calc/run/UI, allocation, netting, jobs, adjustments, payments, statements, receipt links, mobile contract, invariants) · T-060 … T-072 (mobile API, handover, the whole Android app incl. durability tests) · T-080 … T-087a (registers, reports, home, import, Razorpay + read-only mode, admin console, public pages, payload) · T-090 · T-091 (draft; column names wait for the dump) · T-096 |
-| **In flight** | T-045a Owner back-dated new connection · T-082 CSV exports · T-086b admin TOTP per session · T-088 e2e journeys |
-| **Ready for an agent** | T-086a sync metrics · T-086c platform-read allow-list audit · T-087b language switch label/font · T-095 load testing (run it on a quiet machine or CI, not a shared container) · T-096a health DB ping + cron check-ins |
-| **Waiting on a product decision** | T-031a apply a plan's new rent to existing connections · T-062a what "flag an unsubmitted handover" should do (see §8) |
-| **Waiting on people** | T-073 (needs H-01 Play Console) · T-092 / T-093 / T-094 migration (need the legacy dump, H-06) |
+| **Done (Phases 1–5)** | T-020 … T-036 · T-040 … T-052 · T-045a · T-060 … T-072 · T-080 … T-088 (registers, reports, CSV exports, home, import, Razorpay + read-only mode, admin console with per-session TOTP, setup-link enrolment, platform-read allow-list and sync metrics, public pages, payload, language switch, e2e journeys) · T-090 · T-091 (draft; column names wait for the dump) · T-095 (tooling; real numbers are T-095a) · T-096 · T-096a |
+| **In flight** | none |
+| **Waiting on a product decision** | T-031a apply a plan's new rent to existing connections · T-045b plain add into a month whose run has passed (refuse and route to the Owner flow, or charge automatically?) · T-062a what "flag an unsubmitted handover" should do · T-086e platform whole-row reads of `users` / `jobs` (narrow or accept) · T-086f rate limit on `/payments:batch` + retention of the sync-metrics tables |
+| **Waiting on people** | T-073 (H-01 Play Console) · T-095a load test on a Vercel preview + Neon branch (H-01) · T-092 / T-093 / T-094 migration (the legacy dump, H-06) |
 | **Human** | H-01 accounts + secrets · H-02 domain / accent / applicationId · H-03 Hindi review · H-04 usability round · H-05 device + printer matrix · H-06 migration sign-off · H-07 finance sign-off · H-08 pilot · H-09 cutover · H-10 GSTIN |
 
 Run `node scripts/tasks.mjs board` for the live view.
@@ -56,6 +55,8 @@ Run `node scripts/tasks.mjs board` for the live view.
 - T-087a: pages are 50–120 KiB lighter, but Lighthouse mobile ≥ 90 was not shown (scores swung 20–40 points on the loaded container). Re-measure on a Vercel preview (H-01). The language-switch label and the Devanagari font on English pages are T-087b.
 - T-096: backup and restore were proven only on local Postgres with fake data (1.17 M rows: 18 s backup, 44 s restore + verify). The Neon drill, the bucket, the Sentry alerts (`sentry-alerts.mjs --apply`) and the uptime check need H-01. The nightly jobs only start once `BACKUP_ENABLED` / `RESTORE_DRILL_ENABLED` are set and `backup.yml` is on `main`.
 - T-091: the mapping names every legacy table but only three legacy columns are known; the rest wait for the dump (run the T-090 profiler and query Q0, then §12 of `docs/migration/mapping.md`).
+- T-095: the load tool works end to end against `next start`, but "p95 < 2 s" was never measured on real infrastructure (T-095a). On the shared container the 50-item `/payments:batch` reached 25.8 s p95, close to T-061's 30 s per-batch budget: items post one at a time, so watch it on the real run.
+- T-087b: English receipt pages (`/r/<token>`, hand-built HTML in `app/r/[token]/_lib/html.ts`) still load the Devanagari face for their own "हिंदी" link.
 - T-067 / T-073: set `bundle { language { enableSplit = false } }` before the first Play upload, or Hindi strings can be missing on English-language phones.
 
 ---
@@ -123,17 +124,16 @@ su postgres -c "psql -c \"ALTER USER postgres PASSWORD 'postgres';\" -c 'CREATE 
 
 ## 5. Recommended next wave
 
-Follow `node scripts/tasks.mjs next`. What is left for agents is small; the big remaining items need people.
+Nothing an agent can do alone is left on the board. In order:
 
 | Do | Why |
 |---|---|
-| Merge the in-flight PRs (T-045a, T-082, T-086b, T-088) | T-045a and T-086b are `review: required`: review the diff yourself or with a reviewer agent before merging (T-086's review found a real append-only gap). |
-| T-086c, T-096a, T-087b, T-086a | Small hardening follow-ups from the reviews. |
-| Get answers to §8 | Unblocks T-031a and T-062a, and several defaults already built in. |
-| H-01, then T-073, then T-095 on real infrastructure | Production builds, Play upload, backups, alerts and a meaningful load test all need the accounts. |
-| H-06: the legacy dump | Unblocks finishing T-091 and the whole migration chain T-092 → T-093 → T-094 → H-09 cutover. |
+| Answer §8 (wave 4 list first) | Unblocks T-031a, T-045b, T-062a, T-086e, T-086f; each is small once decided. |
+| H-01 accounts | Production builds, then T-073 (Play upload), T-095a (real load test), backups/alerts `--apply` (T-096/T-096a). |
+| H-06: the legacy dump | Finishes T-091 and the whole migration chain T-092 → T-093 → T-094 → H-09 cutover. |
+| Small follow-ups without a task yet | Android: match a nil-id batch result by position so a refused item goes to "Call office" instead of retrying forever (after #93) · the receipt page's Devanagari face on English receipts (T-087b) · the load tool refuses production only when `LOAD_FORBIDDEN_HOSTS` is set (make it default-deny?). |
 
-The user's standing instruction in this session was "keep merging": the coordinator verified each PR locally (rebase onto the latest `feature/mvp`, full checks incl. DB tests, Gradle for Android), reviewed `review: required` PRs, and merged once CI was green. Ask the user again in a new session.
+The user's standing instruction in this session was "keep merging": the coordinator verified each PR locally (rebase onto the latest `feature/mvp`, full checks incl. DB tests, Gradle for Android), had a reviewer agent review every `review: required` PR, and merged once CI was green. Ask the user again in a new session.
 
 ---
 
@@ -164,6 +164,11 @@ The user's standing instruction in this session was "keep merging": the coordina
 22. **Removing an agent's worktree means it can't be resumed.** Only remove worktrees of agents that have sent their final report; to follow up on a finished agent's PR, start a new agent on its branch.
 23. **Review `review: required` PRs with a separate reviewer agent** (read-only, adversarial, ranked findings) and send the fixes back as a new agent. On T-086 this found that an ended support grant could be reopened at the database level.
 24. **Acceptance criteria that need a device, real accounts or the dump stay unticked**, with the reason in the completion notes; the task can still be completed and merged. §2 lists every such gap.
+
+25. **Reviewer agents keep finding real bugs in `review: required` PRs.** Wave 4: T-045a could leave a month never charged (a completed run without the customer); T-086a held the phone's answer on a metrics write and could report a success rate over 100 %; T-086d recorded the new admin as its own creator and leaked admin logins by timing. Always review those PRs adversarially before merging, and send the fixes back to the author agent (keep its worktree until merged so it can be resumed).
+26. **Never `pkill`/`killall` by name** in a shared container: one agent's `pkill -f vitest` killed every agent's test runs. Kill only PIDs you started; say so in every prompt.
+27. **Load, not code, caused most red local runs.** With 4–5 agents, timing checks (`seeded.test.ts` "timing sanity", Tailwind gallery, property tests) failed in packages a PR never touched. Run `--concurrency=1`, re-run the failing file alone, and only then call it real. One genuine race (concurrent imports, #90) showed up the same way, so don't dismiss a failure without reading it.
+28. **Rate limits stop all agents at once.** Resume each with a message once the limit resets ("Postgres was restarted; servers and test runs are gone; `git status` first"); their worktrees keep the work.
 
 **Interfaces delivered so far** (details in each task file's *Completion notes*):
 
@@ -267,4 +272,13 @@ Report back: PR URL, head SHA, interfaces for later agents, deviations, problems
 - *Android (T-072):* add the nightly emulator workflow from `docs/testing/android-field-uat.md`? · a deactivated lineman's held payments still need the office "release" flow (T-066).
 - *Web payload (T-087a):* with a Sentry DSN set, the SDK still downloads after load, so Lighthouse still counts it.
 - *Migration (T-091):* 27 business decisions are listed in `docs/migration/mapping.md` §13 (money unit, rounding tolerance, `isReceipt`, which balance is authoritative, how much history, payment method for legacy receipts, lineman login collisions, owners of the 8 operators …). Also: `migration_batches` / `migration_exceptions` / `legacy_id_map` from PLAN §7.2 don't exist yet (T-092), and `payments.method` has no "not recorded" value.
+**Questions raised in the fourth wave** (default in brackets)
+- *Back-dated add (T-045a, T-045b):* a start on the 1st of a billed month is charged that month's full rent whatever the D-18 setting [decided by PLAN §8.1] · the plain "Add connection" with a start in a month whose run has passed: refuse and route to the Owner's back-dated flow, or charge automatically? [proposal: refuse]
+- *Exports (T-082):* a full customer file with address, alternate phone and connections? · `.xlsx` with text columns so Excel doesn't mangle long VC numbers and phones? · a download link on `/customers`?
+- *Platform admin (T-086b/c/d/e):* platform admins now enrol only through a one-time link: `pnpm --filter @cb/core admin:create -- --by <enrolled admin email> --email <new admin>` (first admin: `--bootstrap`) · is a 1-hour link long enough when sent by hand, and should the script email it? · no recovery yet for an admin who lost the authenticator (an audited reset?) · per-session list/sign-out in the console? · T-086e: the platform role reads whole `users` rows (staff/lineman names, phones, emails) and all of `jobs` because the auth adapter runs on `withPlatform`: narrow with column grants or accept?
+- *Sync metrics (T-086a, T-086f):* should a "send again" payment that never gets a final answer (lost phone) count as a failed attempt? · should a reused id count as a failed attempt? · keep `payment_sync_rejections` (a per-id refusal log, no PII)? · T-086f: rate limit and retention.
+- *Monitoring (T-096a):* Sentry cron monitors must be created with `sentry-alerts.mjs --apply` before check-ins count; someone must set each monitor's notification target · session-close and receipt-link cleanup crons aren't monitored yet.
+- *Load (T-095):* three proposed budgets aren't in the PRD: exports 60 s, billing run 30 min at legacy size and 5 h at 10× · should the load tool refuse production by default?
+- *Journeys (T-088):* after "Make bills now" runs again, the summary still says "New bills: 3" (counts add up over the month) · after an undo the payment register says "4 payments · 1 cancelled" while Home says "3 payments".
+
 - *Migration (T-090):* the real dump is needed for column names, charset, and whether money is in rupees or paise (feeds T-091 and H-06) · the MariaDB tests don't run in CI (no MariaDB service in `web.yml`).
