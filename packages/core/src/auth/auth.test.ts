@@ -20,7 +20,7 @@ import { beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { resolveAdminContext } from "../admin/context";
 import { newRequestId } from "../context/runtime";
 import { captureLogs, type SeededTenant, seedTenant } from "../testing";
-import { createAdminSetupService, reissueAdminSetupLink } from "./admin-setup";
+import { createAdminSetupService, createPlatformAdmin, reissueAdminSetupLink } from "./admin-setup";
 import { createAuthService, type PasswordResetEmail } from "./auth";
 import { hashPassword } from "./password";
 import { SESSION_POLICY } from "./policy";
@@ -175,8 +175,12 @@ describeDb("web authentication (Better Auth)", () => {
       ).rows[0]?.email ?? "";
     const issued = await reissueAdminSetupLink(
       { db: t.current.db, logger: logs.logger },
-      { email },
+      { email, by: await linkIssuer() },
     );
+    return completeLink(issued.token);
+  };
+  /** Start + Done on a setup link in a new browser, with PASSWORD and the right code. */
+  const completeLink = async (token: string) => {
     const setup = createAdminSetupService({
       auth: service,
       db: t.current.db,
@@ -184,16 +188,36 @@ describeDb("web authentication (Better Auth)", () => {
       logger: logs.logger,
     });
     const browser = newBrowser();
-    const started = await setup.start({ token: issued.token, headers: browser.headers() });
+    const started = await setup.start({ token, headers: browser.headers() });
     if (!started.ok) throw new Error(`setup start: ${started.error.code}`);
     const done = await setup.complete({
-      token: issued.token,
+      token,
+      keyId: started.value.keyId,
       password: PASSWORD,
       code: totp(started.value.secret),
       headers: browser.headers(),
     });
     if (!done.ok || !done.value.signedIn) throw new Error("setup complete failed");
     return { browser, secret: started.value.secret };
+  };
+  /** Links are issued by an enrolled admin; the first one is made with --bootstrap (T-086d). */
+  let issuerEmail: string | null = null;
+  const linkIssuer = async () => {
+    if (!issuerEmail) {
+      const root = await createPlatformAdmin(
+        { db: t.current.db, logger: logs.logger },
+        {
+          email: "root-admin@platform.test",
+          name: "Root Admin",
+          login: "root-admin",
+          language: "en",
+          by: { kind: "bootstrap", osUser: "tester", host: "test-host" },
+        },
+      );
+      await completeLink(root.token);
+      issuerEmail = "root-admin@platform.test";
+    }
+    return { kind: "admin" as const, email: issuerEmail };
   };
 
   beforeAll(async () => {
@@ -636,8 +660,8 @@ describeDb("web authentication (Better Auth)", () => {
       // Platform events: operator_id NULL, no PII.
       const actions = await auditRows(admin.userId);
       expect(actions.map((r) => r.action)).toEqual([
+        // (the setup link itself was issued by another admin: they are that event's actor)
         "auth.sign_in_blocked",
-        "auth.admin_setup_link_issued",
         "auth.admin_setup_completed",
         "auth.signed_in",
         "auth.signed_out",
@@ -958,12 +982,6 @@ describeDb("web authentication (Better Auth)", () => {
       const text = JSON.stringify(rows);
       for (const secret of [...logins, ownerEmail, PASSWORD]) expect(text).not.toContain(secret);
       for (const row of rows) {
-        if (row.action === "auth.admin_setup_link_issued") {
-          // T-086d: made on the command line, not in a request: no IP or browser.
-          expect(row).toMatchObject({ ip: null, user_agent: null });
-          expect(row.request_id).toBeTruthy();
-          continue;
-        }
         expect(row.ip).toMatch(/^198\.51\.100\.\d+$/);
         expect(row.user_agent).toBe("vitest-browser/1.0");
         expect(row.request_id).toBeTruthy();

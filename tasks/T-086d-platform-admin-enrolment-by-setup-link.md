@@ -126,9 +126,9 @@ PLAN §9.2, §12.4; T-026 (open question "Platform admin bootstrap"), T-086b com
 
 | Where | What |
 |---|---|
-| `packages/core/src/auth/admin-setup.ts` (new) | `createPlatformAdmin(deps, { email, name, login, language })`: inserts a platform admin with **no password**, returns `{ userId, token, expiresAt }`. `reissueAdminSetupLink(deps, { email })`: for an active admin **without** TOTP; removes their password, sessions, any half-made `two_factors` row and older links. Both throw `AdminSetupIssueError` (`invalid_input`, `already_exists`, `not_found`, `not_a_platform_admin`, `disabled`, `already_enrolled`). Both audit `auth.admin_setup_link_issued` `{ reissued }`. `adminSetupUrl(base, token)`, `ADMIN_SETUP_PATH`, `ADMIN_SETUP_LINK_TTL_SECONDS` (1 h). `createAdminSetupService({ auth, db, rateLimiter, logger?, now? })` returns `inspect(token)`, `start({ token, headers })` and `complete({ token, password, code, headers })`. |
+| `packages/core/src/auth/admin-setup.ts` (new) | `createPlatformAdmin(deps, { email, name, login, language, by })`: inserts a platform admin with an **unusable password**, returns `{ userId, token, expiresAt }`. `reissueAdminSetupLink(deps, { email, by })`: for an active admin **without** TOTP; replaces their password with an unusable one and removes their sessions, any half-made `two_factors` row and older links. `by: AdminSetupIssuer` is `{ kind: "admin", email }` or `{ kind: "bootstrap", osUser, host }` (review fix 1 below). Both throw `AdminSetupIssueError` (`invalid_input`, `already_exists`, `not_found`, `not_a_platform_admin`, `disabled`, `already_enrolled`, `issuer_not_allowed`, `bootstrap_not_allowed`). Both audit `auth.admin_setup_link_issued` `{ reissued, by, os_user?, os_host? }` with the issuer as actor. `adminSetupUrl(base, token)` → `<base>/admin-setup#<token>`, `adminSetupBaseUrlProblem(url)`, `ADMIN_SETUP_PATH`, `ADMIN_SETUP_LINK_TTL_SECONDS` (1 h). `createAdminSetupService({ auth, db, rateLimiter, logger?, now? })` returns `inspect(token)`, `start({ token, headers })` → `{ email, secret, totpUri, keyId }`, and `complete({ token, keyId, password, code, headers })`. |
 | `packages/core/scripts/create-platform-admin.ts` (new) | `pnpm --filter @cb/core admin:create -- --email … --name … [--login …] [--language en\|hi] [--base-url …]`, or `--reissue --email …`. Prints the link; exit 0 / 1 failed / 2 refused. |
-| `apps/web/src/app/(auth)/admin-setup/**` (new) | `/admin-setup/<token>`: `noindex`, `referrer: no-referrer`. A GET only reads. **Start** (POST) shows a fresh key. **Turn on and sign in** (POST) takes the new password twice and the first code, then goes to `/admin`. A used, expired or unknown link shows one sentence and no form. `setup-flow.test.tsx` covers en/hi, the errors and the token being sent. |
+| `apps/web/src/app/(auth)/admin-setup/**` (new) | `/admin-setup#<token>`: `noindex`, `referrer: no-referrer`. The server page is the same for everyone (the token is in the fragment). In the browser the page takes the token out of the address bar, checks the link with a Server Action, then **Start** (POST) shows a fresh key and **Turn on and sign in** (POST) takes the new password twice and the first code, then goes to `/admin`. The token travels only in the actions' bodies. A used, expired, unknown or missing link shows one sentence and no form; a key replaced elsewhere shows "The key changed. Press Start again." `setup-flow.test.tsx` covers en/hi, the errors and how the token is handled. |
 | `packages/core/src/auth/auth.ts` | See "Security decisions" below. Also: new failure code `SETUP_LINK_REQUIRED`; `TOTP_OPTIONS` and `TWO_FACTOR_LOCKOUT` exported; the twoFactor plugin now gets `accountLockout` explicitly (same numbers as its defaults). |
 | `audit-events.ts`, `audit-query/actions.ts`, `audit.json` en/hi | Actions `auth.admin_setup_link_issued` and `auth.admin_setup_completed`. Platform events only, never in a tenant's log. |
 | `auth.json` en/hi, `form-state.ts`, `login/page.tsx` | Error `setup_link_required` ("… Ask for a new setup link."), notice `admin_setup_done`, words `admin_setup.*`. Every Hindi string is in `_review`. |
@@ -238,7 +238,9 @@ PLAN §9.2, §12.4; T-026 (open question "Platform admin bootstrap"), T-086b com
 
 Any platform admin who exists today without TOTP can no longer sign in. Give them a link:
 
-`DATABASE_URL=… APP_BASE_URL=https://<app> pnpm --filter @cb/core admin:create -- --reissue --email <their email>`
+`DATABASE_URL=… APP_BASE_URL=https://<app> pnpm --filter @cb/core admin:create -- --by <your enrolled admin email> --reissue --email <their email>`
+
+If no platform admin has 2-step sign-in yet, use `--bootstrap` instead of `--by` for the first one.
 
 Send the printed link over a channel only they read. It works once, for 1 hour. Admins who already
 enrolled are unaffected.
@@ -316,6 +318,110 @@ enrolled are unaffected.
   - the platform audit events;
   - a legacy admin refused at sign-in on every admin route;
   - the existing console flow, signing in with the code.
+
+**Review fixes (coordinator review of PR #92)**
+
+1. **Who issued a link is the actor.**
+   - `admin:create` now needs one of two options:
+     - `--by <email>`: checked in the issuing transaction to be an active platform admin with TOTP
+       on, else `issuer_not_allowed`;
+     - `--bootstrap`: only while no active, enrolled platform admin exists, else
+       `bootstrap_not_allowed`. It takes a transaction advisory lock, so two bootstraps can't race.
+   - `recordAuthEvent` takes an optional `actor` (default: the subject; `null`: the system).
+     `auth.admin_setup_link_issued` now has:
+     - actor = the `--by` admin, or the system for `--bootstrap`;
+     - entity = the new admin;
+     - `after { reissued, by: "admin" | "bootstrap", os_user?, os_host? }` (the OS user and host
+       only for bootstrap).
+   - Sentence: "{who} made a one-time setup link for a platform admin" (en/hi, Hindi in
+     `_review`). With the system as actor, {who} reads "The app".
+2. **Login-name timing.** Better Auth 1.7.7 behaves differently by sign-in path:
+   - username sign-in (`plugins/username/index.mjs`) throws at once, with no hash, when the user has
+     no credential account;
+   - email sign-in (`api/routes/sign-in.mjs`) hashes a dummy in that case.
+
+   New and reissued admins now get a credential row whose password is `hashPassword` of 32 random
+   bytes. Sign-in therefore verifies (and logs "Invalid password") like any wrong password. Reissue
+   *replaces* it (no longer deletes it); the setup link still overwrites it. Only two places read
+   the credential row:
+   - T-032's Team page (`passwordSet`), which only lists the tenant's own users, never admins;
+   - the lineman mobile sign-in (`mobile-auth.ts`), linemen only.
+
+   Neither treats this row as "has set a password" for an admin.
+3. **Token out of URL paths.**
+   - The link is `/admin-setup#<token>`. Browsers never send the fragment, so the server, Vercel's
+     request logs and Sentry never see the token in a URL.
+   - `/admin-setup` renders the same neutral page for everyone. In the browser, the page takes the
+     token from `location.hash`, removes it at once with `history.replaceState`, checks the link
+     with a Server Action (`checkAdminSetupLinkAction`), and sends the token only in the POST
+     bodies of check / Start / Done.
+   - `referrer: no-referrer` and `noindex` are kept. The `[token]` route is gone. The CLI output,
+     the tests and Playwright are updated.
+   - Playwright checks that no request URL the browser made contained the token.
+4. **A failed reset can't fail a right code.** In `twoFactorLockoutAfter`, only the success-branch
+   reset is wrapped in try/catch (`auth.two_factor_reset_failed`, error log). Failure counting stays
+   strict.
+5. **Accepted (defence in depth):** a burst of parallel wrong codes in the existing-session branch
+   can all pass the before-check before any is counted. It needs a valid session, and the per-IP
+   limit (30 / 15 min) still applies. Each one is still counted afterwards.
+6. **Accepted risk (unchanged Better Auth behaviour):** someone who knows an admin's password can
+   keep that admin's 2-step sign-in locked, in 15-minute steps, by typing wrong codes at the
+   sign-in challenge.
+7. **The key changed.**
+   - "Start" returns a random `keyId`, stored with the encrypted secret. "Done" must send it back.
+   - When it doesn't match the link's current key, or Start was never pressed, the answer is the
+     new code `SETUP_KEY_CHANGED`: "The key changed. Press Start again." / "की बदल गई है। फिर से
+     “शुरू करें” दबाएँ।" (Hindi in `_review`).
+   - The same answer covers the race where Start is pressed again during Done's transaction. The
+     page then shows the Start step again.
+   - An old key's code never gets `INVALID_CODE` any more.
+8. **https only:** the CLI refuses a base URL that isn't an `https://` origin, except
+   `http://localhost` / `127.0.0.1` / `[::1]` (`adminSetupBaseUrlProblem`).
+9. **Password limits:** the setup form gets `PASSWORD_MIN_LENGTH` / `PASSWORD_MAX_LENGTH` as
+   props from the server page. Importing `@cb/core` into a client component would bundle server
+   code.
+
+**Verification of the review fixes** (rebased on `feature/mvp` 8f7755a, after #93)
+
+- `admin-setup.test.ts`: 11 tests. New or changed:
+  - the base-URL rule;
+  - the unusable argon2id credential, for create and reissue;
+  - sign-in by email **and by login name** logs "Invalid password", which proves the password
+    verify ran;
+  - Done before Start, and Done with an old key id → `SETUP_KEY_CHANGED`;
+  - every issued event's actor, role and `after` (root bootstrap = system, with OS user and host;
+    the others = the root admin);
+  - `bootstrap_not_allowed` once an admin has enrolled;
+  - `issuer_not_allowed` for an unenrolled admin, an owner, a disabled admin, an unknown address,
+    and an admin issuing for themselves;
+  - a refused issue changes nothing.
+- `auth.test.ts`: links are issued by a bootstrapped root admin.
+- `setup-flow.test.tsx`: 7 tests:
+  - the token is read from `#`, gone from `location`, and sent in the action bodies;
+  - key changed → the Start step again, then the new key with no stale error;
+  - a missing `#` asks nothing of the server;
+  - en/hi.
+- Mutation checks (each reverted), every one caught:
+  - anyone may issue;
+  - bootstrap allowed after an admin enrolled;
+  - actor back to the subject (3 tests fail);
+  - no credential row for a new admin;
+  - reissue deletes the credential row;
+  - key id not checked;
+  - http base URL allowed anywhere;
+  - token left in the address bar;
+  - no Start-again step.
+
+  The reset try/catch (4) has no automated test: it needs a database failure injected between
+  Better Auth's session creation and the reset.
+- Root checks:
+  - `pnpm install --frozen-lockfile`, lint, typecheck, build, `pnpm generate` (no diff), the
+    `--check` modes, `db:check` and `tasks.mjs check --local` pass.
+  - `TURBO_FORCE=1 pnpm test --concurrency=1`: 10/10 packages. `@cb/core` 1286 passed + 3
+    skipped, `@cb/db` 273 (incl. the harness), `@cb/web` 615.
+- Playwright on a fresh scratch DB: `admin.spec.ts` + `auth.spec.ts` + `audit.spec.ts` **14/14**.
+  The script runs with `--by` a seeded enrolled admin. The `#` link works, the address bar loses
+  the token, no request URL contains it, and the issued event's actor is the issuing admin.
 
 ## Board log
 - 2026-10-14T21:26:48.076Z claimed by agent-t086d

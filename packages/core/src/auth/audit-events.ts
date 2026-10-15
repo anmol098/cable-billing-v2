@@ -46,17 +46,24 @@ export async function recordAuthEvent(
     headers: Headers;
     /** Codes/counts only (e.g. `{ method: "password" }`). */
     after?: Record<string, string | number | boolean>;
+    /**
+     * Who did it, when that is not the subject (T-086d: the admin who ran `admin:create`).
+     * `null` = the system ("The app"). Default: the subject acted on their own account.
+     */
+    actor?: { readonly userId: string; readonly role: UserRole } | null;
   },
 ): Promise<void> {
   const client = clientInfo(event.headers);
   const requestId = requestIdFromHeaders(event.headers);
   const { subject } = event;
+  const actor =
+    event.actor === undefined ? { userId: subject.userId, role: subject.role } : event.actor;
   try {
     const write = (tx: Parameters<typeof writeAuditEvent>[0]) =>
       writeAuditEvent(tx, {
         operatorId: subject.operatorId,
-        actorId: subject.userId,
-        actorRole: subject.role,
+        actorId: actor?.userId ?? null,
+        actorRole: actor?.role ?? null,
         action: event.action,
         entityType: "user",
         entityId: subject.userId,

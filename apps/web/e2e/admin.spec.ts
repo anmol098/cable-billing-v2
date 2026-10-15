@@ -115,6 +115,17 @@ test.describe("platform admin console", () => {
           password: hash,
         });
       }
+      // "issuer": an enrolled admin, who runs `admin:create --by` (recorded as the actor).
+      await tx.insert(users).values({
+        id: uuidv7(),
+        operatorId: null,
+        role: "platform_admin",
+        name: `E2E Issuing Admin ${run}`,
+        login: login("issuer"),
+        email: `${login("issuer")}@cable.test`,
+        language: "en",
+        twoFactorEnabled: true,
+      });
       await tx.insert(jobs).values({
         id: failedJobId,
         operatorId,
@@ -193,6 +204,8 @@ test.describe("platform admin console", () => {
         "exec",
         "tsx",
         "scripts/create-platform-admin.ts",
+        "--by",
+        `${login("issuer")}@cable.test`,
         "--email",
         email,
         "--name",
@@ -204,8 +217,12 @@ test.describe("platform admin console", () => {
       ],
       { env: process.env, encoding: "utf8" },
     );
-    const link = output.match(/https?:\/\/\S+\/admin-setup\/[A-Za-z0-9_-]{43}/)?.[0] ?? "";
+    // The token is in the #fragment: browsers never send it, so no server log can hold it.
+    const link = output.match(/https?:\/\/\S+\/admin-setup#[A-Za-z0-9_-]{43}/)?.[0] ?? "";
     expect(link, output).not.toBe("");
+    const token = link.split("#")[1] ?? "";
+    const requested: string[] = [];
+    page.on("request", (request) => requested.push(request.url()));
 
     // No password yet: nobody can sign in as this admin before the link is used.
     await signIn(page, "admin");
@@ -214,6 +231,8 @@ test.describe("platform admin console", () => {
     await page.goto(link);
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Set up your admin account");
     await expect(page.getByTestId("admin-setup-account")).toHaveText(email);
+    // The page took the token out of the address bar.
+    await expect(page).toHaveURL(/\/admin-setup$/);
     await page.getByRole("button", { name: "Start" }).click();
     totpSecret = (await page.getByTestId("totp-secret").textContent())?.trim() ?? "";
     expect(totpSecret).toMatch(/^[A-Z2-7]+$/);
@@ -239,20 +258,29 @@ test.describe("platform admin console", () => {
       "This setup link does not work any more.",
     );
     await expect(page.getByRole("button", { name: "Start" })).toHaveCount(0);
+    // No request the browser made had the token in its URL (it went only in POST bodies).
+    expect(requested.length).toBeGreaterThan(0);
+    expect(requested.filter((url) => url.includes(token))).toEqual([]);
 
-    // On record as platform events.
-    const actions = await db.withPlatform(async (tx) => {
-      const admin = await tx.query.users.findFirst({ where: (u, { eq }) => eq(u.email, email) });
-      const events = await tx.query.auditEvents.findMany({
-        where: (a, { eq }) => eq(a.actorId, admin?.id ?? ""),
+    // On record as platform events: the issuing admin made the link, the new admin set it up.
+    const events = await db.withPlatform(async (tx) => {
+      const find = (address: string) =>
+        tx.query.users.findFirst({ where: (u, { eq }) => eq(u.email, address) });
+      const admin = await find(email);
+      const issuer = await find(`${login("issuer")}@cable.test`);
+      const rows = await tx.query.auditEvents.findMany({
+        where: (a, { eq }) => eq(a.entityId, admin?.id ?? ""),
       });
-      return events.map((e) => `${e.action}:${e.operatorId ?? "platform"}`);
+      return rows.map(
+        (e) =>
+          `${e.action}:${e.operatorId ?? "platform"}:${e.actorId === issuer?.id ? "issuer" : e.actorId === admin?.id ? "self" : "other"}`,
+      );
     });
-    expect(actions).toEqual(
+    expect(events).toEqual(
       expect.arrayContaining([
-        "auth.admin_setup_link_issued:platform",
-        "auth.admin_setup_completed:platform",
-        "auth.signed_in:platform",
+        "auth.admin_setup_link_issued:platform:issuer",
+        "auth.admin_setup_completed:platform:self",
+        "auth.signed_in:platform:self",
       ]),
     );
   });

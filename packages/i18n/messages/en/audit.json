@@ -68,7 +68,7 @@
       "password_reset_completed": "{who} set a new password with the email link",
       "two_factor_enabled": "{who} turned on 2-step sign-in",
       "other_sessions_ended": "{who} turned on 2-step sign-in, so {count, plural, one {# other device was} other {# other devices were}} signed out",
-      "admin_setup_link_issued": "A one-time setup link was made for {who}",
+      "admin_setup_link_issued": "{who} made a one-time setup link for a platform admin",
       "admin_setup_completed": "{who} set a password and turned on 2-step sign-in with the setup link"
     },
     "mobile_auth": {

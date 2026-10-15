@@ -4,16 +4,20 @@
  * Only the person a platform admin account was made for can attach an authenticator to it:
  *
  * 1. **Issue** (`createPlatformAdmin`, `reissueAdminSetupLink`; run by the reviewed CLI
- *    `packages/core/scripts/create-platform-admin.ts`): the admin user is created **without a
- *    password** (or, for an existing admin who never turned on TOTP, their password, sessions and
- *    any half-made TOTP row are removed), and a single-use link `/admin-setup/<token>` is made. The
- *    token is 32 random bytes; only its SHA-256 is stored (like T-050's receipt links), in Better
+ *    `packages/core/scripts/create-platform-admin.ts`, `--by` an enrolled admin or `--bootstrap`
+ *    for the very first one, recorded as the audit actor): the admin gets an **unusable** password
+ *    (an argon2 hash of random bytes, so sign-in costs the same time as for anyone else), and their
+ *    sessions and any half-made TOTP row are removed. A single-use link `/admin-setup#<token>` is
+ *    made. The token is 32 random bytes in the URL **fragment**, which browsers never send, so it
+ *    never reaches request logs. Only its SHA-256 is stored (like T-050's receipt links), in Better
  *    Auth's `verifications` table ("password-reset and similar one-time tokens", platform path
  *    only) under the `cb-admin-setup:` prefix. It expires after {@link ADMIN_SETUP_LINK_TTL_SECONDS}.
  *    A new link for the same admin removes the older ones.
  * 2. **Start** (`start`, a POST from the link page, so link scanners that only GET learn nothing):
  *    a fresh random TOTP secret is made, stored encrypted (Better Auth's `symmetricEncrypt`, the
- *    same as its own `two_factors.secret`) on the link row, replacing any earlier one, and shown.
+ *    same as its own `two_factors.secret`) on the link row with a new key id, replacing any earlier
+ *    one, and shown. "Done" sends the key id back, so "the key changed" is told apart from a wrong
+ *    code.
  * 3. **Complete** (`complete`): the new password (twice in the UI) and a first code from the app.
  *    The code is checked against the stored secret, then in **one transaction** the link row is
  *    consumed (deleted, only if unexpired and still holding that same secret), the password is set,
@@ -41,7 +45,7 @@ import {
 } from "@cb/db";
 import { err, ok } from "@cb/domain";
 import { generateRandomString, symmetricDecrypt, symmetricEncrypt } from "better-auth/crypto";
-import { and, eq, gt, like } from "drizzle-orm";
+import { and, eq, gt, like, sql } from "drizzle-orm";
 import { createLogger, errorLogFields, type Logger } from "../logging/logger";
 import { type AuthAuditSubject, recordAuthEvent } from "./audit-events";
 import { type AuthResult, type AuthService, TOTP_OPTIONS } from "./auth";
@@ -49,7 +53,7 @@ import { hashPassword, PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH } from "./passwo
 import { AUTH_RATE_LIMITS, type RateLimiter, rateLimitKey } from "./rate-limit";
 import { clientIp } from "./request-info";
 
-/** The setup page: `/admin-setup/<token>`. */
+/** The setup page: `/admin-setup#<token>` (the token is in the fragment, see {@link adminSetupUrl}). */
 export const ADMIN_SETUP_PATH = "/admin-setup";
 /** How long a setup link works (once): 1 hour, like a password-reset link. */
 export const ADMIN_SETUP_LINK_TTL_SECONDS = 60 * 60;
@@ -58,28 +62,59 @@ export const ADMIN_SETUP_LINK_TTL_SECONDS = 60 * 60;
 const IDENTIFIER_PREFIX = "cb-admin-setup:";
 /** 32 random bytes, base64url without padding. */
 const TOKEN = /^[A-Za-z0-9_-]{43}$/;
+const KEY_ID = /^[0-9a-f]{16}$/;
 const TOTP_CODE = /^\d{6}$/;
 const LOGIN = /^[^\s@A-Z]{3,100}$/;
 const EMAIL = /^[^\s@A-Z]+@[^\s@A-Z]+\.[^\s@A-Z]+$/;
 
-/** The setup page URL for a token. */
+/**
+ * The setup link for a token: `<app>/admin-setup#<token>`. The token is in the URL **fragment**,
+ * which browsers never send to the server, so it can't end up in request logs, Vercel's logs or
+ * Sentry's URLs; the page reads it in the browser and sends it in the body of its Server Actions.
+ */
 export function adminSetupUrl(baseUrl: string, token: string): string {
-  return `${baseUrl.replace(/\/+$/, "")}${ADMIN_SETUP_PATH}/${token}`;
+  return `${baseUrl.replace(/\/+$/, "")}${ADMIN_SETUP_PATH}#${token}`;
+}
+
+const LOCAL_HOSTS = new Set(["localhost", "127.0.0.1", "[::1]"]);
+
+/**
+ * Why `baseUrl` can't be the origin of a setup link, or `null` when it can: an origin (no path,
+ * query or fragment) on `https://`, or on `http://` only for localhost.
+ */
+export function adminSetupBaseUrlProblem(baseUrl: string | undefined): string | null {
+  if (!baseUrl) return "missing";
+  let url: URL;
+  try {
+    url = new URL(baseUrl);
+  } catch {
+    return "not a URL";
+  }
+  if (url.pathname !== "/" || url.search || url.hash || url.username || url.password) {
+    return "must be an origin only";
+  }
+  if (url.protocol === "https:") return null;
+  if (url.protocol === "http:" && LOCAL_HOSTS.has(url.hostname)) return null;
+  return "must be https:// (http:// only for localhost)";
 }
 
 function identifierOf(token: string): string {
   return `${IDENTIFIER_PREFIX}${createHash("sha256").update(token).digest("base64url")}`;
 }
 
-/** The link row's `value`: who it is for, and the pending TOTP secret (encrypted) once started. */
+/**
+ * The link row's `value`: who it is for, and once "Start" was pressed the pending TOTP secret
+ * (encrypted) with a random id for that key (so "Done" can tell "the key changed" from "wrong code").
+ */
 interface LinkValue {
   readonly userId: string;
   readonly secret: string | null;
+  readonly keyId: string | null;
 }
 
-/** Always `{"userId":"…","secret":…}` in this order, so a user's links can be found by prefix. */
+/** Always `{"userId":"…",…}` first, so a user's links can be found by prefix. */
 function linkValue(value: LinkValue): string {
-  return JSON.stringify({ userId: value.userId, secret: value.secret });
+  return JSON.stringify({ userId: value.userId, secret: value.secret, keyId: value.keyId });
 }
 
 function userLinksPattern(userId: string): string {
@@ -88,10 +123,11 @@ function userLinksPattern(userId: string): string {
 
 function parseLinkValue(raw: string): LinkValue | null {
   try {
-    const parsed = JSON.parse(raw) as { userId?: unknown; secret?: unknown };
+    const parsed = JSON.parse(raw) as { userId?: unknown; secret?: unknown; keyId?: unknown };
     if (typeof parsed.userId !== "string") return null;
     const secret = typeof parsed.secret === "string" ? parsed.secret : null;
-    return { userId: parsed.userId, secret };
+    const keyId = typeof parsed.keyId === "string" ? parsed.keyId : null;
+    return { userId: parsed.userId, secret, keyId };
   } catch {
     return null;
   }
@@ -104,7 +140,11 @@ export type AdminSetupIssueErrorCode =
   | "not_found"
   | "not_a_platform_admin"
   | "disabled"
-  | "already_enrolled";
+  | "already_enrolled"
+  /** `--by` is not an active platform admin with 2-step sign-in on. */
+  | "issuer_not_allowed"
+  /** `--bootstrap` while an enrolled platform admin exists (they must issue it with `--by`). */
+  | "bootstrap_not_allowed";
 
 export class AdminSetupIssueError extends Error {
   constructor(readonly code: AdminSetupIssueErrorCode) {
@@ -112,6 +152,16 @@ export class AdminSetupIssueError extends Error {
     this.name = "AdminSetupIssueError";
   }
 }
+
+/**
+ * Who is issuing the link (recorded as the audit event's actor, never the new admin):
+ * - `admin`: an active platform admin with 2-step sign-in on (`--by <email>`);
+ * - `bootstrap`: the very first admin, allowed only while no enrolled platform admin exists. The
+ *   actor is then the system, and the OS user and host the command ran on are recorded.
+ */
+export type AdminSetupIssuer =
+  | { readonly kind: "admin"; readonly email: string }
+  | { readonly kind: "bootstrap"; readonly osUser: string; readonly host: string };
 
 export interface IssuedAdminSetupLink {
   readonly userId: string;
@@ -128,6 +178,79 @@ interface IssueDeps {
 
 type PlatformTx = Parameters<Parameters<DbClient["withPlatform"]>[0]>[0];
 
+interface ResolvedIssuer {
+  readonly actor: { readonly userId: string; readonly role: "platform_admin" } | null;
+  readonly after: Readonly<Record<string, string>>;
+}
+
+/** Checks the issuer inside the issuing transaction (see {@link AdminSetupIssuer}). */
+async function resolveIssuer(tx: PlatformTx, by: AdminSetupIssuer): Promise<ResolvedIssuer> {
+  if (by.kind === "admin") {
+    const [issuer] = await tx
+      .select({
+        id: users.id,
+        role: users.role,
+        status: users.status,
+        twoFactorEnabled: users.twoFactorEnabled,
+      })
+      .from(users)
+      .where(eq(users.email, by.email.trim().toLowerCase()));
+    if (
+      issuer?.role !== "platform_admin" ||
+      issuer.status !== "active" ||
+      !issuer.twoFactorEnabled
+    ) {
+      throw new AdminSetupIssueError("issuer_not_allowed");
+    }
+    return { actor: { userId: issuer.id, role: "platform_admin" }, after: { by: "admin" } };
+  }
+  // One bootstrap at a time; it stays allowed only until some admin has enrolled.
+  await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext('cb-admin-setup-bootstrap'))`);
+  const enrolled = await tx
+    .select({ id: users.id })
+    .from(users)
+    .where(
+      and(
+        eq(users.role, "platform_admin"),
+        eq(users.status, "active"),
+        eq(users.twoFactorEnabled, true),
+      ),
+    )
+    .limit(1);
+  if (enrolled.length > 0) throw new AdminSetupIssueError("bootstrap_not_allowed");
+  return {
+    actor: null,
+    after: {
+      by: "bootstrap",
+      os_user: by.osUser.slice(0, 64) || "unknown",
+      os_host: by.host.slice(0, 128) || "unknown",
+    },
+  };
+}
+
+/**
+ * An argon2id hash of 32 random bytes nobody knows, as the credential password of an admin who
+ * hasn't set one yet: sign-in then hashes and fails like any wrong password (Better Auth answers a
+ * user **without** a credential row without hashing, which would tell login names apart by time).
+ * The setup link replaces it; nothing treats "has a credential row" as "has set a password".
+ */
+async function unusablePasswordHash(): Promise<string> {
+  return hashPassword(randomBytes(32).toString("base64url"));
+}
+
+async function replaceCredential(tx: PlatformTx, userId: string, hash: string): Promise<void> {
+  await tx
+    .delete(accounts)
+    .where(and(eq(accounts.userId, userId), eq(accounts.providerId, "credential")));
+  await tx.insert(accounts).values({
+    id: uuidv7(),
+    userId,
+    accountId: userId,
+    providerId: "credential",
+    password: hash,
+  });
+}
+
 async function insertLink(tx: PlatformTx, userId: string, at: Date): Promise<IssuedAdminSetupLink> {
   // Older links of this admin stop working.
   await tx
@@ -143,7 +266,7 @@ async function insertLink(tx: PlatformTx, userId: string, at: Date): Promise<Iss
   await tx.insert(verifications).values({
     id: uuidv7(),
     identifier: identifierOf(token),
-    value: linkValue({ userId, secret: null }),
+    value: linkValue({ userId, secret: null, keyId: null }),
     expiresAt,
     createdAt: at,
     updatedAt: at,
@@ -160,13 +283,44 @@ const adminSubject = (userId: string): AuthAuditSubject => ({
   operatorId: null,
 });
 
+async function auditIssued(
+  deps: IssueDeps,
+  logger: Logger,
+  userId: string,
+  issuer: ResolvedIssuer,
+  reissued: boolean,
+): Promise<void> {
+  await recordAuthEvent(
+    { db: deps.db, logger },
+    {
+      action: "auth.admin_setup_link_issued",
+      subject: adminSubject(userId),
+      actor: issuer.actor,
+      headers: new Headers(),
+      after: { reissued, ...issuer.after },
+    },
+  );
+  logger.info("auth.admin_setup_link_issued", {
+    user_id: userId,
+    issued_by: issuer.actor?.userId ?? "bootstrap",
+    reissued,
+  });
+}
+
 /**
- * Creates a platform admin **without a password** and returns their one-time setup link token.
- * `email` and `login` are stored lower case; both must be unused.
+ * Creates a platform admin **without a usable password** and returns their one-time setup link
+ * token. `email` and `login` are stored lower case; both must be unused. `by` is checked and
+ * recorded as the actor (see {@link AdminSetupIssuer}).
  */
 export async function createPlatformAdmin(
   deps: IssueDeps,
-  input: { email: string; name: string; login: string; language: "en" | "hi" },
+  input: {
+    email: string;
+    name: string;
+    login: string;
+    language: "en" | "hi";
+    by: AdminSetupIssuer;
+  },
 ): Promise<IssuedAdminSetupLink> {
   const logger = deps.logger ?? createLogger();
   const at = (deps.now ?? (() => new Date()))();
@@ -176,7 +330,9 @@ export async function createPlatformAdmin(
   if (!EMAIL.test(email) || email.length > 254 || !LOGIN.test(login) || !name) {
     throw new AdminSetupIssueError("invalid_input");
   }
-  const issued = await deps.db.withPlatform(async (tx) => {
+  const unusable = await unusablePasswordHash();
+  const { issued, issuer } = await deps.db.withPlatform(async (tx) => {
+    const issuer = await resolveIssuer(tx, input.by);
     const taken = await tx
       .select({ id: users.id })
       .from(users)
@@ -193,34 +349,29 @@ export async function createPlatformAdmin(
       email,
       language: input.language,
     });
-    return insertLink(tx, userId, at);
+    await replaceCredential(tx, userId, unusable);
+    return { issued: await insertLink(tx, userId, at), issuer };
   });
-  await recordAuthEvent(
-    { db: deps.db, logger },
-    {
-      action: "auth.admin_setup_link_issued",
-      subject: adminSubject(issued.userId),
-      headers: new Headers(),
-      after: { reissued: false },
-    },
-  );
-  logger.info("auth.admin_setup_link_issued", { user_id: issued.userId, reissued: false });
+  await auditIssued(deps, logger, issued.userId, issuer, false);
   return issued;
 }
 
 /**
  * A new setup link for an existing platform admin who has **not** turned on TOTP (e.g. one made
- * before T-086d, or whose link ran out). Their password, sessions, any unfinished TOTP row and older
- * links are removed, so the link is the only way in. An admin with TOTP on is refused.
+ * before T-086d, or whose link ran out). Their password is replaced by an unusable one, and their
+ * sessions, any unfinished TOTP row and older links are removed, so the link is the only way in.
+ * An admin with TOTP on is refused.
  */
 export async function reissueAdminSetupLink(
   deps: IssueDeps,
-  input: { email: string },
+  input: { email: string; by: AdminSetupIssuer },
 ): Promise<IssuedAdminSetupLink> {
   const logger = deps.logger ?? createLogger();
   const at = (deps.now ?? (() => new Date()))();
   const email = input.email.trim().toLowerCase();
-  const issued = await deps.db.withPlatform(async (tx) => {
+  const unusable = await unusablePasswordHash();
+  const { issued, issuer } = await deps.db.withPlatform(async (tx) => {
+    const issuer = await resolveIssuer(tx, input.by);
     const [user] = await tx
       .select({
         id: users.id,
@@ -235,23 +386,12 @@ export async function reissueAdminSetupLink(
     if (user.role !== "platform_admin") throw new AdminSetupIssueError("not_a_platform_admin");
     if (user.status !== "active") throw new AdminSetupIssueError("disabled");
     if (user.twoFactorEnabled) throw new AdminSetupIssueError("already_enrolled");
-    await tx
-      .delete(accounts)
-      .where(and(eq(accounts.userId, user.id), eq(accounts.providerId, "credential")));
+    await replaceCredential(tx, user.id, unusable);
     await tx.delete(sessions).where(eq(sessions.userId, user.id));
     await tx.delete(twoFactors).where(eq(twoFactors.userId, user.id));
-    return insertLink(tx, user.id, at);
+    return { issued: await insertLink(tx, user.id, at), issuer };
   });
-  await recordAuthEvent(
-    { db: deps.db, logger },
-    {
-      action: "auth.admin_setup_link_issued",
-      subject: adminSubject(issued.userId),
-      headers: new Headers(),
-      after: { reissued: true },
-    },
-  );
-  logger.info("auth.admin_setup_link_issued", { user_id: issued.userId, reissued: true });
+  await auditIssued(deps, logger, issued.userId, issuer, true);
   return issued;
 }
 
@@ -272,6 +412,8 @@ export interface AdminSetupKey {
   readonly secret: string;
   /** `otpauth://totp/...`. */
   readonly totpUri: string;
+  /** Which key this is: "Done" sends it back, so a key replaced elsewhere is told apart. */
+  readonly keyId: string;
 }
 
 /** The link's checks that hold before anything is changed. */
@@ -413,11 +555,12 @@ export function createAdminSetupService(options: CreateAdminSetupServiceOptions)
       if (!link) return err({ code: "INVALID_TOKEN" });
       const secret = generateRandomString(32);
       const encrypted = await symmetricEncrypt({ key: await secretKey(), data: secret });
+      const keyId = randomBytes(8).toString("hex");
       const updated = await db.withPlatform((tx) =>
         tx
           .update(verifications)
           .set({
-            value: linkValue({ userId: link.value.userId, secret: encrypted }),
+            value: linkValue({ userId: link.value.userId, secret: encrypted, keyId }),
             updatedAt: now(),
           })
           .where(
@@ -435,17 +578,21 @@ export function createAdminSetupService(options: CreateAdminSetupServiceOptions)
         email: link.email,
         secret: new URL(totpUri).searchParams.get("secret") ?? "",
         totpUri,
+        keyId,
       });
     },
 
     /**
      * "Done": sets the password and turns on TOTP with the first code, using up the link, then
      * signs the admin in (`signedIn: false` if that last step failed: setup is still done).
-     * INVALID_CODE (wrong code, or "Start" not pressed / pressed again elsewhere), INVALID_PASSWORD,
-     * INVALID_TOKEN (unknown, used, expired), RATE_LIMITED.
+     * INVALID_CODE (wrong code), SETUP_KEY_CHANGED (`keyId` is not the link's current key: "Start"
+     * was pressed again elsewhere, or never), INVALID_PASSWORD, INVALID_TOKEN (unknown, used,
+     * expired), RATE_LIMITED.
      */
     async complete(input: {
       token: string;
+      /** The `keyId` "Start" returned with the key the code comes from. */
+      keyId: string;
       password: string;
       code: string;
       headers: Headers;
@@ -463,7 +610,9 @@ export function createAdminSetupService(options: CreateAdminSetupServiceOptions)
       if (!allowed.ok) return allowed;
       const link = await liveLink(input.token);
       if (!link) return err({ code: "INVALID_TOKEN" });
-      if (!link.value.secret) return err({ code: "INVALID_CODE" });
+      if (!link.value.secret || !KEY_ID.test(input.keyId) || link.value.keyId !== input.keyId) {
+        return err({ code: "SETUP_KEY_CHANGED" });
+      }
       const key = await secretKey();
       const secret = await symmetricDecrypt({ key, data: link.value.secret });
       const right = await createOTP(secret, {
@@ -549,7 +698,7 @@ export function createAdminSetupService(options: CreateAdminSetupServiceOptions)
           throw error;
         });
       if (outcome === "used") return err({ code: "INVALID_TOKEN" });
-      if (outcome === "restarted") return err({ code: "INVALID_CODE" });
+      if (outcome === "restarted") return err({ code: "SETUP_KEY_CHANGED" });
       await recordAuthEvent(
         { db, logger },
         {

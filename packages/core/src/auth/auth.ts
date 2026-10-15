@@ -131,6 +131,11 @@ export type AuthFailureCode =
    * through a new one-time setup link (password was right; shown only then).
    */
   | "SETUP_LINK_REQUIRED"
+  /**
+   * Admin setup link (T-086d): the key on the page is no longer the link's key ("Start" was
+   * pressed again elsewhere). Press Start again.
+   */
+  | "SETUP_KEY_CHANGED"
   /** Reset link (or admin setup link) invalid, used or expired. */
   | "INVALID_TOKEN"
   /** New password too short or too long. */
@@ -457,12 +462,18 @@ export function createAuthService(options: CreateAuthServiceOptions) {
     }
     const userId = (returned as { user?: { id?: unknown } } | null | undefined)?.user?.id;
     if (typeof userId !== "string") return;
-    await db.withPlatform((tx) =>
-      tx
-        .update(twoFactors)
-        .set({ failedVerificationCount: 0, lockedUntil: null })
-        .where(eq(twoFactors.userId, userId)),
-    );
+    // The code was right and a session may already exist: a failed reset must not turn that into
+    // an error (the count then stays until the next right code). Failure counting stays strict.
+    try {
+      await db.withPlatform((tx) =>
+        tx
+          .update(twoFactors)
+          .set({ failedVerificationCount: 0, lockedUntil: null })
+          .where(eq(twoFactors.userId, userId)),
+      );
+    } catch (error) {
+      logger.error("auth.two_factor_reset_failed", { user_id: userId, ...errorLogFields(error) });
+    }
   });
 
   const auth = betterAuth({

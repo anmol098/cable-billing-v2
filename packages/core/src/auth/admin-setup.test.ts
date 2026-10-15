@@ -17,7 +17,9 @@ import { captureLogs, seedTenant } from "../testing";
 import {
   ADMIN_SETUP_LINK_TTL_SECONDS,
   AdminSetupIssueError,
+  type AdminSetupIssuer,
   type AdminSetupService,
+  adminSetupBaseUrlProblem,
   adminSetupUrl,
   createAdminSetupService,
   createPlatformAdmin,
@@ -94,6 +96,31 @@ function totp(base32Secret: string, at = Date.now()): string {
 /** A 6-digit code that is surely wrong now (5 minutes ahead, outside the ±30 s window). */
 const wrongCode = (secret: string) => totp(secret, Date.now() + 5 * 60_000);
 
+describe("adminSetupBaseUrlProblem (the CLI's base URL rule)", () => {
+  it("wants an https origin; http only for localhost", () => {
+    for (const ok of [
+      "https://app.example.com",
+      "https://app.example.com/",
+      "http://localhost:3000",
+      "http://127.0.0.1:3100",
+    ]) {
+      expect(adminSetupBaseUrlProblem(ok), ok).toBeNull();
+    }
+    for (const bad of [
+      undefined,
+      "",
+      "app.example.com",
+      "http://app.example.com",
+      "http://localhost.evil.test",
+      "https://app.example.com/path",
+      "https://app.example.com/?x=1",
+      "ftp://app.example.com",
+    ]) {
+      expect(adminSetupBaseUrlProblem(bad), String(bad)).not.toBeNull();
+    }
+  });
+});
+
 describeDb("platform admin setup link and 2FA lockout (T-086d)", () => {
   const t = useTestDatabase();
   const logs = captureLogs();
@@ -103,6 +130,10 @@ describeDb("platform admin setup link and 2FA lockout (T-086d)", () => {
   let auth: AuthService;
   let setup: AdminSetupService;
   let runSeq = 0;
+  /** The first admin, made with `--bootstrap` and enrolled; issues every other link here. */
+  const ROOT_EMAIL = "root-admin@platform.test";
+  let rootId = "";
+  const byRoot = () => ({ kind: "admin" as const, email: ROOT_EMAIL });
 
   const newBrowser = () => {
     ipCounter += 1;
@@ -119,6 +150,7 @@ describeDb("platform admin setup link and 2FA lockout (T-086d)", () => {
       name,
       login,
       language: "en",
+      by: byRoot(),
     });
   };
   const query = <T extends Record<string, unknown>>(sql: string, params: unknown[] = []) =>
@@ -133,6 +165,18 @@ describeDb("platform admin setup link and 2FA lockout (T-086d)", () => {
         [userId],
       )
     ).map((r) => r.action);
+  /** `auth.admin_setup_link_issued` events about `userId` (whoever issued them). */
+  const issuedEvents = (userId: string) =>
+    query<{
+      actor_id: string | null;
+      actor_role: string | null;
+      operator_id: string | null;
+      after: unknown;
+    }>(
+      `SELECT actor_id, actor_role, operator_id, after FROM audit_events
+       WHERE action = 'auth.admin_setup_link_issued' AND entity_id = $1 ORDER BY at, id`,
+      [userId],
+    );
   const twoFactorRow = async (userId: string) =>
     (
       await query<{ failed: number; locked_until: Date | null; verified: boolean }>(
@@ -149,6 +193,7 @@ describeDb("platform admin setup link and 2FA lockout (T-086d)", () => {
     if (!started.ok) throw new Error(`start: ${started.error.code}`);
     const done = await setup.complete({
       token,
+      keyId: started.value.keyId,
       password: PASSWORD,
       code: totp(started.value.secret),
       headers: browser.headers(),
@@ -175,6 +220,16 @@ describeDb("platform admin setup link and 2FA lockout (T-086d)", () => {
       logger: logs.logger,
       now: () => clock(),
     });
+    // The very first admin: no enrolled admin exists yet, so --bootstrap is allowed.
+    const root = await createPlatformAdmin(issueDeps(), {
+      email: ROOT_EMAIL,
+      name: "Root Admin",
+      login: "root-admin",
+      language: "en",
+      by: { kind: "bootstrap", osUser: "tester", host: "ci-host" },
+    });
+    rootId = root.userId;
+    await enrolWithLink(root.token);
   });
 
   beforeEach(() => {
@@ -182,16 +237,20 @@ describeDb("platform admin setup link and 2FA lockout (T-086d)", () => {
   });
 
   describe("the setup link", () => {
-    it("creates an admin with no password; the link sets it, turns on TOTP and signs in, once", async () => {
+    it("creates an admin with an unusable password; the link sets it, turns on TOTP and signs in, once", async () => {
       const issued = await newAdmin();
       const email = await emailOf(issued.userId);
       expect(adminSetupUrl(`${BASE_URL}/`, issued.token)).toBe(
-        `${BASE_URL}/admin-setup/${issued.token}`,
+        `${BASE_URL}/admin-setup#${issued.token}`,
       );
-      // No password, no TOTP; the token itself is stored nowhere, only its SHA-256.
-      expect(
-        await query("SELECT 1 FROM accounts WHERE user_id = $1", [issued.userId]),
-      ).toHaveLength(0);
+      // An unusable password (argon2id of random bytes), no TOTP; the token itself is stored
+      // nowhere, only its SHA-256.
+      const credential = await query<{ password: string }>(
+        "SELECT password FROM accounts WHERE user_id = $1 AND provider_id = 'credential'",
+        [issued.userId],
+      );
+      expect(credential).toHaveLength(1);
+      expect(credential[0]?.password).toMatch(/^\$argon2id\$/);
       const stored = await query<{ identifier: string; value: string; expires_at: Date }>(
         "SELECT identifier, value, expires_at FROM verifications WHERE value LIKE $1",
         [`{"userId":"${issued.userId}",%`],
@@ -206,30 +265,42 @@ describeDb("platform admin setup link and 2FA lockout (T-086d)", () => {
         ADMIN_SETUP_LINK_TTL_SECONDS * 1000,
       );
 
-      // Nobody can sign in with any password before the link is used.
+      // Nobody can sign in with any password before the link is used, and the answer costs a
+      // password check like any wrong password (no early "no credential" answer by login name).
       const early = newBrowser();
-      expect(
-        await auth.signIn({ login: email, password: PASSWORD, headers: early.headers() }),
-      ).toEqual({ ok: false, error: { code: "INVALID_CREDENTIALS" } });
+      const login = (
+        await query<{ login: string }>("SELECT login FROM users WHERE id = $1", [issued.userId])
+      )[0]?.login;
+      for (const typed of [email, login ?? ""]) {
+        const before = logs.records.length;
+        expect(
+          await auth.signIn({ login: typed, password: PASSWORD, headers: early.headers() }),
+        ).toEqual({ ok: false, error: { code: "INVALID_CREDENTIALS" } });
+        expect(logs.records.slice(before)).toContainEqual(
+          expect.objectContaining({ event: "auth.library_warning", message: "Invalid password" }),
+        );
+      }
 
       // The page knows whom the link is for.
       expect(await setup.inspect(issued.token)).toEqual({ email });
 
       const browser = newBrowser();
-      // "Done" before "Start": no key was shown yet.
+      // "Done" before "Start": no key was shown yet ("press Start").
       expect(
         await setup.complete({
+          keyId: "0000000000000000",
           token: issued.token,
           password: PASSWORD,
           code: "123456",
           headers: browser.headers(),
         }),
-      ).toEqual({ ok: false, error: { code: "INVALID_CODE" } });
+      ).toEqual({ ok: false, error: { code: "SETUP_KEY_CHANGED" } });
       const started = await setup.start({ token: issued.token, headers: browser.headers() });
       if (!started.ok) throw new Error(started.error.code);
       expect(started.value.email).toBe(email);
       expect(started.value.secret).toMatch(/^[A-Z2-7]+$/);
       expect(started.value.totpUri).toMatch(/^otpauth:\/\/totp\/Cable%20Billing:/);
+      expect(started.value.keyId).toMatch(/^[0-9a-f]{16}$/);
       // The pending secret is stored encrypted, never as shown.
       const pending = await query<{ value: string }>(
         "SELECT value FROM verifications WHERE identifier = $1",
@@ -240,6 +311,7 @@ describeDb("platform admin setup link and 2FA lockout (T-086d)", () => {
       // Wrong code, short password: refused, the link still works.
       expect(
         await setup.complete({
+          keyId: started.value.keyId,
           token: issued.token,
           password: PASSWORD,
           code: wrongCode(started.value.secret),
@@ -248,6 +320,7 @@ describeDb("platform admin setup link and 2FA lockout (T-086d)", () => {
       ).toEqual({ ok: false, error: { code: "INVALID_CODE" } });
       expect(
         await setup.complete({
+          keyId: started.value.keyId,
           token: issued.token,
           password: "short",
           code: totp(started.value.secret),
@@ -257,6 +330,7 @@ describeDb("platform admin setup link and 2FA lockout (T-086d)", () => {
       expect(await setup.inspect(issued.token)).toEqual({ email });
 
       const done = await setup.complete({
+        keyId: started.value.keyId,
         token: issued.token,
         password: PASSWORD,
         code: totp(started.value.secret),
@@ -291,6 +365,7 @@ describeDb("platform admin setup link and 2FA lockout (T-086d)", () => {
       });
       expect(
         await setup.complete({
+          keyId: started.value.keyId,
           token: issued.token,
           password: "another password 1",
           code: totp(started.value.secret),
@@ -309,7 +384,6 @@ describeDb("platform admin setup link and 2FA lockout (T-086d)", () => {
       ).toBe(true);
 
       expect(await auditActions(issued.userId)).toEqual([
-        "auth.admin_setup_link_issued",
         "auth.admin_setup_completed",
         "auth.signed_in",
         "auth.signed_in",
@@ -318,9 +392,17 @@ describeDb("platform admin setup link and 2FA lockout (T-086d)", () => {
         "SELECT operator_id, after FROM audit_events WHERE actor_id = $1 ORDER BY at, id",
         [issued.userId],
       );
-      expect(events.map((e) => e.operator_id)).toEqual([null, null, null, null]);
-      expect(events[0]?.after).toEqual({ reissued: false });
-      expect(events[2]?.after).toEqual({ method: "password_totp" });
+      expect(events.map((e) => e.operator_id)).toEqual([null, null, null]);
+      expect(events[1]?.after).toEqual({ method: "password_totp" });
+      // The link was issued by the root admin (the actor), about this admin (the entity).
+      expect(await issuedEvents(issued.userId)).toEqual([
+        {
+          actor_id: rootId,
+          actor_role: "platform_admin",
+          operator_id: null,
+          after: { reissued: false, by: "admin" },
+        },
+      ]);
       expect(JSON.stringify(events)).not.toContain(email);
       // The link and the password never reach the logs.
       const logged = JSON.stringify(logs.records);
@@ -342,6 +424,7 @@ describeDb("platform admin setup link and 2FA lockout (T-086d)", () => {
       });
       expect(
         await setup.complete({
+          keyId: started.value.keyId,
           token: issued.token,
           password: PASSWORD,
           code: totp(started.value.secret),
@@ -361,6 +444,7 @@ describeDb("platform admin setup link and 2FA lockout (T-086d)", () => {
         expect(
           await setup.complete({
             token,
+            keyId: "0000000000000000",
             password: PASSWORD,
             code: "123456",
             headers: browser.headers(),
@@ -369,7 +453,7 @@ describeDb("platform admin setup link and 2FA lockout (T-086d)", () => {
       }
     });
 
-    it("pressing Start again replaces the key: a code from the old key is refused", async () => {
+    it("pressing Start again replaces the key: Done with the old key says the key changed", async () => {
       const issued = await newAdmin();
       const first = newBrowser();
       const second = newBrowser();
@@ -379,13 +463,25 @@ describeDb("platform admin setup link and 2FA lockout (T-086d)", () => {
       expect(fresh.value.secret).not.toBe(old.value.secret);
       expect(
         await setup.complete({
+          keyId: old.value.keyId,
           token: issued.token,
           password: PASSWORD,
           code: totp(old.value.secret),
           headers: first.headers(),
         }),
-      ).toEqual({ ok: false, error: { code: "INVALID_CODE" } });
+      ).toEqual({ ok: false, error: { code: "SETUP_KEY_CHANGED" } });
+      // Even the new key's code is refused with the old key id: the page must Start again.
+      expect(
+        await setup.complete({
+          keyId: old.value.keyId,
+          token: issued.token,
+          password: PASSWORD,
+          code: totp(fresh.value.secret),
+          headers: first.headers(),
+        }),
+      ).toEqual({ ok: false, error: { code: "SETUP_KEY_CHANGED" } });
       const done = await setup.complete({
+        keyId: fresh.value.keyId,
         token: issued.token,
         password: PASSWORD,
         code: totp(fresh.value.secret),
@@ -404,6 +500,7 @@ describeDb("platform admin setup link and 2FA lockout (T-086d)", () => {
       const results = await Promise.all(
         [a, b].map((browser) =>
           setup.complete({
+            keyId: started.value.keyId,
             token: issued.token,
             password: PASSWORD,
             code,
@@ -470,11 +567,19 @@ describeDb("platform admin setup link and 2FA lockout (T-086d)", () => {
       );
 
       // The coordinator's one-off step: a new link. The old password and session stop working.
-      const first = await reissueAdminSetupLink(issueDeps(), { email: email.toUpperCase() });
-      const issued = await reissueAdminSetupLink(issueDeps(), { email });
-      expect(
-        await query("SELECT 1 FROM accounts WHERE user_id = $1", [legacy.userId]),
-      ).toHaveLength(0);
+      const first = await reissueAdminSetupLink(issueDeps(), {
+        email: email.toUpperCase(),
+        by: byRoot(),
+      });
+      const issued = await reissueAdminSetupLink(issueDeps(), { email, by: byRoot() });
+      // The old password is replaced by an unusable one (a credential row stays, so sign-in still
+      // costs a password check).
+      const credential = await query<{ password: string }>(
+        "SELECT password FROM accounts WHERE user_id = $1",
+        [legacy.userId],
+      );
+      expect(credential).toHaveLength(1);
+      expect(credential[0]?.password).toMatch(/^\$argon2id\$/);
       expect(
         await query("SELECT 1 FROM sessions WHERE user_id = $1", [legacy.userId]),
       ).toHaveLength(0);
@@ -484,11 +589,23 @@ describeDb("platform admin setup link and 2FA lockout (T-086d)", () => {
       ).toEqual({ ok: false, error: { code: "INVALID_CREDENTIALS" } });
       const { signedIn } = await enrolWithLink(issued.token);
       expect(signedIn).toBe(true);
-      expect((await auditActions(legacy.userId)).slice(-4)).toEqual([
-        "auth.admin_setup_link_issued",
-        "auth.admin_setup_link_issued",
+      expect((await auditActions(legacy.userId)).slice(-2)).toEqual([
         "auth.admin_setup_completed",
         "auth.signed_in",
+      ]);
+      expect(await issuedEvents(legacy.userId)).toEqual([
+        {
+          actor_id: rootId,
+          actor_role: "platform_admin",
+          operator_id: null,
+          after: { reissued: true, by: "admin" },
+        },
+        {
+          actor_id: rootId,
+          actor_role: "platform_admin",
+          operator_id: null,
+          after: { reissued: true, by: "admin" },
+        },
       ]);
 
       // Who can't get a link: an admin who has TOTP, a tenant user, an unknown address; and an
@@ -500,9 +617,15 @@ describeDb("platform admin setup link and 2FA lockout (T-086d)", () => {
         tenant.users.owner,
       ]);
       const refusals: Array<[string, () => Promise<unknown>]> = [
-        ["already_enrolled", () => reissueAdminSetupLink(issueDeps(), { email })],
-        ["not_a_platform_admin", () => reissueAdminSetupLink(issueDeps(), { email: ownerEmail })],
-        ["not_found", () => reissueAdminSetupLink(issueDeps(), { email: "nobody@nowhere.test" })],
+        ["already_enrolled", () => reissueAdminSetupLink(issueDeps(), { email, by: byRoot() })],
+        [
+          "not_a_platform_admin",
+          () => reissueAdminSetupLink(issueDeps(), { email: ownerEmail, by: byRoot() }),
+        ],
+        [
+          "not_found",
+          () => reissueAdminSetupLink(issueDeps(), { email: "nobody@nowhere.test", by: byRoot() }),
+        ],
         [
           "already_exists",
           () =>
@@ -511,6 +634,7 @@ describeDb("platform admin setup link and 2FA lockout (T-086d)", () => {
               name: "Dup",
               login: "dup-admin",
               language: "en",
+              by: byRoot(),
             }),
         ],
         [
@@ -521,6 +645,7 @@ describeDb("platform admin setup link and 2FA lockout (T-086d)", () => {
               name: "X",
               login: "x-admin",
               language: "en",
+              by: byRoot(),
             }),
         ],
       ];
@@ -532,6 +657,76 @@ describeDb("platform admin setup link and 2FA lockout (T-086d)", () => {
         expect(error, code).toBeInstanceOf(AdminSetupIssueError);
         expect(error, code).toMatchObject({ code });
       }
+    }, 60_000);
+
+    it("records who issued a link; only an enrolled admin can, or --bootstrap before any exists", async () => {
+      // The root admin was bootstrapped: the actor is the system, with where the command ran.
+      expect(await issuedEvents(rootId)).toEqual([
+        {
+          actor_id: null,
+          actor_role: null,
+          operator_id: null,
+          after: { reissued: false, by: "bootstrap", os_user: "tester", os_host: "ci-host" },
+        },
+      ]);
+      // Now that an admin has enrolled, --bootstrap is refused; so is any issuer who isn't an
+      // active platform admin with 2-step sign-in on.
+      const pending = await newAdmin(); // has no TOTP yet
+      const pendingEmail = await emailOf(pending.userId);
+      const tenant = await seedTenant(t.current);
+      const ownerEmail = `owner-${uuidv7().slice(-8)}@cable.test`;
+      await t.current.admin.query("UPDATE users SET email = $1 WHERE id = $2", [
+        ownerEmail,
+        tenant.users.owner,
+      ]);
+      const disabled = await newAdmin();
+      await enrolWithLink(disabled.token);
+      const disabledEmail = await emailOf(disabled.userId);
+      await t.current.admin.query("UPDATE users SET status = 'disabled' WHERE id = $1", [
+        disabled.userId,
+      ]);
+      const newcomer = (by: AdminSetupIssuer) => () =>
+        createPlatformAdmin(issueDeps(), {
+          email: `new-${uuidv7().slice(-8)}@platform.test`,
+          name: "New Admin",
+          login: `new-${uuidv7().slice(-8)}`,
+          language: "en",
+          by,
+        });
+      const refusals: Array<[string, () => Promise<unknown>]> = [
+        ["bootstrap_not_allowed", newcomer({ kind: "bootstrap", osUser: "x", host: "y" })],
+        ["issuer_not_allowed", newcomer({ kind: "admin", email: pendingEmail })],
+        ["issuer_not_allowed", newcomer({ kind: "admin", email: ownerEmail })],
+        ["issuer_not_allowed", newcomer({ kind: "admin", email: disabledEmail })],
+        ["issuer_not_allowed", newcomer({ kind: "admin", email: "nobody@nowhere.test" })],
+        [
+          "bootstrap_not_allowed",
+          () =>
+            reissueAdminSetupLink(issueDeps(), {
+              email: pendingEmail,
+              by: { kind: "bootstrap", osUser: "x", host: "y" },
+            }),
+        ],
+        [
+          "issuer_not_allowed",
+          () =>
+            reissueAdminSetupLink(issueDeps(), {
+              email: pendingEmail,
+              by: { kind: "admin", email: pendingEmail },
+            }),
+        ],
+      ];
+      for (const [code, attempt] of refusals) {
+        const error = await attempt().then(
+          () => null,
+          (e: unknown) => e,
+        );
+        expect(error, code).toBeInstanceOf(AdminSetupIssueError);
+        expect(error, code).toMatchObject({ code });
+      }
+      // Refused issues change nothing: no new user, no new link for the pending admin.
+      expect(await issuedEvents(pending.userId)).toHaveLength(1);
+      expect(await query("SELECT 1 FROM users WHERE name = 'New Admin'")).toHaveLength(0);
     }, 60_000);
 
     it("a legacy admin session without TOTP is ended; admins can never self-enrol", async () => {

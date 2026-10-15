@@ -10,6 +10,7 @@ export type AuthErrorKey =
   | "two_factor_expired"
   | "sign_in_again"
   | "setup_link_required"
+  | "setup_key_changed"
   | "invalid_token"
   | "invalid_password"
   | "passwords_differ"
@@ -34,6 +35,7 @@ const ERROR_KEYS: Record<AuthFailure["code"], AuthErrorKey> = {
   TWO_FACTOR_EXPIRED: "two_factor_expired",
   SIGN_IN_AGAIN: "sign_in_again",
   SETUP_LINK_REQUIRED: "setup_link_required",
+  SETUP_KEY_CHANGED: "setup_key_changed",
   INVALID_TOKEN: "invalid_token",
   INVALID_PASSWORD: "invalid_password",
   UNAUTHENTICATED: "two_factor_expired",

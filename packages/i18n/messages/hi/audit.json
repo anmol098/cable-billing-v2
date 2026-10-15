@@ -361,7 +361,7 @@
       "password_reset_completed": "{who} ने ईमेल के लिंक से नया पासवर्ड बनाया",
       "two_factor_enabled": "{who} ने 2-स्टेप लॉग इन चालू किया",
       "other_sessions_ended": "{who} ने 2-स्टेप लॉग इन चालू किया, इसलिए {count, plural, one {# दूसरे डिवाइस} other {# दूसरे डिवाइसों}} से लॉग आउट कर दिया गया",
-      "admin_setup_link_issued": "{who} के लिए एक बार चलने वाला सेटअप लिंक बनाया गया",
+      "admin_setup_link_issued": "{who} ने एक प्लेटफ़ॉर्म एडमिन के लिए एक बार चलने वाला सेटअप लिंक बनाया",
       "admin_setup_completed": "{who} ने सेटअप लिंक से पासवर्ड बनाया और 2-स्टेप लॉग इन चालू किया"
     },
     "mobile_auth": {

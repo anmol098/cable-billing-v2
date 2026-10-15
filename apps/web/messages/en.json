@@ -757,7 +757,7 @@
       },
       "auth": {
         "admin_setup_completed": "{who} set a password and turned on 2-step sign-in with the setup link",
-        "admin_setup_link_issued": "A one-time setup link was made for {who}",
+        "admin_setup_link_issued": "{who} made a one-time setup link for a platform admin",
         "other_sessions_ended": "{who} turned on 2-step sign-in, so {count, plural, one {# other device was} other {# other devices were}} signed out",
         "password_reset_completed": "{who} set a new password with the email link",
         "password_reset_requested": "{who} asked for a link to set a new password",
@@ -894,6 +894,7 @@
       "rate_limited": "Too many tries. Try again in {minutes, plural, one {# minute} other {# minutes}}.",
       "required": "Fill this in.",
       "role_not_allowed": "This login is for the phone app. Linemen sign in on the phone, not here.",
+      "setup_key_changed": "The key changed. Press Start again.",
       "setup_link_required": "2-step sign-in is not set up for this admin account. Ask for a new setup link.",
       "sign_in_again": "2-step sign-in did not turn on. Sign in again and try once more.",
       "title": "Could not sign in",
