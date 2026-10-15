@@ -119,6 +119,11 @@ PRD §16, PLAN §10.4, T-086 completion notes.
    - `PAYMENT_SYNC_BATCH_MAX === PAYMENT_BATCH_MAX`. `@cb/db` can't import `@cb/contracts`, so the two are tied by this test instead.
 6. **The "same batch sent 10× at once" test also checks the counters:** 20 batches, 100 items, 5 accepted, 95 duplicates, nothing rejected or retried.
 7. **Follow-up task T-086f:** a rate limit on `/payments:batch` (one token wrote 200 refusal rows in 4 requests) and a retention decision for both tables.
+- Verified after the fixes (on `feature/mvp` with T-087b):
+  - `pnpm install --frozen-lockfile`, lint, typecheck and build pass.
+  - `TURBO_FORCE=1 pnpm test --concurrency=1`: 10/10 packages (core 1288 + 3 skipped, web 607, db 279).
+  - `pnpm generate` leaves no diff. The `--check` modes, `db:check`, the `@cb/db` harness security audit and `tasks.mjs check --local` pass.
+  - Playwright `admin`, `mobile-collect` and `payments` pass 9/9 on a fresh scratch DB. Under `next start` the counters were written after the response via `after`: 1 posted batch, then 5 duplicate batches.
 - Migrations 0019/0020 were regenerated, since they are not on `feature/mvp` yet. Files outside the owned paths, added in this round: `apps/web/src/lib/mobile/{http,server}.ts` (the optional `afterResponse` hook) and T-061's `test-support.ts` (the `afterResponse` option).
 
 **Verification**
