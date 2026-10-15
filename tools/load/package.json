@@ -1,0 +1,28 @@
+{
+  "name": "@cb/load",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Load-test scenarios and the performance budget gate (T-095). Plain Node fetch, no load-testing framework.",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "tsc --noEmit",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "load": "tsx src/cli.ts"
+  },
+  "dependencies": {
+    "@cb/contracts": "workspace:*",
+    "@cb/db": "workspace:*"
+  },
+  "devDependencies": {
+    "@cb/config": "workspace:*",
+    "@types/node": "catalog:",
+    "tsx": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}
