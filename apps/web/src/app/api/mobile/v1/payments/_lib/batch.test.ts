@@ -299,6 +299,72 @@ describeDb("POST /payments:batch (T-061)", () => {
     expect(JSON.stringify(body)).not.toContain(theirs);
   }, 60_000);
 
+  it("refuses an item whose id is UUID-shaped but not an RFC UUID on its own; the rest post and the answer is 200", async () => {
+    const { tenant, lineman } = await tenantWithLineman(t.current, h);
+    const op = tenant.operatorId;
+    const customer = await insertCustomer(t.current, op);
+    // Hex in UUID shape, but the version (0) and variant (0) digits are not RFC 9562.
+    const notRfc = "12345678-1234-0234-0234-123456789abc";
+    const items: Record<string, unknown>[] = [
+      paymentItem(lineman, customer, { amount_paise: 20_000 }, 1),
+      { ...paymentItem(lineman, customer, { amount_paise: 15_000 }, 2), id: notRfc },
+      { ...paymentItem(lineman, customer, { amount_paise: 5_000 }, 3), id: notRfc.toUpperCase() },
+      paymentItem(lineman, customer, { amount_paise: 30_000 }, 4),
+    ];
+    const body = await ok(await send(lineman.accessToken, { payments: items }));
+    expect(body.results.map((r) => r.outcome)).toEqual([
+      "posted",
+      "rejected",
+      "rejected",
+      "posted",
+    ]);
+    // The refused items carry the unusable id (the contract can't echo theirs) and say why.
+    expect(body.results.map((r) => r.id)).toEqual([
+      items[0]?.id,
+      UNUSABLE_ITEM_ID,
+      UNUSABLE_ITEM_ID,
+      items[3]?.id,
+    ]);
+    expect(body.results[1]?.error).toMatchObject({
+      code: "VALIDATION",
+      fields: [{ path: "payments.1.id" }],
+    });
+    expect(body.results[2]?.error).toMatchObject({
+      code: "VALIDATION",
+      fields: [{ path: "payments.2.id" }],
+    });
+    // Only the two valid payments were written.
+    const counts = await moneyRowCounts(t.current, op);
+    expect(counts.payments).toBe(2);
+    expect(counts.receipts).toBe(2);
+
+    // The phone sends the queue again: the valid payments are duplicates, nothing new is written.
+    const replay = await ok(await send(lineman.accessToken, { payments: items }));
+    expect(replay.results.map((r) => r.outcome)).toEqual([
+      "duplicate",
+      "rejected",
+      "rejected",
+      "duplicate",
+    ]);
+    expect((await moneyRowCounts(t.current, op)).payments).toBe(2);
+  }, 60_000);
+
+  it("answers the time budget's retry_later with the unusable id for a non-RFC item id", async () => {
+    const { tenant, lineman } = await tenantWithLineman(t.current, h);
+    const customer = await insertCustomer(t.current, tenant.operatorId);
+    const items = [
+      paymentItem(lineman, customer, {}, 1),
+      { ...paymentItem(lineman, customer, {}, 2), id: "12345678-1234-0234-0234-123456789abc" },
+    ];
+    const noBudget = paymentBatchHandler(h.getDeps, { timeBudgetMs: 0 });
+    const body = await ok(await send(lineman.accessToken, { payments: items }, noBudget));
+    expect(body.results.map((r) => [r.id, r.outcome, r.error?.code])).toEqual([
+      [items[0]?.id, "retry_later", "RATE_LIMITED"],
+      [UNUSABLE_ITEM_ID, "retry_later", "RATE_LIMITED"],
+    ]);
+    expect((await moneyRowCounts(t.current, tenant.operatorId)).payments).toBe(0);
+  }, 60_000);
+
   it("refuses a whole request that isn't a batch (400 VALIDATION, nothing written)", async () => {
     const { tenant, lineman } = await tenantWithLineman(t.current, h);
     const customer = await insertCustomer(t.current, tenant.operatorId);

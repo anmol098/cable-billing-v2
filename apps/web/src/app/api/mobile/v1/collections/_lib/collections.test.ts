@@ -321,6 +321,8 @@ describeDb("collections API (T-061)", () => {
     });
     for (const bad of [
       { ...request, submission_id: "x" },
+      // UUID-shaped hex that is not an RFC UUID: refused here, so it is never stored or echoed.
+      { ...request, submission_id: "12345678-1234-0234-0234-123456789abc" },
       { ...request, cash_handed_over_paise: -1 },
       { ...request, cash_handed_over_paise: 10.5 },
       { ...request, discrepancy_reason: "lost" },

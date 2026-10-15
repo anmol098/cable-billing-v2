@@ -5,20 +5,28 @@
  *
  * Messages are developer English for logs: field **names** only, never request values or PII.
  */
-import type { ErrorCode } from "@cb/contracts";
-import { isUuid } from "@cb/db";
+import { type ErrorCode, Uuid } from "@cb/contracts";
 import type { FieldProblem as FieldIssue } from "@/lib/mobile/http";
 
 /**
- * The id a batch result carries for an item whose own id is unusable (missing or not a UUID).
- * Matches no item the phone has, so the phone keeps whatever it sent and shows nothing new.
+ * The id a batch result carries for an item whose own id is unusable (missing or not a UUID the
+ * contract accepts). Matches no item the phone has, so the phone keeps whatever it sent and shows
+ * nothing new.
  */
 export const UNUSABLE_ITEM_ID = "00000000-0000-0000-0000-000000000000";
 
-/** The item's id in canonical lower case, or {@link UNUSABLE_ITEM_ID}. */
+/**
+ * The item's id in canonical lower case, or {@link UNUSABLE_ITEM_ID}.
+ *
+ * Checked with the contract's own `Uuid` (RFC 9562 version and variant digits), not `isUuid`
+ * (any hex in UUID shape): the result echoes this id and the whole answer is validated against
+ * the contract before it leaves, so an id the contract refuses would turn the answer into a 500
+ * after the batch's other items were already saved. Such an item also fails the item schema (same
+ * `Uuid`), so it is `rejected` VALIDATION on its own and never posted.
+ */
 export function itemIdOf(raw: unknown): string {
-  const id = (raw as { id?: unknown } | null)?.id;
-  return typeof id === "string" && isUuid(id) ? id.toLowerCase() : UNUSABLE_ITEM_ID;
+  const id = Uuid.safeParse((raw as { id?: unknown } | null)?.id);
+  return id.success ? id.data.toLowerCase() : UNUSABLE_ITEM_ID;
 }
 
 /** Core input names that are not just camelCase of the wire name. */
