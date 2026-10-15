@@ -1,15 +1,18 @@
 /**
  * Platform admin console (T-086) against `next start` and a real, migrated database:
- * - every admin route refuses anonymous visitors (→ sign in), tenant owners (→ /home) and an
- *   admin without 2-step sign-in (→ TOTP enrolment), server-side;
- * - T-086b: a password-only session opened before enrolment (another browser) is ended when
- *   enrolment completes, and gets in only after signing in again with the code;
+ * - every admin route refuses anonymous visitors (→ sign in) and tenant owners (→ /home),
+ *   server-side;
+ * - T-086d: an admin without 2-step sign-in is refused at sign-in (the right password is not
+ *   enough, and there is no self-enrolment); an admin made by the `admin:create` script sets the
+ *   password and 2-step sign-in with the one-time setup link, lands in the console, and the link
+ *   then no longer works;
  * - the admin flow: overview metrics, operators list and detail, extend, offline payment,
  *   support access (reason, 2 hours, visible in the operator's own audit log, ended early →
  *   refused), job retry, Razorpay log, admin log, and adding an operator.
  *
  * Needs `DATABASE_URL` (migrated) and `BETTER_AUTH_SECRET` for both the runner and the server.
  */
+import { execFileSync } from "node:child_process";
 import { createHmac } from "node:crypto";
 import { hashPassword } from "@cb/core";
 import {
@@ -91,14 +94,15 @@ test.describe("platform admin console", () => {
     });
     failedJobId = uuidv7();
     await db.withPlatform(async (tx) => {
-      // "admin": the console flow; "admin2": two browsers around enrolment (T-086b).
-      for (const who of ["admin", "admin2"]) {
+      // "admin" is made by the `admin:create` script (T-086d test). "legacy": an admin made the
+      // old way, with a password and no 2-step sign-in.
+      for (const who of ["legacy"]) {
         const adminId = uuidv7();
         await tx.insert(users).values({
           id: adminId,
           operatorId: null,
           role: "platform_admin",
-          name: who === "admin" ? `E2E Admin ${run}` : `E2E Second Admin ${run}`,
+          name: `E2E Legacy Admin ${run}`,
           login: login(who),
           email: `${login(who)}@cable.test`,
           language: "en",
@@ -111,6 +115,17 @@ test.describe("platform admin console", () => {
           password: hash,
         });
       }
+      // "issuer": an enrolled admin, who runs `admin:create --by` (recorded as the actor).
+      await tx.insert(users).values({
+        id: uuidv7(),
+        operatorId: null,
+        role: "platform_admin",
+        name: `E2E Issuing Admin ${run}`,
+        login: login("issuer"),
+        email: `${login("issuer")}@cable.test`,
+        language: "en",
+        twoFactorEnabled: true,
+      });
       await tx.insert(jobs).values({
         id: failedJobId,
         operatorId,
@@ -135,6 +150,9 @@ test.describe("platform admin console", () => {
   test.afterAll(async () => {
     await db?.end();
   });
+
+  /** The form's error box (Next's route announcer also has role="alert"). */
+  const formAlert = (page: Page) => page.locator('[role="alert"]:not(#__next-route-announcer__)');
 
   async function signIn(page: Page, who: string) {
     await page.goto("/login");
@@ -161,62 +179,110 @@ test.describe("platform admin console", () => {
     }
   });
 
-  test("an admin must turn on 2-step sign-in before any admin page", async ({ page }) => {
-    await signIn(page, "admin");
-    await expect(page).toHaveURL(/\/login\/2fa\/setup$/);
+  test("an admin without 2-step sign-in never gets in, even with the right password (T-086d)", async ({
+    page,
+  }) => {
+    await signIn(page, "legacy");
+    await expect(formAlert(page)).toContainText("Ask for a new setup link.");
     for (const route of ADMIN_ROUTES) {
       await page.goto(route);
-      await expect(page, route).toHaveURL(/\/login\/2fa\/setup$/);
+      await expect(page, route).toHaveURL(/\/login\?next=%2Fadmin/);
     }
-    await page.getByLabel("Your password").fill(PASSWORD);
-    await page.getByRole("button", { name: "Next" }).click();
-    totpSecret = (await page.getByTestId("totp-secret").textContent())?.trim() ?? "";
-    await page.getByLabel("6-digit code from the app").fill(totp(totpSecret));
-    await page.getByRole("button", { name: "Turn on" }).click();
-    await expect(page).toHaveURL(/\/admin$/);
-    await expect(page.getByRole("heading", { level: 1, name: "Overview" })).toBeVisible();
   });
 
-  test("a password-only session from before enrolment never reaches the console (T-086b)", async ({
-    browser,
+  test("an admin made by the script sets up with the one-time link, then reaches the console (T-086d)", async ({
+    page,
+    baseURL,
   }) => {
-    // Two browsers sign in with the password alone; the second one turns on 2-step sign-in.
-    const before = await browser.newContext();
-    const enrolling = await browser.newContext();
-    try {
-      const stale = await before.newPage();
-      const page = await enrolling.newPage();
-      await signIn(stale, "admin2");
-      await expect(stale).toHaveURL(/\/login\/2fa\/setup$/);
-      await signIn(page, "admin2");
-      await expect(page).toHaveURL(/\/login\/2fa\/setup$/);
-      await page.getByLabel("Your password").fill(PASSWORD);
-      await page.getByRole("button", { name: "Next" }).click();
-      const secret = (await page.getByTestId("totp-secret").textContent())?.trim() ?? "";
-      await page.getByLabel("6-digit code from the app").fill(totp(secret));
-      await page.getByRole("button", { name: "Turn on" }).click();
-      await expect(page).toHaveURL(/\/admin$/);
+    const email = `${login("admin")}@cable.test`;
+    // The reviewed command an operator of the platform runs (packages/core/scripts).
+    const output = execFileSync(
+      "pnpm",
+      [
+        "--filter",
+        "@cb/core",
+        "exec",
+        "tsx",
+        "scripts/create-platform-admin.ts",
+        "--by",
+        `${login("issuer")}@cable.test`,
+        "--email",
+        email,
+        "--name",
+        `E2E Admin ${run}`,
+        "--login",
+        login("admin"),
+        "--base-url",
+        baseURL ?? "",
+      ],
+      { env: process.env, encoding: "utf8" },
+    );
+    // The token is in the #fragment: browsers never send it, so no server log can hold it.
+    const link = output.match(/https?:\/\/\S+\/admin-setup#[A-Za-z0-9_-]{43}/)?.[0] ?? "";
+    expect(link, output).not.toBe("");
+    const token = link.split("#")[1] ?? "";
+    const requested: string[] = [];
+    page.on("request", (request) => requested.push(request.url()));
 
-      // The first browser's session is gone: every admin route sends it to sign in.
-      for (const route of ADMIN_ROUTES) {
-        await stale.goto(route);
-        await expect(stale, route).toHaveURL(/\/login(\?|$)/);
-      }
-      await expect(stale.getByLabel("Mobile no., user name or email")).toBeVisible();
+    // No password yet: nobody can sign in as this admin before the link is used.
+    await signIn(page, "admin");
+    await expect(formAlert(page)).toContainText("Wrong user name or password.");
 
-      // Signing in there again needs the code; then it gets in.
-      await signIn(stale, "admin2");
-      await expect(stale).toHaveURL(/\/login\/2fa$/);
-      await stale.getByLabel("6-digit code").fill(totp(secret));
-      await stale.getByRole("button", { name: "Check code" }).click();
-      await expect(stale).toHaveURL(/\/admin$/);
-      // The enrolled browser is still in.
-      await page.goto("/admin/jobs");
-      await expect(page).toHaveURL(/\/admin\/jobs$/);
-    } finally {
-      await before.close();
-      await enrolling.close();
-    }
+    await page.goto(link);
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Set up your admin account");
+    await expect(page.getByTestId("admin-setup-account")).toHaveText(email);
+    // The page took the token out of the address bar.
+    await expect(page).toHaveURL(/\/admin-setup$/);
+    await page.getByRole("button", { name: "Start" }).click();
+    totpSecret = (await page.getByTestId("totp-secret").textContent())?.trim() ?? "";
+    expect(totpSecret).toMatch(/^[A-Z2-7]+$/);
+    await page.getByLabel("New password", { exact: true }).fill(PASSWORD);
+    await page.getByLabel("New password again").fill(PASSWORD);
+    await page
+      .getByLabel("6-digit code from the app")
+      .fill(totp(totpSecret, Date.now() + 5 * 60_000));
+    await page.getByRole("button", { name: "Turn on and sign in" }).click();
+    await expect(formAlert(page)).toContainText("Wrong code");
+    // The key stays; the password fields are cleared (passwords never come back to the page).
+    await expect(page.getByTestId("totp-secret")).toHaveText(totpSecret);
+    await page.getByLabel("New password", { exact: true }).fill(PASSWORD);
+    await page.getByLabel("New password again").fill(PASSWORD);
+    await page.getByLabel("6-digit code from the app").fill(totp(totpSecret));
+    await page.getByRole("button", { name: "Turn on and sign in" }).click();
+    await expect(page).toHaveURL(/\/admin$/);
+    await expect(page.getByRole("heading", { level: 1, name: "Overview" })).toBeVisible();
+
+    // The link worked once.
+    await page.goto(link);
+    await expect(page.locator('[data-admin-setup="invalid"]')).toContainText(
+      "This setup link does not work any more.",
+    );
+    await expect(page.getByRole("button", { name: "Start" })).toHaveCount(0);
+    // No request the browser made had the token in its URL (it went only in POST bodies).
+    expect(requested.length).toBeGreaterThan(0);
+    expect(requested.filter((url) => url.includes(token))).toEqual([]);
+
+    // On record as platform events: the issuing admin made the link, the new admin set it up.
+    const events = await db.withPlatform(async (tx) => {
+      const find = (address: string) =>
+        tx.query.users.findFirst({ where: (u, { eq }) => eq(u.email, address) });
+      const admin = await find(email);
+      const issuer = await find(`${login("issuer")}@cable.test`);
+      const rows = await tx.query.auditEvents.findMany({
+        where: (a, { eq }) => eq(a.entityId, admin?.id ?? ""),
+      });
+      return rows.map(
+        (e) =>
+          `${e.action}:${e.operatorId ?? "platform"}:${e.actorId === issuer?.id ? "issuer" : e.actorId === admin?.id ? "self" : "other"}`,
+      );
+    });
+    expect(events).toEqual(
+      expect.arrayContaining([
+        "auth.admin_setup_link_issued:platform:issuer",
+        "auth.admin_setup_completed:platform:self",
+        "auth.signed_in:platform:self",
+      ]),
+    );
   });
 
   test("admin flow: operators, subscription, support access, jobs, logs", async ({ page }) => {

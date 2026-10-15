@@ -1,6 +1,22 @@
 /** Web authentication (T-026). See ./auth.ts for the overview. */
 export { platformAuthAdapter } from "./adapter";
 export {
+  ADMIN_SETUP_LINK_TTL_SECONDS,
+  ADMIN_SETUP_PATH,
+  AdminSetupIssueError,
+  type AdminSetupIssueErrorCode,
+  type AdminSetupIssuer,
+  type AdminSetupKey,
+  type AdminSetupService,
+  adminSetupBaseUrlProblem,
+  adminSetupUrl,
+  type CreateAdminSetupServiceOptions,
+  createAdminSetupService,
+  createPlatformAdmin,
+  type IssuedAdminSetupLink,
+  reissueAdminSetupLink,
+} from "./admin-setup";
+export {
   AUTH_AUDIT_ACTIONS,
   type AuthAuditAction,
   type AuthAuditSubject,
@@ -18,6 +34,8 @@ export {
   type PasswordResetEmail,
   type PasswordResetInvite,
   type SignInOutcome,
+  TOTP_OPTIONS,
+  TWO_FACTOR_LOCKOUT,
   type TwoFactorEnrolment,
   type WebSession,
 } from "./auth";

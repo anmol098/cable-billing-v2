@@ -159,6 +159,9 @@ export const AUDIT_ACTIONS = {
   "auth.other_sessions_ended": {
     details: ({ after }) => ({ count: count(field(after, "sessions")) }),
   },
+  // Platform admin setup link (T-086d): platform events only, never in a tenant's log.
+  "auth.admin_setup_link_issued": {},
+  "auth.admin_setup_completed": {},
   "mobile_auth.refresh_reuse_detected": {},
   "devices.revoke": {},
   // Business (T-027, T-030)

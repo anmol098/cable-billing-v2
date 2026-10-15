@@ -24,6 +24,10 @@ export const AUTH_AUDIT_ACTIONS = [
   "auth.two_factor_enabled",
   /** T-086b: turning on TOTP ended the user's other sessions (`{ sessions, reason }`). */
   "auth.other_sessions_ended",
+  /** T-086d: a platform admin's one-time setup link was made (`{ reissued }`). */
+  "auth.admin_setup_link_issued",
+  /** T-086d: a platform admin set their password and turned on TOTP with their setup link. */
+  "auth.admin_setup_completed",
 ] as const;
 export type AuthAuditAction = (typeof AUTH_AUDIT_ACTIONS)[number];
 
@@ -42,17 +46,24 @@ export async function recordAuthEvent(
     headers: Headers;
     /** Codes/counts only (e.g. `{ method: "password" }`). */
     after?: Record<string, string | number | boolean>;
+    /**
+     * Who did it, when that is not the subject (T-086d: the admin who ran `admin:create`).
+     * `null` = the system ("The app"). Default: the subject acted on their own account.
+     */
+    actor?: { readonly userId: string; readonly role: UserRole } | null;
   },
 ): Promise<void> {
   const client = clientInfo(event.headers);
   const requestId = requestIdFromHeaders(event.headers);
   const { subject } = event;
+  const actor =
+    event.actor === undefined ? { userId: subject.userId, role: subject.role } : event.actor;
   try {
     const write = (tx: Parameters<typeof writeAuditEvent>[0]) =>
       writeAuditEvent(tx, {
         operatorId: subject.operatorId,
-        actorId: subject.userId,
-        actorRole: subject.role,
+        actorId: actor?.userId ?? null,
+        actorRole: actor?.role ?? null,
         action: event.action,
         entityType: "user",
         entityId: subject.userId,

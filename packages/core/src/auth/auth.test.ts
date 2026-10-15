@@ -1,7 +1,7 @@
 /**
  * Web authentication against a real database (T-026): sign-in by login and email, role and status
  * gates (lineman never, disabled never), rate limits, sessions (cookie flags, sliding, revocation,
- * sign out everywhere), the platform admin's TOTP enrolment / 2FA step / 8-hour cap, password reset
+ * sign out everywhere), the platform admin's setup link (T-086d) / 2FA step / 8-hour cap, password reset
  * (single use, expiry, no enumeration), tenant context building and the audit trail.
  */
 import { createHmac } from "node:crypto";
@@ -20,6 +20,7 @@ import { beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { resolveAdminContext } from "../admin/context";
 import { newRequestId } from "../context/runtime";
 import { captureLogs, type SeededTenant, seedTenant } from "../testing";
+import { createAdminSetupService, createPlatformAdmin, reissueAdminSetupLink } from "./admin-setup";
 import { createAuthService, type PasswordResetEmail } from "./auth";
 import { hashPassword } from "./password";
 import { SESSION_POLICY } from "./policy";
@@ -159,6 +160,65 @@ describeDb("web authentication (Better Auth)", () => {
         [userId],
       )
     ).rows;
+
+  /**
+   * T-086d: platform admins get TOTP only through their setup link. Reissues one for `userId`
+   * (removing any password), completes it in a new browser with PASSWORD, and returns the
+   * browser (signed in, TOTP-verified) and the authenticator secret.
+   */
+  const enrolByLink = async (userId: string) => {
+    const email =
+      (
+        await t.current.admin.query<{ email: string }>("SELECT email FROM users WHERE id = $1", [
+          userId,
+        ])
+      ).rows[0]?.email ?? "";
+    const issued = await reissueAdminSetupLink(
+      { db: t.current.db, logger: logs.logger },
+      { email, by: await linkIssuer() },
+    );
+    return completeLink(issued.token);
+  };
+  /** Start + Done on a setup link in a new browser, with PASSWORD and the right code. */
+  const completeLink = async (token: string) => {
+    const setup = createAdminSetupService({
+      auth: service,
+      db: t.current.db,
+      rateLimiter: createMemoryRateLimiter(),
+      logger: logs.logger,
+    });
+    const browser = newBrowser();
+    const started = await setup.start({ token, headers: browser.headers() });
+    if (!started.ok) throw new Error(`setup start: ${started.error.code}`);
+    const done = await setup.complete({
+      token,
+      keyId: started.value.keyId,
+      password: PASSWORD,
+      code: totp(started.value.secret),
+      headers: browser.headers(),
+    });
+    if (!done.ok || !done.value.signedIn) throw new Error("setup complete failed");
+    return { browser, secret: started.value.secret };
+  };
+  /** Links are issued by an enrolled admin; the first one is made with --bootstrap (T-086d). */
+  let issuerEmail: string | null = null;
+  const linkIssuer = async () => {
+    if (!issuerEmail) {
+      const root = await createPlatformAdmin(
+        { db: t.current.db, logger: logs.logger },
+        {
+          email: "root-admin@platform.test",
+          name: "Root Admin",
+          login: "root-admin",
+          language: "en",
+          by: { kind: "bootstrap", osUser: "tester", host: "test-host" },
+        },
+      );
+      await completeLink(root.token);
+      issuerEmail = "root-admin@platform.test";
+    }
+    return { kind: "admin" as const, email: issuerEmail };
+  };
 
   beforeAll(async () => {
     service = createAuthService({
@@ -515,73 +575,41 @@ describeDb("web authentication (Better Auth)", () => {
   });
 
   describe("platform admin (TOTP 2FA, 8-hour session)", () => {
-    it("must enrol TOTP, then needs the code at every sign-in; 8 hours max", async () => {
+    it("T-086d: no session without TOTP; after the setup link, the code at every sign-in; 8 hours max", async () => {
       const browser = newBrowser();
+      // The password is right, but this admin has no 2-step sign-in: no session, no self-enrolment.
       const first = await service.signIn({
         login: await loginOf(admin.userId),
         password: PASSWORD,
         headers: browser.headers(),
       });
-      expect(first).toEqual({
-        ok: true,
-        value: {
-          status: "signed_in",
-          userId: admin.userId,
-          role: "platform_admin",
-          twoFactorEnrolmentRequired: true,
-        },
-      });
-      const session = await service.getSession(browser.headers());
+      expect(first).toEqual({ ok: false, error: { code: "SETUP_LINK_REQUIRED" } });
+      expect(browser.cookies.has(SESSION_COOKIE)).toBe(false);
+      expect(await sessionRows(admin.userId)).toEqual([]);
+      expect(await service.getSession(browser.headers())).toBeNull();
+
+      // The one-time setup link (reissued: this admin had a password) sets TOTP up and signs in.
+      const enrolled = await enrolByLink(admin.userId);
+      const cap = SESSION_POLICY.platformAdminMaxAgeSeconds * 1000;
+      const session = await service.getSession(enrolled.browser.headers());
       expect(session).toMatchObject({
         role: "platform_admin",
         operatorId: null,
-        twoFactorEnrolmentRequired: true,
+        twoFactorEnabled: true,
+        twoFactorVerified: true,
+        twoFactorEnrolmentRequired: false,
       });
-      const cap = SESSION_POLICY.platformAdminMaxAgeSeconds * 1000;
       const [row] = await sessionRows(admin.userId);
       expect(
         (row?.expires_at.getTime() ?? 0) - (row?.created_at.getTime() ?? 0),
       ).toBeLessThanOrEqual(cap);
       // Not a tenant user.
-      const ctx = await service.tenantContext({ db: t.current.db }, browser.headers());
+      const ctx = await service.tenantContext({ db: t.current.db }, enrolled.browser.headers());
       expect(ctx).toMatchObject({
         ok: false,
         error: { code: "FORBIDDEN", details: { reason: "not_a_tenant_user" } },
       });
-
-      // Enrol: password again, then a first code.
-      expect(
-        await service.startTwoFactorEnrolment({
-          password: "wrong password!",
-          headers: browser.headers(),
-        }),
-      ).toMatchObject({ ok: false, error: { code: "INVALID_CREDENTIALS" } });
-      const enrolment = await service.startTwoFactorEnrolment({
-        password: PASSWORD,
-        headers: browser.headers(),
-      });
-      expect(enrolment.ok).toBe(true);
-      if (!enrolment.ok) return;
-      expect(enrolment.value.totpUri).toMatch(/^otpauth:\/\/totp\//);
-      expect(enrolment.value.secret).toMatch(/^[A-Z2-7]+=*$/);
-      expect(enrolment.value.backupCodes.length).toBeGreaterThan(0);
-      expect(
-        await service.confirmTwoFactorEnrolment({ code: "000000", headers: browser.headers() }),
-      ).toMatchObject({ ok: false });
-      const confirmed = await service.confirmTwoFactorEnrolment({
-        code: totp(enrolment.value.secret),
-        headers: browser.headers(),
-      });
-      expect(confirmed).toEqual({
-        ok: true,
-        value: { userId: admin.userId, role: "platform_admin", otherSessionsEnded: 0 },
-      });
-      expect(await service.getSession(browser.headers())).toMatchObject({
-        twoFactorEnabled: true,
-        twoFactorVerified: true,
-        twoFactorEnrolmentRequired: false,
-      });
-      await service.signOut({ headers: browser.headers() });
+      await service.signOut({ headers: enrolled.browser.headers() });
 
       // Next sign-in: password, then the code.
       const again = newBrowser();
@@ -598,13 +626,13 @@ describeDb("web authentication (Better Auth)", () => {
         ok: false,
         error: { code: "INVALID_CODE" },
       });
-      const wrongCode = totp(enrolment.value.secret, Date.now() + 5 * 60_000);
+      const wrongCode = totp(enrolled.secret, Date.now() + 5 * 60_000);
       expect(await service.verifyTwoFactor({ code: wrongCode, headers: again.headers() })).toEqual({
         ok: false,
         error: { code: "INVALID_CODE" },
       });
       const step2 = await service.verifyTwoFactor({
-        code: totp(enrolment.value.secret),
+        code: totp(enrolled.secret),
         headers: again.headers(),
       });
       expect(step2).toEqual({
@@ -632,145 +660,54 @@ describeDb("web authentication (Better Auth)", () => {
       // Platform events: operator_id NULL, no PII.
       const actions = await auditRows(admin.userId);
       expect(actions.map((r) => r.action)).toEqual([
+        // (the setup link itself was issued by another admin: they are that event's actor)
+        "auth.sign_in_blocked",
+        "auth.admin_setup_completed",
         "auth.signed_in",
-        "auth.two_factor_enabled",
         "auth.signed_out",
         "auth.signed_in",
       ]);
       expect(new Set(actions.map((r) => r.operator_id))).toEqual(new Set([null]));
+      expect(actions[0]?.after).toEqual({ reason: "admin_setup_required" });
       expect(actions.at(-1)?.after).toEqual({ method: "password_totp" });
     });
 
-    it("T-086b: enrolling ends the other sessions; only a session that passed TOTP is an admin's", async () => {
+    it("T-086b: only a session that passed TOTP is an admin's (getSession and the admin gate)", async () => {
       const admin2 = await createUser(t.current, { operatorId: null });
-      await setPassword(admin2.userId);
-      const login = await loginOf(admin2.userId);
-      const signIn = (browser: Browser) =>
-        service.signIn({ login, password: PASSWORD, headers: browser.headers() });
       const adminContext = (sessionId: string) =>
         resolveAdminContext(
           { db: t.current.db },
           { userId: admin2.userId, sessionId, requestId: newRequestId() },
         );
-
-      // Two browsers sign in with the password alone, before TOTP is on.
-      const laptop = newBrowser();
-      const phone = newBrowser();
-      expect((await signIn(laptop)).ok).toBe(true);
-      expect((await signIn(phone)).ok).toBe(true);
-      const stale = await service.getSession(laptop.headers());
-      expect(stale).toMatchObject({ twoFactorVerified: false, twoFactorEnrolmentRequired: true });
-      if (!stale) return;
-      expect(await adminContext(stale.sessionId)).toMatchObject({
-        ok: false,
-        error: { code: "FORBIDDEN", details: { reason: "two_factor_required" } },
-      });
-
-      // The phone enrols: its session is re-issued as TOTP-verified, the laptop's is ended.
-      const enrolment = await service.startTwoFactorEnrolment({
-        password: PASSWORD,
-        headers: phone.headers(),
-      });
-      if (!enrolment.ok) throw new Error(enrolment.error.code);
-      const confirmed = await service.confirmTwoFactorEnrolment({
-        code: totp(enrolment.value.secret),
-        headers: phone.headers(),
-      });
-      expect(confirmed).toEqual({
-        ok: true,
-        value: { userId: admin2.userId, role: "platform_admin", otherSessionsEnded: 1 },
-      });
-      const rows = await t.current.admin.query<{ id: string; verified: Date | null }>(
-        "SELECT id, two_factor_verified_at AS verified FROM sessions WHERE user_id = $1",
-        [admin2.userId],
-      );
-      expect(rows.rows).toHaveLength(1);
-      expect(rows.rows[0]?.verified).toBeInstanceOf(Date);
-
-      // The laptop's password-only session is gone and refused, at both gates.
-      expect(rows.rows.map((r) => r.id)).not.toContain(stale.sessionId);
-      expect(await service.getSession(laptop.headers())).toBeNull();
-      expect(await adminContext(stale.sessionId)).toMatchObject({
-        ok: false,
-        error: { code: "UNAUTHENTICATED", details: { reason: "no_session" } },
-      });
-      // Enrolling again from it is refused too.
-      expect(
-        await service.confirmTwoFactorEnrolment({
-          code: totp(enrolment.value.secret),
-          headers: laptop.headers(),
-        }),
-      ).toEqual({ ok: false, error: { code: "UNAUTHENTICATED" } });
-
-      // The enrolled session gets in.
-      const enrolled = await service.getSession(phone.headers());
+      const { browser } = await enrolByLink(admin2.userId);
+      const enrolled = await service.getSession(browser.headers());
       expect(enrolled).toMatchObject({ twoFactorEnabled: true, twoFactorVerified: true });
-      expect((await adminContext(enrolled?.sessionId ?? "")).ok).toBe(true);
+      if (!enrolled) return;
+      expect((await adminContext(enrolled.sessionId)).ok).toBe(true);
 
-      // The laptop signs in again: password, then the code → that session gets in too.
-      expect(await signIn(laptop)).toEqual({ ok: true, value: { status: "two_factor_required" } });
-      expect(
-        (
-          await service.verifyTwoFactor({
-            code: totp(enrolment.value.secret),
-            headers: laptop.headers(),
-          })
-        ).ok,
-      ).toBe(true);
-      const fresh = await service.getSession(laptop.headers());
-      expect(fresh).toMatchObject({ twoFactorVerified: true });
-      expect((await adminContext(fresh?.sessionId ?? "")).ok).toBe(true);
-      // ... and enrolling is not offered again (already on).
-      expect(
-        await service.confirmTwoFactorEnrolment({
-          code: totp(enrolment.value.secret),
-          headers: laptop.headers(),
-        }),
-      ).toEqual({ ok: false, error: { code: "INVALID_CODE" } });
-      expect(await sessionRows(admin2.userId)).toHaveLength(2);
-
-      // Audit: a platform event with the count (no PII).
-      const audit = await auditRows(admin2.userId);
-      expect(audit.map((r) => r.action)).toEqual([
-        "auth.signed_in",
-        "auth.signed_in",
-        "auth.other_sessions_ended",
-        "auth.two_factor_enabled",
-        "auth.signed_in",
-      ]);
-      expect(audit[2]).toMatchObject({
-        operator_id: null,
-        actor_role: "platform_admin",
-        after: { sessions: 1, reason: "two_factor_enabled" },
+      // A session row without the TOTP mark (as if it had been opened with the password alone)
+      // is refused by the admin gate and ended by getSession.
+      await t.current.admin.query(
+        "UPDATE sessions SET two_factor_verified_at = NULL WHERE id = $1",
+        [enrolled.sessionId],
+      );
+      expect(await adminContext(enrolled.sessionId)).toMatchObject({
+        ok: false,
+        error: { code: "FORBIDDEN", details: { reason: "session_not_two_factor_verified" } },
       });
-    });
-
-    it("T-086b: a password-only admin session that outlives enrolment is ended on its next request", async () => {
-      // Belt and braces: if the enrolment step's revocation ever missed a session (a race, a
-      // failure after Better Auth turned TOTP on), getSession still refuses it.
-      const admin3 = await createUser(t.current, { operatorId: null });
-      await setPassword(admin3.userId);
-      const browser = newBrowser();
-      await service.signIn({
-        login: await loginOf(admin3.userId),
-        password: PASSWORD,
-        headers: browser.headers(),
-      });
-      expect(await service.getSession(browser.headers())).toMatchObject({
-        twoFactorVerified: false,
-      });
-      await t.current.admin.query("UPDATE users SET two_factor_enabled = true WHERE id = $1", [
-        admin3.userId,
-      ]);
       expect(await service.getSession(browser.headers())).toBeNull();
-      expect(await sessionRows(admin3.userId)).toEqual([]);
+      expect(await sessionRows(admin2.userId)).toEqual([]);
       expect(logs.records).toContainEqual(
         expect.objectContaining({
           event: "auth.session_revoked",
-          user_id: admin3.userId,
+          user_id: admin2.userId,
           reason: "two_factor_not_verified_in_session",
         }),
       );
+      expect(await adminContext(enrolled.sessionId)).toMatchObject({
+        ok: false,
+        error: { code: "UNAUTHENTICATED", details: { reason: "no_session" } },
+      });
     });
 
     it("T-086b: tenant users' password sessions keep working (nothing reads the mark for them)", async () => {
@@ -851,7 +788,8 @@ describeDb("web authentication (Better Auth)", () => {
     });
 
     it("T-086b: when enrolment doesn't re-issue this browser's session, every session ends and nothing claims 2-step is on", async () => {
-      const admin4 = await createUser(t.current, { operatorId: null });
+      // An owner (platform admins never self-enrol since T-086d; the mechanism is the same).
+      const admin4 = await createUser(t.current, { operatorId: tenant.operatorId, role: "owner" });
       await setPassword(admin4.userId);
       const login = await loginOf(admin4.userId);
       const a = newBrowser();

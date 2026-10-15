@@ -17,14 +17,29 @@
  *   not reachable from outside.
  * - **Audit:** sign-in, blocked sign-in, sign-out, sign-out everywhere, reset requested/completed,
  *   2FA enabled (./audit-events.ts).
+ * - **Platform admins (T-086d):** get TOTP only through their one-time setup link
+ *   (./admin-setup.ts). A platform admin without TOTP never gets a session (refused at sign-in,
+ *   `SETUP_LINK_REQUIRED`), and the self-enrolment methods refuse them.
+ * - **Wrong 2FA codes (T-086d):** every wrong code counts toward Better Auth's per-user lockout
+ *   (`two_factors.failed_verification_count`, {@link TWO_FACTOR_LOCKOUT}), whichever branch of its
+ *   verify endpoints handled it. Better Auth counts the sign-in-challenge branch; our hooks count
+ *   the existing-session branch, which it leaves uncounted (see `twoFactorLockoutBefore/After`).
  */
 import { AsyncLocalStorage } from "node:async_hooks";
-import { type DbClient, operators, sessions, type UserRole, users, uuidv7 } from "@cb/db";
+import {
+  type DbClient,
+  operators,
+  sessions,
+  twoFactors,
+  type UserRole,
+  users,
+  uuidv7,
+} from "@cb/db";
 import { err, ok, type Result } from "@cb/domain";
 import { APIError, type BetterAuthPlugin, betterAuth } from "better-auth";
 import { createAuthMiddleware, isAPIError } from "better-auth/api";
 import { twoFactor, username } from "better-auth/plugins";
-import { and, eq, ne } from "drizzle-orm";
+import { and, eq, gt, gte, lte, ne, sql } from "drizzle-orm";
 import type { ServiceRuntime } from "../context/runtime";
 import {
   type ContextError,
@@ -111,7 +126,17 @@ export type AuthFailureCode =
    * the user was ended to be safe (T-086b). Sign in again and try once more.
    */
   | "SIGN_IN_AGAIN"
-  /** Reset link invalid, used or expired. */
+  /**
+   * A platform admin without 2-step sign-in (T-086d): they can't sign in or turn it on here, only
+   * through a new one-time setup link (password was right; shown only then).
+   */
+  | "SETUP_LINK_REQUIRED"
+  /**
+   * Admin setup link (T-086d): the key on the page is no longer the link's key ("Start" was
+   * pressed again elsewhere). Press Start again.
+   */
+  | "SETUP_KEY_CHANGED"
+  /** Reset link (or admin setup link) invalid, used or expired. */
   | "INVALID_TOKEN"
   /** New password too short or too long. */
   | "INVALID_PASSWORD"
@@ -176,10 +201,39 @@ const SIGN_IN_PATHS = new Set(["/sign-in/username", "/sign-in/email"]);
  */
 const TOTP_VERIFY_PATH = "/two-factor/verify-totp";
 
+/** The TOTP settings every authenticator app gets (Better Auth's twoFactor plugin, T-086d's link). */
+export const TOTP_OPTIONS = Object.freeze({ issuer: "Cable Billing", digits: 6, period: 30 });
+
+/**
+ * Per-user lockout for wrong 2FA codes (T-086d): this many wrong codes in a row lock the user's
+ * 2-step sign-in for this long. One counter (`two_factors.failed_verification_count`) for every
+ * way a code is checked. These are Better Auth's defaults, passed explicitly so that its own
+ * sign-in counting and our existing-session counting use the same numbers.
+ */
+export const TWO_FACTOR_LOCKOUT = Object.freeze({
+  maxFailedAttempts: 10,
+  durationSeconds: 15 * 60,
+});
+
+/**
+ * Better Auth's 2FA code-check endpoints and the error code each throws for a wrong code. In the
+ * **existing-session branch** (a session cookie, no sign-in challenge) none of them counts the
+ * failure toward the lockout or checks the lock (1.7.7: `verify-two-factor.mjs`, `totp/`,
+ * `backup-codes/` and `otp/index.mjs` gate both on `isSignIn`), so our hooks do.
+ */
+const TWO_FACTOR_CODE_FAILURES: Readonly<Record<string, string>> = Object.freeze({
+  [TOTP_VERIFY_PATH]: "INVALID_CODE",
+  "/two-factor/verify-backup-code": "INVALID_BACKUP_CODE",
+  "/two-factor/verify-otp": "INVALID_CODE",
+});
+
 /** Error codes our hooks put into Better Auth errors. */
 const RATE_LIMITED = "RATE_LIMITED";
 const ROLE_NOT_ALLOWED = "ROLE_NOT_ALLOWED";
 const ACCOUNT_DISABLED = "ACCOUNT_DISABLED";
+const ADMIN_SETUP_REQUIRED = "ADMIN_SETUP_REQUIRED";
+/** Better Auth's own code for a locked 2-step sign-in (we throw it too, for the same lock). */
+const ACCOUNT_TEMPORARILY_LOCKED = "ACCOUNT_TEMPORARILY_LOCKED";
 
 const RESET_TOKEN = /^[A-Za-z0-9_-]{16,128}$/;
 const TOTP_CODE = /^\d{6}$/;
@@ -216,8 +270,10 @@ export function createAuthService(options: CreateAuthServiceOptions) {
     after?: Record<string, string | number | boolean>,
   ) => recordAuthEvent({ db, logger }, { action, subject, headers, ...(after ? { after } : {}) });
 
-  /** The user's role, status and operator status, read fresh (platform path). */
-  async function loadSubject(userId: string): Promise<(SignInSubject & { userId: string }) | null> {
+  /** The user's role, status, operator status and 2FA flag, read fresh (platform path). */
+  async function loadSubject(
+    userId: string,
+  ): Promise<(SignInSubject & { userId: string; twoFactorEnabled: boolean }) | null> {
     const rows = await db.withPlatform(
       (tx) =>
         tx
@@ -226,6 +282,7 @@ export function createAuthService(options: CreateAuthServiceOptions) {
             status: users.status,
             operatorId: users.operatorId,
             operatorStatus: operators.status,
+            twoFactorEnabled: users.twoFactorEnabled,
           })
           .from(users)
           .leftJoin(operators, eq(operators.id, users.operatorId))
@@ -296,6 +353,126 @@ export function createAuthService(options: CreateAuthServiceOptions) {
       await hit(rateLimitKey("reset-password:ip", ip), AUTH_RATE_LIMITS.resetPerIp, path);
     } else if (path.startsWith("/two-factor/")) {
       await hit(rateLimitKey("2fa:ip", ip), AUTH_RATE_LIMITS.twoFactorPerIp, path);
+      if (path in TWO_FACTOR_CODE_FAILURES) await twoFactorLockoutBefore(ctx);
+    }
+  });
+
+  type HookContext = Parameters<Parameters<typeof createAuthMiddleware>[0]>[0];
+
+  /**
+   * The user whose **existing session** a 2FA verify call will use, or `null` when Better Auth will
+   * take the sign-in-challenge branch instead. Mirrors its `getSessionFromCtx` (signed session
+   * cookie → unexpired session row) without its side effects (caching on the context, refreshing
+   * the session). Only a wrong code reaches the after hook's use of it, and a wrong code changes
+   * no session, so both hooks see what the endpoint saw.
+   */
+  async function existingSessionUser(ctx: HookContext): Promise<string | null> {
+    const token = await ctx.getSignedCookie(
+      ctx.context.authCookies.sessionToken.name,
+      ctx.context.secret,
+    );
+    if (!token) return null;
+    const rows = await db.withPlatform(
+      (tx) =>
+        tx
+          .select({ userId: sessions.userId })
+          .from(sessions)
+          .where(and(eq(sessions.token, token), gt(sessions.expiresAt, new Date())))
+          .limit(1),
+      { accessMode: "read only" },
+    );
+    return rows[0]?.userId ?? null;
+  }
+
+  /**
+   * Before a 2FA code check in the existing-session branch: refuse while the user's 2-step sign-in
+   * is locked (Better Auth checks the lock only for sign-in challenges), and clear a lock that has
+   * run out, like Better Auth's `assertTwoFactorNotLocked`.
+   */
+  async function twoFactorLockoutBefore(ctx: HookContext): Promise<void> {
+    const userId = await existingSessionUser(ctx);
+    if (!userId) return;
+    const at = new Date();
+    const rows = await db.withPlatform(
+      (tx) =>
+        tx
+          .select({ lockedUntil: twoFactors.lockedUntil })
+          .from(twoFactors)
+          .where(eq(twoFactors.userId, userId)),
+      { accessMode: "read only" },
+    );
+    const lockedUntil = rows[0]?.lockedUntil ?? null;
+    if (!lockedUntil) return;
+    if (lockedUntil > at) {
+      logger.warn("auth.two_factor_locked", { user_id: userId, path: ctx.path });
+      throw new APIError("TOO_MANY_REQUESTS", {
+        code: ACCOUNT_TEMPORARILY_LOCKED,
+        message: "Two-factor verification is locked",
+        retryAfter: Math.max(1, Math.ceil((lockedUntil.getTime() - at.getTime()) / 1000)),
+      });
+    }
+    await db.withPlatform((tx) =>
+      tx
+        .update(twoFactors)
+        .set({ failedVerificationCount: 0, lockedUntil: null })
+        .where(and(eq(twoFactors.userId, userId), lte(twoFactors.lockedUntil, at))),
+    );
+  }
+
+  /**
+   * After a 2FA code check: a wrong code in the existing-session branch counts toward the user's
+   * lockout (atomic increment; at the limit the lock is set), exactly as Better Auth's
+   * `recordTwoFactorFailure` does for sign-in challenges (it already counted those: not counted
+   * twice). A right code clears the count, like its `resetTwoFactorFailures`.
+   */
+  const twoFactorLockoutAfter = createAuthMiddleware(async (ctx) => {
+    const failureCode = TWO_FACTOR_CODE_FAILURES[ctx.path];
+    if (!failureCode) return;
+    const returned = ctx.context.returned;
+    if (isAPIError(returned)) {
+      if ((returned.body as { code?: unknown } | undefined)?.code !== failureCode) return;
+      const userId = await existingSessionUser(ctx);
+      if (!userId) return;
+      const counted = await db.withPlatform((tx) =>
+        tx
+          .update(twoFactors)
+          .set({ failedVerificationCount: sql`${twoFactors.failedVerificationCount} + 1` })
+          .where(eq(twoFactors.userId, userId))
+          .returning({ count: twoFactors.failedVerificationCount }),
+      );
+      const count = counted[0]?.count ?? 0;
+      logger.info("auth.two_factor_failure_counted", { user_id: userId, count });
+      if (count >= TWO_FACTOR_LOCKOUT.maxFailedAttempts) {
+        await db.withPlatform((tx) =>
+          tx
+            .update(twoFactors)
+            .set({
+              lockedUntil: new Date(Date.now() + TWO_FACTOR_LOCKOUT.durationSeconds * 1000),
+            })
+            .where(
+              and(
+                eq(twoFactors.userId, userId),
+                gte(twoFactors.failedVerificationCount, TWO_FACTOR_LOCKOUT.maxFailedAttempts),
+              ),
+            ),
+        );
+        logger.warn("auth.two_factor_locked", { user_id: userId, path: ctx.path });
+      }
+      return;
+    }
+    const userId = (returned as { user?: { id?: unknown } } | null | undefined)?.user?.id;
+    if (typeof userId !== "string") return;
+    // The code was right and a session may already exist: a failed reset must not turn that into
+    // an error (the count then stays until the next right code). Failure counting stays strict.
+    try {
+      await db.withPlatform((tx) =>
+        tx
+          .update(twoFactors)
+          .set({ failedVerificationCount: 0, lockedUntil: null })
+          .where(eq(twoFactors.userId, userId)),
+      );
+    } catch (error) {
+      logger.error("auth.two_factor_reset_failed", { user_id: userId, ...errorLogFields(error) });
     }
   });
 
@@ -401,6 +578,23 @@ export function createAuthService(options: CreateAuthServiceOptions) {
               logger.warn("auth.sign_in_blocked", { user_id: subject.userId, reason: block });
               throw blockedError(block);
             }
+            // T-086d: a platform admin gets TOTP only through their one-time setup link, so an
+            // admin without it never gets a session (no password-only admin session, nothing to
+            // self-enrol from). Reached only after the password was proven right.
+            if (subject.role === "platform_admin" && !subject.twoFactorEnabled) {
+              const headers = scopedHeaders(ctx?.headers ?? ctx?.request?.headers);
+              await audit("auth.sign_in_blocked", subject, headers, {
+                reason: "admin_setup_required",
+              });
+              logger.warn("auth.sign_in_blocked", {
+                user_id: subject.userId,
+                reason: "admin_setup_required",
+              });
+              throw new APIError("FORBIDDEN", {
+                code: ADMIN_SETUP_REQUIRED,
+                message: "Sign-in not allowed",
+              });
+            }
             // T-086b: record whether THIS session passed TOTP. Only the TOTP verify endpoint
             // creates a session after checking a code (sign-in 2FA step, enrolment re-issue);
             // every other session is password-only. Forced either way, so a value can never be
@@ -443,7 +637,7 @@ export function createAuthService(options: CreateAuthServiceOptions) {
         },
       },
     },
-    hooks: { before: rateLimitHook },
+    hooks: { before: rateLimitHook, after: twoFactorLockoutAfter },
     plugins: [
       username({
         minUsernameLength: 3,
@@ -453,9 +647,10 @@ export function createAuthService(options: CreateAuthServiceOptions) {
         schema: { user: { fields: { username: "login", displayUsername: "displayLogin" } } },
       }),
       twoFactor({
-        issuer: "Cable Billing",
+        issuer: TOTP_OPTIONS.issuer,
         twoFactorCookieMaxAge: SESSION_POLICY.twoFactorChallengeSeconds,
-        totpOptions: { digits: 6, period: 30 },
+        totpOptions: { digits: TOTP_OPTIONS.digits, period: TOTP_OPTIONS.period },
+        accountLockout: { enabled: true, ...TWO_FACTOR_LOCKOUT },
       }),
       ...(options.plugins ?? []),
     ],
@@ -478,6 +673,7 @@ export function createAuthService(options: CreateAuthServiceOptions) {
     }
     if (code === ROLE_NOT_ALLOWED) return { code: "ROLE_NOT_ALLOWED" };
     if (code === ACCOUNT_DISABLED) return { code: "ACCOUNT_DISABLED" };
+    if (code === ADMIN_SETUP_REQUIRED) return { code: "SETUP_LINK_REQUIRED" };
     if (code === "INVALID_TWO_FACTOR_COOKIE" || code === "TOO_MANY_ATTEMPTS_REQUEST_NEW_CODE") {
       return { code: "TWO_FACTOR_EXPIRED" };
     }
@@ -521,6 +717,10 @@ export function createAuthService(options: CreateAuthServiceOptions) {
     const verifiedAt = (session as typeof session & { twoFactorVerifiedAt?: Date | string | null })
       .twoFactorVerifiedAt;
     const twoFactorVerified = verifiedAt !== null && verifiedAt !== undefined;
+    // T-086d: no admin session without TOTP (e.g. one opened before the setup link existed).
+    if (subject.role === "platform_admin" && !twoFactorEnabled) {
+      return revoke("admin_setup_required");
+    }
     // T-086b: once an admin has TOTP on, a session that never passed it (opened with the password
     // before enrolment) is not an admin session: end it, so they sign in again with the code.
     if (subject.role === "platform_admin" && twoFactorEnabled && !twoFactorVerified) {
@@ -634,8 +834,9 @@ export function createAuthService(options: CreateAuthServiceOptions) {
     },
 
     /**
-     * Starts TOTP enrolment for the signed-in user (platform admins must, before /admin).
-     * Re-asks the password. Returns the secret to put in an authenticator app.
+     * Starts TOTP enrolment for the signed-in owner or staff member (optional for them).
+     * Re-asks the password. Returns the secret to put in an authenticator app. Platform admins
+     * never enrol here (T-086d): only through their one-time setup link (./admin-setup.ts).
      */
     async startTwoFactorEnrolment(input: {
       password: string;
@@ -643,6 +844,7 @@ export function createAuthService(options: CreateAuthServiceOptions) {
     }): Promise<AuthResult<TwoFactorEnrolment>> {
       const session = await getSession(input.headers);
       if (!session) return err({ code: "UNAUTHENTICATED" });
+      if (session.role === "platform_admin") return err({ code: "SETUP_LINK_REQUIRED" });
       if (session.twoFactorEnabled) return err({ code: "INVALID_CODE" });
       try {
         const data = await withHeaders(input.headers, () =>
@@ -667,6 +869,8 @@ export function createAuthService(options: CreateAuthServiceOptions) {
      * role: owners and staff too): a session opened with the password alone, in another browser,
      * before enrolment, must not live on. If Better Auth didn't re-issue this browser's session,
      * every session is ended and the answer is SIGN_IN_AGAIN (nothing is audited as turned on).
+     * Platform admins are refused (T-086d: setup link only). A wrong code counts toward the
+     * user's 2FA lockout (the after hook; Better Auth leaves this branch uncounted).
      */
     async confirmTwoFactorEnrolment(input: {
       code: string;
@@ -674,6 +878,7 @@ export function createAuthService(options: CreateAuthServiceOptions) {
     }): Promise<AuthResult<{ userId: string; role: WebRole; otherSessionsEnded: number }>> {
       const session = await getSession(input.headers);
       if (!session) return err({ code: "UNAUTHENTICATED" });
+      if (session.role === "platform_admin") return err({ code: "SETUP_LINK_REQUIRED" });
       // Already on: nothing to confirm (startTwoFactorEnrolment refuses the same way).
       if (session.twoFactorEnabled) return err({ code: "INVALID_CODE" });
       const code = input.code.replace(/\s+/g, "");

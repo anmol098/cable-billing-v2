@@ -12,9 +12,11 @@
   "scripts": {
     "build": "tsc --noEmit",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "admin:create": "tsx scripts/create-platform-admin.ts"
   },
   "dependencies": {
+    "@better-auth/utils": "0.4.2",
     "@cb/db": "workspace:*",
     "@cb/domain": "workspace:*",
     "@node-rs/argon2": "2.2.2",
@@ -27,6 +29,7 @@
     "@cb/config": "workspace:*",
     "@cb/contracts": "workspace:*",
     "@types/node": "catalog:",
+    "tsx": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
   }
